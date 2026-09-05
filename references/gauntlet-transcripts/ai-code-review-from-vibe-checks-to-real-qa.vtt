@@ -1,0 +1,1762 @@
+WEBVTT
+
+1
+00:00:13.630 --> 00:00:18.729
+Tom Babb: Byron, you can probably just introduce yourself and… Kill a couple minutes here.
+
+2
+00:00:18.730 --> 00:00:20.290
+Bryon Mackay: Oh, sure. Okay.
+
+3
+00:00:20.750 --> 00:00:22.260
+Bryon Mackay: Alright!
+
+4
+00:00:23.400 --> 00:00:25.410
+Bryon Mackay: Alright, well, welcome, everybody.
+
+5
+00:00:25.510 --> 00:00:30.110
+Bryon Mackay: People are coming in. Appreciate y'all coming, making time in your…
+
+6
+00:00:30.180 --> 00:00:47.580
+Bryon Mackay: afternoons and evenings to come be here. My name is Byron. I'm gonna be your speaker tonight, and I am the Director of Learning here at Gauntlet, so I really focus a lot on the curriculum, making sure we're keeping things up to date.
+
+7
+00:00:47.580 --> 00:01:05.690
+Bryon Mackay: Making sure you have the most pertinent information when you go out, and you have your job, and you're an AI engineer or an AI-first engineer. So, it's an interesting problem to solve, honestly. As many of you can probably attest, keeping up with AI is really hard.
+
+8
+00:01:05.860 --> 00:01:08.110
+Bryon Mackay: There is a lot going on.
+
+9
+00:01:08.180 --> 00:01:14.830
+Bryon Mackay: And, you know, the… this… this topic we're talking about tonight has really started to…
+
+10
+00:01:14.840 --> 00:01:33.810
+Bryon Mackay: surface its ugly head in a way that we all kind of knew it was happening, and then it had just really, like, hit the wall hard. Where we start seeing, like, major issues with major companies on their apps, and everyone's trying to figure out what to do about this. Now.
+
+11
+00:01:33.860 --> 00:01:43.349
+Bryon Mackay: You may not have felt this as much, maybe in your roles, or maybe in the apps that you've used, but I'm gonna show some metrics here in a second here that are…
+
+12
+00:01:43.400 --> 00:01:55.730
+Bryon Mackay: hopefully gonna be a bit more eye-opening. It was definitely for me. And then we're gonna talk about how to, how to, you know, stop this from happening. It's interesting, though, I will say that…
+
+13
+00:01:55.730 --> 00:02:08.270
+Bryon Mackay: There are a number of apps that I use. I won't name names, but they're all big companies, I'm sure you use a lot of the same apps, where I have just found the most random and annoying bugs that I have never seen before.
+
+14
+00:02:08.550 --> 00:02:17.669
+Bryon Mackay: And I don't know, I don't think it's a configuration thing, but some of the most simplest of actions will cause something to break.
+
+15
+00:02:18.240 --> 00:02:26.079
+Bryon Mackay: And I'm just… I just sit here, I sit back in my chair, and I go, this is an AI problem. This is a uniquely AI problem where we are seeing
+
+16
+00:02:26.180 --> 00:02:40.659
+Bryon Mackay: So many more issues. But then the other shocker is these issues don't get resolved, right? They just kind of stick around for a while. So anyway, there's all sorts of big problems and little problems that we're seeing.
+
+17
+00:02:40.810 --> 00:02:44.220
+Bryon Mackay: But our jobs as engineers is to fix it, yeah.
+
+18
+00:02:44.220 --> 00:02:55.550
+Tom Babb: Quick question, sorry, we didn't address this, but how do you want questions? Some people, they're able to raise their hands. Do you want them to be able to ask questions along the way, or would you prefer that all questions are safe to the end?
+
+19
+00:02:55.840 --> 00:03:00.149
+Bryon Mackay: You know what? Let's have him do it on the way. I'll find some spots to pause.
+
+20
+00:03:00.670 --> 00:03:04.800
+Bryon Mackay: And then we can take some questions. I think that's tough. Yeah.
+
+21
+00:03:04.800 --> 00:03:18.129
+Tom Babb: I'll say to the audience real quick, if you have a question, there's a little button that says, raise your hand, and that will put you in queue, and then when Byron's ready, we'll click allow to talk, and you can ask your question, and we'll just go through questions that way.
+
+22
+00:03:18.880 --> 00:03:19.790
+Bryon Mackay: Awesome.
+
+23
+00:03:20.070 --> 00:03:21.020
+Bryon Mackay: Okay.
+
+24
+00:03:22.990 --> 00:03:41.609
+Bryon Mackay: Austin, we will not be covering that. We will not be covering how to bundle map files in our automated updates. That's not quite the scope of this one, it's more of a detail, but, you know, we'll, we'll get there. So, alright.
+
+25
+00:03:43.070 --> 00:03:59.140
+Bryon Mackay: Let's go ahead and get started. Oh, let me give you one more bit of an intro here. So, Tom reminded me of this just a second ago, and I… it's an analogy that I love, and that I,
+
+26
+00:03:59.410 --> 00:04:10.529
+Bryon Mackay: It's a little bit of a personal spot for me, so just so you all know, I spent 10 years as a mobile engineer, that's all I did. I did Android and I did iOS. And at the time, that was really rare, to do both.
+
+27
+00:04:10.560 --> 00:04:23.489
+Bryon Mackay: I do have my preferences for one versus the other, but I did a lot of work in each, and I saw the mobile revolution happen as a developer, and so when the App Store came out, like.
+
+28
+00:04:23.490 --> 00:04:40.540
+Bryon Mackay: we were all just going crazy trying to build these things, and… but the interesting thing is, what we're seeing today with AI is very similar to what we saw with the mobile revolution. And what I mean by that is, when apps first came out.
+
+29
+00:04:40.680 --> 00:04:48.190
+Bryon Mackay: When apps first… when the app store opened up and everybody was building their apps, they all looked like mini web pages.
+
+30
+00:04:49.160 --> 00:04:52.679
+Bryon Mackay: And so we all got these apps that looked like mini-web pages, because that's what we knew.
+
+31
+00:04:53.170 --> 00:05:02.689
+Bryon Mackay: And all the apps that we had in the apps were similar to that, were like web pages. And then things started happening. I remember specific libraries coming out.
+
+32
+00:05:02.770 --> 00:05:19.140
+Bryon Mackay: I remember when Facebook introduced the hamburger menu, and that was just, like, blew everybody's mind. We're like, what a hamburger menu? You gotta be kidding me! That's amazing! Apple had their human interface guidelines that really steered the way that, that… and still influences how mobile apps are today.
+
+33
+00:05:19.330 --> 00:05:28.650
+Bryon Mackay: But over those years, then we started to identify there are applications that we can do that we've never done before because of a smartphone.
+
+34
+00:05:28.910 --> 00:05:35.519
+Bryon Mackay: And so, for example, there was no web app to call a random stranger to come pick you up.
+
+35
+00:05:35.710 --> 00:05:36.899
+Bryon Mackay: That didn't exist.
+
+36
+00:05:37.230 --> 00:05:42.299
+Bryon Mackay: And it couldn't exist, because we didn't have a good way of doing it, and now we do, with phones.
+
+37
+00:05:42.750 --> 00:05:48.989
+Bryon Mackay: We are at… the early mobile stage of AI right now.
+
+38
+00:05:49.520 --> 00:05:59.959
+Bryon Mackay: There are a lot of things we are still trying to figure out, every single day, about how to use this, how to build with this, and I… it's my opinion that we are not thinking big enough.
+
+39
+00:06:00.700 --> 00:06:16.059
+Bryon Mackay: That there is… at some point, someone's gonna hit it, and it's gonna nail a concept, and suddenly it's gonna just absolutely explode all over again. Or we're gonna realize the great power and capabilities that we have with these applications. And the application will probably change.
+
+40
+00:06:16.290 --> 00:06:24.129
+Bryon Mackay: The way that we see them, the way that we use them, and right now, we're just using the paradigms that we know. We know websites, we know chatbots, right?
+
+41
+00:06:24.370 --> 00:06:31.039
+Bryon Mackay: That's the current paradigm. But what if it wasn't chatbots? What if we figure out other ways to do it that are not… that don't look like chatbots?
+
+42
+00:06:31.560 --> 00:06:42.060
+Bryon Mackay: I don't know the answers, I don't think anybody does quite yet, but I do feel like we're in those early stages, just like we were in mobile, where we're transitioning from what we can do right now
+
+43
+00:06:42.310 --> 00:06:47.180
+Bryon Mackay: To what we can actually really do once we really harness this and think about it differently.
+
+44
+00:06:47.350 --> 00:06:53.710
+Bryon Mackay: Part of this conversation today is going to be about that, about some of the lessons we're learning, and the hard lessons we're learning, so let's get into it.
+
+45
+00:06:54.620 --> 00:07:10.329
+Bryon Mackay: Alright, who here is vibe-coded? I don't know if y'all have access to emojis, but I'm gonna assume all of you are raising your hand. We've all vibe-coded, right? It's a fun time. Wow, it makes programming so fun and so fast. You can just, with literally anything you can dream, you can see it.
+
+46
+00:07:10.540 --> 00:07:11.800
+Bryon Mackay: And it's amazing.
+
+47
+00:07:12.090 --> 00:07:24.949
+Bryon Mackay: So, there's… there's problems with that, right? Right? I… I have Vibecoded an app with my son, and I'm afraid to look at the code, right? I… I don't even want to know what's under… what's underneath that blanket. So we'll…
+
+48
+00:07:24.950 --> 00:07:32.560
+Bryon Mackay: But anyway, so how do we fix this? So we can't do this in our jobs. We're engineers. We've got to make sure things are quality, that things are good.
+
+49
+00:07:32.680 --> 00:07:47.529
+Bryon Mackay: Here's some, interesting stats that I think will, highlight just how prevalent these issues are that we're seeing. Ai-generated PRs contain 1.7 times more issues overall than if a human did it.
+
+50
+00:07:48.190 --> 00:07:51.899
+Bryon Mackay: So, we're getting more issues. Are they sneaking through? You bet they are.
+
+51
+00:07:52.230 --> 00:07:59.479
+Bryon Mackay: So, this isn't a reason to stop AI, this is a reason for us to stop and consider what we're doing with AI.
+
+52
+00:07:59.960 --> 00:08:12.730
+Bryon Mackay: You know, I thought about this the other… last night as I was preparing for this. If somebody came up to you 10 years ago and said, here is somebody who has 1.7… who makes errors 1.7 more times than any of your engineers.
+
+53
+00:08:12.730 --> 00:08:22.840
+Bryon Mackay: Would you hire this person? You'd be like, no. But then you'd say, what if they could code 100 times faster? You'd be like, well, maybe, you know? So it's this funny, like, what kind of world we're living in.
+
+54
+00:08:23.070 --> 00:08:25.280
+Bryon Mackay: But yeah, a lot more issues. Here's some more issues.
+
+55
+00:08:25.480 --> 00:08:36.350
+Bryon Mackay: Performance regressions are 7x more likely. Readability is 3X, has 3X more issues. Security vulnerabilities, that's a big one. 2.74.
+
+56
+00:08:36.710 --> 00:08:54.930
+Bryon Mackay: I mean, we're talking… these are some serious numbers here of more issues that could be coming out, and we don't even know, what, you know, what's going on. Like, we don't even know why, initially, because we probably didn't read the, you know, I'm not saying all of you, but I'm imagining a lot of us probably didn't read the code thoroughly.
+
+57
+00:08:55.350 --> 00:09:06.799
+Bryon Mackay: Error handling gaps, two times more common. Logic and correctness, 75% more common. Okay, this is the kind of stuff that's getting out there.
+
+58
+00:09:06.970 --> 00:09:21.729
+Bryon Mackay: Okay? This is the kind of issues that we're seeing. AI and LLMs are not doing a better quality job. They're just doing it a whole lot faster. And that's what we're real… that's what we've been focused on for so long, right? 10x engineer!
+
+59
+00:09:22.510 --> 00:09:24.639
+Bryon Mackay: Right? We hear that all the time.
+
+60
+00:09:24.810 --> 00:09:29.879
+Bryon Mackay: What does that really mean? It's just, they're just coding faster, but they're actually coding worse.
+
+61
+00:09:30.370 --> 00:09:31.490
+Bryon Mackay: So…
+
+62
+00:09:31.610 --> 00:09:37.069
+Bryon Mackay: This is where we come in and go, okay, let's figure out what's going on. What can we do about this?
+
+63
+00:09:38.120 --> 00:09:46.719
+Bryon Mackay: All right. The first point here is, I think, pretty, pretty evident to all of… to any of us who's tried to do this, especially at a production level.
+
+64
+00:09:47.010 --> 00:09:51.979
+Bryon Mackay: Right? We need to make sure there's a lot of context. So…
+
+65
+00:09:52.200 --> 00:10:05.539
+Bryon Mackay: They have no knowledge of your business rules, nowhere of architectural constraints. Sure, Cloud Code will go through your codebase and try to understand all these things. It will do its very best, and quite frankly, it does a really impressive job at that.
+
+66
+00:10:05.620 --> 00:10:24.830
+Bryon Mackay: But it's still missing constraints. It still doesn't know about this function that's buried over here that could actually be really helpful in this situation, right? There's a lot of things like that that we as engineers for years and years and years prided ourselves on… ourselves on, on knowing, because we wrote the code by hand, and so we knew all the ins and outs.
+
+67
+00:10:25.260 --> 00:10:37.289
+Bryon Mackay: No understanding configuration patterns. This last one, is something that I want to, highlight here, and that is that a lot of times, and I do this, I think we all probably do this to some extent.
+
+68
+00:10:37.330 --> 00:10:50.760
+Bryon Mackay: we will keep a Claude session open, or a codec session open for so long that we are just… we just have exceeded the reasonable level of context in the context window.
+
+69
+00:10:51.010 --> 00:10:54.690
+Bryon Mackay: So, context window currently is, what, a million for Opus, right?
+
+70
+00:10:54.860 --> 00:10:58.459
+Bryon Mackay: Okay, a million does not mean we should use a million tokens.
+
+71
+00:10:58.580 --> 00:10:59.470
+Bryon Mackay: Right?
+
+72
+00:10:59.660 --> 00:11:01.410
+Bryon Mackay: I would stop at $100,000.
+
+73
+00:11:01.510 --> 00:11:16.840
+Bryon Mackay: If we get to 100,000, stop, consolidate, do something, you know, start a new session, whatever it takes. But by that point, there are studies that are showing that it is starting to lose its ability to remember things at that point.
+
+74
+00:11:17.210 --> 00:11:27.009
+Bryon Mackay: Okay, so that's something that we have to be, really cognizant of as well, is how much context are we using? And I'm guilty of this. I have context windows that are…
+
+75
+00:11:27.050 --> 00:11:41.459
+Bryon Mackay: super bloated that I just want to keep going back to, because it went so well last time, but it inevitably, will cause more… well, not to say more issues, but it'll just… yeah, it will be more issues. It'll come at a more… at a more frequent clip, right?
+
+76
+00:11:41.530 --> 00:11:48.460
+Bryon Mackay: And so, that's something we have to be, really keen on, really aware of, as we… as we work through our code.
+
+77
+00:11:49.240 --> 00:11:51.110
+Bryon Mackay: But here's the bigger thing.
+
+78
+00:11:54.440 --> 00:12:06.200
+Bryon Mackay: We do not have the time to review all the code that an AI produces. Now, I want to challenge you here for a second, because every company will say at some point.
+
+79
+00:12:06.290 --> 00:12:12.940
+Bryon Mackay: We want more code. Look at these things, they go so fast. 10x engineer, yadda yadda yadda yadda, right?
+
+80
+00:12:13.030 --> 00:12:15.479
+Bryon Mackay: What if we said no?
+
+81
+00:12:15.480 --> 00:12:33.920
+Bryon Mackay: What if we said we're not doing that? What if we said we're actually going to go 2X faster, or something to that extent, right? Before AI, issues arrived at human speed, we could review them, right? You had your engineer sitting next to you, you'd write code, he'd write code, halfway through the week, you'd swap code and read each other's code.
+
+82
+00:12:33.930 --> 00:12:36.450
+Bryon Mackay: You know, that was manageable, right?
+
+83
+00:12:36.560 --> 00:12:49.559
+Bryon Mackay: Now, things are coming out so fast, oh, you can, you can, you know, essentially vibecode your way through a problem, and it's, like, you just keep pushing out features. I had…
+
+84
+00:12:50.010 --> 00:12:58.829
+Bryon Mackay: I had a situation where I had a junior engineer sitting next to me, and I asked them to go do some task. And he came back with a 300-line PR.
+
+85
+00:12:59.120 --> 00:13:05.270
+Bryon Mackay: And I looked at the PR, and I mean, about 20 lines in, I go, this could all be done in about 3 lines.
+
+86
+00:13:05.870 --> 00:13:07.799
+Bryon Mackay: And so I went back to him and was like, hey.
+
+87
+00:13:08.400 --> 00:13:14.329
+Bryon Mackay: you've… here's your solution. I'm just gonna… I'm just gonna give it to you and tell you what it is, because what you have is way too much code.
+
+88
+00:13:14.450 --> 00:13:25.260
+Bryon Mackay: It's 3 lines, to do something that he had, essentially had an AI bill 300 for. So there's these checks, right, that we need to be aware of. I'll say this again later.
+
+89
+00:13:25.390 --> 00:13:26.340
+Bryon Mackay: But…
+
+90
+00:13:26.570 --> 00:13:36.879
+Bryon Mackay: the bottleneck that we should experience, we all… you know, what is the bottleneck? Well, it's reviews, right? No. The bottleneck is our ability to ensure quality.
+
+91
+00:13:37.410 --> 00:13:39.400
+Bryon Mackay: And however that happens, happens.
+
+92
+00:13:39.530 --> 00:13:41.770
+Bryon Mackay: But that should be the bottleneck.
+
+93
+00:13:42.420 --> 00:13:56.909
+Bryon Mackay: Right? So, we have to be really, leery, and even push back when we're being pushed to do things to our… and that might be a hard thing for some leaders to hear, but as engineers, it needs to start with us.
+
+94
+00:13:57.490 --> 00:14:02.009
+Bryon Mackay: So… Alright, so what do we do here?
+
+95
+00:14:02.780 --> 00:14:12.739
+Bryon Mackay: Where do we start? So let's say we want to make sure that we talked about context, we've talked about quality, right? And assuring quality. So where do we start first?
+
+96
+00:14:12.970 --> 00:14:27.969
+Bryon Mackay: Pseudocoding the logic first is a great way to go. Doesn't have to be pseudocode in your codebase, but it could be something where you are, where you talk it out, where you really think deeply about how is this going to work. I really find it valuable
+
+97
+00:14:28.040 --> 00:14:42.129
+Bryon Mackay: To tell… to build out documents that… where I, like, go through the logic myself, and I go, this is how I expect it to be built. Like, that's kind of my practice, too, with a lot of PRs, like, I expect it to be built this way, let's see how they end up doing it.
+
+98
+00:14:42.360 --> 00:15:00.609
+Bryon Mackay: But you provide that kind of guidance to the LLM, and suddenly it knows exactly where it should go, right? Us as engineers need to be aware of our codebases. We are aware of our codebases, and so there's a lot of guidance that we should be providing, as opposed to saying, hey, go make this button, and make it
+
+99
+00:15:00.740 --> 00:15:03.639
+Bryon Mackay: You know, make this button so they can change their status.
+
+100
+00:15:03.740 --> 00:15:16.140
+Bryon Mackay: go through the steps a little bit more. How do they… how does this button, you know, how do you want this button to send the API request? How do you want that API request to get to your service layer? How do you want that to go to the database? Should you make…
+
+101
+00:15:16.140 --> 00:15:27.890
+Bryon Mackay: And just be a lot more, a lot more detailed in your context that you provide. Don't let the LLM decide, because heaven knows, as we've seen in those numbers, it will do a poor job.
+
+102
+00:15:29.070 --> 00:15:32.890
+Bryon Mackay: Of course, this goes back to research,
+
+103
+00:15:33.100 --> 00:15:49.479
+Bryon Mackay: And I'll go into this a little bit. I do have a practice that I really like doing when it comes to doing research. And it's not really research as much as it is having a team architecture conversation. So what we'll do is we will get the engineers in a room, the engineers that are working on said task.
+
+104
+00:15:50.000 --> 00:15:52.749
+Bryon Mackay: we'll turn on Notion. Notion is my…
+
+105
+00:15:52.950 --> 00:16:02.489
+Bryon Mackay: transcriber of choice, personally. I just… I like it. There's lots of great transcribers, but that's the one I like to use. Turn on Notion, and we'll just start talking for an hour or two.
+
+106
+00:16:02.650 --> 00:16:12.559
+Bryon Mackay: About whatever the, whatever the, you know, task is at hand. We'll go into a lot of detail, like I was talking about. We'll go into a lot of detail of how to get
+
+107
+00:16:12.670 --> 00:16:27.620
+Bryon Mackay: this task completed, and the changes that need to go into making it. Not saying to do this for everyone. Of course, there are small tasks that you can get by with without this much rigor, but for larger tasks, it's important for us on the team
+
+108
+00:16:27.770 --> 00:16:41.499
+Bryon Mackay: to know all the innards of what's going on, right? I don't want to be an engineer on the island. I want to make sure my team's aware, and we have these conversations, so that we can build this context up.
+
+109
+00:16:41.880 --> 00:16:55.799
+Bryon Mackay: When we're done with our conversation, and it's all transcribed in Notion, we go through the transcription… not the transcription, it usually… we then take that and say to Claude, hey, go take this transcription and build out, a spec list.
+
+110
+00:16:56.080 --> 00:17:00.469
+Bryon Mackay: And filled out some tasks. And then we go through those meticulously.
+
+111
+00:17:00.590 --> 00:17:18.360
+Bryon Mackay: And make sure that those align with what we're doing, and then we can go to the AI. Once we have those edited, fleshed out, and we're feeling really good about where we are, then we go to, you know, COLD Code, or Codex, or whatever you're using, and implement it. But it still just takes a lot of thought, and a lot of engineering know-how.
+
+112
+00:17:18.440 --> 00:17:31.130
+Bryon Mackay: To get there. So, when I say pseudocode logic first, there's also a lot of planning involved. Of course, there's research involved if there's things you don't know. But there's this collaboration between engineers, too, that goes a long, long way.
+
+113
+00:17:33.400 --> 00:17:34.330
+Bryon Mackay: Okay.
+
+114
+00:17:35.180 --> 00:17:39.310
+Bryon Mackay: There's a couple other things you can do, and this is more on a team level.
+
+115
+00:17:39.690 --> 00:17:53.950
+Bryon Mackay: In terms of what you can accomplish. So, context files are super helpful, especially when you have teams, when you have a repo that you have many, many people working on, and they all have different,
+
+116
+00:17:54.140 --> 00:18:00.079
+Bryon Mackay: I'd say mastery, understanding of different areas of it, of your codebase.
+
+117
+00:18:00.360 --> 00:18:18.439
+Bryon Mackay: So you have these CloudMD files. Codex has one as well, I think they're called Agents.md, I can't remember the exact name. But you basically can put these to set rules and constraints and patterns and understandings so that you're not relying on the LLM to go through your codebase and understand what's going on every single time.
+
+118
+00:18:18.570 --> 00:18:24.549
+Bryon Mackay: Instead, it will rely on these files to go in and understand the rules and the constraints of a given file.
+
+119
+00:18:24.970 --> 00:18:41.870
+Bryon Mackay: A good example of this would be, to, to say, don't, you know, you're not allowed… you're only allowed to change authentication logic in this one spot. You cannot put authentication logic anywhere else in the codebase, it has to go through this file.
+
+120
+00:18:42.440 --> 00:18:56.939
+Bryon Mackay: Right? That will stop the LLM from going out and trying to do some things that are just not safe, or try to bypass some security measures that you've already established. So those are the kinds of things that you want to put inside those context files to give that LLM, that coding agent.
+
+121
+00:18:56.940 --> 00:19:05.979
+Bryon Mackay: It's, it's guidance so that it does not go off the rails and start to cause those security issues or other performance issues that we were talking about earlier.
+
+122
+00:19:06.750 --> 00:19:07.650
+Bryon Mackay: Okay?
+
+123
+00:19:07.860 --> 00:19:26.140
+Bryon Mackay: Centralizing risk, something I just kind of mentioned in that example, but making sure there's, a single owner, mainly like the files, right? Everything's consolidated, it's in one spot, and anytime those change, that should raise a flag, right? You can set these triggers here and there, to say.
+
+124
+00:19:26.140 --> 00:19:33.820
+Bryon Mackay: You know, when this file changes, we need to get a review from so-and-so, or we need to get a review from this guy, or that guy, or from platform, or from security.
+
+125
+00:19:34.070 --> 00:19:47.629
+Bryon Mackay: You know, those things are all really, really good processes to have in place to make sure that the code that we're writing and the changes that we're making, even if it's a junior to the most senior, they're all getting reviewed by the same people. We all know what's going on.
+
+126
+00:19:47.790 --> 00:19:48.560
+Bryon Mackay: Right?
+
+127
+00:19:49.260 --> 00:19:58.540
+Bryon Mackay: Smaller PRs. Now, there's always give and take when there's a number involved here, especially something like lines of code, but…
+
+128
+00:19:59.290 --> 00:20:06.649
+Bryon Mackay: It's more of a code smell, I'll admit, but if you're getting around the 400 line mark, or getting above it, especially significantly.
+
+129
+00:20:06.690 --> 00:20:22.589
+Bryon Mackay: Think about it. Think about it for a second. Why is it taking so much code? More likely than not these days, the coding agent is bloating, right? They're usually going out there and they're just writing a whole lot of code to get something done, and it's a good time to stop and be like, wait a minute, what's really going on here?
+
+130
+00:20:22.680 --> 00:20:27.550
+Bryon Mackay: Your PR reviewer will thank you too, as you can probably imagine.
+
+131
+00:20:28.230 --> 00:20:33.720
+Bryon Mackay: The 7 file change, again, it's not really a hard number, it's a bit arbitrary.
+
+132
+00:20:33.790 --> 00:20:34.820
+Bryon Mackay: But…
+
+133
+00:20:34.880 --> 00:20:53.259
+Bryon Mackay: It's a… it's kind of that rule of, like a code smell. Again, if you're changing 15 files, you're going, wait, wait, why are we doing so many file changes? Now, sometimes you have to, right? Sometimes there are cases where you're actually just, you know… but you know what those are. I'm not trying to… I'm not trying to simplify… oversimplify this a bit.
+
+134
+00:20:53.260 --> 00:21:00.110
+Bryon Mackay: But again, it's just good things to keep in mind. Like, LLMs are great at writing a whole lot of code.
+
+135
+00:21:00.430 --> 00:21:11.680
+Bryon Mackay: And this is just one of those opportunities where you can sit there and go, when I see a PR with, like, a thousand line changes, I'm gonna stop and go, wait, what's really going on here? Why do we need all of these line changes? Let me understand this better.
+
+136
+00:21:13.010 --> 00:21:31.040
+Bryon Mackay: Another thing that I've seen a lot in the code from our challengers, which is actually quite surprised me, is naming. There gets to be a lot of generic names that LLMs will throw into code, and that can be problematic when you try to read it.
+
+137
+00:21:31.210 --> 00:21:37.520
+Bryon Mackay: Generic names, or using, you know, small shorthand.
+
+138
+00:21:37.700 --> 00:21:45.449
+Bryon Mackay: There's just… there's just no room for that. And the way that we can remedy is quite simple, just tell… either… either you name it yourself.
+
+139
+00:21:45.800 --> 00:22:00.039
+Bryon Mackay: Or just remind the LLM to be explicit and see how that goes, but I would lean into you naming it yourself when it's really critical, and when it's important, so that you can make sure that when you come back and read it, you know what's going on.
+
+140
+00:22:00.500 --> 00:22:01.420
+Bryon Mackay: Right?
+
+141
+00:22:02.180 --> 00:22:10.460
+Bryon Mackay: Finally, checkpoint commits, right? Commit at logical checkpoints, these are all things that are really useful.
+
+142
+00:22:10.640 --> 00:22:17.560
+Bryon Mackay: And one tool that I… I'm not affiliated with them, but I'm just gonna throw it out there. If anyone has used Graphite.
+
+143
+00:22:17.680 --> 00:22:21.799
+Bryon Mackay: Graphite is an excellent tool for this kind of thing.
+
+144
+00:22:22.390 --> 00:22:31.949
+Bryon Mackay: Reason being is because what they… I'll just really quickly touch on it. It can sound a little confusing if you're not used to this kind of thing, but basically they'll make a stack of PRs.
+
+145
+00:22:32.110 --> 00:22:39.830
+Bryon Mackay: Where every PR relies on the previous PR, right? It's built on top of itself. But they have some really great functionality around
+
+146
+00:22:40.120 --> 00:22:54.210
+Bryon Mackay: If you have to make a change at, like, the bottom of the stack, that stack, that then gets propagated to the rest of the stack. Really, really helpful, when it comes to, when it comes to, like, building small PRs and building them in
+
+147
+00:22:54.210 --> 00:23:07.259
+Bryon Mackay: And kind of some sort of scope, where it's like, hey, these are going to be my database changes, then it's gonna be my service layer, then it's gonna be my API layer. Really, really helpful, when it comes to putting all those together, so…
+
+148
+00:23:07.320 --> 00:23:16.259
+Bryon Mackay: If you haven't looked into it, I recommend it. It's not for everybody, and it's not for every use case, but I think graphite and the process they have is, super helpful, so…
+
+149
+00:23:18.410 --> 00:23:19.390
+Bryon Mackay: Okay.
+
+150
+00:23:20.190 --> 00:23:26.880
+Bryon Mackay: This… this is another thing that I've seen so much of, and I'm totally guilty of this, and I'm learning better ways now.
+
+151
+00:23:28.850 --> 00:23:35.519
+Bryon Mackay: It is really easy for LLMs to make tests, and we all feel so good about it, because we're like, look.
+
+152
+00:23:35.530 --> 00:23:46.249
+Bryon Mackay: I'm running tests, and this might be the first time in years that I've really written this many tests. But the fact of the matter is, is that these tests are usually low value.
+
+153
+00:23:46.250 --> 00:24:00.700
+Bryon Mackay: My favorite one is when they're verifying that a static map is indeed that static map, and it's like, no, we don't need to test that, like, this is a string, we don't need to spec that this value is here, because
+
+154
+00:24:00.730 --> 00:24:14.529
+Bryon Mackay: That's just what it is. So, there's a lot of tests that it'll write that are low value. Now, I'm not saying there's no value in them, okay? There's value in them, and we should. We should be having them write tests.
+
+155
+00:24:14.570 --> 00:24:24.419
+Bryon Mackay: But there's an opportunity here for us to consider what other tests we might want this, to verify that this is actually working.
+
+156
+00:24:24.460 --> 00:24:42.979
+Bryon Mackay: And I'll give you a couple examples of categories. We've got edge cases, right? There's a lot of edge cases we can test. Security is another one of those areas where we can make sure that, yes, a test for this security thing is actually there. One thing that you have to be a little more mindful of sometimes with coding agents.
+
+157
+00:24:43.690 --> 00:24:54.080
+Bryon Mackay: is verifying parameters, right? So, sometimes I've seen coding agents where they'll automatically do it, other times they do not, and they really should.
+
+158
+00:24:54.660 --> 00:25:10.150
+Bryon Mackay: And then those are things, of course, that you would test. So, there's… I would almost… I would… I like to think that thinking through the tests are just as important, and this is a little… this has been said for many, many, many years, especially if you're in a TDD environment.
+
+159
+00:25:10.490 --> 00:25:20.679
+Bryon Mackay: That we should also be thinking about the test just as much as we're thinking about the contact… the plan, the planning phase of… that we eventually hand to the AA agent.
+
+160
+00:25:20.830 --> 00:25:25.670
+Bryon Mackay: It ensures not only that the, right
+
+161
+00:25:25.820 --> 00:25:31.500
+Bryon Mackay: That the right functionality is there, but it also ensures that there's no regression later.
+
+162
+00:25:33.870 --> 00:25:44.339
+Bryon Mackay: You may be doing this already, but something that I've almost forgotten to do, because I just have it… I have it drilled into our skill, is after every change, that it goes through and runs all the tests.
+
+163
+00:25:44.540 --> 00:25:50.540
+Bryon Mackay: That it runs through them and checks for regression. And it's amazing, and kind of scary.
+
+164
+00:25:50.650 --> 00:25:56.149
+Bryon Mackay: how often regression tests are failing because of something that the AI just wrote.
+
+165
+00:25:56.590 --> 00:26:09.489
+Bryon Mackay: So, again, really important to have that set up, to have your tests set up. It's really important to make sure that your tests are covering the proper things, and the things that, are critical to your business.
+
+166
+00:26:09.700 --> 00:26:22.219
+Bryon Mackay: Also important that you give the LLM, or I keep switching off between the two, but you know what I mean, the coding agent, the understanding and ability to go and run those tests every time.
+
+167
+00:26:22.660 --> 00:26:39.020
+Bryon Mackay: So, I would just put a skill. Personally, what I do is I just… well, I put it in the… I think we have it in a skill, and we also have a CloudMD file, where we just say, after every change, when I say it's all done, like, always run the test before, you know, before committing.
+
+168
+00:26:39.170 --> 00:26:45.200
+Bryon Mackay: And make sure that that's there. And of course, we have those things already also built in as pre-commit hooks.
+
+169
+00:26:45.770 --> 00:26:52.680
+Bryon Mackay: But easier to have the LLM run it, and then go back and change it, and work through the problems themselves, and having to go back and forth.
+
+170
+00:26:52.840 --> 00:26:57.399
+Bryon Mackay: That also is true for UI changes with, things like Playwright.
+
+171
+00:26:57.610 --> 00:27:05.149
+Bryon Mackay: If you want to include that as well, it just is one less step that you have to do. Of course, now they all have their own… they're all coming out with their own,
+
+172
+00:27:05.450 --> 00:27:12.309
+Bryon Mackay: Browser use so that you can go in there and… and simply say, hey, go spin up the app, go make sure it actually runs.
+
+173
+00:27:12.310 --> 00:27:30.110
+Bryon Mackay: I would have loved to have had that, you know, a year ago, when I was doing some heavy UI changes to have it go figure that out, so I wouldn't have to be the one to do it, but… So anyway, a lot of great tools are coming out, and more still to come. Like I said, I still think we're in the early, early stages, and we haven't quite figured out where all this is going.
+
+174
+00:27:30.110 --> 00:27:32.739
+Bryon Mackay: But when we do, it's gonna be… it's gonna be a heyday.
+
+175
+00:27:33.260 --> 00:27:35.480
+Bryon Mackay: So,
+
+176
+00:27:36.480 --> 00:27:42.940
+Bryon Mackay: Okay, I think we know this, we've been drilled with this in our heads as engineers for many, many years, so won't say any more on that.
+
+177
+00:27:44.070 --> 00:27:50.720
+Bryon Mackay: Next, so we have, guard rails, are really…
+
+178
+00:27:51.210 --> 00:28:01.760
+Bryon Mackay: it's… guardrails is such a funny term, I feel like, because it's… sometimes we say it to say, like, oh, you have to make sure your app has guardrails for all these things. I don't know, it just…
+
+179
+00:28:02.100 --> 00:28:10.029
+Bryon Mackay: It's a very vague term in terms of what actually it is, but we're gonna… so we're gonna talk about what kind of guardrails you can put in place,
+
+180
+00:28:10.330 --> 00:28:17.670
+Bryon Mackay: And we can… and then you can take that back to your work and see what, how you want to implement it.
+
+181
+00:28:18.260 --> 00:28:21.339
+Bryon Mackay: But the first… is skills.
+
+182
+00:28:21.560 --> 00:28:31.759
+Bryon Mackay: So, skills is an excellent, excellent way of defining a process that you want, the LLMs to do.
+
+183
+00:28:31.990 --> 00:28:46.210
+Bryon Mackay: And they're super useful. So, for example, I, as part of my job, I pull down a lot of code, that I have no idea what's inside, right? I am pulling down code all the time and running it on my machine.
+
+184
+00:28:46.770 --> 00:28:55.139
+Bryon Mackay: And so one thing I do is I have a set of skills that goes through the code and just makes sure that there's nothing nefarious in there, nothing that's gonna hose my machine.
+
+185
+00:28:55.600 --> 00:29:10.649
+Bryon Mackay: And it's just… it's just part of the regular workflow. I've forgotten it's there, quite frankly. The only time I remember it's there is when I go, wow, this is taking a little bit longer than I thought, and then I look and it's, like, still looking through security concerns.
+
+186
+00:29:10.730 --> 00:29:22.609
+Bryon Mackay: So… but it's great, because I never have to think about it again, and it just takes one more thing off my plate. So, if you have any of those, and it could be, let's see, I'll give you a couple examples here.
+
+187
+00:29:22.770 --> 00:29:36.350
+Bryon Mackay: we had one that would check our Click House instance to make sure that things were… and then if there was an issue there, it would go and, update, or try to scale up our nodes, or scale down our nodes.
+
+188
+00:29:36.520 --> 00:29:50.960
+Bryon Mackay: We had other ones that would do document generators, that was a really, really useful one, so whenever anything changed, we had a skill for that. But there's just all sorts of things where it's like, we always forget, right? So write a skill that just does it for you, and you don't have to remember as much, which is nice.
+
+189
+00:29:51.820 --> 00:29:53.500
+Bryon Mackay: Okay.
+
+190
+00:29:53.820 --> 00:29:56.420
+Bryon Mackay: So… Linters.
+
+191
+00:29:56.780 --> 00:30:16.070
+Bryon Mackay: I still am a big advocate of lynching. It's static, yes. It's not AI, yes. But it's still really great, and it's a great thing for the LLMs, to be aware of. So, again, as part of your either pre-commit, or as part of your skills, or your CloudMD files, it's another great thing to put in there. It's like, hey, every now and then run this.
+
+192
+00:30:16.530 --> 00:30:22.030
+Bryon Mackay: Make sure that, you know, when you change, when you're done changing, you know, 400 lines of code at a time.
+
+193
+00:30:22.350 --> 00:30:34.870
+Bryon Mackay: go and run the linter and see where we're at. It'll catch a plethora of issues and mistakes well before, it hits production, and it just gives, again, the LLM a chance to self-correct.
+
+194
+00:30:35.360 --> 00:30:45.260
+Bryon Mackay: So I'm still a huge, huge fan of lenders. I know there are… there's a lot of opinions out there about what lenders should do, but regardless, I think there's still a lot of value there.
+
+195
+00:30:46.080 --> 00:30:47.050
+Bryon Mackay: Okay.
+
+196
+00:30:50.520 --> 00:31:02.439
+Bryon Mackay: So, you can choose, as well, what models you're using for different tasks. Now, it's very easy for me to say, hey, I'm gonna use Opus, because Opus is the best, and it is.
+
+197
+00:31:02.590 --> 00:31:04.590
+Bryon Mackay: Try to convince me otherwise.
+
+198
+00:31:04.860 --> 00:31:14.080
+Bryon Mackay: But, sometimes we don't need it, right? However, when it comes to the critical gates that we have in our system.
+
+199
+00:31:14.440 --> 00:31:17.449
+Bryon Mackay: That is where we want to use the best model possible.
+
+200
+00:31:17.590 --> 00:31:28.450
+Bryon Mackay: Right? Before it goes out to production, when we have a coding agent go through and review our code, you better believe that we want the best thing possible, because we want to catch everything we can.
+
+201
+00:31:28.770 --> 00:31:29.810
+Bryon Mackay: So…
+
+202
+00:31:30.110 --> 00:31:41.289
+Bryon Mackay: Be mindful, right? We all have tokens, there's a cost, it's super easy for an LLM to become the most expensive thing in the engineering, budget.
+
+203
+00:31:41.770 --> 00:31:51.480
+Bryon Mackay: But, so be mindful of that, but also when it comes to critical things, like, use the smartest model you can get your hands on for that verification.
+
+204
+00:31:51.830 --> 00:31:58.700
+Bryon Mackay: Or, if you're using a lesser model, just make sure you give it enough context and enough guidance so that it can do a good job as well.
+
+205
+00:31:58.960 --> 00:32:02.320
+Bryon Mackay: But I wouldn't leave that up to a weak one, and I think that's… I think that's pretty…
+
+206
+00:32:02.490 --> 00:32:04.680
+Bryon Mackay: Pretty obvious, but worth saying.
+
+207
+00:32:06.390 --> 00:32:07.330
+Bryon Mackay: Okay.
+
+208
+00:32:07.990 --> 00:32:17.219
+Bryon Mackay: Finally, separate the loops. Keep the verification process distinct from the coding process. So,
+
+209
+00:32:17.730 --> 00:32:34.680
+Bryon Mackay: this is… this is where you want to make sure that, you know, you still have other eyes on your code, right? You have other processes that are going through and verifying that, yes, what you have written is going to work in production. That can be QAing, that can be,
+
+210
+00:32:35.260 --> 00:32:40.580
+Bryon Mackay: That can be, you know, other agents, that can be different… there's a whole lot of ways that we can go around this.
+
+211
+00:32:40.810 --> 00:32:47.119
+Bryon Mackay: I would also want to say that verification does not happen always after the code's been pushed.
+
+212
+00:32:47.820 --> 00:32:50.870
+Bryon Mackay: So, to give you an example.
+
+213
+00:32:50.990 --> 00:33:03.640
+Bryon Mackay: We had, we had a case where we had to move data from a Postgres database to an OLAP database, because it was all analytical data that we wanted to aggregate. There's a lot of numbers that we wanted to crunch.
+
+214
+00:33:04.000 --> 00:33:08.460
+Bryon Mackay: And, the verification process actually started in the planning phase.
+
+215
+00:33:08.760 --> 00:33:16.220
+Bryon Mackay: So my co-worker, dutifully, did his research, went through the whole thing, and wrote this really great planning doc.
+
+216
+00:33:16.450 --> 00:33:33.689
+Bryon Mackay: And it was my opportunity to then verify it, the plan. And so I went through it myself, I read it, I made some suggestions, most of it looked… it pretty much all looked great, there were just some additions I would have included, and then he went and built it, and it was… it was great. It was very, very smooth.
+
+217
+00:33:34.480 --> 00:33:42.429
+Bryon Mackay: But again, we didn't rush it, right? He wrote it, and then I verified it, and then he wrote the code, and then I verified the code, and we had coding agents reviewing the code.
+
+218
+00:33:42.580 --> 00:33:48.540
+Bryon Mackay: And it was a very, very smooth process. But you want to make sure that, of course, that you have
+
+219
+00:33:48.870 --> 00:33:53.500
+Bryon Mackay: you know, multiple people look at that. If you've ever studied the, or looked into,
+
+220
+00:33:54.290 --> 00:33:59.199
+Bryon Mackay: Oh, now I'm gonna forget the name. I wanna say Systems of Control, but I don't think that's quite the right term.
+
+221
+00:33:59.310 --> 00:34:13.539
+Bryon Mackay: Where, basically, you can't… you don't give one person all the keys to handle finances, right? You have multiple people that have different keys, that have different gates that they're in charge of. Still want that, still need that. Does it slow things down? Sure. Sure, it does.
+
+222
+00:34:13.889 --> 00:34:19.359
+Bryon Mackay: But we shouldn't let that speed be the determining factor on what we do.
+
+223
+00:34:20.110 --> 00:34:23.220
+Bryon Mackay: Which leads me right to this thought.
+
+224
+00:34:23.540 --> 00:34:27.300
+Bryon Mackay: If any of you know DEX, from Human Lair.
+
+225
+00:34:28.500 --> 00:34:35.659
+Bryon Mackay: Segregation of duties. Jason. Yes, I think that's… I won't… I don't know if that's the exact right term, but that's really close to it.
+
+226
+00:34:36.429 --> 00:34:41.929
+Bryon Mackay: It might even be the right one. It's been a while for me since I've had to use that term. Anyway…
+
+227
+00:34:42.889 --> 00:34:52.780
+Bryon Mackay: This is from Dex, he's at Human Layer, you may know him, he's pretty… he's getting pretty big on… on X and other places. But he said this the other day, and I just… I think this is…
+
+228
+00:34:52.980 --> 00:34:56.710
+Bryon Mackay: An excellent frame of mind to have as engineers.
+
+229
+00:34:56.870 --> 00:35:00.929
+Bryon Mackay: He said the bottleneck is your ability to ensure quality.
+
+230
+00:35:01.970 --> 00:35:03.470
+Bryon Mackay: I think that's so true.
+
+231
+00:35:03.870 --> 00:35:13.039
+Bryon Mackay: I think that is absolutely what should be the bottleneck. I know we all want to push things fast, but for heaven's sakes, slow down.
+
+232
+00:35:13.190 --> 00:35:17.890
+Bryon Mackay: And we should be pushing that up the leadership as well. That, look.
+
+233
+00:35:18.120 --> 00:35:22.960
+Bryon Mackay: We're engineers, we're gonna make sure things work, we're gonna get more pushed out than ever before.
+
+234
+00:35:23.080 --> 00:35:26.520
+Bryon Mackay: It may not just be the 100X that some people say.
+
+235
+00:35:26.710 --> 00:35:37.540
+Bryon Mackay: It's not gonna be us open-clawing our way through, it's just not gonna work that way. And… if Anthropic's, little PR
+
+236
+00:35:37.840 --> 00:35:41.369
+Bryon Mackay: Snafu that they had this last week.
+
+237
+00:35:41.500 --> 00:35:47.269
+Bryon Mackay: Where we all got a peek a little bit into what Cloud Code actually looks like.
+
+238
+00:35:47.720 --> 00:35:54.789
+Bryon Mackay: As well as that product works, there's some raised eyebrows. So, let's not be like that.
+
+239
+00:35:55.040 --> 00:36:04.520
+Bryon Mackay: And let's make sure that our quality is good. It's really… it's almost becoming a bit of a moat, in a sense, these days. I don't know how long that will be.
+
+240
+00:36:04.730 --> 00:36:07.469
+Bryon Mackay: But to have a quality application that's secure.
+
+241
+00:36:07.600 --> 00:36:15.409
+Bryon Mackay: It's always been a mode, I suppose, but even more so today, with all the things that are going on, those metrics that we saw earlier kind of allude to that.
+
+242
+00:36:16.070 --> 00:36:22.790
+Bryon Mackay: That we need to make sure that the quality of our code is still the most important thing that we can do with our jobs.
+
+243
+00:36:23.400 --> 00:36:28.400
+Bryon Mackay: I do want to point out one other thing here, with this.
+
+244
+00:36:28.560 --> 00:36:30.490
+Bryon Mackay: I saw an article the other day.
+
+245
+00:36:31.960 --> 00:36:39.590
+Bryon Mackay: Excuse me. That I thought was actually… the headline was kind of funny, but also, said something about our jobs as engineers.
+
+246
+00:36:39.830 --> 00:36:50.339
+Bryon Mackay: It said, CEO fires all lawyers and relies on ChatGPT for his lawsuit. Loses $250 million case.
+
+247
+00:36:52.140 --> 00:36:53.529
+Bryon Mackay: And I just thought.
+
+248
+00:36:53.800 --> 00:37:01.359
+Bryon Mackay: We as engineers are like those lawyers, and sometimes people feel like they are going to vibe their way out of a problem.
+
+249
+00:37:01.450 --> 00:37:15.119
+Bryon Mackay: Because, look at me, I can build a website. And it's like, cool. Do you know what's going on in that website? Do you know what's going on under the hood? And there's a lot of opportunities for us as engineers to step in and be like, look.
+
+250
+00:37:15.420 --> 00:37:24.840
+Bryon Mackay: We know what we need to do, we know what we need to put into this. We are going to ensure that quality does not lack.
+
+251
+00:37:25.240 --> 00:37:37.489
+Bryon Mackay: We're going to ensure that your app is secure. But to do that, we need to slow down. We'll still build more, but probably at a 2X pace. And quite frankly, most companies need to be okay with that, in my opinion.
+
+252
+00:37:37.780 --> 00:37:43.599
+Bryon Mackay: Yes, we can build feature after feature after feature, but as consumers, can we even consume that many features?
+
+253
+00:37:43.740 --> 00:37:45.010
+Bryon Mackay: Not really.
+
+254
+00:37:45.390 --> 00:37:50.510
+Bryon Mackay: Not really. We're creatures of habit, and if we're breaking the habit too much, what's going on?
+
+255
+00:37:52.240 --> 00:37:59.740
+Bryon Mackay: But there's something to be said about quality. I feel like right now we're in a bit of a state where quality is a moat. If you can ensure quality.
+
+256
+00:38:00.170 --> 00:38:05.179
+Bryon Mackay: You have a moat. You're gonna be just fine. You're protected, at least for the foreseeable future.
+
+257
+00:38:05.670 --> 00:38:13.809
+Bryon Mackay: Call me back up when we have Opus 5.7, or whatever it is that comes out, and we'll see what happens then. But I really don't think it's gonna change too much.
+
+258
+00:38:14.910 --> 00:38:20.159
+Bryon Mackay: Alright, this is a little bit for non-engineers. I don't know how many people in here are non-engineers.
+
+259
+00:38:20.450 --> 00:38:22.170
+Bryon Mackay: But I just want to point this out.
+
+260
+00:38:24.000 --> 00:38:32.490
+Bryon Mackay: that, as a non-engineer who's trying to build, their exposure is higher. They do not understand the ins and outs, as engineers do.
+
+261
+00:38:32.570 --> 00:38:44.339
+Bryon Mackay: But engineers… so that when they build something, they're not aware of all the things. As one person likes to… as one phrase I like is the unconsciously incompetent.
+
+262
+00:38:44.590 --> 00:38:45.400
+Bryon Mackay: Right?
+
+263
+00:38:45.650 --> 00:38:48.040
+Bryon Mackay: Where they just don't know what they don't know.
+
+264
+00:38:48.350 --> 00:38:50.820
+Bryon Mackay: So, it's very important.
+
+265
+00:38:50.910 --> 00:39:07.610
+Bryon Mackay: to have an… at the very least, what I would recommend is sit down with an engineer and have them help you set up your workspace. They can put together a certain structure using… you can leverage CloudMD files, you could set rules and guardrails in there.
+
+266
+00:39:07.610 --> 00:39:19.010
+Bryon Mackay: You can do… you can set up skills, and those kinds of things will help a non-engineer go a lot further and a lot safer. So, for example, if you have a PM that wants to do some changes, or you have a designer that wants to do some changes.
+
+267
+00:39:19.010 --> 00:39:28.300
+Bryon Mackay: say, hey, let me set up your workspace, but let me only give you access to these files. Like, here are areas where… here are… we're gonna blacklist a whole bunch of this application, or whitelist some of it.
+
+268
+00:39:28.520 --> 00:39:33.930
+Bryon Mackay: And so that they have the ability, right? They could very well do a lot of meaningful work.
+
+269
+00:39:34.040 --> 00:39:37.360
+Bryon Mackay: But, we don't want to give them the keys to the kingdom either.
+
+270
+00:39:37.590 --> 00:39:41.329
+Bryon Mackay: Which is what seems to be happening at some places.
+
+271
+00:39:42.070 --> 00:39:43.450
+Bryon Mackay: So, anyway
+
+272
+00:39:43.450 --> 00:40:04.299
+Bryon Mackay: Finally, and to that point, the next point here, never deploy anything touching auth payments or user data without a review, right? Think about blast radius, and just what awful things could happen, when people do… when people put those things together and, unknowingly, right? And then they release it, because it gets through some review process.
+
+273
+00:40:04.300 --> 00:40:08.440
+Bryon Mackay: And suddenly we have… Bigger issues on our plate.
+
+274
+00:40:10.890 --> 00:40:25.470
+Bryon Mackay: I want to just come back to this slide and leave this up here as I say one more… as I kind of talk a little bit about what Gauntlet's trying to do here. So, here at Gauntlet, like, this is… this is our… this is my job, this is our job, to help other engineers
+
+275
+00:40:25.710 --> 00:40:37.340
+Bryon Mackay: know how to set up codebases, know how to be the AI leader that a lot of these companies need, right? We need people with good frames of mind where they think about these problems in terms of.
+
+276
+00:40:37.340 --> 00:40:46.030
+Bryon Mackay: what's the worst that can happen, and how do I prevent that? There's also people… we also need to have good system designers, right? We have to understand the systems that we're in, that we're working in.
+
+277
+00:40:46.080 --> 00:40:49.550
+Bryon Mackay: The, we have to understand the libraries we're leveraging.
+
+278
+00:40:49.650 --> 00:40:57.089
+Bryon Mackay: And how those make for a better, you know, how we can leverage those to make a better application.
+
+279
+00:40:57.270 --> 00:41:07.430
+Bryon Mackay: and avoid overloading our, you know, all of the dependencies that we may have. We understand as engineers these, these qual… the qualities of a good app.
+
+280
+00:41:08.570 --> 00:41:15.080
+Bryon Mackay: it's getting harder and harder to do that when it's so easy to vibe. So what do you do?
+
+281
+00:41:15.320 --> 00:41:25.850
+Bryon Mackay: Did we just stop vibing? Did we stop using AI? No, of course not. We're gonna keep using this. But we have to use it strategically, we have to use it well, and we're fearing, I'll just give you a little insight.
+
+282
+00:41:25.960 --> 00:41:42.120
+Bryon Mackay: When we talk to the companies that hire our graduates, the things that I'm hearing from them, resonate there, where there are still some that want more features, and that's just kind of what… how they come off. I don't know if that's entirely what's in their mind.
+
+283
+00:41:42.450 --> 00:41:50.490
+Bryon Mackay: But they come off as saying, like, yeah, I want these engineers to work faster and build more and more and more, and that's great, right? That's okay.
+
+284
+00:41:50.950 --> 00:41:57.419
+Bryon Mackay: But, it also comes with a caveat. We're teaching them as much as we're teaching those that come to Gauntlet.
+
+285
+00:41:57.620 --> 00:42:12.650
+Bryon Mackay: That there's a lot more nuance there that you are not… that they're not aware of, and we have… we'll supply… we'll teach our engineers how to identify that nuance, how to be a good communicator of that nuance, so that it can be addressed appropriately.
+
+286
+00:42:13.100 --> 00:42:28.149
+Bryon Mackay: So, a lot of what we teach, and with every cohort, this changes, right? Every cohort gets a kind of a new flavor of it, because in 10 weeks, so many things can change, and so many things are becoming apparent.
+
+287
+00:42:28.400 --> 00:42:30.699
+Bryon Mackay: That, so…
+
+288
+00:42:30.930 --> 00:42:43.920
+Bryon Mackay: where was I going with that? The next time we do this cohort, the curriculum's gonna change a little bit. And we're gonna make sure we focus on some issues that we're seeing pop up all over the place. That's a big thing and part of my job, is to make sure that we're staying up to date.
+
+289
+00:42:44.010 --> 00:42:56.849
+Bryon Mackay: And then, when it comes to… so, anyway, all that's… if you are interested in coming to Gauntlet and learning more about how to, be that kind of leader in a, in an…
+
+290
+00:42:56.850 --> 00:43:06.250
+Bryon Mackay: in an environment where AI is working, it's thriving, but it's also very dangerous, and you want to be the voice of reason to help make sure that these companies actually
+
+291
+00:43:06.290 --> 00:43:08.380
+Bryon Mackay: Produce quality output.
+
+292
+00:43:08.460 --> 00:43:19.869
+Bryon Mackay: Come talk to us. It's a great opportunity. It's 10 weeks, fully paid for on our dime, not yours, and and you'll have the opportunity to interface with these companies and get jobs with them.
+
+293
+00:43:19.990 --> 00:43:31.989
+Bryon Mackay: We have cohorts, starting throughout the year, and so we have another cohort starting in about three and a half weeks. So, if that's too fast for you, though, we have other cohorts starting later.
+
+294
+00:43:31.990 --> 00:43:44.320
+Bryon Mackay: In the year. And we'd love to have you. We'd love to have you. It's such a great time. You get, there's kind of 3 things that I always point out to people that you get a lot of Gauntlet. You get, of course, the learning, and the opportunity to just work on your craft.
+
+295
+00:43:44.930 --> 00:43:49.269
+Bryon Mackay: We always talk about 100-hour work weeks, that's not an exaggeration. There's a lot of work
+
+296
+00:43:49.340 --> 00:43:51.419
+Bryon Mackay: Excuse me, that we're due every week.
+
+297
+00:43:51.420 --> 00:44:16.009
+Bryon Mackay: And it's just a great time to hone your craft and really dig into this stuff without any other distractions. Two, you get to interface with a lot of great companies, so you get to see… you get to meet great people, you get to talk to them about what they're building, and decide if that's a good fit for you, and if that's something that you want to go do, in the future. And of course, all these companies are offering very high salaries, and so it's a great chance to kind of bring them all together, all these companies together, all these great
+
+298
+00:44:16.010 --> 00:44:22.070
+Bryon Mackay: Engineers together, and, to make some, some great, some great jobs happen.
+
+299
+00:44:22.720 --> 00:44:30.289
+Bryon Mackay: And then the third thing, which is a little bit in line with number two, is networking. You not only get to network, though, with the companies.
+
+300
+00:44:30.290 --> 00:44:42.870
+Bryon Mackay: But you get to network with a great group of people that come in with you into the cohort. You're all like-minded, you're all engineers that want to learn more, you want to push the envelope, but you want to do it in a way that is… that produces value and quality.
+
+301
+00:44:42.870 --> 00:44:50.910
+Bryon Mackay: And that's what you get when you come to Gauntlet. A great time to sharpen that saw. We'd love to have a lot of people out in Austin.
+
+302
+00:44:50.910 --> 00:45:01.759
+Bryon Mackay: Where you get to be there for 7 weeks, and you just get to really work and grind. It's a fun, fun time, and a great way to get to know people, and also, and also just land that great job.
+
+303
+00:45:02.070 --> 00:45:04.670
+Bryon Mackay: So… Alright.
+
+304
+00:45:04.880 --> 00:45:23.659
+Bryon Mackay: I've been talking a lot, I'm gonna stop there. Haven't seen any hands pop up just yet, but if you have any questions, whether about the topic we've talked about, or, if you want to talk about, if you want to talk about Gauntlet, I'm here to… to answer. So, I'm going to…
+
+305
+00:45:23.760 --> 00:45:31.629
+Bryon Mackay: Check real quick here… Let's see… Let's see here…
+
+306
+00:45:32.680 --> 00:45:38.560
+Bryon Mackay: I had… let's see, guys, I had a document pulled up that I think I might need…
+
+307
+00:45:39.180 --> 00:45:41.100
+Bryon Mackay: Oops, not that one. Sorry.
+
+308
+00:45:41.100 --> 00:45:44.970
+Tom Babb: Also, we have someone with… that raised their hand, Christian, I'm gonna allow it to talk.
+
+309
+00:45:45.170 --> 00:45:47.889
+Bryon Mackay: Oh, okay. Oh, I didn't see it. I'm sorry there, Christian. Go ahead.
+
+310
+00:45:47.890 --> 00:45:48.760
+Tom Babb: I've just done it.
+
+311
+00:45:49.810 --> 00:45:50.900
+Christian Jarjouhi: Hello.
+
+312
+00:45:51.270 --> 00:45:52.239
+Christian Jarjouhi: Can you hear me?
+
+313
+00:45:52.240 --> 00:45:53.660
+Bryon Mackay: Yep, I can hear you. Go ahead.
+
+314
+00:45:53.660 --> 00:46:01.630
+Christian Jarjouhi: Yeah, thank you so much for the presentation. It resonates well. I've been doing vibe coding for the past few months.
+
+315
+00:46:01.760 --> 00:46:16.000
+Christian Jarjouhi: And I realized the amplification of the errors. And, your point resonates well. I'm trying… for… my question is related to gauntlets. I tried to apply, and it looks that…
+
+316
+00:46:16.280 --> 00:46:21.229
+Christian Jarjouhi: There's, somewhere,
+
+317
+00:46:21.370 --> 00:46:34.109
+Christian Jarjouhi: that the review will… there will be a review, and there will be… somehow, a committee will be reaching out afterwards. I don't know if that, like, if there's any timeline on that, there wasn't.
+
+318
+00:46:34.110 --> 00:46:45.550
+Christian Jarjouhi: And second question is, in terms of the teacher or instructors, like, what are the typical profiles, for the, for the instructors in, overall, and is there…
+
+319
+00:46:45.630 --> 00:46:54.310
+Christian Jarjouhi: some kind of teacher assistance over there, or, just wanted to shed some light on that, on the content process. Thank you.
+
+320
+00:46:54.510 --> 00:46:55.160
+Bryon Mackay: Yeah.
+
+321
+00:46:55.280 --> 00:47:13.399
+Bryon Mackay: Yeah, so, first question about, having people, there's somebody… waiting for somebody from Gotland to reach out. I will… I can… we can reach out to our guy. There's a guy here named Drew. He's usually… he's the one in charge of that, and, he should be reaching out to… to see if…
+
+322
+00:47:13.400 --> 00:47:16.589
+Bryon Mackay: Let's see, have you taken the CCAT already, Christian?
+
+323
+00:47:19.120 --> 00:47:22.579
+Christian Jarjouhi: I'm sorry, yeah, yeah, I did that. Okay.
+
+324
+00:47:22.760 --> 00:47:28.350
+Christian Jarjouhi: I believe I was in the 80s something? I didn't reach the 90s.
+
+325
+00:47:29.060 --> 00:47:30.850
+Bryon Mackay: Oh, like the 90th percentile?
+
+326
+00:47:30.850 --> 00:47:31.470
+Christian Jarjouhi: Yeah.
+
+327
+00:47:31.470 --> 00:47:34.489
+Bryon Mackay: Okay, cool. Yeah, so,
+
+328
+00:47:34.660 --> 00:47:50.129
+Bryon Mackay: I know there's a lot of people applying, so let me… I can… I can take your name and send it over to Drew, but yeah, you should be, you'll hear something from him, whether… either way, to… to see, what's going on there. So, if you haven't heard from him yet,
+
+329
+00:47:50.240 --> 00:47:51.210
+Bryon Mackay: Hang tight.
+
+330
+00:47:51.300 --> 00:48:09.840
+Bryon Mackay: But on the other side of it, with the instructors, yeah, all the instructors we have are all engineers. They're either actively working at a company, or they're working specifically at Gauntlet. They all have many, many years of experience. I'm trying to think of… I don't even know who has the least, per se, but…
+
+331
+00:48:09.860 --> 00:48:22.100
+Bryon Mackay: 10, 15, 20 years is not… is typically what the people have that come and instruct here. So, so yeah, lots of… lots of really good engineers, a lot of the… I respect all of them.
+
+332
+00:48:22.100 --> 00:48:32.530
+Bryon Mackay: And they are all building great stuff on, when they're not teaching. So, they're very much well-versed in what's going on, and how to leverage the tools to get their jobs done.
+
+333
+00:48:34.910 --> 00:48:35.840
+Christian Jarjouhi: Thank you so much.
+
+334
+00:48:36.360 --> 00:48:37.479
+Bryon Mackay: You bet, thank you.
+
+335
+00:48:40.930 --> 00:48:46.950
+Bryon Mackay: I'm gonna read a few from, the comment, or the, yeah, the comment section here.
+
+336
+00:48:47.690 --> 00:48:49.520
+Bryon Mackay: Let's see…
+
+337
+00:48:50.140 --> 00:48:59.329
+Bryon Mackay: Looks like Austin is looking for anybody who wants to meet up at the next AI Camp event at Capital Factory, very cool, that'll be fun.
+
+338
+00:48:59.500 --> 00:49:14.130
+Bryon Mackay: Igor asked, when do you guys stop taking applications for this cohort? Do you guys do stuff like fine-tuning or RAG? Yes and yes. I will say that RAG is one of those that is ever-revolving.
+
+339
+00:49:14.180 --> 00:49:23.410
+Bryon Mackay: And it's used in many, many companies. Fine-tuning is, in my opinion, a really great one to know and understand.
+
+340
+00:49:23.490 --> 00:49:34.799
+Bryon Mackay: But if there's only specific companies that will actually use that skill. More often than not, there's a lot more using of foundation models, and,
+
+341
+00:49:34.920 --> 00:49:42.699
+Bryon Mackay: And just… and using, you know, kind of the top, top-tier things that are… the top-tier LLMs that are out there to… to get work done, so…
+
+342
+00:49:43.320 --> 00:49:51.280
+Bryon Mackay: And as far as take… when we stop taking applications, I'm actually not sure, but I know that we accept people almost up to the day it starts.
+
+343
+00:49:51.500 --> 00:49:59.909
+Bryon Mackay: So, I would… if you wanted to do this cohort, we have, you know, three and a half weeks, I would take… I would say take the time.
+
+344
+00:49:59.920 --> 00:50:14.639
+Bryon Mackay: you know, think about it, think it through, you have time to get through it. Don't wait too long, though, because there are some things you gotta do. You gotta take a CCAT, and you have to go through a review process, as we've been talking about. So, just be aware that, there's a little bit of…
+
+345
+00:50:14.670 --> 00:50:15.440
+Bryon Mackay: Just…
+
+346
+00:50:15.570 --> 00:50:19.529
+Bryon Mackay: Housekeeping that we have to do before we accept you, but we do accept people right up to the date.
+
+347
+00:50:27.240 --> 00:50:29.869
+Bryon Mackay: Let's see, I'm just looking…
+
+348
+00:50:34.590 --> 00:50:35.620
+Bryon Mackay: Okay…
+
+349
+00:50:37.120 --> 00:50:48.889
+Bryon Mackay: I have something else here… oh, you know what? There's a Q&A section that some of you have been putting stuff in, especially you, Jay Fuller, alright. Am I running daily security audits?
+
+350
+00:50:49.030 --> 00:50:53.380
+Bryon Mackay: I don't know if they're daily, or for my stuff, personally.
+
+351
+00:50:53.490 --> 00:51:01.199
+Bryon Mackay: moron, but there are certain things that I… there are certain actions I take where I do automatically have security audits happening.
+
+352
+00:51:01.470 --> 00:51:07.729
+Bryon Mackay: Oh, then you raised your hand. So, there, there's your answer. Apologies. Anyway.
+
+353
+00:51:09.970 --> 00:51:10.870
+Bryon Mackay: Okay.
+
+354
+00:51:14.420 --> 00:51:34.109
+Bryon Mackay: Do you also encourage entrepreneurship tracks? Christian, that's a great question. And the answer is, yes, we do. We definitely push more, though, for getting the jobs, but there are definitely times where, if you have this great idea and you've vetted it out, come talk to us. You know, I…
+
+355
+00:51:34.110 --> 00:51:38.879
+Bryon Mackay: Don't know if you know our CEO, Austin Allred, but he loves that kind of stuff.
+
+356
+00:51:39.000 --> 00:51:45.809
+Bryon Mackay: And if there's an opportunity there, you… this is a great chance to rub shoulders with him. So, yeah, that's an opportunity as well.
+
+357
+00:51:51.830 --> 00:52:01.559
+Bryon Mackay: Okay, Jeremy's asking, what kind of person is landing these 500K jobs, staff-level jobs? Creators of startups with 100K app downloads?
+
+358
+00:52:02.470 --> 00:52:06.829
+Bryon Mackay: Not the creators, necessarily.
+
+359
+00:52:07.270 --> 00:52:21.539
+Bryon Mackay: there are some people that we've had that had many years at Google, who are very well established already in their communities, in terms of maybe it's an ML or a data science kind of track, or,
+
+360
+00:52:21.860 --> 00:52:30.769
+Bryon Mackay: What also happens a lot of times is we get some really incredible people that come in, and there are a lot of companies that want them, and then there becomes a bidding war for that person.
+
+361
+00:52:30.990 --> 00:52:43.910
+Bryon Mackay: So, it… it's not everybody, right? But there's surprisingly more than I thought when I… when I started here, of how many people get up that high. It's… it's pretty… it's… it's impressive.
+
+362
+00:52:44.040 --> 00:52:48.839
+Bryon Mackay: A lot of these companies we have are willing to pay top dollar for great, great people, so…
+
+363
+00:52:50.140 --> 00:52:51.660
+Bryon Mackay: Yeah.
+
+364
+00:52:52.410 --> 00:52:53.910
+Bryon Mackay: Let's see…
+
+365
+00:52:54.230 --> 00:53:04.309
+Bryon Mackay: Idrisu asked, do you have to meet any eligibilities to apply, like level of experience? Can you apply while still in school?
+
+366
+00:53:04.410 --> 00:53:18.799
+Bryon Mackay: We have started to consider people who are still in school. If you're taking a CS degree, go ahead and apply, and there's, there's some more consideration that goes into that one, just to make sure that, you're at a
+
+367
+00:53:19.110 --> 00:53:21.320
+Bryon Mackay: At a spot where you can…
+
+368
+00:53:21.670 --> 00:53:28.970
+Bryon Mackay: do the program and be successful in it. And, we have some of those happening already, which is so fun to watch.
+
+369
+00:53:29.130 --> 00:53:39.179
+Bryon Mackay: But it is something that we kind of do on a case-by-case basis. Typically, we require 3 years of experience. That's our baseline requirement. But if you don't, still apply.
+
+370
+00:53:39.240 --> 00:53:51.140
+Bryon Mackay: And if you're somebody that seems to have the experience, maybe you've coded a lot your whole life, or you've already had a lot of work experience, or whatever the case is, there's opportunities… well, I shouldn't say work experience, that's what we're talking about.
+
+371
+00:53:51.200 --> 00:53:59.589
+Bryon Mackay: But, if you've had a lot of good experiences and you seem like the kind of person that, could handle the program and also land a job, we want to talk to you, too.
+
+372
+00:54:00.730 --> 00:54:05.939
+Bryon Mackay: Jordan asks, what kind of salaries are you expecting for Gauntlet, for Gauntlet for America?
+
+373
+00:54:06.570 --> 00:54:12.260
+Bryon Mackay: Yeah, that's a good question. I would… okay, so there's two here, right? There's salaries and there's whole comp.
+
+374
+00:54:12.610 --> 00:54:31.329
+Bryon Mackay: So, I haven't done the calculations on the total comp, but the salaries are more typically in the $150 to $170 range, based on when… where… what level you get it at. There's a whole… I don't know if you've looked into this, but there's a whole structure of, like, different… of varying levels when you work for the U.S. government.
+
+375
+00:54:31.330 --> 00:54:34.420
+Bryon Mackay: But the total comp is pretty high.
+
+376
+00:54:34.460 --> 00:54:45.930
+Bryon Mackay: Because they do a couple of… for example, there's a pension that you're getting out of that. And and then there's all these other great benefits that they have included in there as well. So, there's a lot…
+
+377
+00:54:46.290 --> 00:54:51.210
+Bryon Mackay: There's a lot to be said for Gauntlet for America that can go a long, long way.
+
+378
+00:54:51.360 --> 00:54:57.220
+Bryon Mackay: So, the salaries may not reflect all the value themselves.
+
+379
+00:54:57.720 --> 00:55:00.859
+Bryon Mackay: But, the perks that you get with that job?
+
+380
+00:55:01.010 --> 00:55:19.549
+Bryon Mackay: I feel like make it a very viable and reasonable thing to… to look into. Definitely something if you're interested in that. Or if you live in the DC area already, that's where a lot of the jobs will be. That's an opportunity for you. Or if you have security clearances already, that's another thing I've been learning lately, is how important those can be. So…
+
+381
+00:55:19.570 --> 00:55:25.040
+Bryon Mackay: Great opportunity there, great way to get your foot in the door, and just work on some pretty interesting stuff.
+
+382
+00:55:26.580 --> 00:55:31.990
+Bryon Mackay: Ryan asked, is the application process different for Gotland for America? No. It's the same.
+
+383
+00:55:32.310 --> 00:55:51.119
+Bryon Mackay: It's the same. You'll be, if you get a certain score on the CCAT, that's one of our main differentiators of whether you get into Gallant for America, whether you get into, the, the main, the flagship program, or if you don't make it at all. So,
+
+384
+00:55:51.300 --> 00:56:02.670
+Bryon Mackay: So, yeah. Alper asks, does Gauntlet for America require a citizenship, or would a GC be sufficient? Citizenship is required for that one.
+
+385
+00:56:02.950 --> 00:56:03.690
+Bryon Mackay: Yeah.
+
+386
+00:56:04.610 --> 00:56:05.440
+Bryon Mackay: Yep.
+
+387
+00:56:06.940 --> 00:56:09.289
+Bryon Mackay: Sure, you bet.
+
+388
+00:56:10.290 --> 00:56:11.659
+Bryon Mackay: Great questions, everyone.
+
+389
+00:56:12.420 --> 00:56:13.709
+Bryon Mackay: Keep them coming.
+
+390
+00:56:17.000 --> 00:56:33.089
+Bryon Mackay: Let's see, Jordan asks, do people bring their own monitors to Austin? No need. Unless you really have a monitor you love. No, I'm kidding, don't even bring that. Not worth bringing it. Bring your computer, preferably a laptop, as opposed to a desktop if you can.
+
+391
+00:56:33.310 --> 00:56:39.929
+Bryon Mackay: But we'll have monitors in Austin that, you get at your desk. So, you'll have plenty to work with there.
+
+392
+00:56:45.320 --> 00:57:04.620
+Bryon Mackay: And Austin's just a really fun, unique time. Like I said, you get just… it's just time where it's just you and the rest of the cohort, and you're all just heads down, working and learning and pushing. It's… it's a… I mean, what other opportunity in your career do you get something like this, where you just…
+
+393
+00:57:04.680 --> 00:57:11.599
+Bryon Mackay: you don't have to pay for anything. It's all covered. Your food, your housing, your laundry.
+
+394
+00:57:11.760 --> 00:57:27.149
+Bryon Mackay: So that you can come and just sharpen the saw, like, for… for however… for 10 weeks. Well, 7 weeks in Austin, right? 10… 3 weeks remote. Then you just do that, and you get a network with great people, you get a high… you get to meet great companies. What an incredible opportunity that is.
+
+395
+00:57:27.260 --> 00:57:37.210
+Bryon Mackay: So, it's quite the experience. I hope you all strongly consider it, and hopefully we'll see many, not all of you.
+
+396
+00:57:37.400 --> 00:57:38.740
+Bryon Mackay: One of our cohorts soon.
+
+397
+00:57:55.400 --> 00:58:00.200
+Bryon Mackay: Alright… Any other questions?
+
+398
+00:58:02.910 --> 00:58:07.269
+Bryon Mackay: How large is the typical cohort? We typically aim for 100.
+
+399
+00:58:07.490 --> 00:58:10.379
+Bryon Mackay: 100, 150? Somewhere in there?
+
+400
+00:58:10.800 --> 00:58:14.409
+Bryon Mackay: We always try to push a little bit higher than that, but…
+
+401
+00:58:14.470 --> 00:58:31.679
+Bryon Mackay: you know, if we can… if we can get to 200, the material I build is… and the processes I build out on the curriculum side, at the very least, are meant for 200. So we can push that number up if we have that number. But 100, 150 is where we like to start a lot of times.
+
+402
+00:58:32.050 --> 00:58:37.089
+Bryon Mackay: How soon after graduation do you anticipate starting with a government job? asks Jordan.
+
+403
+00:58:37.250 --> 00:58:48.149
+Bryon Mackay: That is a really good question, and one that I don't have a solid answer for, because, because this is actually the… we're running it right now for the first time.
+
+404
+00:58:48.570 --> 00:58:54.540
+Bryon Mackay: And so, there are still some expectations that I haven't gotten clear guidance on. But…
+
+405
+00:58:54.640 --> 00:59:09.910
+Bryon Mackay: Give me 3 or 4 weeks, and I will have a much better idea of what that looks like. But we are… let's see, we're currently in week 7, and we have got that ball rolling of getting everybody in the GFA program, or Gauntlet for America program.
+
+406
+00:59:09.910 --> 00:59:20.129
+Bryon Mackay: into their system, so that we can get them, interviewing and getting the jobs they need. So, everything's in motion right now, and they're, being very…
+
+407
+00:59:20.180 --> 00:59:37.479
+Bryon Mackay: very, easy to work with in terms of getting things moving and rolling. So, hopefully I'll know more concretely afterwards. Ideally, you're starting right after you graduate. Or maybe a week after, so you can get life in order if you need to move, or whatever the case is. But I'm sure they're flexible on that, too. They've got to understand that, right? So…
+
+408
+00:59:38.360 --> 00:59:42.170
+Bryon Mackay: Idrisu asks, what's the acceptance rate?
+
+409
+00:59:42.740 --> 00:59:52.339
+Bryon Mackay: That's a good question. I'm… I'm not sure what the exact acceptance rate is. It's pretty low, though.
+
+410
+00:59:52.720 --> 01:00:07.149
+Bryon Mackay: The requirements we have are pretty high, and there's a lot of review we do with each person, so, it's not terribly high. I can't… I couldn't tell you the exact number, but I know it's… it's definitely sub…
+
+411
+01:00:07.480 --> 01:00:13.859
+Bryon Mackay: 10%, I would say. Correct me if I'm way off there, Tom, but I believe that's around the number.
+
+412
+01:00:14.290 --> 01:00:19.730
+Bryon Mackay: Jordan, you're already in cohort GFA5. Awesome. Oh.
+
+413
+01:00:19.930 --> 01:00:26.620
+Bryon Mackay: You're gonna love it. You're gonna love it. I've been so… I've had so much fun developing this, that track.
+
+414
+01:00:26.990 --> 01:00:28.959
+Bryon Mackay: I think it's really, really cool.
+
+415
+01:00:29.090 --> 01:00:31.250
+Bryon Mackay: So, you'll be learning so much good stuff.
+
+416
+01:00:31.530 --> 01:00:41.449
+Bryon Mackay: Christian, what is the ratio, then, for teachers to students? Good question. Let me… there's probably…
+
+417
+01:00:41.820 --> 01:00:46.969
+Bryon Mackay: Oh… 10, I wanna say?
+
+418
+01:00:47.350 --> 01:00:53.860
+Bryon Mackay: There's a lot of us that are just gonna be walking around, talking to you, so…
+
+419
+01:00:54.360 --> 01:01:04.709
+Bryon Mackay: Yeah, and if there's… that's where we like to keep, and we like to send out teachers to talk to you, and see how you're doing, what questions you have. Lectures, of course, will be there, so…
+
+420
+01:01:04.710 --> 01:01:15.370
+Bryon Mackay: Quite a… quite… I would say that's a pretty, pretty good ratio. And then don't forget, you have everybody else, too. You're all learning together, everybody comes in with different skills. A lot of times, we have,
+
+421
+01:01:15.460 --> 01:01:35.369
+Bryon Mackay: within cohorts, there's, like, little meetups that they'll have, where there's, like, for different things. There's, like, a running group, a game group, there's groups that will do lightning talks, and we can help facilitate some of this, but we love it when the cohorts just get together and they're like, hey, let's do this together. It's like, oh, that's great. Because then you're really learning, more about
+
+422
+01:01:35.460 --> 01:01:45.039
+Bryon Mackay: you know, specific topics that maybe we as teachers, like, don't have time to review or to go into. There's a lot of stuff out there, right? And so it's a great opportunity for all of you to work together and…
+
+423
+01:01:45.270 --> 01:01:49.300
+Bryon Mackay: Build, you know, build up those relationships, and also just learn some really cool stuff.
+
+424
+01:01:50.670 --> 01:02:02.490
+Bryon Mackay: Christian asks, and are projects mainly individual in nature, or do we have team projects? You do have a bit of mix, but a lot of it is individual work.
+
+425
+01:02:02.770 --> 01:02:16.330
+Bryon Mackay: There are cases where you get together with groups to discuss the projects you're building, but a lot of the work has to be done individually so we can assess, your skills. At the very end, I will say there is a capstone where you will get with your team.
+
+426
+01:02:16.460 --> 01:02:28.349
+Bryon Mackay: And, you'll get with a team and you'll build a product on your own. So, but yes, a lot of it just by nature of having to verify that everybody is capable and able to take on these jobs.
+
+427
+01:02:28.540 --> 01:02:31.320
+Bryon Mackay: We do a lot of individual work as well, so…
+
+428
+01:02:33.250 --> 01:02:38.470
+Bryon Mackay: Jason asks, what if I have a day job? It's remote, though.
+
+429
+01:02:38.580 --> 01:02:56.710
+Bryon Mackay: So, Jason, this is… I'm glad you asked this question. This is, this is one of those situations where you've got to decide for yourself how much to put in. When you come to Austin, you're not going to be able to have that job. Some people are able to take some leaves, others just have to leave the job entirely.
+
+430
+01:02:56.740 --> 01:03:03.999
+Bryon Mackay: That's typically what has to happen, is people have to leave the job because it's so rigorous and there's so much work to do. So,
+
+431
+01:03:04.490 --> 01:03:15.690
+Bryon Mackay: Yeah, that's… it's… it's… that's not an easy decision to make, though. I fully understand and appreciate that, that decision, and… but it's… it's kind of one of those things where it's like.
+
+432
+01:03:15.850 --> 01:03:34.000
+Bryon Mackay: it's… the opportunity is there, it's incredible. So I don't know where you are in your career, Jason, but it's something you gotta consider for yourself, but I… again, I would just emphasize what an incredible opportunity it is to… to go and learn, and just really spend a lot of time
+
+433
+01:03:34.170 --> 01:03:37.830
+Bryon Mackay: To make yourself the best engineer possible.
+
+434
+01:03:39.160 --> 01:03:47.259
+Bryon Mackay: Austin is saying, I'm putting in my vacation request as soon as I pass the CCAT. There you go. There you go.
+
+435
+01:03:47.410 --> 01:04:01.650
+Bryon Mackay: Just… just saving up that time. Hopefully you have 10 weeks. I think the best company I ever worked at only allowed us to have 6, so… You can almost make that work, right? Squeeze it out? Sure, sure. Anyway.
+
+436
+01:04:03.250 --> 01:04:17.769
+Bryon Mackay: Well, great. Well, everybody, we're, we're at time, but I want to say one more time, just thank you all for coming. Really excited to have all of you here tonight, and just get a chance to talk about
+
+437
+01:04:17.770 --> 01:04:33.690
+Bryon Mackay: where we are in this crazy AI revolution that we're experiencing. But it's a lot of fun. It's a rollercoaster sometimes. New models come out, and suddenly it's like relearning how to ride a bike, but we love it, and there's so much opportunity out there for engineers like you.
+
+438
+01:04:33.690 --> 01:04:39.650
+Bryon Mackay: to go and make a real difference and a real impact, especially as all this is happening. We are gonna be…
+
+439
+01:04:39.650 --> 01:04:47.800
+Bryon Mackay: the… that wave of engineers that really understand and learn this stuff, and solve some really interesting new problems that come up. So…
+
+440
+01:04:47.980 --> 01:04:56.560
+Bryon Mackay: Thank you all again for coming. I hope you have a… enjoy the rest of your evening, and we hope to hear from you more, and see you at Gauntlet.
+

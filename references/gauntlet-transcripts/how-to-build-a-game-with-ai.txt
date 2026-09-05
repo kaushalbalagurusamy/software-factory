@@ -1,0 +1,303 @@
+QuizCaster: Shipping an AI-Generated Game With No Game-Dev Background
+Matt Hulme — Gauntlet Night School
+https://www.youtube.com/watch?v=CoqVZnhwsTg
+
+Matt Hulme (00:07.257)
+Hello everybody, welcome, welcome to night school. See if I can see the chat here. Public chat, there we go. Hello, hello. Everybody say what up in the chat. If you're a gauntlet grad, say hello. I want to hear from you.
+
+I'm gonna let everybody gather in for a couple minutes here before I kick it off. What up? What up, Jason? What up, JC?
+
+Welcome everybody.
+
+Hello, Mikhail.
+
+Matt Hulme (00:44.557)
+Welcome in. Where's everybody coming from? Where are you viewing from?
+
+Matt Hulme (00:55.257)
+Yeah, I'll give it maybe what do you think, Tom? Two minutes after? Five minutes after? When should I start going? One more minute? Okay.
+
+Kansas City. What up, Cisco?
+
+Welcome.
+
+Matt Hulme (01:19.703)
+Redmond, Washington, nice. Never been to Washington.
+
+Matt Hulme (01:26.061)
+Beeha, Utah. Right on. I used to live in Sandy, er Harriman actually. Near Sandy. Bay Area. I'm from the Bay. San Diego. Welcome everybody.
+
+Matt Hulme (01:42.617)
+Back home at Phoenix.
+
+Nice.
+
+Nice Canada. Got some Canadians in the house.
+
+Matt Hulme (01:56.545)
+All right.
+
+Matt Hulme (02:00.025)
+Good to go. Let's get started. Okay. So welcome everybody. Tonight's night school, I'm to be talking about Quizcaster, which is the first video game I've ever created. Coming at you not as a game development expert. I have a history in web development and some data analytics stuff. I've started a couple businesses, but tonight is just all about teaching you what my process was and tips and tricks on how to game how to develop games. So at any point, feel free to ask questions. I'll be reading the chat.
+
+But we will have a QA near the end of about 10 minutes. So yeah, interrupt me at any point. So just a quick itinerary of what we're covering. We're going to cover what Quizcaster is, some of the learning science behind it, the visuals, the audio, some general game dev tips that I've learned, talk about game balance, we'll talk about quality assurance, very important. We'll talk about the marketing side and then the gauntlet loop, not related to gauntlet.
+
+This school. And then we'll talk about some other really cool games built with AI. Yeah, we'll share the slides after this, Justin. yes, we'll share all this. I've got a bunch of documents that I can share with you guys after. So, what is Quizcaster? So, first a little background. The goal was to build an educational game. So, building games alone is a challenge, but building an educational game to me just adds another layer of difficulty.
+
+because you kind of have sometimes the fun and the educational aspect feel like opposite ends of the you know tug of war, and you're fighting for a tension sometimes between those two components. So one game I grew up, I grew up the 90s, I went to school in the 90s, and Math Blaster was a game that I really liked. but as you can see in this clip, it was very like a term that's used in the industry is called chocolate-covered broccoli, where it just kind of like
+
+It would be in phases where you would play a game and then you would do the learning and you'd play a game and do the learning. And they weren't very integrated. It was just kind of like there's no real incentive. Math Blaster was amazing. It's one of my favorites. But there was no real incentive to do better or to be faster. Like if you got it wrong, you just had to get it right until you could proceed. And so I wanted to I was inspired by Math Blaster. And then another game that I was inspired by is Vampire Survivors. So it's a pretty simple game on the computer. They've got it on the mobile app, they've got it on
+
+Matt Hulme (04:18.968)
+I think consoles as well. But it's just it's created its own genre, which is called survival's like survivors like. And you just walk around, essentially, is the control scheme. And that's what drew me in was like, you know, we're gonna be doing kindergarten through fifth grade. It's gonna be kids playing this. I want it to be a really simple control scheme, and I want it to be fun. So Vampire Survivors was absolutely an inspiration here. So let's get into the game. Let me show you. It's quizcaster.com. And
+
+I'm actually doing this on localhost because I'm gonna be doing the cheat menu, and the cheat menu doesn't work on the actual website. So let's make sure the study settings, let's turn on, we'll do second grade math. And those are all the settings. We'll go over that in a sec. So if I lock in, the first thing you're gonna see is these like modifiers. So a big part of us designing this is like I wanted it to be replayable and to be dynamic each time you play. So there's like a random set of, I think.
+
+30 or 40 different modifiers. Some of them help you, some of them don't help you, and it makes each round feel unique. So the first thing is you're gonna pick a weapon. let's choose spark here. That weapon's pretty good. If the audio is too loud, anything like that, let me know in chat if it's it's hard for me to tell with my headphones on. So you can see it's clearly inspired by vampire survivors, a lot of the art style. We'll talk about the art in a bit. Every 15 seconds, it'll stop and then show a question.
+
+And so let's answer these. Let's do a wrong so you see what happens. So it moves the bar down, and then we'll answer this one. So that the speed and the accuracy that you that you answer the questions with is incentivizing you because it sets it determines this bar on the left, which determines the ceiling of the loot that you can get. And so that was like one of the fundamental aspects of this is like, okay, I want the learning.
+
+I want you to be motivated to do good so that it it influences you in the game. It's not just like a gate that blocks you. So we pick up that upgrade and we walk around. This thing's a quest. I have to defeat fifteen of them in twenty seconds. That's easy.
+
+Matt Hulme (06:26.304)
+Okay, we did it, and we get the coins. And so now there's another level up. So so it forces them to level up every 15 seconds. And the reason we did this is because we had kids when we were doing some early beta testing, kids were running away from we'll do it's too electric orb. Kids were running away from the stuff. Cause this stuff would level you up. They'd pick up the XP and they would just so they would just like associate the XP with, I'm gonna have to do math, I'm gonna run away. So we were like, well
+
+We don't want them to be like incentivized to not play the game, but so so you get XP for leveling up for for just killing stuff, but it doesn't have any math with it. The math is on a timer every 15 seconds. So that's kind of how the game works. I could talk about this forever. But there's a little shop, there's all this cool stuff. So yeah, I honestly just want to play this game for an hour. Okay. So let's go back to the menu and let's go through the slides. Let me.
+
+So that's kind of how the game works. Pretty simple loop. but yeah. So first, what's a roguelike? Rogue is a popular game made in the 80s. I think roguelike deck builder is the most common category of game on Steam. Very, very popular. And what I think it is about the genre that's so popular is the replay ability. That it's it's dynamically generating aspects, whether it's maps that are dynamically generating or
+
+Different weapons or it it makes each run feel different, and so it extends the play cycle of the game. And so I thought roguelike was a great genre for what we were building. I think it's the perfect genre for an educational game because it's got that replayable feel. It feels like each time you play it is dynamic. And then it also has those like pause moments of like, ooh, you leveled up. Here's an opportunity to insert some learning or whatever. So that's what we went with. We went with roguelike and vampire survivors. So in Quizcaster, like I talked about, the answers are what give you the
+
+Power. it's not just like a gate where you can't go back to the game until you finish the learning. It like affects your gameplay. And so that's a core aspect of what we're doing. We built it to work with any subject. So you can let's go back to the study settings real quick. let me do a new game and I'll quit to get to the study settings. So we have all these like pre-built quizzes. It comes with K through five of math, spelling, and vocab.
+
+Matt Hulme (08:49.426)
+we have like SAT vocab, AP bio, a bunch of different pre-built AP test prep. And then you can also build your own. You can like we have this build with AI where you copy this and then you toss a prompt into AI, say what kind of subject you're trying to learn, and it'll output and you just paste it here, or you can import them from like Quizlet or Anki or any of those, you know, flashcard games. So it's built to work with any subject. You can bring your own flashcards. we're currently at like 500 weekly active users.
+
+we have one user who's played for more than twenty four hours of their life. shoutout Brazil. and they yeah, they they're they're our biggest supporters. So and over ten thousand quizzes have been answered and there's just been two of us who developed this and it's been about we we built the core loop in a couple weeks, but we've been working on it technically, I think two months. A lot, a lot of the time went into the art. we'll go into that, but you know, with video games it is a lot of art generation.
+
+But first, let's talk about the learning science of this. So a study game really has three jobs. You've got the motivation aspect. Are these kids motivated to play this on their own? You've got the learning outcomes, are they actually learning the material? And you've got the cognitive load. Like, is there too much for them to process? Are they overwhelmed with what's going on? And so on the motivation side, you know, we really wanted to make this a game first. I believe that like the funnest education games that I played grow I played actually quite a bit growing up of those types of games. And
+
+To me, the test is if you remove the g the learning component and it's still a game, that is a pass in my book. But if you remove the learning component and there's nothing underneath, then you haven't really built a game, you've just built like a wrapper around a quiz and kids can tell. And so, yeah, so we wanted this game to be fun first. because it w if kids come back and if they're motivated to come back, then they'll be learning more as well. So
+
+Again, on the motivation side, we had it be integrated and not gated so that the you know, they're incentivized to do better so that they can have those better rewards. And then also the variable rewards aspect of a roguelike where it's essentially RNG, random number generation, where the kid doesn't necessarily know what kind of upgrade they're gonna get. And that you know, unpredictableness of it i it kind of keeps them coming back s s since it's like random and they you never know what you're gonna get.
+
+Matt Hulme (11:11.656)
+And especially nowadays, like kids are you're competing with for the attention of kids, you're competing with TikTok, you're competing with Fortnite, you're competing with all these short form, you know, very dynamic and not static experiences. And so I felt like we needed to make something that was very dynamic, very not static. And on the learning outcome side, we we implemented something called space repetition. So when the deck is dis when the system is deciding which
+
+question to serve to the kid. If they got a question right, that gets moved essentially to the discard pile. And if they got a question wrong, they're gonna see it more often. so that over time the kid is lear i i i if they did poorly on a question, it's reinforcing it soon and then you'll see it at wider and wider intervals. That's called space repetition. So we have this mastery page. Let me see mine. I recently nuked it so these I promise I know zero plus one, you guys.
+
+But so that's the way our system works is it'll show you how you've done on the last five times you've seen it, how you've done it on the last ten times you've seen it or all time. And so parents can track how their kids are doing in an in whatever subject they want. so that's space repetition. And then the cognitive load is that's kind of why I focused on a really simple control scheme of vampire survivors, is like I wanted I didn't want them to be overwhelmed with a bunch of choices and a bunch of we actually have I didn't even show, we have
+
+The space button is the only button you can do and it moves you around, dashes you around. here I got the fog modifier that like makes the map all look dark. So the only controls are really move and dash. And it's because I wanted to keep the cogn cognitive load light and keep them not overwhelmed because they're gonna have to be learning and playing. and then we also one aspect is the
+
+The way the bar moves down, it punishes them for getting inaccurately as well as doing it too slow. But we had to like find the right balance of like, well, we don't want someone who just guesses on three answers to do better than someone who took their time and got the three right answers. So that's all stuff we've had to take into consideration. And it's all customizable settings. You know, as I showed you in the study settings, we have tons of customizability. If I choose these three subjects,
+
+Matt Hulme (13:32.074)
+I can like change how frequently I'm seeing the quizzes. I can change how many questions I'm seeing per quiz, the seconds allowed per quiz. You know, this is all very, very customizable. and then we can parents can put a lock on it so that they can like pin lock it so that if they want their kid to ensure that their kid's actually learning and not just changing it to like, one question every thirty minutes. so we have that in there. So now that I've talked about how the game works, let's talk about building it. That was a long intro, but.
+
+Let's talk about building it. So on the visual components, a lot of the work is in building assets. And this is kind of a hot button issue in game development, hot topic issue. Like a a lot of people have mixed feelings about AI in our generation. And I hear what they're saying, don't get me wrong. We used AI a ton, obviously, in generating these assets. I'll go into the specifics. But as far as the ethics of it, I view there's like a difference between a triple A studio.
+
+laying off all of its artists so that it can use AI to make a bunch of money and a free educational game with two people building it so that so I think there's a spectrum of how you use it. And yeah we've used it in a bunch of different ways. But here's a bunch of the different sprites that we have. You know, every single character you have to do them in the five different directions so that you can mirror it. And this doesn't even include all the animations. I would say like 75% of the work of building this game has been in
+
+The visual generation and in the asset generation. Jason built a bunch of these outfits we've got in the cosmetic store. Let me go back to here. wardrobe. So we've got all these different pieces. You can like mix and match stuff. Jason built all these and you can, you know, all those different angles. It takes a lot of work. And to be honest, like I kind of regret choosing pixel art. I love pixel art and I think it makes a really cool retro feel, but
+
+AI stre it's harder for AI to do pixel art than if we were to just do like SVGs. that rotation was clean, heck yeah, shout out Jason. if you look up too close, some of them you can see a little bit. but I think Jason did an awesome job with this wardrobe. It took him like a couple weeks to get all this out. But we have a like a little where's Waldo thing. I think you can find this in the map. where's the hat for it?
+
+Matt Hulme (15:54.295)
+Yeah, you can find the the Waldo outfit. It's not called that for copyright reasons, but you can find this stuff in the map and then you unlock it. So you get coins as you play through and that unlocks it. But point being, if you're gonna make a video game and using AI to help build it, Pixel art, like be serious about c questioning is pixel art the path that I really want to go down. we we use a product called Pixel Lab.
+
+there was there's a couple different there's Pixel Lab, there's Retro Diffusion, and a couple other pipelines, but we found Pixel Lab to be the best at it you can create characters, you can create objects, you can create map tile sets. There's a whole API, there's an MCP for it, so it's really built for a lot of this. you can see it's some of these objects that we've built here on the right. Pixelab's good, huh, Tyler? Yeah, Pixel Lab's super good.
+
+And we've loved it. So we tried a little bit of retro diffusion and and we like it for like super high depth stills, but the animation is where we started having some difficulty. And even Pixel Lab, you'll find like sometimes you have to try a couple different endpoints and there's tips and tricks like I'll go back to that slide in a second. With Pixel Lab, like we found it easier to go from human description of an object to a reference image.
+
+And then to the pixel image instead of human description of an object straight to the pixel image. Like the LLM had an easier job if we would generate these out with Gemini or whatever first. so we did that and it started making a big, big difference. but so we have three real like main methods of generating the visuals. We would have the Python imaging library, and this is like scriptable stuff that would look for super
+
+Outlier pixels that are just like, okay, within this range, here's the outline of the character. So if you find any that are outside of here that are an off-white or whatever the wrong color, let's replace them. so we use that a little bit to clean things up. Anything that comes back from Pixel Lab will run through our Python imaging library and scripts. And we've got that built out into skills. and a huge part of of you know any AI development, but especially game development, is gonna be you know, templatizing and
+
+Matt Hulme (18:14.546)
+And extracting, abstracting out some of those patterns into skills and being like, okay, like we have skills for each endpoint hitting in the pixel labs. We're like, if you're hitting the create character with eight directions endpoint, here's some things we've learned in the past, and here's things that will help us. So in all AI development, skill, skill, skills, very important to codify and abstract out those repeatable patterns. another method we have is A Sprite, which is this, let me find it. here it is.
+
+This program right here, well, don't have it. It's because it's full screen here. Let me do this. A Sprite right here. you use it to, it's like how you would manually create art, but I'll use this to like fine-tune stuff and adjust files. And one sec, let me go back. And there's also an MCP. So we give we give you know Claude or whoever codecs access to A Sprite.
+
+Through the MCP, and it's able to like it can make simple, simple stuff, like the coins I think were generated in there. and it can fine-tune stuff a little bit. But at the end of the day, a lot of it we'd have to hand and manually fix. but yeah, Pixel Lab is where a lot of the generation, let me log into my account real quick, happens. Let me pull this up, sorry.
+
+Matt Hulme (19:37.165)
+So yeah, you've got we've got the docs here, and I I first thing I did is like hit the API and the docs, and then I built essentially skills for each of these endpoints of like when are we gonna want to hit each of these? When are we gonna wanna use this animate with pro, because different calls will use different amounts of tokens and you're only allocated a specific number of tokens. And then you've got all your characters that it generates. You can see we tried at the wizard quite a few times.
+
+This was a monstrosity. It put the freaking her face in the hat. and so yeah, it it it it's pretty cool how you can see all the characters laid out like that, and then the different rotations, and then it's got the animations in there too. If I click into here, it's got the different animating states. Look at this hat. That was a problem. It kept like twisting the hat or like not consistently doing stuff. It's just it's a lot of back and forth, a lot of QA.
+
+and then in objects is where we generate like all the icons for spells or any characters. This is where the wardrobe happened too. Or any characters that are not humanoids. So like you know, these blobs or things without arms and legs. when we went to animate though, we found that like it's better, Pixel Lab does better if they are a character rather than if they're an object. if it's a character, then it like
+
+Can put a skeleton around it and know where the arms are, know where the legs are, and then animate from there. so yeah, it's pretty cool. But but knowing which endpoint to hit, which ones consume, what amount of tokens, all that is super important. let's go back here. So let's see, reference first. Another big concept is you're gonna want to lock in the pixel density and color palette. That's something that
+
+Honestly, if you look super up close, some of our assets are not the right pixel density. It drives me crazy. But you want the same a pixel to be the same size between two objects. So you don't just want to like take a small object created and then scale it up and have one pixel be huge there and small there. That can create some inconsistency visually. So you want the same pixel density across the board and then the same color palette. On the same topic,
+
+Matt Hulme (21:48.537)
+Quality control is not negotiable. These are some of our characters that we created. And if and if we just piped these straight in, I mean, you'd be able to tell. So some of these bald ones, we were actually this was when we were creating the wardrobe, and we were like, well, if we want to change the hair of the character, we need like a a a mannequin version of them so that we can change, you know, what outfit they're wearing and what that's so that's this kind of looks like avatar, the last airbender.
+
+So, yeah, that's kind of it on visual generation. If anyone has any questions, let me know on what we did. But like I said, it's been about 75% of the work has been the visual pipeline and doing the graphics and all that. So if I were to do it over again, I probably would not pick pixel art if I'm being honest. I think we'd probably do like SVGs, just like solid SVGs and animate that way. it would save us a lot of time and we'd be able to spend more time on other stuff. So, on to audio. JSF.
+
+XR. I don't know how to pronounce that. So what that is is a procedural synth. It's free, it's local, and it's instant. it's a package that you just I think it's over in NPM. And so we use that to like procedurally generate a lot of our sounds. if it can. And if if we don't like the sounds that are coming out of there, then we'll use Eleven Labs. And so Eleven Labs is great. we we're on like the six dollar plan and we built every we all of our music, like we never ran into limits.
+
+The very lowest 11 labs plan was more than enough. And then there's also the option of like pre-recorded sample libraries. we didn't use that, but you know, there's all these like free assets out there that you can use. You can pay for them too. They have asset packs. But so we're mostly JSFXR and 11 labs. So I'll have some examples of each. For the XP pickup, these top three are going to be the J JSFXR.
+
+That one's nice. Level up. And then the UI clicking. And then eleven labs is like more the generated sound so the coin.
+
+Matt Hulme (23:47.555)
+When you beat a quest, when you open the shop, you can't hear. no. Hmm. That's unfortunate. Well, sharing the screen. This is unmuted. Let's see, audio. whatever. Unfortunate. I'll share the slides after. It'll be it'll be in here so you can see it. But yeah, and then the music also was generated with 11 labs. so we've got like five or ten different songs there with
+
+Both images and audio, my general tip is to be as like dis use the real source name. So be like an you know a meteor a flaming meteor is hitting the ground and puffing up the dust around it. Like you want to be very visually descriptive when you're trying to generate audio. AI does much better than if you try and like
+
+Sometimes it would just do like, yeah, plasma energy. It would just be like not sure, but like a transformer hum or a thunderclap from thunder and lightning. It did much better with like real descriptions of objects rather than like abstract ones. So that's my general tip there. let's see. yeah, the model can't hear. So what we did, we built a little it it visualizes the waveform, so it'll it'll like ingest the waveform and then look for peaks.
+
+And because sometimes there would just be random buzzing that would come in from 11 labs or things that would just sound off. and so we had to create a skill that would have it like visualize the waveform and then be able to find anomalies and chop them out and all that. let's see. And then at that point it tunes it a little bit. So we've got to do the audio balance. Sometimes things just get wonky and you're noticing one sound is crazy and another is underbalanced, all that stuff. So then it balances it all, and that's pretty much it for audio.
+
+So yeah, those two tools were everything we needed for audio. I still think there's things we could improve in the audio, but so in general, on the game dev tip side, things that I've learned as a novice, start with the core loop. you know, because it took so much time to build the assets, like if we didn't have a good core loop and didn't feel good about the base mechanics, I think it would have been potentially a waste of time to build out assets to something that wasn't the right fit. So yeah, so like build with
+
+Matt Hulme (26:08.12)
+Placeholders, build with squares, build build with just triangles, whatever it is, until you feel like it's good, and then start layering on from there. I do think like assets, visually and audio assets, should probably be near one of the last steps of doing polish. Like, yeah, I just don't think it makes a ton of sense to do that early. So get the core loop in and then layer on from there. there's no point polishing until it's fun with boxes, until you feel like that's good.
+
+With the game balance side, so you know, we have thirty five different weapons. Let me pull them all up real quick. Let me reload this.
+
+Ooh, we got a bunch of modifiers. Okay. So we have let me pull up the cheat menu. We have like 35 different weapons. So we have these different schools: the arcane, the fire, ice, void, shock, poison, and harvest is a secret one we haven't released yet. But so we've got 35 different weapons, and like balancing all of these, red boxing is the industry term. Thank you, Cameron. Yeah, so do red boxing. So we've got 35 different weapons, and we we wanted a way to
+
+let's see, Mikhail. I spent most of my time on character movement during the game week. All models had a c hard time swapping left leg for the right until Cameron here advised outlining them with different colors for easy recognition. That's super smart. Super super smart. Yeah, so there's there's tips and tricks you can do with that of like there was someone else I saw generating pixel art who did they would create a 3D rendering of a of an object and then it was able to like rotate it to the different directions and snapshot it and use that as a reference. So it's kind of funny. It's like
+
+DLLM has an easier time going from 3D to 2D than to just build in 2D. It's counterintuitive. You wouldn't think that 2D is as challenging as it is, but it really is. Much respect to pixel artists. So on this weapons point, so yeah, we we have these 30, 35 weapons, and we're like, some of them feel much stronger than others, and some, you know, it didn't feel balanced in the weapon versus weapon comparison, and then it didn't feel balanced in like one.
+
+Matt Hulme (28:17.334)
+blue attack speed upgrade was not the same equivalent power increase as a blue, I don't know, attack range increase. And so trying to do that balance is like really, really hard. It takes a lot of testing. I mean, I think human in the loop and human playtesting is king at the end of the day. But what we tried to do is automate it as much as we could. So what what what we did is build like little play testers.
+
+that would this one you turn on like you know in vulnerable mode so that it can't die, but we we build these bots with like trying to optimize the movement pattern for each weapon. And so it would be like, okay, I have a weapon that attacks in a cone in front of me, so I'm gonna move in this path, and then I'm gonna try and pick up as much XP as I can. So we built a system of AI to play test for us, and it would help, you know, turbo run through.
+
+Hundred, two hundred different parallel runs of the game to be able to find all the anomalies of what wasn't balanced and it helped us manage things. So, you know, I I still think human playtesting is king, like I said, but there's a lot that you can do to like find the anomalies, find the outliers and things that aren't super balanced. And I don't think it is super balanced, and no game is perfectly balanced, so you know.
+
+Some sometimes these games can be fun because they're wonky and because you like break them in certain ways. So it's kind of a tough thing where like you know, it's it's it's kind of s the point of these games sometimes is to break them and just let them get kind of crazy. But yeah. So on the quality assurance side, like I was saying, we have these kill switches and cheat menus. So anybody who did my cohort, Cisco's in here, anyone else in my cohort at during Gauntlet.
+
+Feature flags is kind of what I'm known for. I shouldn't be. Everyone should be known for them. But it's the way I think in AI development to test features on production, especially if you don't have a dev or a staging environment. It's a way to hide things from the user and build them in the background. C3, let's go, Cisco. It's a way to hide things from the user, build them in the background, and then when you're re ready to enable them, you turn them on in the feature flag and then they're released to all the users.
+
+Matt Hulme (30:32.674)
+So it's essentially a way for you to be able to test features in production and be able to enable those feature flags, disable those feature flags, and like see how you know, test everything, QA it all. And so we do that for all our new features where like, you know, we added the new costume coins, Spotify uses feature flags, tons of software development company, I mean, tons of software companies use feature flags. It it should absolutely be standard, especially in the age of AI when you're pushing all this code to production and just potentially breaking stuff. Because the nice thing.
+
+about feature flags is that if a rollout doesn't work, you just turn it off. You're like, globally we're gonna turn that off. Now it rolled back to the version one and now no one's seeing the broken version two. So big fan of feature flags for releasing stuff out when you're testing stuff in front of users, whether that's a video game, whatever you're doing, feature flags all day. and then we have this cheat menu. Like I said, it's allowed us to like isolate a weapon and test things and be like, okay, let's
+
+let's see let me run this. Let's go to where's the timer one? Jump to time. Let's jump to time. Eight minutes. Let's give ourselves some weapons here. Let's give ourselves what one do I want? Chain lightning's great. Let's do Arcane Burst. No, we'll do Ricochet actually. And let's do
+
+Matt Hulme (31:51.321)
+Cross Nova, and then we'll do fire breath. Okay, and then we'll jump to that time. We'll spawn a bunch of guys. So this was a way for us to test different weapons. We'll force the tide. Let's see if we're closes here. Jump to time eight minutes. Okay, and then I close the menu. Now it's eight minutes at the top. So this is a way for us to like test different moments of the game. This is making me realize it's really hard to read the the yellow. I'm gonna turn off the math questions. I can do that.
+
+Math enabled. we have these little books that give you a little shield. So just like trying to add random elements that make each run feel a little dynamic. This snow map is actually pretty quick to build from our existing assets, but it makes you slippery, move around and it's little slippery. So yeah, so you know that's what the those debug cheat menus help you QA a little bit. So even though the AI is playtesting for us, it helps you be able to like isolate.
+
+Different enemies, isolate different spells, and and test all that. So, you know, I think all of us are kind of moving. You know, I think QA is an underrated skill. I think it's really, really important with AI development. I think being able to QA efficiently is super, super valuable. And then we have this cool thing where we map the whole system. Jason built this just recently. where is it? This guy. So this is basically all of our different screens, all of our different
+
+Systems, all of our different triggers, all of the different states. And so you can click through like this is the core loop where you have the live combat and then the quiz clock shows up, the XP bar shows up, the level up event. So it's just kind of a cool way to map out when you're in different flows, you know, what the different steps are. And so as we're adding new screens and ads as we're you know, mapping out how the flow of this game works, this is a good way. And this is true of video game development and any flow development. I think
+
+any software development, I think visualizing the flow is super, super important. yeah, so shout out Jason for building this. It's pretty cool. yeah, that's that's live actually, yeah. Quizcaster.com, devlog, game loop. I'll post all these links after. As far as marketing, we are using AI for the marketing as well. So we've got these devlogs like I mentioned. And this is on a slash schedule from Claude. And every Monday I come in
+
+Matt Hulme (34:15.62)
+And it's ready at 9 a.m. with a summary of the previous week's worth of PRs explaining what we did and suggesting clips that we could gather and all the gifts and stuff. So if I go to this is actually live on Quizcaster.com slash devlog, and this just posts all of our devlogs. We've got from the first one, we do one a week. this is just us announcing, yeah, this was the foundational week, free upgrade picks, free play mode.
+
+Yeah, it's pretty cool. So it's super nice to be able to just like, it just looks at my PRs, sees what we did, and creates a devlog for it. And we also it's we're on itch, and it creates that post as well for us every week. And so I really think AI and marketing is an underutilizant and underrated component for like finding opportunities to market and preparing copy and all that stuff. So yeah, scheduling those devlogs. We use it to write the shorts as well.
+
+so we've got YouTube, TikTok, X, Instagram, and Facebook. You know, we've got 500 weekly users. you know, a good portion of that's coming from paid traffic, but we've got quite a bit of organic traffic as well. And that's coming from us just posting shorts. So yeah, every time we do a short, it's kinda that's where I'm like more involved in helping come up with the script and helping AI you know, plan out the creative side, and then it'll record it with me.
+
+Sometimes it does recordings and it's like, okay, obviously its movement is a bot moving around and not a person. It's just like not caring about enemies and running through them and stuff. But yeah. having it helped me prepare all the metadata for these posts, what are the hashtags that we should use? What are the formats that are working? That's a big proponent of all this is like I don't start the script until we digest what formats are working on each of these platforms first. Like what are other games that are doing well and what are
+
+Some of their hooks that are performing well and how can we learn from this? yeah, I believe like format format digesting is a super, super key component of patterning off of Trill. Those are all of our socials, and we do these shorts pretty often. And like I said, we are doing a little bit of paid ads. We're doing them on Reddit primarily. I think that's where a lot of our user base is. we kind of have like we kind of have
+
+Matt Hulme (36:39.584)
+a couple different user bases where it's like it's either the kid playing the game. I mean, some kids are just playing free play mode and not necessarily learning, but it's either the kid or it's the parent who found the site and wants their kid to play it. Or we could potentially have a market of like people who are self-studiers and they're just like, I'm studying for my flight school and I really w need to learn these topics. Like, because anything that's flash cartable works with our game, it's like
+
+So we're trying to find that target market of like which one's doing best. I think so far the flashcard crew is like we stand out the most because there's not a lot of games that I've found that are as modular and as customizable as as ours, as like just paste your flashcards and then it'll work with any game. So that's I think sets us apart in the in the genre. but yeah, we're using it to every every day I'm coming in and I'm analyzing how it's doing on Reddit.
+
+If we should change any of the targeting and it's surfacing comments that people make so that I can respond to them and yeah. Can it import Anki decks? It can, yes. in a couple different formats, yeah. So yeah, it's built specifically for quiz or for quizlet and onki, and yeah, you can import both of them. Good question. Need the version for CCAT? So that's a thing. You're right. we we've tried I think
+
+We've tried we we I the the questions that are officially in the CCAT, I think we've had a hard time sourcing. But we could definitely build like a CCAT light or like a C Cat esque style of thing, but yeah, I think that's a super good idea. I think we should add a CCAT deck. we're looking at at adding like the Texas Star or other standardized testing things. I know, I gotcha, Mikhail. we're looking at adding yeah, Texas Star or other standardized like Texas content so that they can be studying that.
+
+okay, so the gauntlet loop. I'm sure some of you guys have heard of this. The gauntlet loop has nothing to do with gauntlet AI, the school. I checked. But what it is is essentially it it we didn't use it to build our game at all. and what it is essentially is it came out in like the last two weeks, which is why. I mean, I even if we started building two weeks ago, I don't think I'd use it. I'll explain why in a bit. But it essentially is a short prompt that says.
+
+Matt Hulme (39:02.946)
+Here's this, you know, reference material. So it's like build a game like Call of Duty was the one example. It's called Claude of Duty. Let me find it. Yeah. You have some reference example so that the LLM can like reference something as as a anchor point that it can build against. And then you say, let's see, where does it say?
+
+Matt Hulme (39:27.822)
+slash loop until it's utterly perfect and then fan out sub agents and ultra code. And then another the last part is that it has a blind verification agent that is different than the one who built it that is like adversarially reviewing it and saying, Do we meet the standard? Yes or no? So that's it's kind of going popular and this this right here was built with Claude. you know, fifty five thousand lines of three JS. And I didn't even talk about three JS during this. Our our
+
+Engine that we used is Phaser. Phaser's like a you know a web framework. The second place we're going to do was Godot. Unity is another option. Unreal Engine, those are all other options. But 3JS as an engine is phenomenal for building, you know, web GPU stuff is getting really, really good. And if you're getting into 3D development and you've never done it before, I would recommend 3JS. You can build it right in the browser. This was built in there, and there's a lot of cool games that are built in there as well. I'll I'll get into that in a sec.
+
+As I was saying, the the main reason why I don't think I'm a big fan of Gauntlet Loop is first of all, I think it's
+
+It's fundamentally referential. So it's just like pointing at something else and saying, like, build something similar to that. You could maybe like start there and then get a foundation and then layer on your own twists from it. But I don't find it like I don't know. I want to be a little more creative than that personally, but you know, to each their own. So people were saying on on some of these threads on X that like it's pretty architecturally messy a lot of times when they get in there because it's just been iterating over and over and it doesn't have like a good architectural map prior.
+
+It's really token intensive and expensive. Like this one I think was six hundred dollars or yeah, six hundred thirty-two dollars in tokens, so it can be really expensive. Make some cool demos, but it can be really, really buggy, really, really like tough to manage it after at as it starts growing. I think the the thing that I 100% agree with in the gauntlet loop is like never have a self-grader. This is true in video game AI development. This is true in AI development in general.
+
+Matt Hulme (41:30.06)
+Have a separate adversarial reviewer that's blind that just comes in and sees the product and sees the standard that you set and says, Do these match up? Does this meet the criteria? Yes or no? because you know, we all know Claude and you know, Codex, everybody, they are so they tend to just rubber stamp their own work and be like, I did it, I did the thing. So you you know, have an adversarial review I really cannot speak higher about. and then yeah, human adversarial reviewing really helps as well.
+
+So let's see. Some of these other really cool games built with AI, because as much as I love Quizcaster, it's been so much fun. Like there's so many other cool games that are visually more compelling in my opinion than Quizcaster. I love the pixel art, but like it's hard and it's doesn't look as cool in my opinion as a lot of these other styles. So the vibe jam, anybody in chat heard of the vibe jam? Anyone participate in the vibe jam in here? That'd be amazing if we had somebody participate. Let me know in chat if you did. So
+
+What it is is it's held by levels dot io or what's his name? He's on Twitter. Big guy, Levels. he does a bunch of startups and stuff. And cursor. It's hosted by them. I think they give forty to fifty thousand dollars in prize money to whoever wins it. I think it's twenty K goes to first place. But it's a a game jam where you have a month, I think, I think it was April to May this year, and you the rules are I think it has to be ninety percent.
+
+AI generated code so you can still use your own stuff and so those are the rules and this happened in twenty twenty six fairly and these are some of the top ones. So this is null range. Let me pull it up actually. Null range.
+
+Let's see. So this one's just like a
+
+Matt Hulme (43:18.306)
+Freaking flight simulator status. It's pretty cool. Like look at all these visuals. The fact that it can do all this just in the web browser, that's pretty awesome.
+
+So there's just it's like I I continually like cannot believe how how amazing some of the visuals come out out of 3JS and some of these AI developed games. It's really, really cool. Another one is console. Let me pull that up. I should have had these links ready. Okay. This one's like a super chill like meditation aim. let's see.
+
+Matt Hulme (43:54.649)
+So you literally just like take care of plants, I think. I think my one critique here would be the UI is a little AI, you can kind of tell. but it won, I think, what was the award that it won? Most Zen, as you can tell. this one, Haldane. Let's see, Haldane. This one is super interesting. It got the most original. It's actually ASCII art, you know. We were talking about Rogue from 1980.
+
+ASCII art is where it uses like symbols like the dollar sign, you know, percentage, and and all that. And so this whole thing is visually generated with all that. And you move your mouse to like rotate the cave that you're in, and then you use the arrow keys or WASD to move through it. And you're kind of like this little submarine thing. Super cool, super creative. I love the visuals, even though it's just ASCII. I think they did a great job. so that's another one. And then this one, Capabara delivery.
+
+You literally are driving around. That's what you do. You're a copabarro driving around. I even know how to pronounce that. How do I where is the game? There it is.
+
+Let's pull it up here.
+
+Matt Hulme (45:10.306)
+Let's see. You literally are a delivery driver. So I just think it's really cool to see like the industry. I don't know, it's just like vibe coding games is really, really taking off. It's like it's really impressing me. And every single day I'm like, it's it's just getting faster and faster and better and better, this whole process. so we've experienced one particular slice of it in Quizcaster, but there's a whole world out there of people making 3D worlds and people making
+
+You know, a lot of depth to these games, so I need to at least drive, let's see. I need to accept an order.
+
+Matt Hulme (45:49.526)
+Yes. Let's go ahead. Let's open it up for questions. Anybody any questions about anything we did? I guess I can drive around while I'm waiting for questions.
+
+Just drive around for fifteen minutes.
+
+Matt Hulme (46:18.358)
+need to do. Yeah, you bet, Cisco. Thank you guys for being here.
+
+Matt Hulme (46:33.356)
+Yeah, so yeah, so you know, all all this stuff I learned at Gauntlet AI while I was here as a student in the Gauntlet Prime program. But they also have a program called Catalyst, which I actually did as well before I did Gauntlet. That's how I heard about Gauntlet. And it's if you're currently employed at a place and you want to, while you're still working at the job, not take ten weeks off like regular Gauntlet. you can just sign up for Catalyst and your employer pays for it and you
+
+Spend I think it's three weeks, Tom. Four weeks? How many remote? Can you What's the timing on Catalyst? I can't remember. Is it? Yeah. What
+
+Four weeks remote and then two weeks in person, and you're building AI projects, and you know, you have to come out at the end of it with a project that'll help save your company's bottom line. and I did that a year and a half ago. So highly recommend Catalyst or Gauntlet Prime if you're thinking about leveling up in AI and learning more about it. yeah. that's all I got. Any other questions? Anything else I can
+
+Yeah. I'm here for whatever. I can share all these documents. I've got let's see. Yeah, I've got a link of all these docs. I'm just gonna dump this in our chat.
+
+Matt Hulme (48:03.043)
+Okay, cool. We'll send out an email and then a you with a YouTube link and all these documents later as well. Yeah, Tyler, the SVG art direction I wanted to go. He had a question about that. So yes, thank you, Cisco, thank you for highlighting that. AI is just gonna be better at generating for for 2D art, it's better at generating SVGs where it doesn't have to worry about low res pixel rendering, essentially. So if it can just
+
+I mean I still think you wanna have a consistent pixel density, but essentially an SVG path, like you can't see the pixels. It's like, and so for that reason it's easier for the AI to just like it can do animations easier, it can do repeats easier, it can do it all without needing a pipeline like Pixel Lab. Like, just in Gemini, you could generate all the assets that you needed for a game like Quizcaster if it wasn't pixel art. But because it's Pixel art it like
+
+The one or two pixels being out of place looks more punishing because there's less to work with essentially. and so like the the margin of error is thinner in pixel art than with just SVGs. So the SVG pipeline I was gonna use is essentially just like straight up Gemini or talking to any of these image generators, Chad GPTs, whoever, and just describing what you want to build. And first getting a reference image and then building it. I I didn't really build the pipeline.
+
+For it because we went down pixel art so fast. But you would first, you know, get a reference image, get some concept art or whatever that you like, and then start building the different directions of like look north, east, south, whatever, and then you can start building those rotations and then build the animations for them. so does that answer question? Totally. but yeah, I would I would that is my biggest like I love pixel art. I think it gives it a really cool vibe and a really cool feel, but
+
+it's been it's been a pain. It's been a lot of the time that we spent. But the nice thing is, I mean, like Jason right now is actually building a tower defense game. In like an hour he built a proof of concept using all of our assets. So we're probably just gonna reuse all the assets that we have and build some other games in the Quizcaster universe essentially. And hopefully have an arcade of games. a big group of So yeah, I mean that's a nice thing is we did the heavy lifting early and we got all the assets that we need. So
+
+Matt Hulme (50:29.528)
+yeah, if there's one thing you take away from this, don't do pixel art. Or if you do do pixel art, don't use AI to do it and just hire an artist if you can, or just be good enough at art that you can do it yourself. it's really tough. I mean, it's not easy. And shout out pixel artists. It's really, really cool art form. Yeah, let's see. We got 10 more minutes, nine more minutes. I'll stick around. but yeah, we can go through any more of this. I could play more quiz guests.
+
+We could end early, okay. maybe give it two I'll give it two more minutes if anyone has any last questions. and then we can call it. But I'll stick around. Let's see.
+
+Matt Hulme (51:13.154)
+Your mobile game is Pixel art. Yeah, it's tough. It's not easy, man. It's you're using Pixel Lab though, you said, Tyler. I think it's the way to go. I th I think Pixel Lab is the is the the one that I've had the most success with, but sometimes like which endpoint you're supposed to hit, it's like tricky. Sometimes you you use the pro end, you use the cheap one, you use Bitforge, you use Pixin. There's like all these different endpoints. It's not sometimes it's kind of overwhelming how many different options there are to create the same object, but
+
+Yeah, I have found it to be the most robust. ChatGPT Image Gen is greater than Pixel Lab. Yeah. I mean, what about for the animations? You use ChatGPT Image Gen for the animations as well? Cause that was the tricky thing with us, was like the different im different animations and stuff. You funnel one into the other, smart. Super, super smart. Yeah, yeah, I'm gonna have to play it, Tyler. okay, I think we'll call it there, guys. Thanks for coming. we'll post all these in an email and then a YouTube link.
+
+to this as well. Appreciate everyone being in chat. Good to see you guys. Tyler, Cisco.
+
+Yeah, cool. Thanks guys. Take care.

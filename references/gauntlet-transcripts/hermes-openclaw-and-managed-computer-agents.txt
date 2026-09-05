@@ -1,0 +1,401 @@
+Jason Jorgenson (00:10.667)
+Hey everybody, thank you for coming in.
+
+Jason Jorgenson (00:42.876)
+Hey Drew. Hey everybody. Yeah, where is everybody joining in from?
+
+Jason Jorgenson (01:08.691)
+Nice, nice. All across country. UAE. Welcome.
+
+Jason Jorgenson (01:37.333)
+Yep, welcome in everybody. my name is Jason Jordenson. I have about twenty years of experience in the software development industry here. my most recent experience I guess before the gauntlet program was in the casino gaming industry. we were making a white label product, so
+
+on casino property you can gamble from your phone. It's a pretty fun little project.
+
+Jason Jorgenson (02:12.063)
+Hope everybody here is excited about managed computer agents. Yeah, we still have some other people coming in from Bolivia and South America. Nice, nice.
+
+Hope everybody's been enjoying the World Cup.
+
+Jason Jorgenson (02:34.943)
+I guess what is everybody ec like hoping to learn here today, besides, you know, what a managed computer agent is and what it can do for you in the future?
+
+Jason Jorgenson (02:57.139)
+Does Hermes matter? Yeah. Yeah, we will be going over Hermes in a lot of detail.
+
+Jason Jorgenson (03:07.839)
+Best practices, security concerns.
+
+Jason Jorgenson (03:14.101)
+Exactly.
+
+Jason Jorgenson (03:29.013)
+versus open claw, yeah exactly. There's we'll we'll be covering that as well as perplexity computer and a little bit of clawed co-work.
+
+Yeah, we will be taking a look at the current landscape and you know what what your actual managed computer agent can and cannot do. not not just the hype.
+
+Jason Jorgenson (04:21.835)
+Yeah, yeah, we will definitely be going over safety and what you can and cannot hand off to your agents or what you should and shouldn't. And yeah, it's a little bit loud in here, so I'm gonna try and speak up and hopefully it doesn't get the sound of the air. If that background noise gets loud, just let me know. Yeah.
+
+Jason Jorgenson (04:53.371)
+It's
+
+Jason Jorgenson (04:58.699)
+just before we get started, just let you know if you're interested in joining the Gauntlet program, there are two paths. we have a cohort that's going to be starting in July, and then there's also a catalyst program for any corporate teams or individuals that want to learn. thank you for that, Sunny, dropping those links in the chat.
+
+Yeah.
+
+Jason Jorgenson (05:34.165)
+Go ahead and get us started here on our journey into our managed computer agents.
+
+Tonight's topics, we have a few things to go over, you know, what computer agents are, what they aren't, you know, how Hermes, OpenClaw, Nemo Claw, all those things fit into this ecosystem of managed agents. We're gonna learn about some orchestration, you know, what your different boards are, and some agentic teamwork.
+
+And the actual failure modes, humor and oversight, and your key mental model that you should take away. This also includes any you know risks and oversights for things like that.
+
+Section three is where it really gets fun. It's where the model routing and we're actual software factory kind of concepts come into play. But every concept will have a real example. And if you have any questions, feel free to drop them into the chat. There is a dedicated QA section at the end, but in case you have any questions, just feel free to jump right in and we will get to them as we can.
+
+Jason Jorgenson (06:52.841)
+So in the beginning, we had LLMs. It's just text. They were token predictors. Your trees of thought traversal experts. It was autocomplete on steroids essentially. It was, you know, ChatGPT in 2022. Okay. Then we added tool use, right?
+
+Your a agent can now do a single discrete action, right? It can call a function, it can hit an API, right? That was that was useful. So we wrapped it in a loop, right? Most people have heard of the Ralph Wiggum loop, you know, to think, act, observe. It's kind of self-improving, but for the most part, it's just thinking about what it's doing.
+
+Calling that tool and then looking at what it did and sees if it's completed its goal, completed whatever prompt you had asked it to do. Most people, their mental model stops right about there, right?
+
+But if you take that same agentic loop and put it in a governed environment with permissions and monitoring, you have your nice guardrail set up, you've now created a managed agent, right? And once you have your managed agent well defined, you can give them very specific tasks. And once you have your team of agents, you can orchestrate them to do amazing things.
+
+Like every step to the right that we've taken from text generation, adding in the tool use, wrapping that inside of a loop, setting up your guardrails, you're adding more autonomy to your agents, more capability, but it's more complex and it's riskier. so the benefit of orchestration, Gerbier, is
+
+Jason Jorgenson (09:04.723)
+Like over just asking Codex or Claude to dispatch your sub-agents for your predefined units of work, is most of the time, unless you have your managed agent inside of your governed environment your your sandbox environment or wherever your workspace is, for the most part, your agents are ephemeral, right? If you load up an incognito window, go to Chat GPT or Claude Code.
+
+ask it to do something, it'll finish it, do it, you close down that window or open a new tab, new incognito window, it has absolutely no idea what you've asked your previous agent to do. Right? Your managed agents are
+
+a discrete and you know concrete system that exists either on your VPN, a VPS, a hosted cloud box, but they have you know continuity.
+
+That's one of the benefits of the orchestration layer over just telling Claude or Cursor or Codex to spawn subagents to do things. Your main agent will have that context in its window until that session's done. Unless you have written that off into a memory file.
+
+See
+
+Jason Jorgenson (10:35.775)
+But yeah, thank you for that question there. But yeah. So every step, it's more autonomous, more complex, but it's riskier, right? Because if you have your one tool call, right, like go open the browser, right? That's that's not too risky.
+
+Opening a browser, filling out my email, my password, so that way it can read my emails for me, respond to them. We probably want to have some guardrails so it doesn't just delete my inbox, right?
+
+But yeah. And the best thing is all this is model agnostic, right? I'm not going to try and sell you that Opus is better than ChatGPT, or you know, that I wish the Fable was back because it's the best thing ever. not trying to sell you a model. We're changing your mental model, right? I want you to stop thinking, how smart is my model?
+
+What can it and start thinking, what is it allowed to touch? What is it actually allowed to do? Right? Those like that is the most important part question that you can be asking yourself.
+
+Jason Jorgenson (12:00.298)
+Right? Because your chatbot, it generates text. It's great at answering your questions. You know, you ask it about something recent and it pulls in data from the internet, but like I said, it's stateless. Right? Your managed agent is allowed to actually do real things. Right?
+
+You can actually tell it to browse an entire, like like I said, entire form. It can actually simulate writing things into the form fields. I mean it's not special. Like Selenium could do that in 2010, but it does it mostly by itself.
+
+And it can learn how to do it by itself, right? With Soleno had to define this is where the field is, this is what it the format it accepts, right? Your agent can actually take a look at the screen, determine that this is where my login and where my password fields are, how to fill them out, and how to submit it. It's your agent and its harness is a multi-step execution process.
+
+It's not just a single tool call. It can be a series of tool calls. You know, go run this API, get me the results, aggregate the results, you know, determine from those results what we need to update inside the SQL inside of a SQL database, make that tool call and actually make the update. Multi-steps, multiple things where things can go wrong, right?
+
+That's why everything needs to be governed, everything needs to be auditable. Each of those steps, hitting the API.
+
+Jason Jorgenson (13:45.792)
+getting the data, seeing what your agent is transforming that data, like how it's transforming it, what tool calls it's using for that, and then writing that back out to someplace else. Being able to see that entire flow from end to end is what determines your success in running multiple agents or even just a single agent. Right? The leap this year hasn't been a smarter model, right?
+
+It's that we're essentially by having browser use, MCPs, like any sort of these things that agents can use natively, we're essentially giving them hands and eyes and ears, because you know, they can have access to your webcams, right? Like I said, they can literally browse a like a a browser like it's a human. and
+
+Hands and eyes on an agent or just anyone without any governance around them is risky. It's dangerous. It's, you know, giving an attack dog teeth and not giving it proper training. It's it's a scary version of what an agent can become. But before we do that, let's let's lock down what your agent or your managed agents actually are.
+
+and how they're different from absolutely everything else. Because, you know, it's important that we know what they are and what they aren't. It's more than just your model, right? Because it's a model with access to tools.
+
+It's in a controlled environment because again, you don't want it running around doing absolute everything on your machine. Unless that's up to you. You can do that. as long as it's under your supervision or you're willing to take the risks that it's going to do things that you might not have anticipated. Right? like
+
+Jason Jorgenson (15:57.196)
+Th these tools can be anything that's useful for you, right? Like most of mine have access to the GitHub CLI. If I'm deploying things to Vercel, I'll have give it access to the Vercel CLI. You know, it has a access to a sandboxed, you know, shell. So it has terminal access, it can navigate through its own little directory. with the GitHub CLI, it can clone down my repo, make a new branch, you know.
+
+Add some changes to it. Push that branch up. Open a PR domain. Does not have permission to close that PR by its by itself though. Right? And each of these things need to be task-level autonomy.
+
+Simple, discrete, individualized tasks. You don't want to just tell it to run my company, make no mistakes. Okay. Your agent won't have the context on everything that you're doing or your company is doing, unless you know you've been sitting there doing a brain lift and it does know everything that it's doing. But even then, that's way too vague of an ask for an agent at this point.
+
+So if you think of you know the original LLMs with you know once they added tool calls, that's kind of like a pocket knife. It was, you know, just text. It you know, has a blade, it can cut things. when you add access to your tool calls, you're making it more like a Swiss Army knife. Because you know, now you have access to all the different CLIs and MCPs that give your agent you know.
+
+Hands and eyes that it can now use to do things. Like your controlled environment, let's either, you know, a Mac Mini that's in a secure VPS. at home, I have an ACES Spark. perplexity computer kind of makes that more turnkey because they have things hosted in a cloud. So you don't even need to have your own computer for that.
+
+Jason Jorgenson (18:11.241)
+Yeah, your environment controls the entire world for your agent. Right? It is where your agent lives, it's its full body, right? You define your skills, your agent, like MD, that's where its soul file lives. And those agent and soul markdown files are really important, especially when you're trying to orchestrate a specialized agent. Right?
+
+And you know, that controlled environment is like extremely important. Like you've seen the headlines, right? Like, this my my agent accidentally deleted all my ema emails, you know, the ones that have pushed code to production and you know broken things.
+
+Here, like I've even had my own sort of semi, it's a benign rogue AI moment with Kelly Claude. You know, she was our orchestrator agent in charge of a bunch of project leads. And one of the project lead agents finished their work and said, Hey, is my like I'm done? Like, is the project ready to ship? And you know, Kelly like had gotten a little bit of context rot and said, Yeah, ship it, and you know, fired off.
+
+our you know shipping sequence. So let's see there's one question here isn't this risky versus vibe coding software that does the thing you want. so
+
+I guess is by that question you're asking, is it riskier to run a managed agent versus vibe coding like the exact thing that you want? if that's the case, I would say that you know having an actual managed agent is less risky just because if you're vibe coding something, you're generally not really thinking about the guardrails, right? You're just thinking about that one thing that you want it to do. Right? You're not thinking about the things that it shouldn't do.
+
+Jason Jorgenson (20:17.261)
+or the things that it shouldn't have access to. It's you know generally more of like a one-shot sort of thing. But you know, there are risks that come with that. And is there a way to route API calls for agents that are paid subscription?
+
+so with most of these harnesses, like Cloud Cowork, Hermes, OpenClaw, you can set up your model to be wherever it wherever it is. So on some of them, like OpenClaw, they've restricted your the use of API keys. So you'll just have to check with the harness provider. I know that with Hermes you can still use code.
+
+index's pro version so that way it can route your like all of your all of these can essentially work through any model. Again, not trying to sell you a model. I'm just trying to instruct you on what the differences are between your agents and
+
+basically what the difference between what a managed agent is, you know, what a coding loop is, and how you can use these things to make newer, better, more complex things. But we will circle back to Replexity, Claude, Hermes, and OpenClaw.
+
+distinction between managed computer agent and a harness. Okay. So like so Hermes and OpenClaw are just harn like all of these are examples of harnesses essentially. Right? The management comes from the governance that you're setting up, the guardrails that and guardrails and/or evals that you set up to specify what your agent has access to.
+
+Jason Jorgenson (22:17.165)
+Which tools it has access to, and then specifically you could go in with OpenClaw or Hermes and have individual agents running specific models with specific tool call permissions. So you could have a designer that you know is allowed to use the browser, it's allowed to go and you know use specific APIs for like an A-Sprite MCP.
+
+if you're dueling the pixel art or can call into the foul AI or retro diffusion for generating images, right? But your coder might not need access to those tool calls or you know to specific to specific directories.
+
+Okay.
+
+Jason Jorgenson (23:13.545)
+Let me continue.
+
+Jason Jorgenson (23:19.369)
+So like we're all covering this this the pretty much this slide on why managed is the important word here, right? Like your permissions, right, are specific for your agent, right?
+
+So even though they have access to the GitHub CLI, you can have a specific agent for each specific project or repo that you're working on. So you can have gating based on that, right? Your agent that you're working with for a specific client, if you're working, you know, if you're your own solo dev shop, you can have an agent with repo permissions for each specific repository or with each specific project they have access to, right?
+
+you don't like have to have them have access to everything, right?
+
+monitoring and and an auditability, right? You want to be able to see what your agents are doing. Most of them have a built-in built in time built in dashboard of some sort that lets you see their thinking process, their tool calls, you know, so that way you can go back and see why did you use browser use, you know, multiple times in a row. Like I I I gave you one query and you know you started looping. You can go back and see what process made the
+
+Agent think that it needed to do that. Human approvals. Again, that's super important. If you just have, you know, your factory or your agent doing everything, dangerously skipping permissions. You know, you can you can YOLO mode things for a little bit, but it's risky. I don't recommend it. But you know.
+
+Jason Jorgenson (25:04.159)
+Like I I like putting human approvals on anything that's irreversible or you know basically irreversible. So deployments, deletions, you know, payments, you know, those things, at least on my home server, my agent stops and waits and knows to ask me, like, hey, I'm about to push this to like e like right now, I think I even have it gated on staging, right? But like
+
+You shouldn't think of your agent as you know a brilliant intern that can do anything and that you can just toss the keys to and say, hey, you know, please run my company. Yeah. You you you have to think of it as a supervised employee, right? Like they're super smart, they're super capable, they're really eager to please you.
+
+But you know, you have to give them boundaries, otherwise they will try and do silly things. But as long as you provided your agents a structure, right, and some guardrails, like it's everything works pretty well. Right? So I'm gonna show you this in some real systems, and you can see how like the structure changes based on
+
+On your integration.
+
+Jason Jorgenson (26:30.591)
+Right, because now your agents are moving and operating software like real people. Right. So before, like I said, for Google search, there was a search API. Jira has their API, so you can use it for updating their boards, you know, all these things. It's already there, they already exist. But you know what? Jira updates all the time. And they break their API.
+
+fairly often. You know, as long as you keep updated, things generally are fine. But you know, these are big companies. What about, you know, the tiny little company that has that one specific database that you need? Right? And that's why we have computer use now, where the agent
+
+literally learns how to use its like environment that it's in, the tools that you've allowed it to use, and you know with Hermes it can then make a skill about it. Right? So, you know, it can if you know you can I have a skill on mine that basically opens up a specific Chromium, you know, browser window, navigates to Gmail, logs me in, and you know, goes through and like
+
+sorts through my email for me because like I haven't set up really good filters for it yet, which I probably should, but you know, I have an agent that lets me know which of my important emails are important.
+
+Jason Jorgenson (28:08.777)
+Back and look at some these questions. Yeah, I would isolate your network and machine, especially if you're having your agent work on sensitive things.
+
+I mean with tailscale, it's really easy to isolate an agent out and have it only accessible, you know, via via your tail scale SSH. it can still be able to reach the internet, you know, just things can't get to it. And as long as you're getting your tools on what it can and can't do, you know, you can effectively keep it sandboxed. And
+
+Nothing that it's going to do will, you know, be bad inside of its sandbox. but yeah. Like why why is this important now though? Like it's just interesting because like, you know, this is just a sample of
+
+Like computer use. And these are all mostly browser-based things. But your computer use agent can literally learn to use anything on your screen now. there are MCPs for like screenshotting your desktop, and then your agent can take those, analyze what your program is, where the fields are, and like I said, if it's Hermes, it will make a skill. So you could tell it to make a skill for you know making cap cut automated for you on.
+
+your MacBook and it would know how to click around, shorten and trim things. You know, it probably won't be good because it's not a video editor, but there's probably a skill for that.
+
+Jason Jorgenson (29:53.12)
+Yeah, and yeah, that's what saying, Christian, is like now essentially your agent can operate any software like you could. Right? the best practice though really is to use the API if it exists. I mean your agent clicking around on the screen, typing things in manually is you know a lot slower and can sometimes be a little flaky.
+
+But yeah, essentially you can automate any program via your GOI.
+
+Yeah, it's it's your platform and like routing that make all this possible. Right? And so the platforms again are you know like cloud code, cloud cobork, exception, and Hermes, right? It's more than just a model layer, right?
+
+The model's actually the least interesting layer, at least in my opinion. sure it's providing your your inference, it's what's actually doing the thinking. But I mean, new frontier models and competitor models are coming out all the time. They're getting smarter, they're getting smaller. I mean, like I said, it's it's interesting, but it's kind of replaceable, right?
+
+But yeah, to further this, you know, your loop is not a managed agent, right? It's more than just, you know, your a clever like Ralph loop where you're like, hey, you know, work on this project, write my test cases, make sure the tests pass. Like you you're chaining a bunch of things together, right? But if you're just doing that in cloud code, again.
+
+Jason Jorgenson (31:49.428)
+Unless after it's done with that you say save this to my memory file. If you close that session and come back, you know, it's you know a new session, right? It doesn't remember what you did unless you resume your old session. Right? Your managed agent, you know, like Hermes or OpenClaw, they have skills to update their memory.
+
+Hermes has a bunch of different memory layers in it and some optional ones that you can have as third party. OpenClaw is completely configurable in that regard, right? But like at the at the end of the day, it's, you know, they're very similar.
+
+But your managed agent has that human little loop for your approvals, right? It has its own predefined permission systems, right? So those are already defined out beforehand in your agent.md file. The tool calls that it can use, can't use, right? With clawed code, codecs, right? If it's a new session and you haven't started it with dangerously skip permissions or dangerously like skip approvals.
+
+Right, it's going to ask you every time it wants to do a thing. Right. With your Hermes agents or open claw or perplexed computer, you can set up all that beforehand. I mean, yes, you can just say always allow and then it adds it to a list, which is essentially doing you know that pre-work but in real time and keeping that updated. But again, once you're done with that claw or codec session and close it out, unless it has saved
+
+those permissions to like the global like allow list, it was just for that session, right? And you know
+
+Jason Jorgenson (33:46.324)
+Unless you're inside of Claw just scrolling through and expanding all the thoughts and like thinking thinking sections that it has, you're not going to get the detailed monitoring and auditability of something that's actually writing another log file that is reference referenceable in the future when you need to go back and check your work.
+
+So I mean, it's really the difference between, you know, like I said, an ephemeral agent that, you know, is really good at doing stuff, I guess, kind of if you think about it in its own head, and then forgetting about it when you close the session, or having essentially
+
+a virtual employee that you can assign a task to overnight, come back, see what they've done, and see their entire train of thought and reasoning that got them to where they are when you're when you show up in the morning. Right? So that just helps me sleep a little bit better at night whenever I kick something off before I go home.
+
+Jason Jorgenson (34:54.815)
+Right. So we've got four, I guess maybe four four or five-ish main platforms, right? These are your gen agenti carnages. You've got perplexity computer, Hermes, OpenClaw, and Cloud Cowork. Right? You've got your easiest on-ramp with Perplexity Computer. It's cloud hosted.
+
+Available via your browser. You don't really have to set up anything locally on your own environment. It runs its agents and everything in a cloud sandbox environment. It is the most turnkey, I guess, if you're going to start up on a managed computer agent, right?
+
+I would say shortly after that would be Cloud Co work as it's consumer just as it is a consumer desktop app, right? And it basically wraps your existing cloud code with this management layer, right? It lets you set up your guardrails and your guidelines, preset what tool calls your cloud agent or yeah, your cloud agent can use, right? And gives it a
+
+Memory layer that it knows to update. Hermes and OpenClaw. There
+
+similar but I guess the key difference is that Hermes has so many skills and I guess community support. Like OpenClaw has a huge community and lots of support but this is more like Mac versus Linux I guess is the best way to describe it. You know Hermes you have a great platform it's got great apps, great skills, you know
+
+Jason Jorgenson (36:54.933)
+A lot of things work right out of the box, just like Perplexity Computer, but it's self-hosted. I think they have their own web-hosted agent and model now too, Noah's research. But you know, it's it's the batteries included. You know, I want to run something locally and have it work. Right. Open claw.
+
+Like I said, it's the Linux of everything. It anything that Hermes can do, you can do an open claw, but it will take setup. And manually installing prerequisites, tinkering with configuration files, going back and installing more prerequisites that you didn't know you needed before, more tinkering with configuration files. It's you know
+
+It's worth it though if you want to know literally everything that your agent is doing. Because you can set up what tools it's calling and have visibility and monitoring into that entire chain. Right? So it, you know, is, like I said, it's the tinkerer's choice, right?
+
+And if you want something that's a little like more security hardened already, they have Nemo Claw, right? Which is NVIDIA's like flavor, I guess, of OpenClaw. It's mainly for people that are running things on like CUDA platforms GPU machines, or people that are really wanting to do things with fine-tuning.
+
+Nemo Claw has a bunch of like I said, NVIDIA CUDA-specific tensor skills. So it makes updating and fine-tuning things for you know their own GPUs easier, which is great for that. yeah, cloud co work, I think, like I said, is the cleanest demonstration of like an easy to use.
+
+Jason Jorgenson (39:09.191)
+local model that doesn't take a lot of configuration. A lot of people are very comfortable using Cloud. They already have their Cloud accounts. Like cowork, like I said, makes your agent just that little bit smarter. I know that ChatGPT and Cloud on the web, they both save some of your user information so it doesn't completely, you know, forget everything that it's been doing and that it's been talking to you with.
+
+I know that ChatGPT can also search your session, your previous sessions if you ask it to, but you know, those things it doesn't do default out of the box. Cloud CoWork kind of graphs on some of that intelligence back into Cloud since it's now native to your desktop and has a place where it can store things better.
+
+Jason Jorgenson (40:06.346)
+Yeah. The the other thing to keep in mind is that when you're running any of these or you know it like Perplexity, Hermes, OpenClaw, Clawed Cowork, usually it's not just one model. Right? Like it like this is just your harness. These are just the platforms.
+
+so speaking of your model routing, right? Most of the time you'll have just picture like most pe most of the time people think of agents as just having one agent that does everything, right?
+
+So you have your one agent that you're working with in Claude, you know, it's making your making your plans, it's building the plans, so it's writing your code, generating out all your artifacts, it's doing all these things: planning, UI, implementation, and info, right? And you know, you can split that into sub-agents, but you know, it all rolls up to that one agent at the end of the day. Right? And like I said, Claude has
+
+Cloud and ChatGPT have pulled some of this intelligence into their harnesses on the web, but you know, you have more fine-grained control of that if you're running your own platform. So you can have your Opus 4.8 as your architect, which is doing your planning.
+
+For me, I have a Quen 3 Coder Next that's my coding model, right? It's 80 billion parameters and it's been fine-tuned to literally just code things, right? Which is better than an 80 billion parameter model that's been generally trained, right? My coding model, it might not know how to format a newspaper article, but my coding model doesn't need to know how to format a newspaper article, right?
+
+Jason Jorgenson (42:14.451)
+Jason Jorgenson (42:19.125)
+Yeah.
+
+And the reason the reason that you do this is so that way, like in my example, I can call Opus as a frontier model to do my planning to break my tasks down into discrete like tasks, different like individualized coding tasks, something for the UI designer to actually build out in parallel with my coding agent. Right? And if my coding agent is hosted locally, there's no token cost associated.
+
+With that, right? Or even if you don't have a locally hosted model, you don't want to use Opus for everything, right? Once you have your actual tasks broken down for your coder, usually Sonnet is good enough for it, right? Sometimes you can get away with haiku even, and that cuts your costs by a lot, right?
+
+And they're faster usually because they take less time thinking. So you're not burning your tokens, right, that you need for your Opus models, because you still need to have a really detailed plan. You have to be able to break down each of these steps into tasks, right? Either yourself or your agent has to be smart enough to know how to break things down into tasks, right?
+
+So again, it doesn't really matter matter what your model is, right? And in the end, it doesn't even really matter which which agent you're using or which harness you're using, right? It's your combination and how you have that set up, right? That is your management. And once you have one agent, or your series of these four agents.
+
+Jason Jorgenson (44:16.031)
+well defined inside either Agent's MD or Hermes profile, you're really just orchestrating all these things, right? And once you scale this up and orchestrate it out, you have a literal team. Right? And you know, orchestration, it's not a scary word, right? It's just working with multiple things.
+
+Right, and the easiest thing to do that with is you know some sort of board. And your agents, again, they don't really care what sort of board you're using, so you can use whatever you're most used to, right? Whether that's linear, Jira, Notion, Obsidian, GitHub. Hermes added in a its own native Kanban. I really like that one, just because it was built, you know.
+
+for agents by a team that was making the agent. So it gives you a little bit of that extra leverage because your agent already knows what it's doing.
+
+Jason Jorgenson (45:32.651)
+you know it's you know a standard software software development lifecycle, right? Your orchestration agent writes down a task, decomposes that task, you know, or that once you supply a goal to your agent, right, your orchestrator will break that goal down into tasks. The workers pull the tasks and they move them through the board. It's you know pretty much
+
+Just like running Kanban. yes, I'm using orchestration as in coordinating and dispatching across your subagents or your other agents. Correct. Yep. And yeah, I can share out my coding model here in a second.
+
+Yeah, like this is a picture of, you know, the Hermes Kanban dashboard. Things usually fall into triage. An agent will pick it up, put it into to do, to do, and you know, they'll go into in progress when they're in progress, and then there's a ready column over here when you know, or the ready column and then the done. There's also a blocked and yeah, it's it's just just a Kanban board, right? But your agents
+
+Are allowed to share that full memory or that full context of what went in there, or at least what's inside of each card. Right, because your architect agent, in addition to you know splitting out all the tasks and coordinating
+
+Which agents are assigned to what cards. It's also providing context in each of the cards for what that worker should be working on and anything that needs to do that. Each card and each movement of the card just adds to your audit trail.
+
+Jason Jorgenson (47:31.197)
+Right. inside of those cards, you can drill down, you can see, like I said, all the thoughts. I think you can include token spend in there with a flag. Like it's you know completely like transparent, and that transparency into your agents and what they're doing is what's important. and yes, you can watch and interact with the agents on that board, the Kanban board.
+
+You can block things, add comments, and you can add you can basically call the tasks directly. You can remove the things on the board. So if it's in ready, but you don't think that should be worked on yet, or you forgot to assign like a parent, you can just go in and just update things through the GUI.
+
+Yeah. If if you really think about it, right, having all these agents with their specific roles, like I said, it's pretty much like starting your own company. Having you know, a human team, right? And that's that's where this entire thing is leading us for an unlock, right? But remember, you have to have your guardwheels in place.
+
+Right. You you're setting the goal, you're in charge of the guardrails, right? And there should at least be one human on the team, right? But
+
+When you set up your Kanban team, you have your planner agent, you have an architect. You can use BMAD to or the GTAN stack, Garitan stack to split up and you know have as many specific agents as you need or as you want, right? If you're not working on anything that's UI heavy, you probably don't need a design and UI agent specifically.
+
+Jason Jorgenson (49:39.853)
+Jason Jorgenson (49:49.74)
+But the best thing though, like I said, is you can form an entire team. And that's what we did with Kelly Claude. She was exactly that. You know, she has her own software factory and iOS skills, right? We have you know a main router.
+
+which spawns project leads. We have one project lead per project. And these are actual software projects because we have a Kelly Improver lead that all self-improvement projects went into and were worked on.
+
+Both the Kelly and Project Leads on multiple different sub sub agents. They had testers, you know, they had coders, they had a QA lead which was writing the test, which is separate from the testers that were running the tests. there are three humans in the Kelly Cloud team. About.
+
+Someone had question on guardrails. So your guardrail files are basically your definitions on what your tool calls are and what I guess directories your agent has access to. I mean those are pretty much defined during setup of your agent.
+
+Each one is a little bit different. I haven't used Perplexity Computer, so I'm not sure what or how they set up guardrails since it's a cloud managed environment that you're essentially working in.
+
+Jason Jorgenson (51:49.984)
+But yeah. and yeah, I we can we I can share out some of the the the role files as well. but yeah, she has made almost fifteen K cumulatively over all of her like software that she's developed and put out.
+
+like I said, aside from the the one time when she shipped something to the app store without, you know, human intervention, which turned out to be okay, she's generally been a well beh well behaved agent. All right. but yeah, like I said, that that was an oversight on our part.
+
+just because like I said, she got a little bit of context rot and you know forgot that she was supposed to ask the humans before she shipped things. Right? and you know, there's four main w ways that this this falls apart, right? You know your smarter model is not gonna fix these things, right? If
+
+Like context drift, yeah, they they have there's a bunch of different memory skills, memory plugins, memory add-ons, because of this problem, right?
+
+Your context drift is when you know you're talking with your agent, you know, you've set a budget for your project, and you know, compaction happens. That that little circle in the bottom fills up, and you know, your agent takes five minutes to respond because it's compacting everything that you've been talking about for the past three days into a smaller context window. And it forgot about your budget because it didn't think that was important during the summarization. and that's what happened to our
+
+Jason Jorgenson (53:44.222)
+Hey, make sure you check in with the users or the humans before you send things off to ship. Also a permission problem because she had access to submit into the app store without us typing anything in by herself. But again, like the the context drift.
+
+is why you need supervision, right? Or some sort of memory management. But again, if you're keeping track of what your agent knows and what it remembers, what it forgets, you can do that with a bunch of evals, basically running your agent and harness through so you can get a at least a guide a guideline on or baseline on how many turns of compaction can I get before you start forgetting things that are super important.
+
+tool hallucination also can be an issue. n notably like
+
+I guess you most see this if you're in Claude or Chat GPT. Sometimes you ask it to modify or make a markdown file, and it confidently tells you, okay, I've updated the file. And you look on the little right side of your browser and there's no update made to the file. Nothing is showing up in your documents browser and you're like, hey, I thought you were gonna update that. And it's like, you're right. I didn't actually update the file. I'll do that now.
+
+Right? Like it's it's a problem. And yeah. It and it like that in the last one, your ambiguous requirements, that's the hey fix this bug, make no mistakes.
+
+Jason Jorgenson (55:38.205)
+Right? That bug could be anything. That bug could already have a solution that you looked at it and you already knew what you needed to do to fix it. So you assume that the agent also looking at that bug will know what to do to fix it. Right? But your smarter model, it might not know.
+
+So you need to have maintain a tight scope on your problems and your tasks, the goals that you're giving to your agent, have real monitoring in place, that way you can see what your agent is doing, or at least be able to audit and see what your agent did, and permission gates that are enforced so that way your agent doesn't or can't do the things that it shouldn't do. Right?
+
+Jason Jorgenson (56:34.919)
+And that's shipping behind guardrails, right? I've already kind of covered this. You know, the the failure post from the news. Like this is this is what you usually see inside of Cloud when you're like asking it to do things normally and you don't have it telling you to s or you didn't start with skip permissions. This is it asking, Hey, can I run a git pull? Hey, can I run a git fetch? You know, and you're like, yes, allow. Or
+
+know, add it to the allow list so that way it can always be allowed. Right? It's but it's always going back and checking these guardrails on occasions to make sure that one of the times that you were approving things, you know, you didn't accidentally approve. Yeah, you you can go ahead and run git delete and add that to the allow list. And why where has my repo gone? Right?
+
+Right. These are the categories of things that you should always require approval for. I mean, your risk tolerance may vary, but you know, the these are things that are usually non-reversible or have you know an actual significant impact on you or your customers. Right?
+
+Like Nemo Claw kind of already wraps OpenClaw into a sandbox to do a lot of this for you, right? Again, it's very specialized and runs on runs best on CUDA chord PCs, but you know, it all automatically sets up a sandbox. It's
+
+automatically has deny first like basically default deny for your networking you know it's sets up your agent to be sandboxed that it can't escape and it also I think it automatically has an audit trail for everything that happens inside of that sandbox. So you know NVIDIA has done some good work with with with NemoClaw.
+
+Jason Jorgenson (58:50.343)
+And you know, adding gates, it's it's gonna add friction, right? And you know, sometime once you've deployed or been running through things and everything seems to be working fine, you're like, okay, I can just go ahead and remove that guardrail. Don't do it. that gate is there for your pr for your protection, right? For that one day when the agent is confidently wrong, when it
+
+confidently chooses to do the wrong thing and has you know no regard that it did the wrong thing because it thinks it's right.
+
+Jason Jorgenson (59:36.297)
+I mean, and it's not a model of how smart the agent is or how how smart your model is. This isn't a, I was running, you know, Opus four three and I'll I'll just run it through Opus four eight and get a better result.
+
+Right. Like the difference between four three and four eight isn't going to stop the fact that you had, you know, the GitHub CLI wide open and it deleted your repository. Right. That's because the model and the agent had the permission to do so. Right? Like
+
+If if you're just worried about how smart the model is, that's probably great if you're only making like a customer support bot, you know, just a chat bot. Like yeah, how fast it responds and how smart it is, those are really great benchmarks. But if you're actually trying to make an autonomous software factory, you know, how smart it is isn't as important as what permissions can it, like does it have access?
+
+What tool calls does it have access to? What permissions to touch things on my file system have I granted it? Because you can route things through a smart planner and then like I said, have everything go to haiku for your actual coding and end up with high quality output.
+
+A modestly smart agent that has production credentials is way more dangerous in my mind than like a genius agent that's in a sandbox. Right? Because inside of the sandbox, that agent can do almost anything it wants to, and it'll be fine.
+
+Jason Jorgenson (01:01:37.173)
+So
+
+Jason Jorgenson (01:01:40.682)
+Governance over intelligence, right? We want to make sure that our models are doing what we expect them to do, right? And as long as they're doing what we expect them to do all the time, you know, they can be as smart or as dumb as that model is, right? Because if it doesn't have permission to delete things, you know, it's not going to suddenly gain that ability by having a smarter model.
+
+Jason Jorgenson (01:02:14.965)
+Your computer use, right? That's like a lot of the times, you know, sometimes you'll have to write like you'll see people writing their own custom MCP, or which is basically just you know a protocol specifically for APIs. Why? Because that application didn't have a publicly available API, right? But computer use eliminates that.
+
+Most people or most companies don't have a public API when they know that their API is going to change a lot. So if you design your own custom MCP that's hitting their API and they change it, well you'll have to update the MCP. With computer use again, you know, the UI might change, but
+
+If your user agent is looking for a login field and if they've moved it, it's still going to find the login field even if it's a different place. Right?
+
+third important thing, it's the platforms that are important, not the models, right? Hermes, OpenClaw, Cloud Co-work to an extent. You can change the model. The model's the engine, right? Your platform, your harness, that that's your car.
+
+It just in a small lecture earlier where I think Zach Smith said something very similar. But remember, you can't drive an engine, right? You drive the car. The models, they're pluggable. And that's great because tomorrow there could be a new fable, right? And orchestration enables your teams. Planning the work is still important.
+
+Jason Jorgenson (01:04:06.24)
+Governance and your platforms are what give you your orchestration though, right? Because it's your closed, controlled, very specific things that your agent can do, right? And your tool calls, which are defined by your platform, to allow your orchestration. You know, you can use a shared board.
+
+And then your agent now has its memory to know what it's working on, what's currently in flight, and what it can parallelize with what's already there.
+
+And once you have all four of these things, right, you've stopped building a tool and you've started building a tiny company.
+
+Jason Jorgenson (01:05:03.755)
+Yeah. Does anyone have any questions? Because I mean, you know, manage agents aren't interesting because they can click buttons. Like I said, Selenium could do that back in 2010, 2011, something like that. But that click is now attached to judgment, memory, why, a reasoning stack of why it clicked that button.
+
+And you have insight into all of that now.
+
+Jason Jorgenson (01:06:35.783)
+And feel free to reach out on LinkedIn if you have other questions. if you're interested in applying to Gauntlet, Sonny has dropped a link. and there should be a live Q<unk>A with our admissions department and Austin tomorrow at 1130 Central.
+
+Jason Jorgenson (01:07:01.773)
+twelve thirty PM Central, sorry.
+

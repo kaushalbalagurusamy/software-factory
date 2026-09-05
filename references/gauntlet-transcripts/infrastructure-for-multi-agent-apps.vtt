@@ -1,0 +1,1366 @@
+WEBVTT
+
+1
+00:00:07.430 --> 00:00:11.289
+Tom Babb: And Matt, just to clarify, we have 25 people in So, you can.
+
+2
+00:00:11.290 --> 00:00:11.860
+Matt Wood: Wonderful.
+
+3
+00:00:11.860 --> 00:00:13.430
+Tom Babb: Engaging with the audience.
+
+4
+00:00:14.880 --> 00:00:16.710
+Matt Wood: Awesome, can everyone hear me?
+
+5
+00:00:17.220 --> 00:00:22.479
+Matt Wood: Give me a thumbs up or a wave if you can. Let me know if you can see.
+
+6
+00:00:23.140 --> 00:00:24.700
+Matt Wood: I'm gonna share my screen.
+
+7
+00:00:37.300 --> 00:00:38.240
+Matt Wood: Great.
+
+8
+00:00:50.960 --> 00:00:53.289
+Matt Wood: Give me one moment as I set up this.
+
+9
+00:00:53.490 --> 00:00:57.319
+Matt Wood: Set up Zoom here, it looks like.
+
+10
+00:00:57.450 --> 00:00:59.110
+Matt Wood: There's a permissions issue.
+
+11
+00:01:36.330 --> 00:01:40.580
+Matt Wood: I'll be right back, guys. Joining and, joining and… One second.
+
+12
+00:01:47.950 --> 00:01:58.779
+Tom Babb: Hey guys, we still have some marketing, or we still have the marketing team behind the scenes here, so just give us a second, we're dealing with a little bit of, technical difficulties, and I think Matt will be right back on. Here we go.
+
+13
+00:01:59.750 --> 00:02:00.709
+Matt Wood: There we are.
+
+14
+00:02:06.110 --> 00:02:07.780
+Matt Wood: All of the permissions.
+
+15
+00:02:08.090 --> 00:02:08.900
+Matt Wood: Okay.
+
+16
+00:02:19.010 --> 00:02:24.129
+Matt Wood: Please let me know if you can't see my screen. I should have… you should see a,
+
+17
+00:02:24.910 --> 00:02:28.260
+Matt Wood: When I got here, you should see the chrome…
+
+18
+00:02:29.250 --> 00:02:32.230
+Matt Wood: UI here. We're gonna get started.
+
+19
+00:02:36.890 --> 00:02:37.800
+Tom Babb: We're good to go.
+
+20
+00:02:37.800 --> 00:02:38.350
+Matt Wood: it's…
+
+21
+00:02:38.710 --> 00:02:49.369
+Matt Wood: Awesome. Great, every… welcome, everyone. Please, please say hello if you can in the chats, as folks are streaming in and we're getting started with the…
+
+22
+00:02:49.400 --> 00:02:59.179
+Matt Wood: With the webinar, I'd love to know more about you, where you're coming from, what brought you here today, and, what got you excited about, managed agents.
+
+23
+00:02:59.480 --> 00:03:17.740
+Matt Wood: I'm particularly excited about, this particular topic. I think it's the… it's… it's all the rage. We saw Google announce Managed Agents API yesterday with their anti-gravity, CLI. We saw Cursor announce a product earlier this week.
+
+24
+00:03:18.020 --> 00:03:23.879
+Matt Wood: Where they're calling it automations, where you can essentially use the same cursor,
+
+25
+00:03:24.060 --> 00:03:27.909
+Matt Wood: patterns that you're familiar with on top of cursor's infrastructure.
+
+26
+00:03:28.130 --> 00:03:35.659
+Matt Wood: And, as is the case with many of these technologies, we're going to be focusing on Anthropic's offering.
+
+27
+00:03:35.860 --> 00:03:55.039
+Matt Wood: Anthropic's offering, as many as this has happened before, kind of preceded the, the rest of the other providers, and kind of set the tone for, the type of patterns that are useful for creating agentic work. So, really excited to go and walk through what they're offering.
+
+28
+00:03:55.130 --> 00:04:05.830
+Matt Wood: And explain, from my perspective, how it's… how it's a step change in how we're able to think about deploying agents and agent swarms at scale.
+
+29
+00:04:06.210 --> 00:04:19.480
+Matt Wood: A little bit about me. I'm a designer turned developer. I've been working on the web almost 20 years now. Originally a hired gun, working at digital agencies, across, Manhattan.
+
+30
+00:04:19.600 --> 00:04:28.299
+Matt Wood: And, in that… in that designer, in that designer role, I didn't really have the opportunity to…
+
+31
+00:04:28.300 --> 00:04:46.010
+Matt Wood: to get into automations, or I always thought a lot of the things that had to deal with business logic were… were too… were too difficult for myself to actually integrate and implement. Fast forward, you know, 10 years, when JavaScript came around, things became a lot easier, and I've been riding that wave ever since.
+
+32
+00:04:46.020 --> 00:04:53.960
+Matt Wood: Maybe 3 years ago, when we started to write our code with the large language models, and watching
+
+33
+00:04:54.670 --> 00:05:12.849
+Matt Wood: the progress of not only, kind of, the frontier technology of the large language models get to where they're at, but also watching the tooling around it, specifically the harnesses and the patterns that have emerged, has been really, really exciting. I think we're reaching a point right now
+
+34
+00:05:13.330 --> 00:05:23.580
+Matt Wood: Where it doesn't require this technical background for you to be successful in kind of leveraging everything that AI is offering at the moment.
+
+35
+00:05:23.580 --> 00:05:36.729
+Matt Wood: Many of us are in the business of creating software, or building things, or designing things, and creating… creating on the web, and creating things in the digital realm.
+
+36
+00:05:36.790 --> 00:05:50.950
+Matt Wood: And a lot of the folks who aren't familiar or aren't kind of in the AI space really only see AI as maybe chat GPT or maybe some of the interesting things that Claude has done with co-work.
+
+37
+00:05:51.010 --> 00:06:03.259
+Matt Wood: Today, we're going to kind of take a step, forward in where I believe that the industry is going and where our ecosystem is leading us.
+
+38
+00:06:03.370 --> 00:06:05.550
+Matt Wood: And the reason…
+
+39
+00:06:06.320 --> 00:06:20.090
+Matt Wood: we're focusing on cloud-managed agents. As I said earlier, I think Anthropic has been leading the pack. This particular announcement, when they announced it for the first time, was, what, a month and a half ago? And as I mentioned, just this week.
+
+40
+00:06:20.220 --> 00:06:29.510
+Matt Wood: we've seen both Cursor and Google announce competing products for this very thing. So, my suspicion is that over the next
+
+41
+00:06:29.780 --> 00:06:47.179
+Matt Wood: few weeks, over the next few months, and over the summer, we're going to, we're going to see a lot more of this, discussion, a lot more examples, a lot of excitement about folks who have been able to create these agentic, workforces. So.
+
+42
+00:06:47.420 --> 00:06:55.250
+Matt Wood: without further ado, if there's any questions, like I said, please continue to place them in the chat, and I'll go ahead and kick things off.
+
+43
+00:07:00.250 --> 00:07:06.260
+Matt Wood: I think the easiest way to explain what managed agents are…
+
+44
+00:07:06.550 --> 00:07:17.289
+Matt Wood: and I'm not sure, are we able to get reactions, or can we get thumbs up? What I'd like to know is how many are on the call are familiar with Cloud Code, or how many have used
+
+45
+00:07:17.450 --> 00:07:24.489
+Matt Wood: Anthropics products outside of Cloud.ai. How many have used them for,
+
+46
+00:07:25.330 --> 00:07:31.619
+Matt Wood: for building software, or building anything like that. Okay, great, I can see the thumbs, that's fantastic.
+
+47
+00:07:32.900 --> 00:07:51.289
+Matt Wood: The main difference here is that if you wanted to try to do anything that required Claude, and it wasn't going to be on your machine, you were going to be responsible, up until now, until managed agents or the products like it, you were going to be responsible for
+
+48
+00:07:51.290 --> 00:07:59.769
+Matt Wood: setting up the servers, writing and wiring up the code, either using Langchain, or Mastra, or AI SDK,
+
+49
+00:08:00.490 --> 00:08:07.950
+Matt Wood: Or any of the other dozens of, kind of, agentic frameworks. And they all started out Simply as…
+
+50
+00:08:08.250 --> 00:08:21.010
+Matt Wood: Like, network request libraries, or ways to kind of tie together functions through, through, through business logic that would then allow you to kind of have these, these different sequential agentic calls.
+
+51
+00:08:21.110 --> 00:08:34.619
+Matt Wood: Now, because of the patterns that Anthropic has kind of started, everything from skills to tool calling, and memory in Markdown, we're now able to build
+
+52
+00:08:34.880 --> 00:08:42.319
+Matt Wood: primitives, and that's the easy… that's… that… I'm going to come back to that word quite a few times, in this, in this… in this lecture.
+
+53
+00:08:42.400 --> 00:08:52.400
+Matt Wood: the primitives that we have are going to be able to get us from this idea where I'm going to talk back and forth with this agent, I'm going to have this conversation and kind of arrive at something.
+
+54
+00:08:52.440 --> 00:09:03.010
+Matt Wood: Or maybe I'll have 2 or 3 conversations going at once, to an experience where I'm setting up the rules, I'm kind of giving the lay of the land.
+
+55
+00:09:03.460 --> 00:09:19.779
+Matt Wood: And I'm, letting the agent run off and go do a thing until it's done. So in this particular slide, the messages API, this Messages API on the left-hand side is what we're mostly all familiar with. That's,
+
+56
+00:09:19.960 --> 00:09:33.490
+Matt Wood: And I'm seeing a lot of thumbs up, so I'm glad a lot of y'all have already started using Cloud Code. The Messages API is what Cloud Code is traditionally based on. In fact, all of these kind of original hardnesses use the same
+
+57
+00:09:33.610 --> 00:09:37.990
+Matt Wood: open AI-style, APIs to go…
+
+58
+00:09:37.990 --> 00:10:01.599
+Matt Wood: to, you know, to send contacts, to send both system messages and individual user messages, to do tool calling, all of that kind of stuff. The biggest difference here with managed agents is that we're doing all of that work, but we're doing it in an isolated infrastructure. And in this case, we're essentially paying Anthropic for the compute, for all of the hosting, and more importantly, the scaling.
+
+59
+00:10:01.850 --> 00:10:11.520
+Matt Wood: And then we're getting, as a benefit, all of the, kind of, off-the-shelf patterns that are familiar in the cloud code ecosystem.
+
+60
+00:10:11.690 --> 00:10:13.270
+Matt Wood: So…
+
+61
+00:10:13.560 --> 00:10:26.669
+Matt Wood: The piece is the primitives. I could have called this slide 8 primitives on the table. The first one is the agent itself. It's just a Markdown file, although it can be a lot more, and we'll get into what that looks like.
+
+62
+00:10:26.740 --> 00:10:42.959
+Matt Wood: the agent is kind of like the main actor, and you're going to decide who those actors are. The environment is not environment variables, it's really kind of a definition of a Linux machine or VM that you might be using.
+
+63
+00:10:42.960 --> 00:10:54.100
+Matt Wood: You… The benefit of this, and the reason you define this, or have to create it as a primitive, is that in more mature workflows, you're going to want to kind of pre-install packages, perhaps
+
+64
+00:10:54.110 --> 00:11:10.769
+Matt Wood: you're gonna pre-install FFmpeg if you want to do some video manipulation, or maybe you're gonna install some other bespoke binary that you need, or maybe you're just gonna have it just be bare metal and load up as quick as possible. So that's what the environments are. Those are also reusable.
+
+65
+00:11:10.930 --> 00:11:14.360
+Matt Wood: When you combine, agents and environments.
+
+66
+00:11:14.410 --> 00:11:20.030
+Matt Wood: They are, accessible by a session, and the session is the ephemeral thing
+
+67
+00:11:20.030 --> 00:11:41.089
+Matt Wood: that, I shouldn't say ephemeral, no, I'm sorry. It's the… it's the persistent thing, actually, that stays on that, on the Anthropics infrastructure. When you make that first, when you send the first message in this paradigm, you're sending it to the session as a user message, and that user message then, sorry, that session then takes the agent, the environment.
+
+68
+00:11:41.090 --> 00:11:47.620
+Matt Wood: and a few other variables, and then kicks off that work. And that work might include many other additional agents.
+
+69
+00:11:47.620 --> 00:12:03.670
+Matt Wood: agents. Skills we're all familiar with, those exist in managed agents paradigm as well. Vaults are essentially where you are able to paste in your environment variables, but more importantly, you're able to
+
+70
+00:12:04.130 --> 00:12:21.310
+Matt Wood: connect to, using OAuth to additional providers. So, things like Figma MCP, or maybe GitHub, or one of those. You're going to keep all of those sensitive things inside of vaults, and so the environment will have access to those vaults.
+
+71
+00:12:21.560 --> 00:12:25.779
+Matt Wood: These last three are…
+
+72
+00:12:25.810 --> 00:12:39.520
+Matt Wood: products that they've rolled out after the initial announcement. Outcomes is a way for you to give guardrails or acceptance criteria to this kind of agent or this agent pool that you might create. And the reason that is, is that
+
+73
+00:12:39.520 --> 00:12:55.230
+Matt Wood: your age… in this new paradigm, rather than Claude Code, or what you might be doing traditionally, where you prompt it, and it goes and does the thing, once I set up this session, I've actually just got a working endpoint. I have a working
+
+74
+00:12:55.320 --> 00:12:57.450
+Matt Wood: URL, I can hit
+
+75
+00:12:57.530 --> 00:13:16.710
+Matt Wood: And that payload that I hit it with may not contain a user message. So, outcomes is how you define what that agent or what that session should be doing. It's also just markdown, and it's essentially just a kind of a finishing step at the end of the session.
+
+76
+00:13:17.560 --> 00:13:21.210
+Matt Wood: Sandboxes are essentially the…
+
+77
+00:13:21.240 --> 00:13:30.489
+Matt Wood: The product they released last week, but a way for you to run on kind of your own self-hosted or internal infrastructure
+
+78
+00:13:30.490 --> 00:13:44.000
+Matt Wood: some sort of a virtual machine. And the reason this is important is because you can imagine you have sensitive information that your clients will not allow you to just send off willy-nilly to Anthropic. So, now you have the ability for
+
+79
+00:13:44.110 --> 00:14:00.909
+Matt Wood: Anthropic's infrastructure to talk to your sandbox, and companies like Cloudflare and Vercel have become some of those initial partners for this type of thing. You can also obviously do this on your own custom self-hosted solution. And lastly, the MCP connector.
+
+80
+00:14:00.910 --> 00:14:04.819
+Matt Wood: Is a way for you to, on your end.
+
+81
+00:14:04.820 --> 00:14:16.180
+Matt Wood: both connect with third part… any number of the third-party MCPs that are available, but also have your own MCP, if you wanted, on your company's infrastructure, where, where it…
+
+82
+00:14:16.520 --> 00:14:32.199
+Matt Wood: responds, it broadcasts those available tools to the agents that are living on the infrastructure of Anthropic. So, with those in hand, we're going to zoom through these few primitives.
+
+83
+00:14:32.600 --> 00:14:44.330
+Matt Wood: the, we're… and I'm going to be doing this… there's all sorts of ways I could have presented. Obviously, the API allows for Python, TypeScript, Go, whatever you'd like, but I like to just, give…
+
+84
+00:14:44.330 --> 00:14:57.029
+Matt Wood: high level on the right-hand side of what the curl command looks like, so that you can see how easy this is. For those of you unfamiliar, this is a kind of an… this is a command that hits an endpoint.
+
+85
+00:14:57.130 --> 00:15:17.119
+Matt Wood: that creates agents, a post-call to an agent's endpoint. I've got the authentication up top, I'm naming the agent's social asset generator, I'm saying what kind of model I want. This system prompt is just the instructions that you might be familiar with, and I'm allowing that agent to have a set of tools.
+
+86
+00:15:19.120 --> 00:15:33.740
+Matt Wood: The environment I mentioned, the same thing, it's just a kind of a description of a Linux box. In this case, the environment definition is telling us how it is locked down or not locked down from external traffic.
+
+87
+00:15:33.740 --> 00:15:43.379
+Matt Wood: So you can imagine that would be important for securing, who can actually call your session, or who can actually get access to the stuff that's happening in that environment.
+
+88
+00:15:43.490 --> 00:16:02.120
+Matt Wood: The session, like I mentioned, is where the agent and environment get mashed together, and this is where the actual… this is where we breathe life into the entire experience. We first create a session, and when I get this command back, I get an ID, and then once I have that ID,
+
+89
+00:16:02.120 --> 00:16:07.780
+Matt Wood: I'm able to use it to communicate back and forth. When a session is done, by the way, it's not…
+
+90
+00:16:07.830 --> 00:16:15.810
+Matt Wood: it doesn't turn off. It just turns idle. And that's really, I think, an important piece that we'll see here in a little bit, because
+
+91
+00:16:15.890 --> 00:16:23.410
+Matt Wood: You can imagine you're at your computer with clawed code, you have a… you have this long conversation, then you go out for lunch, you come back.
+
+92
+00:16:23.860 --> 00:16:37.499
+Matt Wood: you start typing and continuing the conversation. That's exactly what's happening here, where that session… there's nothing happening, there was no processing happening that you were paying for during that… that lunch hour, but you're able to continue where you left off.
+
+93
+00:16:37.790 --> 00:16:54.999
+Matt Wood: If you're not familiar with skills, we'll most likely have either another night school about it, or you come join us at Gauntlet, so you'll be able to learn more about them, but skills are this incredible primitive that allows you to package up, prompts.
+
+94
+00:16:55.000 --> 00:17:00.780
+Matt Wood: Scripts, resources, in a portable way for, for you and your team.
+
+95
+00:17:00.820 --> 00:17:06.569
+Matt Wood: They're really a superpower, and the beauty of them is a skill can be just a simple text file.
+
+96
+00:17:07.040 --> 00:17:20.140
+Matt Wood: The vaults I mentioned, I think it's pretty obvious. This is where you keep your credentials that, you don't want, mixing in, and this is… this is Anthropic's, kind of, version to,
+
+97
+00:17:20.660 --> 00:17:24.029
+Matt Wood: Of solving, the idea of environment variables.
+
+98
+00:17:24.480 --> 00:17:36.070
+Matt Wood: Outcomes, as I mentioned, is a new primitive, and it's essentially, this is what I want whenever some random, ambiguous request comes into that session.
+
+99
+00:17:36.070 --> 00:17:44.540
+Matt Wood: if something hasn't been defined in that user message, then I want this particular thing to happen. And they use this concept of rubric.
+
+100
+00:17:44.580 --> 00:17:50.530
+Matt Wood: So, you're gonna see in the tool that I've created to help me with managed agents.
+
+101
+00:17:51.140 --> 00:18:05.890
+Matt Wood: I have a rubric MD, next to every flow, and I call flows basically this whole… a combination of everything I'm talking about here. That's just help… that's a helpful mental model for me.
+
+102
+00:18:06.170 --> 00:18:18.570
+Matt Wood: And, yeah, so the rubric will essentially grade the end of that flow. Sandboxes, I mentioned, this allows you to run your own infrastructure.
+
+103
+00:18:18.750 --> 00:18:20.950
+Matt Wood: For, for…
+
+104
+00:18:21.010 --> 00:18:39.040
+Matt Wood: things like browser use, or perhaps you have sensitive internal databases, you can have Claude's brain on the… in the remote server do everything that Claude's good at, and run those sessions, and then communicate to your self-hosted
+
+105
+00:18:39.040 --> 00:18:46.259
+Matt Wood: sandbox, really powerful stuff. The MCP connectors, same way. You're able to basically
+
+106
+00:18:46.290 --> 00:19:00.520
+Matt Wood: connect with a large library of… and a growing library of external tools, but more importantly, you could create an MCP server internally, and open that up, or give Claude
+
+107
+00:19:00.770 --> 00:19:04.509
+Matt Wood: in the cloud, access to your MCP server.
+
+108
+00:19:04.850 --> 00:19:09.909
+Matt Wood: And this is kind of the… in my mind, this is kind of like the… the…
+
+109
+00:19:10.350 --> 00:19:25.869
+Matt Wood: the cherry on top, or I should say kind of like the linchpin of it all. Every time we do… we create these flows, the magic of this is that I'm not at my machine, I'm not sitting down, I don't have to have some Mac Mini.
+
+110
+00:19:25.870 --> 00:19:30.859
+Matt Wood: in my office, tucked in the closet. I don't need to keep my machine open with caffeinate.
+
+111
+00:19:30.900 --> 00:19:42.940
+Matt Wood: all I need is have these flows set up, ready to go on Claude's infrastructure, and I've automatically got a webhook, everything's set up ready for me to go. In this scenario.
+
+112
+00:19:42.940 --> 00:19:51.439
+Matt Wood: We can also define what happens when the agents are complete. So we can look at individual events, we can define what happens.
+
+113
+00:19:51.440 --> 00:20:10.859
+Matt Wood: what events are called back to my own infrastructure, and perhaps I have an N8N instance, or maybe I have some sort of a Zapier, or if this and that, or what have you, that does additional work outside of the really intelligent work. So, this is helpful when you're building out a larger, more complex,
+
+114
+00:20:11.360 --> 00:20:13.110
+Matt Wood: system.
+
+115
+00:20:14.500 --> 00:20:19.270
+Matt Wood: The… I think the most exciting thing, if you… if you weren't,
+
+116
+00:20:19.510 --> 00:20:36.579
+Matt Wood: able to see our previous sessions about sub-agents and agent teams, is that with these primitives in place, you can now begin building workforces. You can now begin building small little armies, and whether or not I'm, you know, doing research, or whether or not I just want
+
+117
+00:20:36.660 --> 00:20:50.439
+Matt Wood: you know, Claude to do some very simple parsing of a document and send it somewhere else, or whether or not I want something much more complex, like, generating, you know, generating an analysis
+
+118
+00:20:50.580 --> 00:21:04.059
+Matt Wood: from multiple different angles, or perhaps creating assets first for an ad or social media, or running leads across 12 different industries simultaneously. You're able to do that with the…
+
+119
+00:21:04.190 --> 00:21:13.290
+Matt Wood: With these agents. You're basically able to create the diagram that you'd prefer of who's in charge of what, and then,
+
+120
+00:21:13.520 --> 00:21:25.480
+Matt Wood: And then separate or isolate that work in parallel so that it is not burdening to one individual session, and you're not kind of overflowing the context of one particular agent.
+
+121
+00:21:25.600 --> 00:21:34.220
+Matt Wood: At the time, you're only able to have a single main agent, and then any number of sub-agents underneath it.
+
+122
+00:21:34.250 --> 00:21:49.280
+Matt Wood: Those sub-agents themselves can run additional sub-agents in the Claude term, but for our… for our discussion today, just think of the main agent, and then any number of agents on that second row.
+
+123
+00:21:50.110 --> 00:21:57.120
+Matt Wood: We're… I'll show you what the coordinator and all of these specialists, look like in a few moments.
+
+124
+00:21:57.940 --> 00:22:11.300
+Matt Wood: So you can try to think… we're talking about a few different use cases. If somebody had a, let's say somebody in the office had a kind of a weekly, post or weekly content that they had to create.
+
+125
+00:22:11.300 --> 00:22:29.099
+Matt Wood: Yes, they could set this up on their own infrastructure, on the machine. Yes, they could set up an OpenClaw or Hermes and try to get that under the hood. If you're not familiar with Gemini, GEMS, same type of thing, or a GPT where you can schedule things, those are kind of, like, the easier-to-use consumer versions of this.
+
+126
+00:22:29.300 --> 00:22:47.430
+Matt Wood: But if you wanted to graduate to the next level, this is where you would set up some sort of an automation, some sort of an endpoint that allows you to run it. So in this case, he's, you know, getting a bunch of posts created for him on a weekly basis.
+
+127
+00:22:49.620 --> 00:22:55.269
+Matt Wood: Alright, more use cases that we can look at. I talked about research, I talked about marketing.
+
+128
+00:22:55.390 --> 00:23:14.039
+Matt Wood: customer support, I think, is another good example. Obviously, software development. Our discussion isn't really about software development, but it's helpful to know you can easily do this with, with GitHub issues, or Jira tickets, or linear issues, or anything like that. You're able to kind of move really quickly.
+
+129
+00:23:14.100 --> 00:23:25.159
+Matt Wood: One example is the deep research. You know, you could have 3 different agents that are able to do, different types of work.
+
+130
+00:23:25.930 --> 00:23:28.040
+Matt Wood: You could,
+
+131
+00:23:28.360 --> 00:23:40.470
+Matt Wood: you could create… I talked about social media generation, you could easily create something that… that presents some sort of a… an analysis, at the end of a sprint, maybe a week or two, where you're able to get a
+
+132
+00:23:40.800 --> 00:23:51.379
+Matt Wood: PDF-generated, or some sort of a report, not only from one particular source, but imagine you were able to connect every message from Slack
+
+133
+00:23:51.380 --> 00:24:03.399
+Matt Wood: every file that's been uploaded to the company's drive, you know, all the transcripts that have occurred over the week that have been saved to the company drive as well, you'd be able to create something
+
+134
+00:24:03.400 --> 00:24:09.679
+Matt Wood: That would have that ready for you on Monday morning, and hopefully make you look like a rock star at the office.
+
+135
+00:24:11.660 --> 00:24:28.269
+Matt Wood: Support agents, I think, are a really good example where somebody can call in, something can happen, it hits that same webhook we talked about earlier, and any number of actions can be taken place. Things that would have normally been some sort of an N8N or some sort of a…
+
+136
+00:24:28.270 --> 00:24:43.739
+Matt Wood: you know, note-for-note workflow that you might have created. Well, now you can just replace all of that with a simple markdown, explaining what you want to have done, and put that in a managed agent flow, and you're good to go. You don't need to worry about
+
+137
+00:24:43.950 --> 00:24:45.320
+Matt Wood: If this, then that.
+
+138
+00:24:48.430 --> 00:24:55.639
+Matt Wood: The one I like the most, and we're gonna actually work and show a few demos of this, is a social media asset generator.
+
+139
+00:24:56.470 --> 00:25:14.080
+Matt Wood: Not really, I think, one of the original kind of use cases for managed agents, because, again, there's much more kind of cost-efficient ways, but for the convenience of being able to just describe in a simple text form… let's see if I can zoom out a little bit…
+
+140
+00:25:16.740 --> 00:25:28.729
+Matt Wood: the ability to just describe quickly what I want, and be able to have the agent take care of everything for me is… is… is huge. You can imagine that,
+
+141
+00:25:28.850 --> 00:25:37.839
+Matt Wood: Non-technical folks could be able to describe exactly what they want in an agent, and have it work, so long as they've got the right, you know, third-party
+
+142
+00:25:37.990 --> 00:25:40.110
+Matt Wood: extensions.
+
+143
+00:25:40.900 --> 00:25:45.150
+Matt Wood: So, like I said earlier, this… I believe this, this…
+
+144
+00:25:45.160 --> 00:26:03.489
+Matt Wood: moment of time that we're in right now, and we'll be different by the end of the summer, but for right now, we're in this moment where we have graduated from our coding harnesses, we've kind of moved away from the requirements of OpenClaw, where you have to have your own infrastructure. We're now seeing a pattern between Anthropic.
+
+145
+00:26:03.490 --> 00:26:12.400
+Matt Wood: cursor, and now Google, where everyone is now giving you the tools and the capabilities to have your own, workforce.
+
+146
+00:26:12.450 --> 00:26:29.249
+Matt Wood: If you do use Claude Desktop or Claude Code, and you want to get started with this right away, and you don't want to listen to me, go ahead and just open up the terminal, open up Claude Code, start a session, and just type Cloud API.
+
+147
+00:26:29.610 --> 00:26:33.549
+Matt Wood: It will be up-to-date. It's one of the beauties of,
+
+148
+00:26:33.730 --> 00:26:44.479
+Matt Wood: the skill, kind of paradigm that Anthropic has championed. This… this will basically do everything that we're going to be doing in the next few minutes.
+
+149
+00:26:44.480 --> 00:26:55.129
+Matt Wood: it knows the ins and outs, and more importantly, it has all these latest features, all the bells and whistles that I couldn't even get in time that were announced a couple days ago. Those types of things are all going to be available
+
+150
+00:26:55.150 --> 00:27:00.119
+Matt Wood: And you can essentially prompt your way into a working…
+
+151
+00:27:00.390 --> 00:27:10.449
+Matt Wood: a working managed agent flow, if you'd like. So, definitely check that out. Use that in your prompts as well. You don't need to start it like this, by the way.
+
+152
+00:27:10.620 --> 00:27:22.860
+Matt Wood: You can ask questions with it, which is what I often do. I say, hey, I'm trying to figure out the best way to deal with vaults. Double check with the… and then I'll type slash cloud API.
+
+153
+00:27:24.200 --> 00:27:26.200
+Matt Wood: Okay, great.
+
+154
+00:27:26.560 --> 00:27:31.949
+Matt Wood: Awesome. Alright, so I'm leaving this here. There's a link on the bottom, and I'll put it here in the chat.
+
+155
+00:27:32.880 --> 00:27:34.400
+Matt Wood: Let's get out of my way.
+
+156
+00:27:37.060 --> 00:27:38.779
+Matt Wood: If you'd like to follow along.
+
+157
+00:27:40.080 --> 00:27:57.010
+Matt Wood: But what I built was a… let me show you the GitHub page, actually, just we'll go there first, is a very simple tool. It evolved originally from kind of a CLI. All I did was take the APIs from
+
+158
+00:27:57.130 --> 00:28:06.580
+Matt Wood: from Claude, from the documentation, and I wrapped them into a skill, and the only reason I did that is because I wanted to be able to
+
+159
+00:28:06.960 --> 00:28:16.279
+Matt Wood: conveniently describe a brand new flow. My thought process was, I want to say something in a prompt like.
+
+160
+00:28:16.740 --> 00:28:24.680
+Matt Wood: hey, braid, like I'm using here, create a, you know, a minute-long,
+
+161
+00:28:25.270 --> 00:28:39.680
+Matt Wood: real estate video ad for this particular listing, or create a generic agent pool that I can use to create a series of 5 to 7 social media posts.
+
+162
+00:28:39.830 --> 00:28:44.219
+Matt Wood: you figure it out. And then this tool would use clawed code
+
+163
+00:28:44.370 --> 00:28:47.859
+Matt Wood: to generate these primitives that I've just shown you.
+
+164
+00:28:47.880 --> 00:29:07.230
+Matt Wood: So, this is definitely not part of the Manage Agents infrastructure. I'm just… I want to demonstrate that we have the ability to build on top of these primitives, and to kind of create our own little workflows. So, for me, this helped me create a number of…
+
+165
+00:29:07.330 --> 00:29:19.520
+Matt Wood: different flows inside of, cloud-managed agents without having to create each one of those, or having to hit the endpoint each time. So, just to kind of go over what that looks like.
+
+166
+00:29:21.700 --> 00:29:38.509
+Matt Wood: The… this is the UI. You can see it's really… there's nothing really special about it. It's simply showing you that… that one coordinator agent on top, and then if there are agents… sub-agents beneath it,
+
+167
+00:29:38.700 --> 00:29:46.340
+Matt Wood: they will be displayed here. These, on the left, are the different kind of templates or flows that I've created before.
+
+168
+00:29:46.470 --> 00:29:50.190
+Matt Wood: And I'll show you what those look like, and more importantly, what they look like when they're running.
+
+169
+00:29:52.240 --> 00:30:01.209
+Matt Wood: before I… before I get there, let me just chat about Braid in general, and… and also show you what this type of work looks like inside of the cloud platform.
+
+170
+00:30:06.430 --> 00:30:20.489
+Matt Wood: So Braid will create that flow for you. It will say, hey, using natural language, hey, I want to kind of create this, agent swarm of a 3-shot fundraiser site for a dog rescue, or…
+
+171
+00:30:21.240 --> 00:30:27.860
+Matt Wood: use one of the templates that I've already got inside of the, inside of the repo for you to create a fundraiser site.
+
+172
+00:30:27.880 --> 00:30:45.389
+Matt Wood: I presented this exact same project at kind of a large fundraising site last week, and I had that example ready, which is why it's here. The next one is the setup. The setup will actually go and make those post requests to agents, environments.
+
+173
+00:30:45.730 --> 00:30:48.639
+Matt Wood: what am I saying? Memory stores and others.
+
+174
+00:30:48.670 --> 00:30:57.120
+Matt Wood: And, this is required before I actually run the flow. Then I go ahead and run the flow, and it doesn't necessarily even need the description.
+
+175
+00:30:57.150 --> 00:31:16.999
+Matt Wood: Because, like we talked about, outcomes are defined, but oftentimes in the templates, you'll see that the agent itself takes an input. It has a default input, but it takes an input, let's say, like a URL, to a product that I want the agent swarm to create ads for. That's where I would add it here.
+
+176
+00:31:17.300 --> 00:31:21.050
+Matt Wood: And then I've got other, kind of,
+
+177
+00:31:21.260 --> 00:31:25.200
+Matt Wood: What do you call it? Management type of, commands as well.
+
+178
+00:31:25.640 --> 00:31:38.590
+Matt Wood: I mentioned the templates, check those out. With, with these templates, I've created some for video generation, I've created some for website generation, and then, I've also…
+
+179
+00:31:38.890 --> 00:31:58.729
+Matt Wood: introduced this concept that was into the library that allows you to receive messages back when the whole thing is done, in case you want to run some sensitive commands on your machine that you don't want Cloud to run inside of its environment. The reason I was doing this is because I wanted to actually
+
+180
+00:31:58.840 --> 00:32:10.419
+Matt Wood: run linting and some other tools, before I deployed to Vercel. And I wanted to experiment what it would look like and what it would require to have, let's say, very sensitive keys
+
+181
+00:32:10.760 --> 00:32:17.470
+Matt Wood: Kept on my machine while still having them kind of triggered and utilized by, by the remote.
+
+182
+00:32:18.930 --> 00:32:29.090
+Matt Wood: managed agents infrastructure. So this whole idea of host-side hooks, and in this case, a post-session hook that uses a deployed script to Vercel.
+
+183
+00:32:29.790 --> 00:32:31.290
+Matt Wood: Great.
+
+184
+00:32:32.910 --> 00:32:34.190
+Matt Wood: With that.
+
+185
+00:32:34.700 --> 00:32:45.940
+Matt Wood: let me show you really quickly, we're doing good on time, so I'm gonna go through this. This is the UI for managed agents. The first thing you'll see is, if you want, you can just…
+
+186
+00:32:46.220 --> 00:32:57.160
+Matt Wood: kind of, almost like you… almost like you do in Google Gemini Gems, or ChatGPT… GPTs, you've kind of got this… this, chat interface.
+
+187
+00:32:57.310 --> 00:33:02.320
+Matt Wood: I had to get this thing out of the screen, sorry, y'all assume that.
+
+188
+00:33:02.560 --> 00:33:15.780
+Matt Wood: But you can basically describe your agent, and it will create it for you. We can start here. They've also got a number of different templates. I want to zoom in a little bit and just show you what these templates look like. So, if I click on Deep Research, right?
+
+189
+00:33:16.110 --> 00:33:23.880
+Matt Wood: This is all that's needed. In this case, it's YAML. YAML is just a,
+
+190
+00:33:24.110 --> 00:33:38.929
+Matt Wood: another version of JSON, but if you see here, we're just… it's literally just text. We're giving it a system prompt, we're telling it, to, you know, in this case, decompose a problem. We're telling… we're describing the tools.
+
+191
+00:33:38.930 --> 00:33:45.599
+Matt Wood: And, you have this kind of key-value pair of any sort of metadata that you want to keep in there.
+
+192
+00:33:45.720 --> 00:33:47.650
+Matt Wood: Let's look at another one.
+
+193
+00:33:48.360 --> 00:34:00.470
+Matt Wood: A support agent. Okay, in this case, we've got the instructions for the support agent, we've given a clear description, we're saying that we only wanted to use Sonnet, but more importantly, we're connecting it to both Notion and Slack.
+
+194
+00:34:00.610 --> 00:34:10.660
+Matt Wood: So, these are… these are the kind of concepts that exist inside of the agent definition. We can get way, way more complex in the MCP. In this case.
+
+195
+00:34:10.679 --> 00:34:26.660
+Matt Wood: It's, dealing with sentry alerts, and we're able to create, linear tickets from it. I imagine you'd be able to even, set this up so that it creates the PR and, and pushes
+
+196
+00:34:26.989 --> 00:34:43.880
+Matt Wood: the PR to GitHub and notifies you on Slack. So you can imagine all of this infrastructure before, all of this kind of configuration would have kind of been a pain in the neck to code by hand, or even develop… or even ask Claude to do it and do by hand, and it's all
+
+197
+00:34:43.909 --> 00:34:55.279
+Matt Wood: living within this single, YAML file, and that's really all you need to kind of get the value out of this, and to kickstart your own, your own flows.
+
+198
+00:34:57.180 --> 00:35:04.170
+Matt Wood: And just to demonstrate that, here are some of the agents that I've got, but if I were to… if I were to come in here and I wanted that same,
+
+199
+00:35:05.410 --> 00:35:19.970
+Matt Wood: thing, and I say, hey, you know, creates a… A list of the top 10 AI.
+
+200
+00:35:22.240 --> 00:35:23.779
+Matt Wood: Headlines this morning.
+
+201
+00:35:25.270 --> 00:35:31.190
+Matt Wood: From, at least… Three different news sources.
+
+202
+00:35:31.590 --> 00:35:34.900
+Matt Wood: And I can hit generate. This will use…
+
+203
+00:35:35.070 --> 00:35:37.489
+Matt Wood: Claude to create that yellow for me.
+
+204
+00:35:37.910 --> 00:35:44.440
+Matt Wood: And that's all I need, just to start playing around. You can imagine how easy this would be for non-technical folks.
+
+205
+00:35:44.630 --> 00:35:54.170
+Matt Wood: If I were to say anything about MCP or Slack or GitHub or Google Drive, it would add it here to the bottom of the YAML. So I'm going to go ahead and create that agent.
+
+206
+00:35:54.360 --> 00:36:00.039
+Matt Wood: It's already there, it's already in my agent's list. I can see it's active.
+
+207
+00:36:00.680 --> 00:36:08.119
+Matt Wood: Let's create a brand new environment, just for fun, even though I've got a bunch I could reuse if I wanted to.
+
+208
+00:36:08.550 --> 00:36:11.390
+Matt Wood: AI news environment.
+
+209
+00:36:15.950 --> 00:36:25.330
+Matt Wood: Nothing, I don't need to describe it. It's in the cloud, self-hosted. We… this option didn't exist, last week, so obviously we want to do it in the cloud.
+
+210
+00:36:29.010 --> 00:36:32.140
+Matt Wood: And then I've got my Linux environment all set up, ready to go.
+
+211
+00:36:32.270 --> 00:36:47.139
+Matt Wood: I could go further and create memory stores so that text could be saved, markdown could be saved, and I can also go in and add the credentialed vaults. I won't do that right now, because I just want to kick off a session and show you what that looks like.
+
+212
+00:36:47.480 --> 00:36:55.349
+Matt Wood: But if I were to click New Session, Let's say, generate AI news.
+
+213
+00:36:55.810 --> 00:37:04.209
+Matt Wood: what agent am I going to use? I'm going to use the one I just selected? What environment am I going to use? I'm going to use the same one I just created.
+
+214
+00:37:04.390 --> 00:37:08.700
+Matt Wood: And that's it. I'm gonna go ahead and create the session, and the UI
+
+215
+00:37:09.020 --> 00:37:15.859
+Matt Wood: isn't that sexy? It's just a… it's just a list. It's… it almost feels more like an enterprise. It's not gonna give you the same…
+
+216
+00:37:15.990 --> 00:37:28.579
+Matt Wood: you know, simplistic view that you might see in Chap GPT or Gemini, but, Create the…
+
+217
+00:37:28.790 --> 00:37:35.510
+Matt Wood: List of headlines, Focusing on data center build-outs.
+
+218
+00:37:36.010 --> 00:37:40.730
+Matt Wood: And once I do this, I'll crank up the… Size a little bit.
+
+219
+00:37:43.120 --> 00:37:48.089
+Matt Wood: We should see… What looks like kind of like a debug panel.
+
+220
+00:37:48.290 --> 00:37:52.279
+Matt Wood: And it's… it's literally the back and forth between
+
+221
+00:37:52.800 --> 00:38:08.149
+Matt Wood: the, the different, the different, tool calls. In this case, the… I sent this user message, the agent is now actually making those queries, we can actually see its reasoning. So, as I mentioned, it's not a,
+
+222
+00:38:09.330 --> 00:38:17.529
+Matt Wood: it's not the same kind of interface we're used to, but we're able to use this to kind of inspect. This is not where you're supposed to be
+
+223
+00:38:17.670 --> 00:38:32.669
+Matt Wood: observing and kind of messing around with managed agents. It's really kind of a… I guess it's really kind of an environment to debug what's happening. Obviously, they've even got this debug view that gets more into the details.
+
+224
+00:38:32.670 --> 00:38:46.279
+Matt Wood: But it allows you to see at a glance everything that's happening within a certain session, see the status of the session. If anything goes haywire, and it most likely will on your first few tries, you can copy this here, and it will…
+
+225
+00:38:46.500 --> 00:38:57.049
+Matt Wood: Let's get this out of the way again. Copy this here, and you'll get the entire transcript, and, for you to be able to, paste inside of Cloud Code and tell you what to fix.
+
+226
+00:38:57.600 --> 00:39:03.200
+Matt Wood: And… let's see, we've got… Looks like it's still…
+
+227
+00:39:03.500 --> 00:39:11.450
+Matt Wood: It's still working? Okay, boom. Here are your… headlines for the day. So…
+
+228
+00:39:11.650 --> 00:39:16.690
+Matt Wood: again, nothing pretty here, nothing that exciting that we couldn't do out of ChatGPT.
+
+229
+00:39:16.690 --> 00:39:34.839
+Matt Wood: But the difference is, this doesn't live as a session, it's not on my machine, it's now, like, it's now a remote endpoint I can hit and get this back. If I were to connect this to Google Drive with one of the MCPs that I mentioned, I could have this ready in my inbox as a draft. I could connect it to Slack.
+
+230
+00:39:34.840 --> 00:39:41.540
+Matt Wood: just with a few clicks as the others, as the other templates kind of demonstrated, and I can have this ready to go.
+
+231
+00:39:41.600 --> 00:39:49.329
+Matt Wood: So, what I want to try to emphasize here is that, the… the possibilities are endless.
+
+232
+00:39:49.460 --> 00:40:07.229
+Matt Wood: we're now at a stage where instead of us all doing the work on our machines, or having OpenClaw require some sort of a, you know, a second-hand MacBook or Mac Mini somewhere, we can now kind of set up these agentic flows, and
+
+233
+00:40:07.230 --> 00:40:23.309
+Matt Wood: What I like about this is that it makes automations, things that previously required N8N, Zapier, and all these other tools, it now gives us the capability of creating those automations using just a few lines of text. Really, really powerful stuff.
+
+234
+00:40:24.810 --> 00:40:42.689
+Matt Wood: Okay, with that in mind, we talked about, we talked about kind of the basics of the… of the UI. I encourage you all to… to get here. One caveat with all of this is that managed agents aren't available with your Mac subscription.
+
+235
+00:40:42.690 --> 00:40:47.739
+Matt Wood: They're not available through the subscriptions at all. This requires a,
+
+236
+00:40:47.970 --> 00:40:53.109
+Matt Wood: This requires the API plan. So you will be paying API prices.
+
+237
+00:40:53.520 --> 00:41:02.370
+Matt Wood: you could imagine if you've got some pretty exotic, organization of agent teams, that you're going to kind of run up a bill.
+
+238
+00:41:02.520 --> 00:41:10.600
+Matt Wood: And, and so just be aware of the costs and benefits. I, I really think this is, this entire…
+
+239
+00:41:10.630 --> 00:41:22.610
+Matt Wood: product is really meant for, those, those times when, when time matters, when convenience matters most. So, keep that in mind. Definitely, definitely, you know,
+
+240
+00:41:22.770 --> 00:41:25.120
+Matt Wood: You know,
+
+241
+00:41:25.280 --> 00:41:38.349
+Matt Wood: put money on the card and try this out when you can, but just be aware, you're… this is separate from your Cloud subscription, and you're going to, you're gonna pay a little higher than usual.
+
+242
+00:41:39.750 --> 00:41:49.070
+Matt Wood: Great, so back to Braid. The way that Braid works, if I can, if I can show how this is happening, I've got these kind of templates already set.
+
+243
+00:41:49.220 --> 00:41:52.509
+Matt Wood: What I want to try to do is show you…
+
+244
+00:41:53.130 --> 00:42:02.220
+Matt Wood: some of these previous… let's see if this will, this will kick off. We're gonna kick off a few different, a few different of these flows.
+
+245
+00:42:10.620 --> 00:42:21.179
+Matt Wood: And I'm hoping everything is work… going to work. I do… I am saying… okay, great. These were… these connections error… errors, I believe, are still bugs I need to work out, but they're from older sessions.
+
+246
+00:42:21.320 --> 00:42:28.350
+Matt Wood: What this flow is going to do, I can show you what it looks like, in the code here in a moment.
+
+247
+00:42:29.770 --> 00:42:48.670
+Matt Wood: But if I click this, I should be able to see the session and the actual work of the main agent on the right-hand side here, as I click these nodes. In this particular case, there's an assignment that the folks are working on this week in Gauntlet to create a learning tool
+
+248
+00:42:48.760 --> 00:43:02.099
+Matt Wood: for, for young learners to be able to learn fractions. And so, I wanted to try to see if I could use a single agent to one-shot a website that does the same thing. This is gonna work for a little minute.
+
+249
+00:43:03.840 --> 00:43:18.549
+Matt Wood: And as it works, and when it works, we should see files, exist here at the top as they're generated. We could even add this, and I've done this on a few others, where we're able to, deploy those to, to Vercel.
+
+250
+00:43:21.530 --> 00:43:30.490
+Matt Wood: this was an example from yesterday. I wanted to, after having a conversation with somebody at Gauntlet, I wanted to try to create a…
+
+251
+00:43:30.590 --> 00:43:33.700
+Matt Wood: workflow where you could give it a URL,
+
+252
+00:43:33.870 --> 00:43:39.380
+Matt Wood: And it would create ads from, the website that were… that was…
+
+253
+00:43:39.390 --> 00:43:57.480
+Matt Wood: using the same aesthetic and style from that URL. So in this case, I called it the Ads Director, the gauntlet Ads Director, and I've got an ads scout agent that I created, and that scout is the one that goes and reads that website, gets all the juicy information.
+
+254
+00:43:57.870 --> 00:44:15.290
+Matt Wood: And then, another agent that does the actual designing of those ads. And so you can see, basically, what I have on the right-hand side, when I clicked a different agent, I've just dumped all of the messages that go back and forth that match up what you're seeing here on the right-hand side.
+
+255
+00:44:16.000 --> 00:44:26.560
+Matt Wood: And then, at the very end, I wanted to get an idea of all of the things that were created, so I have… I should be able to see, if I click some of these ads.
+
+256
+00:44:27.240 --> 00:44:28.020
+Matt Wood: Great.
+
+257
+00:44:28.270 --> 00:44:47.130
+Matt Wood: This was completely generated by the agents. I didn't design anything. I think the font needs work, I don't like that font, that's alright. But these ads, different varying shapes and sizes, different CTAs, different calls to actions, were all generated by this single, designer agent.
+
+258
+00:44:47.760 --> 00:44:53.899
+Matt Wood: You could imagine, once this is done, you could connect this up to something else. I want to kick off…
+
+259
+00:44:54.800 --> 00:44:56.900
+Matt Wood: Let's see if I can kick this one off.
+
+260
+00:44:57.400 --> 00:44:59.420
+Matt Wood: Oh, oh, thank goodness.
+
+261
+00:44:59.930 --> 00:45:03.790
+Matt Wood: Another bug, I'm not sure what's happening here, but I did want to show this…
+
+262
+00:45:04.440 --> 00:45:08.239
+Matt Wood: Yeah, I did want to show this one. This is a more…
+
+263
+00:45:08.460 --> 00:45:13.009
+Matt Wood: complex flow. I wanted to have a director agent
+
+264
+00:45:14.310 --> 00:45:19.320
+Matt Wood: Create a script for a particular hiking boot.
+
+265
+00:45:19.700 --> 00:45:35.990
+Matt Wood: company, and I have a… I have 3… 3 different agents. I have a… a critic that will, grade videos, I have the producer that will generate the videos, and then in this case, because I had a number of issues with these long-running
+
+266
+00:45:36.090 --> 00:45:50.079
+Matt Wood: video generation providers. I added a third agent that I call a Sentinel, which is another tool, if you ever use Cloud Code and you ever want to, hack away on a very long-running product, or long-running session.
+
+267
+00:45:50.250 --> 00:46:00.259
+Matt Wood: just crank up a, in that same session, ask Claude to generate a Sentinel agent for you that will fix anything so nothing goes… goes broken. So that's what's happening here.
+
+268
+00:46:01.050 --> 00:46:14.030
+Matt Wood: And then, let's see, what I did in this case, and the reason this was complex, is I had to generate keyframes first, and then generate a video based on those keyframes. So, that looks like one of the images.
+
+269
+00:46:14.700 --> 00:46:30.100
+Matt Wood: That looks like another image. They're not bad. I don't think we're… we're definitely not at the Will Smith-eating spaghetti phase and gotten out of that. There's still a few, kind of artifacts that you can see, but let's see what the actual videos look like.
+
+270
+00:46:32.930 --> 00:46:33.720
+Matt Wood: You know.
+
+271
+00:46:34.460 --> 00:46:35.570
+Matt Wood: Not bad.
+
+272
+00:46:38.770 --> 00:46:49.669
+Matt Wood: So, again, in this case, the images were being created from a single sentence prompt, and then, and then the videos were created from those images.
+
+273
+00:46:51.710 --> 00:46:55.059
+Matt Wood: Not sure what's happening in his boot, but I'd be careful.
+
+274
+00:46:56.980 --> 00:46:58.869
+Matt Wood: Beautiful. You can imagine…
+
+275
+00:46:58.980 --> 00:47:09.159
+Matt Wood: You can't hear it, there's audio happening here, but you could imagine some, you know, some… some… a bed of music happening in the background that we could also generate and add in.
+
+276
+00:47:09.220 --> 00:47:20.979
+Matt Wood: And it's interesting to see the differences. The reason I did this, like this, and prompted these agents like this is because I wanted to see a couple variations. If you notice the girl's face, we've got two different
+
+277
+00:47:21.510 --> 00:47:35.129
+Matt Wood: kind of two different characters. Maybe this is in Montana, and the other one's in, I don't know, California somewhere. So, we can kind of get that… that… we can kind of get variations, and the idea is that if this…
+
+278
+00:47:35.300 --> 00:47:48.550
+Matt Wood: recipe works, I would want to use it for an entirely new prompt, and I could do that just by coming back here and, modifying that very first user, what do I call it? User, user prompt.
+
+279
+00:47:48.710 --> 00:47:53.430
+Matt Wood: There's a number of other pieces. I will try… let me see if I can open up…
+
+280
+00:47:55.420 --> 00:48:09.759
+Matt Wood: Okay, this is a good example. We've got the… beautiful. So the fractions block, I told you this product, this, this, assignment that the, the challengers at Gauntlet are working on this week, it looks like it's completed. I can click this.
+
+281
+00:48:10.430 --> 00:48:29.649
+Matt Wood: Okay, boom. Nice. So, this is what, I think the prompt, if I remember when I wrote it, I wanted it to be Ninja Turtles-like. It's supposed to be a… let's see if I can zoom out here… it's supposed to be, like an iPad app that kids can play with to work on their fractions. So…
+
+282
+00:48:29.940 --> 00:48:37.319
+Matt Wood: I think that… Claude, either Sonnet or whoever, whichever model created this, did a decent job.
+
+283
+00:48:37.430 --> 00:48:47.770
+Matt Wood: Plenty of things to play around with, but that gives you an idea. This was, again, one single agent, one single prompt. I had a relatively
+
+284
+00:48:48.190 --> 00:48:51.970
+Matt Wood: At a relatively simple.
+
+285
+00:48:52.680 --> 00:49:01.390
+Matt Wood: agent markdown YAML that was used for this. And like I said, it created this, I think this is fine, I could easily deploy this.
+
+286
+00:49:01.430 --> 00:49:15.619
+Matt Wood: And most importantly, this is reusable, and it's now an endpoint. It's a serverless, it's a Lambda function. It's something in the cloud that I could just call. And that, I think, is the takeaway that I hope you all appreciate with today's
+
+287
+00:49:15.790 --> 00:49:31.659
+Matt Wood: lecture, because we're… we're getting into the… we're getting into the business now. Now that we know how to… the quality, we know what to expect, we know how to, manage context, how to give right… the right resources, how to give the right,
+
+288
+00:49:32.190 --> 00:49:43.269
+Matt Wood: you know, authenticated tools, the ins and outs. I hope what this does is inspire you to create a ton more of, kind of.
+
+289
+00:49:43.270 --> 00:49:55.439
+Matt Wood: independent, isolated agents, not to do… not to just get to inbox zero, but to start creating really exciting things. Again, I saved, or I pasted the URL of Braid.
+
+290
+00:49:55.750 --> 00:50:12.310
+Matt Wood: And I haven't gone through what this looks like in the terminal, but this kind of entire project that I've posted here is really run by Cloud Code Sessions. So once you install Braid, and you kind of get the, the templates,
+
+291
+00:50:12.550 --> 00:50:17.279
+Matt Wood: Into a place where you're familiar with them, then go ahead and use this
+
+292
+00:50:17.360 --> 00:50:36.939
+Matt Wood: you know, use this first command, braid create XYZ. Add your Anthropic API key. If you want to create the videos like I've done, the website I was using was fall.ai, if you haven't heard of it. It's a great… and it's a great provider that lets you pick from the cheap models, the fast models, all of the… the very,
+
+293
+00:50:37.120 --> 00:50:45.380
+Matt Wood: interesting kind of text-to-image, text-to-audio, image-to-audio, all sorts of things. Lots of powerful things. Add your fall key if you want.
+
+294
+00:50:45.650 --> 00:51:02.139
+Matt Wood: If you want the agent team to be able to deploy websites, just like this, you know, little demo I created here, just connect it to Vercel, or even better, just connect it to GitHub and deploy a GitHub
+
+295
+00:51:02.250 --> 00:51:11.649
+Matt Wood: page. So yeah, I hope y'all have enjoyed this. We're gonna leave a little time at the very end to answer any questions.
+
+296
+00:51:11.770 --> 00:51:22.689
+Matt Wood: we really only hit the surface. There's a ton of other optimizations and powerful things you can now do with combining a lot of these primitives. Specifically.
+
+297
+00:51:22.810 --> 00:51:27.950
+Matt Wood: What I haven't touched on at all, but I think is the most, going to be the most impactful.
+
+298
+00:51:28.220 --> 00:51:39.789
+Matt Wood: as you save artifacts or text or markdown from your agentic pools into the memory store in Managed Agents, Anthropic produced this… this kind of
+
+299
+00:51:39.790 --> 00:51:53.280
+Matt Wood: other layer called Dreams. I think it's a weird name, but the idea is that it can look over a large collection of those memory stores that came from those agentic sessions and tell you
+
+300
+00:51:53.280 --> 00:52:02.190
+Matt Wood: Ways that you can improve, and more importantly, kick off those sessions, immediately after to validate that those things are improving.
+
+301
+00:52:02.190 --> 00:52:17.660
+Matt Wood: This is… it's very, very early, but it's very obvious to me where that will lead us into these kind of self-healing, self-improving, agentic loops, where I didn't do anything, it wasn't even running on my computer, I was only paying for it in tokens, so…
+
+302
+00:52:18.570 --> 00:52:23.919
+Matt Wood: Thank you, Francesco. Francesco, thank you.
+
+303
+00:52:24.680 --> 00:52:28.989
+Matt Wood: Let me try to get through some of these questions really quickly, if there are any.
+
+304
+00:52:29.230 --> 00:52:31.060
+Matt Wood: Yeah, thank you, Sonny.
+
+305
+00:52:32.150 --> 00:52:34.440
+Matt Wood: I'll paste it here, Josh.
+
+306
+00:52:34.720 --> 00:52:44.679
+Matt Wood: to the braid… projects… And, we have…
+
+307
+00:52:45.850 --> 00:52:48.590
+Matt Wood: Just so you're aware, we've got,
+
+308
+00:52:49.140 --> 00:53:03.229
+Matt Wood: We've got a number of these type of lectures happening here at Gauntlet. We're doing these types of lessons and lectures all the time. If you're interested in Gauntlet, there are two ways. Our next cohort is starting July 6th.
+
+309
+00:53:03.470 --> 00:53:13.860
+Matt Wood: And if you're at a company and you wanted to also get involved with the education that's offered at Gauntlet, then we encourage you to check out Catalyst.
+
+310
+00:53:14.250 --> 00:53:23.610
+Matt Wood: But, there… there will be some links to theirs. I'm hoping… yep, thank you, Sunny. If you want more information about Gauntlet, please go there.
+
+311
+00:53:23.880 --> 00:53:27.319
+Matt Wood: Any other questions before we… let's see…
+
+312
+00:53:28.410 --> 00:53:41.570
+Matt Wood: how bad is the token spend for this stuff, and what's the best way to start streaming and optimizing the token spend? I'd say this is… if that's your main concern, I'm not sure managed agents are for you. I would recommend you… you get familiar with
+
+313
+00:53:41.720 --> 00:53:51.739
+Matt Wood: running an agentic team on your local hardware first, or… and it doesn't have to even be in the Anthropic, world.
+
+314
+00:53:51.740 --> 00:54:07.909
+Matt Wood: But this is not really, the experimentation, I think, alone is going to cost you, you know, the… even, you know, anywhere from $5 to $10 to $100 to $200. I would recommend making sure you are familiar with the principles of
+
+315
+00:54:08.030 --> 00:54:26.259
+Matt Wood: of sub-agents and skills, and you understand the cost-benefit of, for example, asking Claude to go do a bunch of research in the browser, versus having an API that will get that kind of information for you. So, the token spend is significant. You're paying for
+
+316
+00:54:26.580 --> 00:54:33.330
+Matt Wood: compute on Anthropic's infrastructure. So you can imagine it's premium, and you'll be paying that.
+
+317
+00:54:33.860 --> 00:54:51.560
+Matt Wood: How do you control token usage with sub-agent workflows? You have all of the metadata, just like you do with the agent's SDK, so you're able to get that kind of information. I didn't show you, but I had other versions of these flows where every single message, everything that was generated.
+
+318
+00:54:51.560 --> 00:55:03.449
+Matt Wood: saved it to the cloud-managed agent's memory stores, so that's an option for you. You could use that. You could even have your dream that we talked about earlier just simply be
+
+319
+00:55:03.500 --> 00:55:17.759
+Matt Wood: you know, optimize this for cost over time. We have this daily recurring thing, this agentic swarm. As long as that information is in those memory stores, it's accessible, and you can do with that what you… what you will.
+
+320
+00:55:18.130 --> 00:55:22.669
+Matt Wood: May have missed the sandboxing approach. Seems like you sandbox users from each other.
+
+321
+00:55:22.670 --> 00:55:40.470
+Matt Wood: but also ensuring your data you want long-term is saved between sessions, too. Okay, so the way that you… yeah, the sandboxing is particular because you set up these… the environments, you set up these Linux boxes, those are ephemeral. As soon as that, as soon as the environment's done.
+
+322
+00:55:40.700 --> 00:55:54.419
+Matt Wood: it will… that will go away. The session will stay, but the environments may not be saved, so you can't rely on those. The way that you mitigate that is by having the agents save to the memory.
+
+323
+00:55:54.420 --> 00:56:01.610
+Matt Wood: And that memory is kind of a first-class citizen in this collection of primitives. So that memory is just text.
+
+324
+00:56:01.940 --> 00:56:21.449
+Matt Wood: It could be files as well, but that's how you deal with, saving data long-term. So that's Anthropic's solution to it. You can also roll your own and have your own self-hosted sandbox that Anthropic talks to. And there, you can do whatever you'd like.
+
+325
+00:56:23.870 --> 00:56:42.910
+Matt Wood: dropping again, there's already a night school session for Cloud Managed Agents, which just came out recently. Is there a sense that Gauntlet curriculum adapts and changes as AI moves, and new features come out? I, I would like to say and think yes. I think one of the things… I said this at the beginning when I joined Gauntlet, that…
+
+326
+00:56:43.000 --> 00:56:52.720
+Matt Wood: The thing that impressed me the most was that we were able to spin on a dime in terms of the curriculum and really meet
+
+327
+00:56:52.720 --> 00:57:03.960
+Matt Wood: the, the challengers, as well as the folks who are very eager and hungry to hire those challenges… challengers. We were able to meet them where the puck was going, which,
+
+328
+00:57:04.660 --> 00:57:13.470
+Matt Wood: I hope in this case is this more of an agentic workforce. I really feel like the tools and
+
+329
+00:57:13.810 --> 00:57:18.949
+Matt Wood: The expertise needed to succeed are going to include the things that we've talked about today.
+
+330
+00:57:19.390 --> 00:57:25.329
+Matt Wood: Let's see, I have some questions about the…
+
+331
+00:57:26.730 --> 00:57:31.660
+Matt Wood: Is it possible to… I'm an individual on Social Security, is it possible to learn all this stuff?
+
+332
+00:57:31.790 --> 00:57:49.150
+Matt Wood: almost all of the information I shared today is free. Whether or not the compute or running those agents, or these really expensive models, that's where you're going to have to pay the piper. There's a lot of… there's a lot of action around
+
+333
+00:57:49.150 --> 00:58:01.879
+Matt Wood: doing this locally and saving on that, and you… there's a lot of information, but everything I've talked about today is available for free to learn on the internet, as well as, as well as in the documentation.
+
+334
+00:58:02.790 --> 00:58:20.640
+Matt Wood: How to get started on Claude for engineers from basics and thereafter, good resources. I'd recommend… I'd honestly recommend just, staying on, reading the documentation that Claude offers. That's the number one spot. It's up to date, and it'll give you an idea of all the templates and quick starts.
+
+335
+00:58:21.360 --> 00:58:38.539
+Matt Wood: Awesome! Everyone, this has been really, really exciting, and it's been a pleasure to prepare all this material. You know, I built this one little tool because I felt like I wanted to understand more deeply how managed agents were going to affect the workforce.
+
+336
+00:58:38.540 --> 00:58:43.300
+Matt Wood: And it's just one example, but I hope all of you feel a little more inspired.
+
+337
+00:58:43.300 --> 00:59:02.220
+Matt Wood: And I hope your eyes are open to where, like I said, the puck is heading in terms of our journey. We're still at the very beginning of that journey. There's so much more to do. The thing I get excited about the most, I've been saying this a lot over the past few days, is that I'm seeing a lot more folks who are non-technical, just like myself, who…
+
+338
+00:59:02.270 --> 00:59:25.039
+Matt Wood: who self-taught themselves how to create software, how to create experiences and work within this, in the digital realm. We're seeing a lot of folks non-technical jump into this space, and it's incredibly exciting. I hope the best for everybody. If you have any questions, feel free to reach out, to anyone here at Gauntlet, and we'd love to, we'd love to chat with you, and,
+
+339
+00:59:25.190 --> 00:59:27.139
+Matt Wood: And help you along this journey.
+
+340
+00:59:28.450 --> 00:59:29.450
+Matt Wood: Thanks, everyone.
+
+341
+00:59:29.600 --> 00:59:30.440
+Matt Wood: Cheers.
+

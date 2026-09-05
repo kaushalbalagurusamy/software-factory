@@ -1,0 +1,1450 @@
+WEBVTT
+
+1
+00:00:04.210 --> 00:00:05.350
+Ash Tilawat: All right.
+
+2
+00:00:05.610 --> 00:00:23.660
+Ash Tilawat: Welcome, everybody, to Night School. Obviously, at the beginning of Night School, we always give our fellow learners a couple of minutes before we get started, but again, Night School is an opportunity for you to upskill in AI and do it for completely free every Wednesdays. Please mark your calendars.
+
+3
+00:00:23.740 --> 00:00:38.960
+Ash Tilawat: As we get started, let me know in the chat where everybody's logging in from. Last time we had a New Zealand, we had somebody from California, we had somebody from Europe, and obviously the amazing Austin, Texas always shows up.
+
+4
+00:00:39.840 --> 00:00:48.179
+Ash Tilawat: We are starting night school this week from Gauntlet HQ here in Austin, Texas. I just saw Madrid, Spain, that's probably the farthest.
+
+5
+00:00:51.000 --> 00:01:01.350
+Ash Tilawat: Austin, Houston, Turkey. We have Istanbul, Turkey, Plano, Texas, right around the corner. NYC, Philly?
+
+6
+00:01:02.580 --> 00:01:10.569
+Ash Tilawat: Excited to have all of you guys joining us. We had over 400 people sign up for night school. We're gonna give them a few minutes to get situated.
+
+7
+00:01:10.570 --> 00:01:30.420
+Ash Tilawat: If you've never been to Night School before, Night School is a free session that we run every single week, where we try to upskill individuals, specifically engineers and AI. We'll cover technical topics, we'll cover interviewing, we'll cover what is the latest and greatest tool or methodology that you should be using as an engineer.
+
+8
+00:01:30.420 --> 00:01:37.880
+Ash Tilawat: It is completely free. Please bring a friend next week. Oh, Bangalore, India is by far the farthest. Welcome, welcome.
+
+9
+00:01:38.780 --> 00:01:52.600
+Ash Tilawat: Today, we'll be covering Agentic RAG. Now, for those who don't know what that is, we'll start from the beginning, we'll start about… start building the foundations for this topic, and then over time, we'll get to the Agentic RAG specifically.
+
+10
+00:01:53.210 --> 00:01:55.649
+Ash Tilawat: Couple of things to call out.
+
+11
+00:01:56.070 --> 00:01:59.750
+Ash Tilawat: I have created an open source repository here.
+
+12
+00:01:59.790 --> 00:02:16.009
+Ash Tilawat: It is the RAG cookbook, so gauntlet-aidp forward slash rag cookbook. I'll be putting the link here inside of the channel. At Gauntlet, we believe that you need to apply what you learn, so this is a breakdown.
+
+13
+00:02:16.020 --> 00:02:27.360
+Ash Tilawat: of 5 different RAG methodologies, with evals inside that you can use after this class, so you guys can keep building and actually try out some of the things I'm going to be teaching you.
+
+14
+00:02:28.770 --> 00:02:35.980
+Ash Tilawat: Alright, we're about to hit that 100 number. Again, we're gonna give it one more minute, and we'll get started in just a second.
+
+15
+00:02:36.720 --> 00:02:38.630
+Ash Tilawat: Before we get started…
+
+16
+00:02:38.810 --> 00:02:55.649
+Ash Tilawat: I wanted to introduce a few people here inside of the Zoom. I have Sonny, Aaron, Derek, and Tom, which are members of my team here at Gauntlet AI, and there's gonna be so many questions in the chat, and there's absolutely no way that I'm able to answer all of those questions out loud.
+
+17
+00:02:55.650 --> 00:03:06.030
+Ash Tilawat: But these individuals will be there to answer your questions and give you some valuable feedback on any question you ask in the chat. So thank you, Sunny, Aaron, Derek, and Tom.
+
+18
+00:03:07.710 --> 00:03:18.070
+Ash Tilawat: Now, before we get started, if you're an engineer, let me know in the chat. If you're a PM, maybe you're a UX designer, what is everyone's professional background?
+
+19
+00:03:21.460 --> 00:03:22.799
+Ash Tilawat: Sales. Love it.
+
+20
+00:03:26.560 --> 00:03:31.159
+Ash Tilawat: Sales? Okay. Alright, Tom, this tells me we gotta add some marketing classes.
+
+21
+00:03:31.650 --> 00:03:32.949
+Ash Tilawat: I'm open to it.
+
+22
+00:03:35.060 --> 00:03:37.729
+Ash Tilawat: IT, software engineer, love it.
+
+23
+00:03:38.160 --> 00:03:42.089
+Ash Tilawat: Software engineer, data scientist, petroleum engineer, amazing.
+
+24
+00:03:45.260 --> 00:03:47.300
+Ash Tilawat: Pro Vibecoder, I love it.
+
+25
+00:03:51.090 --> 00:03:55.440
+Ash Tilawat: Marketing, Salesforce, Amazing.
+
+26
+00:03:56.240 --> 00:04:14.589
+Ash Tilawat: Now, one of the amazing things about AI is, as we're learning each of these topics, my goal is to start from the beginning. I'm not trying to make this hard to understand right away. The goal would be build the foundations. As we're building the foundations, you guys can get deeper and deeper and deeper into the topics.
+
+27
+00:04:15.420 --> 00:04:23.740
+Ash Tilawat: Okay, this is my queue to get started. What's gonna happen is we're gonna have questions in the chat that Derek, Tom.
+
+28
+00:04:23.870 --> 00:04:43.870
+Ash Tilawat: Aaron and Sonny are gonna be answering for you. I'm going to have about a 40 to 45 minute lecture. I'm going to stop in the middle for questions, and then we're going to keep moving forward with some Q&A at the end. Again, if you have not opened up the open source repository I provided, please check it out. Otherwise, we'll get started on Agentic rack.
+
+29
+00:04:49.460 --> 00:05:01.270
+Ash Tilawat: Okay, welcome to Night School. Today's session is Agentic Rag. Agentic RAG is a process by which we have an agent between the entire retrieval process.
+
+30
+00:05:01.440 --> 00:05:14.810
+Ash Tilawat: So there's something called a context window. A context window is the amount of tokens that you can actually input into a large language model that is then sent to the actual neural network, and then you get an answer back based on those tokens.
+
+31
+00:05:14.950 --> 00:05:31.360
+Ash Tilawat: What's actually happening behind the scene is statistical analysis on all the tokens that are being used, and what tokens should be predicted next. Meaning, a large language model is just trying to predict the answer to your questions using statistical analysis.
+
+32
+00:05:31.620 --> 00:05:39.930
+Ash Tilawat: This context window is all of that preemptive context that you can send in to that neural network or large language model to get an answer back.
+
+33
+00:05:39.960 --> 00:05:54.909
+Ash Tilawat: To give you an example of this, I can say, my name is Ash, tell me what's your name. And it could just give me a single name Mac. Or I can say, my name is Ash, I'm the CTO of Gauntlet AI, and I can say everything about Gauntlet for the AI to give me a different response.
+
+34
+00:05:54.990 --> 00:06:02.700
+Ash Tilawat: More context, more details, a better response on the other side. That's why we've created something called RAG.
+
+35
+00:06:03.240 --> 00:06:09.950
+Ash Tilawat: RAG stands for Retrieval Augmented Generation, which means that we have a question that is coming into the system.
+
+36
+00:06:09.950 --> 00:06:28.630
+Ash Tilawat: And we're gonna go out, and we're gonna find any relevant context associated with that information, we're gonna add that to our context window, and then we're gonna add that back to the LLM. So if I were to break this down really simply for you, what's happening is, let's say we ask a question like, what's the weather like in Paris?
+
+37
+00:06:29.190 --> 00:06:43.299
+Ash Tilawat: We're gonna take that, and we're gonna change that into numerals. We're gonna change it to a numeric language that the neural network actually understands. We're then gonna compare it to existing database of numerals that we already have. These are all mapped in the same language.
+
+38
+00:06:44.010 --> 00:07:00.350
+Ash Tilawat: They're embedded so that we can compare how similar they are to each other. We're gonna do a vector search on top of what that is, and we're gonna grab everything similar and get it back. Once we get it back, what we're doing is we're trying to ensure that these match what we're trying to actually query for.
+
+39
+00:07:00.720 --> 00:07:08.459
+Ash Tilawat: This is then added to the context window of the LLM as a prompt, and then sent over to help define and see what's happening.
+
+40
+00:07:08.900 --> 00:07:14.629
+Ash Tilawat: Now, if I were to break this down step by step from that example, what's the weather like in Paris?
+
+41
+00:07:14.630 --> 00:07:31.319
+Ash Tilawat: What we're doing is we're taking that term, what's the weather like in Paris, we're embedding that term, and then we're comparing those numerical values with the embeddings in our vector database. Now, we're gonna go into all these terms in just a second, but I want to give you a high-level view of what's actually happening.
+
+42
+00:07:31.380 --> 00:07:32.520
+Ash Tilawat: you have.
+
+43
+00:07:32.770 --> 00:07:51.290
+Ash Tilawat: a question coming in, you're translating that question into a language that the AI understands. You're then comparing it with a knowledge base where you have a library of information already in the same language. You're finding the most similar information, grabbing that information back, and then adding it to a prompt.
+
+44
+00:07:51.350 --> 00:07:56.000
+Ash Tilawat: Then you're sending that entire prompt back to the LLM to get an answer.
+
+45
+00:07:56.400 --> 00:08:10.610
+Ash Tilawat: The goal here is, as humans, when we answer a question, we go into our memories, we go into books, we go into research papers, we go talk to somebody else. We retrieve information before we make a decision.
+
+46
+00:08:10.660 --> 00:08:23.759
+Ash Tilawat: Similarly, what we're trying to do here is, if there's an initial question that we want to answer, we want to go out and retrieve information first. Once we have that root information, we want to keep moving forward and try to solve the answer.
+
+47
+00:08:24.120 --> 00:08:41.789
+Ash Tilawat: Now, for everybody in the room that is already familiar with RAG, there's a bunch of downsides to just using RAG out of the box. Meaning, if I just have a knowledge base that I'm routing everything through, then it's really hard to decide if the right information is actually coming into my contacts window.
+
+48
+00:08:41.840 --> 00:08:48.779
+Ash Tilawat: What happens is you have this knowledge base of information that is embedded, and you have to go out and grab all this information and bring it back.
+
+49
+00:08:48.860 --> 00:09:01.800
+Ash Tilawat: As a result, most of that information is unusable. There's a lot of noise and very little signal. And so it's up to you to decide, hey, how can I make this better? What can I do to ensure that the information coming back actually is more useful?
+
+50
+00:09:02.140 --> 00:09:13.479
+Ash Tilawat: There's an argument in the market right now that as context windows get bigger, meaning the amount of tokens I can input gets bigger and bigger, bigger, and bigger, do we actually need to go out and retrieve more and more information?
+
+51
+00:09:14.560 --> 00:09:33.249
+Ash Tilawat: As context windows get bigger, that doesn't mean you can just put all of the information in the world into the context window. You need to be able to delineate and organize what information you're actually putting in, and you need to be able to say, hey, this is the most important information, this is the most critical information, only use this to make a decision.
+
+52
+00:09:33.260 --> 00:09:43.229
+Ash Tilawat: Just because you have all the information in the world doesn't mean that the output will be better with an LLM. The goal should be to control the information going into the LLM and make it the best possible.
+
+53
+00:09:44.280 --> 00:09:47.579
+Ash Tilawat: So, rag patterns are sort of…
+
+54
+00:09:47.740 --> 00:09:50.610
+Ash Tilawat: Increasing in complexity across this different
+
+55
+00:09:51.090 --> 00:09:57.509
+Ash Tilawat: Table. So we start with naiveRag, meaning we go into our knowledge base and we grab all the information that we have.
+
+56
+00:09:57.620 --> 00:10:11.890
+Ash Tilawat: Then there's something called metadata filter drag, meaning we can filter that knowledge base based on a title, or a topic, or maybe a different date, or when something was created. And once we filter that, then we're able to just grab based on that information.
+
+57
+00:10:12.050 --> 00:10:21.850
+Ash Tilawat: Then there's something called hybrid, or, search, which is, like, we do keyword search, then we grab the information, then we try to find what the relevant vectors are.
+
+58
+00:10:22.000 --> 00:10:29.080
+Ash Tilawat: Or we do multi-hop, which is, hey, I'm gonna do multiple queries on top of RAG, and I'm gonna go out and find all the different information.
+
+59
+00:10:29.160 --> 00:10:44.219
+Ash Tilawat: And then finally, what we're going to cover today is called Agentic rag, where we put an agent in the middle to decide which pattern is actually the best pattern to use, and as a result, it's a tool the agent uses to then go out and retrieve information.
+
+60
+00:10:44.630 --> 00:10:51.090
+Ash Tilawat: Now, as we go down this ladder, what we realize, there's more and more complexity into what we're building.
+
+61
+00:10:51.600 --> 00:10:59.279
+Ash Tilawat: As this complexity increases, the goal is that we have evals in place to make sure that our system is performing at the level it should.
+
+62
+00:11:00.530 --> 00:11:01.370
+Ash Tilawat: Okay.
+
+63
+00:11:01.580 --> 00:11:02.370
+Ash Tilawat: Now…
+
+64
+00:11:02.690 --> 00:11:12.390
+Ash Tilawat: There… let's say you have a 2 million token context window, meaning you can put 2 million phrases, characters, or words into a single context window.
+
+65
+00:11:12.700 --> 00:11:15.970
+Ash Tilawat: Why is it that we even need RAG at all?
+
+66
+00:11:15.990 --> 00:11:34.329
+Ash Tilawat: Right? Modern models, like, if you look at some of the Gemini models, their context window is massive. So, if we take all of the information we have, it could be 17 documents, it could be 80 PDFs, it could be a ton of SQL information that is coming back, then all of that is just put into a context window, and then the answer is put out.
+
+67
+00:11:35.030 --> 00:11:43.689
+Ash Tilawat: What this results in is that every single time we ask that model the same question, we have to put that level of context into the context window.
+
+68
+00:11:44.300 --> 00:11:55.849
+Ash Tilawat: This gives us no systematic way to decide whether or not that retrieval process that is happening is actually working or not. Because every single time, all we're doing is saying, hey, here's all the information we have, go figure something out.
+
+69
+00:11:56.100 --> 00:12:09.010
+Ash Tilawat: as we get different queries that are not the same query over and over again, it becomes sort of tedious to gather all the information and ensure that all that information is present when we're actually sending that question to an LLM.
+
+70
+00:12:10.350 --> 00:12:28.789
+Ash Tilawat: What happens over time is because there's no filtering, there's a lot of noise in that information, and as a result, with all that noise, it becomes hard for the LLM to give you the right answer. And that's why people think that the LLM is maybe hallucinating, or maybe it's not understanding something, or it can't achieve what I'm trying to make it do.
+
+71
+00:12:29.080 --> 00:12:37.309
+Ash Tilawat: Because what's actually happening in the background is it doesn't have enough information to make a call, or it has too much information that it's getting lost in the sauce.
+
+72
+00:12:38.150 --> 00:12:41.109
+Ash Tilawat: So, what I'm trying to showcase now is the…
+
+73
+00:12:41.390 --> 00:12:56.319
+Ash Tilawat: you want to promote your LLM from just being, hey, give me all the information, and I'll give you the answer, to being, hey, let me go find all the information myself, then give all that information back to myself, and then give you the answer.
+
+74
+00:12:56.600 --> 00:13:00.499
+Ash Tilawat: That is a huge distinction, because what we're saying is.
+
+75
+00:13:00.610 --> 00:13:07.019
+Ash Tilawat: Let me figure out what context is actually relevant, and what context is actually unnecessary.
+
+76
+00:13:07.020 --> 00:13:25.979
+Ash Tilawat: And so what we're doing now with Agentic rag is we have a query that comes in, and the LM decides, hey, this means I need to go do some sort of SQL query. Oh, this means I need to go look at this document. Oh, this means I need to go do this database. Oh, this means I need to find some other piece of information online.
+
+77
+00:13:26.600 --> 00:13:29.069
+Ash Tilawat: The LLM gets a decided plan.
+
+78
+00:13:29.280 --> 00:13:40.770
+Ash Tilawat: Now, for those in the room that have used, maybe, Cloud Code, Cursor, we know that there exists a plan mode, where you can have a step-by-step, hey, do this first and do that, a sequence of tasks that it can do.
+
+79
+00:13:41.160 --> 00:13:44.669
+Ash Tilawat: When it comes to Gen Grag, what it's doing is it's creating that plan.
+
+80
+00:13:44.810 --> 00:13:51.090
+Ash Tilawat: It's that Ash is asking me the specific question. This is my plan to get the information required for that question.
+
+81
+00:13:51.530 --> 00:13:58.069
+Ash Tilawat: Then I'm gonna organize that information and find signal within that information, then send it to be…
+
+82
+00:13:58.900 --> 00:14:04.549
+Ash Tilawat: That changes the paradigm, and this is what sort of unlocks a lot of things in…
+
+83
+00:14:04.740 --> 00:14:11.519
+Ash Tilawat: When we think about work today, when we think about companies today, they have so many fragmented sources of data.
+
+84
+00:14:11.640 --> 00:14:19.560
+Ash Tilawat: Right? You have information in Slack, you have information in Gong, you have information in HubSpot, you have information in some SQL database.
+
+85
+00:14:19.780 --> 00:14:31.170
+Ash Tilawat: What Agentic RAG lets you enable is it says, hey, I have all these data sources, I'm gonna figure out, of all the data sources I have, the understanding of that data source I have.
+
+86
+00:14:31.240 --> 00:14:38.230
+Ash Tilawat: What is the plan for me to find the right information to get the right answer? I'm gonna go get that information.
+
+87
+00:14:38.230 --> 00:14:55.999
+Ash Tilawat: And then I'm going to organize that information to get the right answer. This is exactly what Claude Code, Manis, Cursor are doing in the background. What they're doing is, they're doing agentic rag and figuring out, hey, maybe I should do keyword search across my codebase. Hey, maybe I should go search a document online.
+
+88
+00:14:56.000 --> 00:15:05.179
+Ash Tilawat: Hey, maybe I should go look at our HubSpot instance and see what's happening. Hey, maybe I should go do some SQL queries and see what information comes out of that.
+
+89
+00:15:05.610 --> 00:15:13.939
+Ash Tilawat: But when you transition the LLM from just being an answer engine to the actual retriever, that is what Agentic rag is.
+
+90
+00:15:14.830 --> 00:15:27.859
+Ash Tilawat: Now, Agentic rag drives the entire workflow, meaning at the end of the retrieval process, when it's gone into these different sources, if it feels that it doesn't have enough information, it can keep going.
+
+91
+00:15:28.350 --> 00:15:34.870
+Ash Tilawat: Which is a much smarter approach than just saying, hey, take all of the information in the world and throw it into a context window.
+
+92
+00:15:35.020 --> 00:15:52.070
+Ash Tilawat: The approach here now is, hey, first do a single retrieval and go find all the information you think is necessary. Once you've found that information, do an assessment based on this prompt, based on these criteria, based on this acceptance criteria, if this is correct or not. If you need to go out and do another search, you can do that as well.
+
+93
+00:15:52.410 --> 00:15:57.529
+Ash Tilawat: As a result, what this lets happen is more detailed.
+
+94
+00:15:57.640 --> 00:16:04.469
+Ash Tilawat: Faster responses that are actually grounded in real documents, real data within a company.
+
+95
+00:16:04.880 --> 00:16:09.150
+Ash Tilawat: Now, I have an example for you on this slide, which is a support agent.
+
+96
+00:16:09.270 --> 00:16:13.790
+Ash Tilawat: A support agent, let's say, gets a question, can I get a refund?
+
+97
+00:16:14.230 --> 00:16:19.829
+Ash Tilawat: In normal RAG, what would happen is, it would just say, of course, let me route you to our support staff.
+
+98
+00:16:19.990 --> 00:16:36.529
+Ash Tilawat: But with Agentic Rag, what we can do instead is we have a connection to the database that houses all the orders. We have a connection to the app experience so we can show UI elements on top that show maybe the photo, or where the order was dropped off, or the location where the order was going to.
+
+99
+00:16:37.050 --> 00:16:46.360
+Ash Tilawat: Also, we have the refund policy, we have the 30-day cashback policy. All of this information inside of company that we can go have the agent retrieve.
+
+100
+00:16:46.360 --> 00:17:02.329
+Ash Tilawat: So the agent receives this question as a support agent. Can I get a refund? It's able to understand who's asking that question, maybe why they're asking that question, and maybe what that question entails. Decide, hey, these are the 3 or 4 data sources I need to go grab.
+
+101
+00:17:02.380 --> 00:17:07.699
+Ash Tilawat: Grab that information inside of those data sources, and then, as a result, give an answer back.
+
+102
+00:17:08.020 --> 00:17:15.700
+Ash Tilawat: Compared to just give a cookie-cutter answer back to everybody asking that question, and then eventually route it to support staff.
+
+103
+00:17:15.930 --> 00:17:19.239
+Ash Tilawat: The future of AI is agentic, meaning
+
+104
+00:17:19.480 --> 00:17:32.130
+Ash Tilawat: the AI needs the ability to do the connection, to grab the data, to make the plan, to do the sequence of task. And once it has those connections, those integrations, then it can start doing work for you.
+
+105
+00:17:34.100 --> 00:17:38.089
+Ash Tilawat: Okay, what the agent actually can decide in a Gentic rag.
+
+106
+00:17:38.350 --> 00:17:39.260
+Ash Tilawat: So…
+
+107
+00:17:39.500 --> 00:17:49.669
+Ash Tilawat: inside of Agentic Rag, we can actually say, hey, I have a question coming into my chatbot that I actually have all the information for. I don't need to go retrieve any data at all.
+
+108
+00:17:50.190 --> 00:17:53.569
+Ash Tilawat: So, for example, if we have something like
+
+109
+00:17:53.910 --> 00:18:04.489
+Ash Tilawat: a math problem, or a random question that is coming into your chatbot. Or, for example, it's like a support chatbot, and it's asking about very simple information that is already on the UI.
+
+110
+00:18:04.680 --> 00:18:13.249
+Ash Tilawat: As a result, we don't need to go out and retrieve and grab this information, because the agent already has everything it needs in its training data to give an answer.
+
+111
+00:18:13.370 --> 00:18:31.619
+Ash Tilawat: So, even deciding whether to retrieve is a decision the agent can make. What is the refund window for a B2B product? Hey, I need to go grab that from HubSpot, I'm gonna grab that information, I'm gonna answer your question. But what is 15% of $4,000? I don't need to go anywhere, I can answer that question directly.
+
+112
+00:18:32.460 --> 00:18:43.540
+Ash Tilawat: Oftentimes, what you find is, there was a story for, like, this chatbot that an airline had, where the people were trying to ask it to change its prompt, and maybe, like, give it a refund,
+
+113
+00:18:43.740 --> 00:19:01.759
+Ash Tilawat: and basically convince it that it deserved a discount so that they can get a discount automatically on top. And so what's happening there is people are asking questions that are outside the purview of the prompts that were originally designed for that chatbot, and so people can, you know, maybe get discounts, or maybe convince it to do something for them.
+
+114
+00:19:01.900 --> 00:19:04.700
+Ash Tilawat: And so we create something called a fail-safe there.
+
+115
+00:19:04.700 --> 00:19:23.719
+Ash Tilawat: Where it's saying that the agent can decide, hey, this is a dangerous question. Hey, maybe there's SQL injection going on. Hey, maybe this is a question I shouldn't answer. Hey, maybe somebody's trying to trick me. Hey, maybe this is a discount I shouldn't offer. So, deciding whether to retrieve or not is actually something that the agent can say, hey, this is a good idea or a bad idea.
+
+116
+00:19:24.400 --> 00:19:30.299
+Ash Tilawat: The next decision that you can make in Agentic rag is, what sources should I retrieve from?
+
+117
+00:19:30.520 --> 00:19:49.369
+Ash Tilawat: A company uses 7, 8, 9, 10 pieces of software, all with data stored inside. With Agentic Rag, you can decide, hey, do I need to even go to this software? Hey, can I, do this without this other piece of software? You can have a sequence of tasks back and forth as a result, so that you can make
+
+118
+00:19:49.570 --> 00:19:56.110
+Ash Tilawat: The perfect plan to grab the perfect amount of data so that you don't have to waste time grabbing data from all sources.
+
+119
+00:19:56.250 --> 00:20:14.439
+Ash Tilawat: So, it could be entity type, it could be metadata filtering, it could be routing based on different query types. The goal here is, as… because this is a more smarter data analyst, it understands that sometimes I need some sources, sometimes I need all the sources, or sometimes I just need a few sources.
+
+120
+00:20:15.620 --> 00:20:22.689
+Ash Tilawat: And the agent can decide when to stop. Now, this is something that happens in ChatGPT all the time.
+
+121
+00:20:22.690 --> 00:20:38.050
+Ash Tilawat: Where we are just, like, putting a ton of information into our little chat window right there. And over time, that information compounds again and again, again and again, and then eventually ChatGPT starts summarizing all that information.
+
+122
+00:20:38.050 --> 00:20:45.560
+Ash Tilawat: Because there's just so many tokens being used, so much information flooding the context window, so then the output is really hard to judge.
+
+123
+00:20:46.230 --> 00:20:55.819
+Ash Tilawat: In this scenario, having an agent in the middle of retrieval and the initial query lets us decide how much information do we actually need.
+
+124
+00:20:56.200 --> 00:21:03.100
+Ash Tilawat: What that sort of does for us is, without us being involved as humans, we can go out and get that information and come back.
+
+125
+00:21:03.340 --> 00:21:17.839
+Ash Tilawat: We can run it again and get more information and come back. We can eval it, we can score it, we can make sure it's the right information. And that is what changes the game from this just being a chatbot that we're answering to something that is actually doing work for us.
+
+126
+00:21:18.450 --> 00:21:28.850
+Ash Tilawat: Okay, so under the hood, what is happening? Agentic rag just means that we've created an agent, and an agent has tools, and those tools let it do research.
+
+127
+00:21:29.150 --> 00:21:43.530
+Ash Tilawat: An agent is just a loop that is running and calling different functions for you to actually accomplish tasks. In this scenario, if we have an agent inside of our RAG pipeline, what we've done is we've given it a tool for vector search.
+
+128
+00:21:43.650 --> 00:21:50.069
+Ash Tilawat: for metadata or keyword search, for structured data like SQL, or an external API connection.
+
+129
+00:21:50.130 --> 00:22:09.020
+Ash Tilawat: These tools correspond to the different data areas that we have. It could be SQL, it could be Slack, it could be HubSpot, it could be documents. And what we're trying to do is, it knows to call those tools in a specific order, based on the description of those tools, to actually get the information back.
+
+130
+00:22:09.270 --> 00:22:28.350
+Ash Tilawat: So, Agentic rag, at the end of the day, is just an agent placed that is available to receive queries. Those queries are then sequenced into a set of tasks that decide between 4 or 5 tools what information to go out and retrieve. Then it's then sent to an LLM to then decipher an answer.
+
+131
+00:22:28.870 --> 00:22:42.979
+Ash Tilawat: The goal here is we've mapped every single data source as a tool, we've mapped the important API calls as a tool, we've mapped all the metadata and the structured data as a tool, so we can then use this inside of our process.
+
+132
+00:22:44.350 --> 00:22:49.479
+Ash Tilawat: Now, when I think of an agent, what is the difference between an agent
+
+133
+00:22:49.710 --> 00:22:59.339
+Ash Tilawat: and a workflow, or an automation, is that the agent is doing the thinking and the doing. It's making a decision, and then it's taking an action.
+
+134
+00:22:59.550 --> 00:23:13.099
+Ash Tilawat: So the… when you put an agent in the middle of your retrieval pipeline, what you're basically doing is you're saying, now the LLM is going to decide what's next, what's… what tools should be called, what should be retrieved, and whether or not we have enough information.
+
+135
+00:23:13.370 --> 00:23:20.130
+Ash Tilawat: A really nice way to understand an agent is called the react loop. Reason, act, and observe.
+
+136
+00:23:20.370 --> 00:23:25.419
+Ash Tilawat: Reason is, hey, I need to get all the information necessary to answer this query.
+
+137
+00:23:25.770 --> 00:23:39.570
+Ash Tilawat: Act means I'm gonna call 1, 2, 3, 4, 5 functions to get all the information required for that query. Observe means I've called 2 or 3 of these functions. Do I have enough information to proceed?
+
+138
+00:23:39.570 --> 00:23:47.930
+Ash Tilawat: Am I following my path? Is my sequence correct? And then I can loop back around to reasoning to say, what step should I take next?
+
+139
+00:23:48.020 --> 00:24:07.670
+Ash Tilawat: So when people explain agents, oftentimes it becomes confusing. Like, what is specifically an agent, what is specifically a workflow, what is maybe just a chat interaction? An agent has to think, and it has to execute. An agent has to reason, and it has to act. An agent has to observe, and it has to react.
+
+140
+00:24:07.980 --> 00:24:27.000
+Ash Tilawat: When you think of an agent, think of doing and thinking, and what we're doing with Agentic Rag is saying, I now have an agent that I've created that understands what I'm trying to get at, what information is required to answer that question, and then actually executes on top of that information.
+
+141
+00:24:28.120 --> 00:24:28.950
+Ash Tilawat: Okay.
+
+142
+00:24:29.230 --> 00:24:33.589
+Ash Tilawat: Another thing that happens is, when we interact with AI,
+
+143
+00:24:33.950 --> 00:24:36.390
+Ash Tilawat: Our questions are really, really vague.
+
+144
+00:24:37.360 --> 00:24:52.549
+Ash Tilawat: Our questions might be, why is that the case? Fix this error. I don't understand. These aren't inherent questions, and they might have different connotations, or different contexts, depending on what's happening previously in the conversation.
+
+145
+00:24:52.740 --> 00:25:10.300
+Ash Tilawat: So what Agentic rag lets us do, it takes a hard question and actually breaks it up into a series of questions. So for example, if I ask the question, how's the weather, there's a couple of inherent decompensation steps inside of that question. Where am I located?
+
+146
+00:25:10.530 --> 00:25:16.339
+Ash Tilawat: What date are… what time is it where I'm located, and how do I access the actual weather?
+
+147
+00:25:16.380 --> 00:25:28.460
+Ash Tilawat: When you have an agent in place, it's able to decompose that vague and hard-to-understand question into a series of steps, a series of different questions that it may be able to ask to then get to the answer.
+
+148
+00:25:28.460 --> 00:25:39.069
+Ash Tilawat: So what we're trying to do with Agentic RAG is also decompose tough, vague, and hard-to-pinpoint questions into a series of steps that can actually be answered.
+
+149
+00:25:39.340 --> 00:25:47.760
+Ash Tilawat: The best example of this would be, let's say we're using a coding agent, and the coding agent comes across an error, or maybe a failure in execution.
+
+150
+00:25:47.880 --> 00:25:53.619
+Ash Tilawat: It's our inherent instinct as developers to maybe just say, fix the error, find what's happening.
+
+151
+00:25:53.740 --> 00:25:55.820
+Ash Tilawat: Make sure that this is actually running.
+
+152
+00:25:55.920 --> 00:26:18.160
+Ash Tilawat: What this results in the agent responding in is basically saying, hey, go out and go check to see the logs. Go out and go check to see the information. Go out and go check to see the code. As a result, the agent is able to decompose the problem so that it can take the problem, get the information required to solve the problem, run that in a sequence of steps, and then go out and solve the problem.
+
+153
+00:26:18.390 --> 00:26:22.050
+Ash Tilawat: So, Agentic rag lets you enable that on top of a pipeline.
+
+154
+00:26:24.430 --> 00:26:29.810
+Ash Tilawat: There's a concept of memory here that I think is important, and I want to talk through really quickly.
+
+155
+00:26:30.020 --> 00:26:37.599
+Ash Tilawat: when you have an interaction with a chatbot, like Claude or ChatGPT, that interaction is
+
+156
+00:26:38.050 --> 00:26:42.320
+Ash Tilawat: Defined by the session, meaning that little window in which you're talking back and forth.
+
+157
+00:26:42.690 --> 00:26:50.420
+Ash Tilawat: And that's scoped to a single conversation, maybe a single task. It has some information, but everything is imprompt, in context.
+
+158
+00:26:51.040 --> 00:27:00.700
+Ash Tilawat: What happens with Agentic rag and archival memory is that we can store certain pieces of memory as the agent is progressing through the task.
+
+159
+00:27:00.860 --> 00:27:07.310
+Ash Tilawat: Meaning, let's say it went out and grabbed something from a SQL database, we can quickly store that.
+
+160
+00:27:07.910 --> 00:27:16.009
+Ash Tilawat: Maybe it went out and actually decided, hey, what are the different aspects I need for this? And made a little state object to store its progress.
+
+161
+00:27:16.070 --> 00:27:32.939
+Ash Tilawat: The goal here is this second type of memory lets us grab different things across the board, store those things for use later on, and makes it so that our context window, when we're actually searching for all this information, isn't diluted with all this noise and random tokens.
+
+162
+00:27:33.010 --> 00:27:44.330
+Ash Tilawat: So, that is another thing that Agentic Rag enables, the fact that we can leave a single session, a single conversation, and have disconnected, offloading our memory onto something else.
+
+163
+00:27:45.980 --> 00:28:05.690
+Ash Tilawat: Now, if we were using Agentic RAG, we can actually run all of our tools in parallel. And if you wanted multiple agents, you can also do that in parallel. Because what we're doing is these are parallel retrieval tasks for data analysis. So let's say we had a question about what is the refund policy here at Stripe.
+
+164
+00:28:05.710 --> 00:28:11.419
+Ash Tilawat: Describe any changes made to that refund policy, and what steps you might take as a result of those changes.
+
+165
+00:28:11.630 --> 00:28:32.900
+Ash Tilawat: What we can do is we can decompose those into a series of calls to different databases, different knowledge sources. We can run all of those in parallel, and then come back and say, hey, what is the information retrieved from this? What is the information got from this? What is the information from this? We can bring all that information together, and then have something on the other side.
+
+166
+00:28:33.140 --> 00:28:45.420
+Ash Tilawat: You want to start with a single agent for your Agentic rag system, but your Agentic rag system can scale horizontally, meaning you can have different sources tied to different agents, and all of those agents can perform in parallel.
+
+167
+00:28:46.480 --> 00:28:54.889
+Ash Tilawat: Okay, before I get to trade-offs in the eval, I'm gonna take a step back here, and we're gonna take some of these questions that we're getting here in the chat.
+
+168
+00:28:59.860 --> 00:29:14.379
+Ash Tilawat: We have a question here that says, I've noticed that RAG is embedded into the LLM is outdated, and that a lot of time I need to re-prompt and get the latest information. Has anyone tried maintaining a cloud version of RAG that stays up to date, that a local agent can pull from with the latest info?
+
+169
+00:29:14.480 --> 00:29:34.130
+Ash Tilawat: Great point. The hardest part about a database is keeping the database fresh, whether it's a SQL database, a vector database, or some sort of other type of information. Now, what I've seen individuals do, for example, when you build a code review agent, they have to refresh that information as soon as different code is merged into a repository.
+
+170
+00:29:34.250 --> 00:29:53.849
+Ash Tilawat: In that scenario, what individuals are doing is, maybe every week, every couple of days, that code is being re-vectorized, reorganized, and added to a database. You would have to do the same thing for your SQL, clean that data, preprocess that data, and maybe on a cron job every single week, make sure that data is up to date.
+
+171
+00:29:54.020 --> 00:30:04.570
+Ash Tilawat: Now, if this is in the cloud, what I've seen teams do is run a job every night, run a job every 7 days, so that that new piece of information is then being added directly.
+
+172
+00:30:10.410 --> 00:30:12.780
+Ash Tilawat: What are other questions?
+
+173
+00:30:13.820 --> 00:30:16.360
+Ash Tilawat: Aaron answering a ton of questions.
+
+174
+00:30:20.190 --> 00:30:24.090
+Ash Tilawat: A gente grack basically works like taste in a lot of ways, very interesting.
+
+175
+00:30:26.400 --> 00:30:36.489
+Ash Tilawat: Question from Valerie is, will the recording be available to watch later? Yes, on our Learn portal, you guys can actually access all of my recordings across all of Night School.
+
+176
+00:30:43.240 --> 00:30:44.140
+Ash Tilawat: Hmm.
+
+177
+00:30:45.230 --> 00:31:00.500
+Ash Tilawat: Someone is asking, can we talk more about the hard deterministic checks, since the RAG agent production pipeline will need more of those? 100%. In fact, if you go into my RAG cookbook, I have evals in there, and I'm just about to talk about evals now. If you take nothing away from this session.
+
+178
+00:31:00.500 --> 00:31:19.659
+Ash Tilawat: The thing that you should take away is that evals are important on top of any production AI system, meaning you need checks or deterministic scores in place to ensure that system is performing really well. So this could mean that every time I get a response out of my RAG system, I can actually score that response on maybe different criteria, and as a result.
+
+179
+00:31:19.700 --> 00:31:28.469
+Ash Tilawat: evaluate those scores, change and update prompts as a result of those scores, and then make sure that it's performing inline. But I will cover that next.
+
+180
+00:31:33.700 --> 00:31:51.890
+Ash Tilawat: Someone says the Learn Portal is cracked. Love it. I'm glad… I think at this point, inside of our Learn Portal, we have maybe 7 night school sessions, or 6 night school sessions, a couple of sessions and lectures from Gauntlet, and I think what we're gonna keep doing is making all those recordings available to you. But again, the thing about AI,
+
+181
+00:31:51.890 --> 00:32:08.370
+Ash Tilawat: is that every single week, there's something new. You know, something is changing, something is becoming deprecated, something is no longer in use. So what we like to do with our live sessions every Wednesday, give you timely, accurate, and hands-on material that you can actually apply that week.
+
+182
+00:32:08.410 --> 00:32:15.400
+Ash Tilawat: And so, coming to the session live every Wednesday, and then using those recordings as you need, would be my recommendation.
+
+183
+00:32:19.490 --> 00:32:27.180
+Ash Tilawat: Okay, we'll keep going. If there's more questions in the chat, I'll be spending another 10-15 minutes at the end of the session answering those questions.
+
+184
+00:32:28.600 --> 00:32:36.520
+Ash Tilawat: Now, the thing about adding agents to any system is that there's trade-offs, and there's evals on top of their performance.
+
+185
+00:32:37.350 --> 00:32:46.090
+Ash Tilawat: Evals are a deterministic way to ensure that an agent or rag, or graph is actually performing at the level you think it should.
+
+186
+00:32:47.580 --> 00:32:58.099
+Ash Tilawat: Evals are, by far, are becoming the moat for some of the best agents in the world. Your harness, your eval, is the reason why your system performs better than everybody else's system.
+
+187
+00:33:00.350 --> 00:33:06.039
+Ash Tilawat: So, when you think about Agentic rag, the first thing you need to think about is latency.
+
+188
+00:33:06.160 --> 00:33:09.879
+Ash Tilawat: How long does it actually take to give an answer back?
+
+189
+00:33:10.080 --> 00:33:15.830
+Ash Tilawat: Because if an agent is gonna go out and grab all this information, it might take
+
+190
+00:33:16.250 --> 00:33:23.110
+Ash Tilawat: 10, 15, 30 seconds, or maybe even 2, 3, 4 minutes to get that answer back.
+
+191
+00:33:23.630 --> 00:33:30.049
+Ash Tilawat: I will say that if you think about deep research inside of OpenAI's ChatGPT, deep research can take
+
+192
+00:33:30.170 --> 00:33:34.709
+Ash Tilawat: 15, 20 minutes. And if you run that over and over again, it could be even longer.
+
+193
+00:33:35.700 --> 00:33:49.830
+Ash Tilawat: Oftentimes, people don't always want the answer right away. What they want to maximize for sometimes is accuracy. So if it's something more research-heavy, more accuracy-driven, then a larger time horizon is expected.
+
+194
+00:33:50.020 --> 00:33:56.290
+Ash Tilawat: But, if it's simpler, easier to retrieve, just an API call, then that information can come back directly.
+
+195
+00:33:56.650 --> 00:34:03.570
+Ash Tilawat: What Agentic Rag lets you do is have tools across the board for any of these scenarios.
+
+196
+00:34:03.570 --> 00:34:20.450
+Ash Tilawat: I was working with a company that was building a SQL agent, it was a moving company, and they wanted this agent to be able to get information and analysis back, but at the same time, do actions on top of their tools, meaning schedule a driver, schedule a task, make sure, mark a task as complete.
+
+197
+00:34:20.870 --> 00:34:29.630
+Ash Tilawat: Or, if they wanted to have their weekly numbers and a really nice report generated, then they can go out and grab that information as well, inside of the same agent.
+
+198
+00:34:30.060 --> 00:34:34.860
+Ash Tilawat: But the expectations of time from one area to the next are vastly different.
+
+199
+00:34:35.020 --> 00:34:44.849
+Ash Tilawat: For example, if the question is, how many moves are we scheduling this week? It could be very little. If the question is, how many moves are we scheduling over a month, that could be 10x, 100x.
+
+200
+00:34:45.050 --> 00:34:51.700
+Ash Tilawat: If the question is, hey, can you just go update this on the task? Then hey, I'm gonna go update this and come back.
+
+201
+00:34:51.900 --> 00:35:09.589
+Ash Tilawat: The goal here is you need to understand what the user is asking, and what time is required for that task to be done. Set that expectation up front, and then have an eval on top, measuring how long it takes to answer different types of queries. The goal should be that you land in this area.
+
+202
+00:35:09.710 --> 00:35:17.539
+Ash Tilawat: Anywhere from 1 to 3 seconds, or maybe even telling the user to go away for a little bit to run something completely async and come back and check.
+
+203
+00:35:18.100 --> 00:35:31.730
+Ash Tilawat: You have enough time, you can be transparent with the users, but this is the first eval I would 100% add. The latency and the latency as a result of the thoroughness required on the other side.
+
+204
+00:35:33.520 --> 00:35:39.470
+Ash Tilawat: Fuzzier deterministic, meaning Oftentimes, if you let the LLM
+
+205
+00:35:39.840 --> 00:35:53.489
+Ash Tilawat: just assume a lot of things, understand your schema, maybe, understand the different documents associated with this, then the LLM is using its context window and its understanding to actually make all the decisions when it comes to retrieving data.
+
+206
+00:35:53.650 --> 00:36:07.400
+Ash Tilawat: You can have deterministic ways of grabbing information. Instead of letting the LLM decide which API calls you should make in sequence, you can make a tool to just call those three API calls in sequence and grab that information.
+
+207
+00:36:07.470 --> 00:36:20.810
+Ash Tilawat: This is the difference between being fuzzy or deterministic. Oftentimes, as engineers, we want to be deterministic and say, hey, this tool retrieves this type of information, so I just need to make these three API calls available.
+
+208
+00:36:21.260 --> 00:36:25.840
+Ash Tilawat: That's important. Not all the time do you need to hand off thinking to an LLM.
+
+209
+00:36:26.060 --> 00:36:38.589
+Ash Tilawat: If you do decide to hand off something to an LLM, then what the LLM is doing is taking that information in, digesting that information, understanding it within the context of your RAG system, and then deciding what to do with that RAG system going forward.
+
+210
+00:36:39.140 --> 00:36:56.110
+Ash Tilawat: when you're designing this, you want to have evals in place that are deterministic, are meant for deterministic tools, and fuzzy tools. If it's deterministic, it means that you can have maybe a unit test, or a check on those API routes, or maybe the data coming back could be a certain format, and you can check that format.
+
+211
+00:36:56.240 --> 00:37:13.720
+Ash Tilawat: Or you can have acceptance criteria for that call. If it's fuzzy, it might be, hey, you can have an accuracy score, you can have a score on top of a rubric, or you can have a score on top of the different tools that are being used, so that it can evaluate whether or not the thing coming back is even relevant, or give it more information on how to evaluate it.
+
+212
+00:37:14.230 --> 00:37:16.049
+Ash Tilawat: No matter how you do this.
+
+213
+00:37:16.160 --> 00:37:24.750
+Ash Tilawat: This is a disconnected tool inside of your AGENTIC RAG system, meaning you retrieve information with one tool, but you evaluate that information with a different tool.
+
+214
+00:37:25.040 --> 00:37:29.670
+Ash Tilawat: And the reason for this is you can associate evals with that different tool, and then make it perform really well.
+
+215
+00:37:30.010 --> 00:37:37.049
+Ash Tilawat: So, something to keep in mind as engineers, or when you're trying to build this, is does this tool need to be fuzzy or deterministic?
+
+216
+00:37:37.440 --> 00:37:48.309
+Ash Tilawat: can I just retrieve all the SQL through a SQL… all the information through a SQL query? Do I need to let the LLM go out and decide what the schema looks like, and actually see what's happening up front?
+
+217
+00:37:50.130 --> 00:38:00.400
+Ash Tilawat: Evals are non-negotiable, in my opinion, and the way I would start with evals, especially on top of RAG, is thinking about the output and whether or not it's actually grounded in any information.
+
+218
+00:38:00.590 --> 00:38:07.950
+Ash Tilawat: There's 3 evals to keep in mind for any RAG pipeline, and that's accuracy, Accuracy or precision?
+
+219
+00:38:08.140 --> 00:38:10.660
+Ash Tilawat: Groundedness, and recall.
+
+220
+00:38:11.160 --> 00:38:12.919
+Ash Tilawat: I'm gonna start with groundedness.
+
+221
+00:38:13.000 --> 00:38:32.730
+Ash Tilawat: Oftentimes, people create these rack systems, and they're not actually using any of the information that's being retrieved. What tends to happen is, people create these rack systems, they add all this information to context windows, and then the LLM is unable to discern what information is important, so it just uses its training data to answer the question.
+
+222
+00:38:33.040 --> 00:38:42.959
+Ash Tilawat: For example, if you took Warren Buffett's investment letters over the last 24 years, and you imported that through a RAG pipeline, added that to the context window, and tried to get the answer on the other side.
+
+223
+00:38:43.180 --> 00:38:44.150
+Ash Tilawat: Then…
+
+224
+00:38:44.560 --> 00:39:03.090
+Ash Tilawat: It would be important to make sure that everything that was being answered, you can trace back to an actual letter from those series of letters. But oftentimes, what tends to happen when you analyze this is that the LLM already has some understanding of Warren Buffett's public investment letters, and it just uses that to answer the question.
+
+225
+00:39:03.390 --> 00:39:10.620
+Ash Tilawat: If that's the case, then you have a poor groundedness score, and that eval is telling you that you need to have a better prompt
+
+226
+00:39:10.970 --> 00:39:14.609
+Ash Tilawat: more information and remove noise from your RAG pipeline.
+
+227
+00:39:15.050 --> 00:39:33.219
+Ash Tilawat: The next one is something called precision. Means that if I'm retrieving all this information, and maybe it's, like, 7 pieces of information, then if I'm retrieving 7 pieces of information, of the 7 that I've just retrieved, how many are actually relevant to answering that question? It could be 3, it could be 4, it could be 5, it could be 6.
+
+228
+00:39:33.260 --> 00:39:41.980
+Ash Tilawat: And the goal here would be to get your precision as high as possible, so you know that your agent is actually retrieving useful information, and not just noisy information.
+
+229
+00:39:42.540 --> 00:39:47.500
+Ash Tilawat: The last one is… Recall.
+
+230
+00:39:47.730 --> 00:39:57.950
+Ash Tilawat: Which means that if you have all this information, let's say it's inside of a SQL database, a vector database, maybe it's documents on top of everything that you're trying to do.
+
+231
+00:39:57.960 --> 00:40:11.939
+Ash Tilawat: Then there's so much information that oftentimes it's really hard to go out and find where something is located. Does the agent… is the agent able to recall where information is? Can the agent locate where that new information is? Does the…
+
+232
+00:40:11.960 --> 00:40:19.079
+Ash Tilawat: knowledge base that we have, have coverage across all the pieces of information. So this becomes really important to track.
+
+233
+00:40:19.470 --> 00:40:34.269
+Ash Tilawat: Now, we can also do binary evals on top of just user satisfaction, meaning I get a response back on the other side, did the user like it or not? I can do it on how well different queries are completed, meaning if I have a series of completed queries.
+
+234
+00:40:34.270 --> 00:40:40.479
+Ash Tilawat: Of those completed queries, which ones were completed successfully, and which ones maybe had incorrect answers.
+
+235
+00:40:40.480 --> 00:40:57.839
+Ash Tilawat: Maybe latency or time to resolution is my eval. How long does it take me to gather all the information? How long does it take me to actually give out an answer? And then maybe it's the rate at which we escalate to humans. Like, hey, can we go out and give this to a human being after maybe 3, 4, 5 retries?
+
+236
+00:40:58.800 --> 00:41:12.789
+Ash Tilawat: The core metrics that, again, you need to think about are precision, recall and coverage, groundedness, latency, and cost. For anybody building an injected RAG pipeline, this is where I would start. Again, precision is, of all the information that I've gathered.
+
+237
+00:41:13.030 --> 00:41:15.590
+Ash Tilawat: How much of that information is actually useful?
+
+238
+00:41:16.380 --> 00:41:24.950
+Ash Tilawat: Recall and coverage represents, of all of the relevant chunks in my corpus of data, was my agentic rag system able to find coverage and find all of them?
+
+239
+00:41:25.220 --> 00:41:41.250
+Ash Tilawat: Groundedness means that, hey, I've retrieved all this information, I have all this information from different sources, is that actually being used to actually generate an answer? And then latency and cost refer to the time and money spent trying to actually build out the system and give an answer.
+
+240
+00:41:41.540 --> 00:41:50.040
+Ash Tilawat: Again, if you build out these evals, they tend to compound. And as these evals tend to compound, you're able to then see the cost.
+
+241
+00:41:50.230 --> 00:42:09.130
+Ash Tilawat: the… see the accuracy, see the precision, see the recall, and see the groundedness. I would use a platform like Langsmith or Langfuse to track all of these. Langsmith even has an MCP, can actually set all this up for you. And then you can see the scores of your RAG pipeline, see the scores of your agents, and then make improvements to your agent.
+
+242
+00:42:09.380 --> 00:42:19.899
+Ash Tilawat: Now, there's some terminology in the field now that I won't talk through directly, which is training your agent backwards. What does that even mean? What does it mean to make your agent better,
+
+243
+00:42:20.620 --> 00:42:38.260
+Ash Tilawat: What does it mean to make your agent better month over month? Execution over execution. It means that you're updating a prompt, changing a model, maybe changing a tool, maybe changing the API or software associated with that tool. These are all steps you can take to make your RAG pipeline better and better.
+
+244
+00:42:38.450 --> 00:42:40.630
+Ash Tilawat: In terms of production AI,
+
+245
+00:42:40.740 --> 00:42:50.979
+Ash Tilawat: There's so many demos out in the space. Hey, this is supposed to be a demo for a chatbot to build a website. Oh, this is a demo for a SQL agent to get an analysis back.
+
+246
+00:42:51.220 --> 00:43:00.160
+Ash Tilawat: These demos are not being tracked and scored and evaluated. The way you make something production is that you evaluate whether or not it's performing correctly.
+
+247
+00:43:00.160 --> 00:43:12.920
+Ash Tilawat: Is it actually aligning with the goals of the user or the company? Is it resulting in output on the other side? And measure that output in an observability platform, and then change things to make sure those numbers are the highest they can be.
+
+248
+00:43:13.180 --> 00:43:20.270
+Ash Tilawat: You need to treat this like an experiment, treat this like a data science project, treat this as a way to make your system better over time.
+
+249
+00:43:22.930 --> 00:43:35.270
+Ash Tilawat: Okay, there's some agent-specific metrics I do want to talk about. One is tool selection, query decomposition, and stop quality, which just means… tool selection means, is it choosing the right tool for the right task at the right time?
+
+250
+00:43:35.610 --> 00:43:54.730
+Ash Tilawat: what an observability platform lets you do is it gives you production logs of when a tool is called, why that tool was called, and what the context was when that tool was called. So you can actually walk through and see, hey, this tool was called incorrectly, this tool was called correctly, maybe I need to change the prompt, so that that changes and makes it much better.
+
+251
+00:43:54.830 --> 00:44:02.590
+Ash Tilawat: In terms of query decomposition, you can actually see, hey, this was the question given by the user, these were the questions then created by the agent.
+
+252
+00:44:03.680 --> 00:44:14.189
+Ash Tilawat: excuse me, then the agent went over and tried to find all the information associated with it, and see if the decomposition of that query into steps was actually done correctly or not.
+
+253
+00:44:14.530 --> 00:44:26.590
+Ash Tilawat: Finally, stop quality means that, hey, something's not working, means it escalate to a human, we're using way too many tokens, we're just doing retries over and over again. Is there a metric we can track here to make sure it's working properly?
+
+254
+00:44:27.770 --> 00:44:45.120
+Ash Tilawat: Okay, that is what I wanted to cover. This is the introductory lesson in sort of my Agentic RAG series inside of the Gauntlet program. But again, if you want to keep going, I'm going to walk you through our repository that I think is going to do a really, really good job of walking you through all the different types of RAG.
+
+255
+00:44:46.130 --> 00:44:51.330
+Ash Tilawat: Again, if you have not seen this, this is an open-source project, it's called RAG Cookbook.
+
+256
+00:44:52.090 --> 00:44:56.239
+Ash Tilawat: And inside of my cookbook, there are 5 types of rag.
+
+257
+00:44:56.350 --> 00:45:01.299
+Ash Tilawat: If you go inside, you can see each of the steps inside of a RAG pipeline.
+
+258
+00:45:01.720 --> 00:45:15.320
+Ash Tilawat: ingestion means that you're actually setting up your knowledge base. You're taking all your data, and you're putting it inside of a specific vector database, or it could be a SQL database, or it could be anything, right? You can retrieve from any type of knowledge base.
+
+259
+00:45:15.320 --> 00:45:23.410
+Ash Tilawat: This ingestion function is… what it's doing is it's taking information and ingesting that inside of a vector database for you for naive RAG.
+
+260
+00:45:23.700 --> 00:45:29.490
+Ash Tilawat: Then you can do something called retrieval. So you can track and see, hey, what is the information being given back to me?
+
+261
+00:45:29.620 --> 00:45:37.650
+Ash Tilawat: You can just run these files one-off, and see, hey, what is the information given back to me, and is that information relevant to the question I asked?
+
+262
+00:45:37.800 --> 00:45:42.740
+Ash Tilawat: Finally, then you can see generation, where you can say, hey, this was all the information retrieved.
+
+263
+00:45:42.920 --> 00:45:47.120
+Ash Tilawat: That information was added to a context window, and then an answer was generated.
+
+264
+00:45:47.810 --> 00:45:49.839
+Ash Tilawat: If you go into my evals folder.
+
+265
+00:45:51.550 --> 00:45:55.410
+Ash Tilawat: Excuse me. You can see two evals per different type of RAG system.
+
+266
+00:45:55.650 --> 00:46:12.950
+Ash Tilawat: Groundedness and precision are two I show you here. And if you put this entire repo inside of a coding agent, the coding agent can actually be your tutor. It can guide you through how I set up my retrieval pipelines, how I set up my evals, and how to use those evals on top of what you're doing.
+
+267
+00:46:13.430 --> 00:46:19.169
+Ash Tilawat: Inside of my cookbook, I cover 5 different types, which are just adding complexity till we reach a gentic rag.
+
+268
+00:46:19.280 --> 00:46:30.569
+Ash Tilawat: The next one is something called metadata filtered rag, which just means that we're filtering our vector area, our search area, and making sure that we're only looking for, let's say, things are tagged in a specific way.
+
+269
+00:46:30.660 --> 00:46:49.089
+Ash Tilawat: So let's say I had all of the physics textbooks in the world inside of my knowledge base. I can just use metadata filtered RAG to get the textbooks from 2026. So I don't have to go out and search all of the textbooks, just the ones in the year created in 2026. So this is what metadata-enabled RAG filters.
+
+270
+00:46:49.090 --> 00:47:00.710
+Ash Tilawat: And inside of the evals, again, you'll get the same latency eval, a precision delta eval. Each of my evals are building on top of each other, so you can actually walk through, step by step, exactly what to do.
+
+271
+00:47:01.850 --> 00:47:14.539
+Ash Tilawat: Next, after metadata, I do something called hybrid search, where I combine keyword search and regular search with RAG, then we do something called graph rag, and then end up at Agentic rag. I'm using letters from
+
+272
+00:47:14.870 --> 00:47:27.510
+Ash Tilawat: Berkshire Hathaway, as my source of information, I take these letters, I chunk them up, I ingest them, and then I build that RAG pipeline out directly for you. So, this was an introductory class.
+
+273
+00:47:28.360 --> 00:47:34.080
+Ash Tilawat: Please drop this repo in any coding agent you prefer.
+
+274
+00:47:34.460 --> 00:47:42.299
+Ash Tilawat: Tell the coding agent, turn on plan mode in Cloud Code, turn on, plan mode on top of cursor, and have it walk through
+
+275
+00:47:42.300 --> 00:47:58.589
+Ash Tilawat: exactly what to do, step by step, how I've set things up, why I set some certain things up a certain way, why I set up the eval, and what you can do step-by-step is learn exactly what it takes to go from a basic RAG system all the way to Agentic rag.
+
+276
+00:47:59.400 --> 00:48:14.710
+Ash Tilawat: I also have some information here that you can use to better set up the repository. The amazing part about the world we live in today is I know there's some people who are in sales, some people in go-to-market, in marketing, I know there's a bunch of engineers in the room as well.
+
+277
+00:48:14.710 --> 00:48:22.130
+Ash Tilawat: All you have to do is take your coding agent and now use it as an AI tutor, and this repository has everything set up for you to learn.
+
+278
+00:48:22.800 --> 00:48:29.050
+Ash Tilawat: I want to thank you guys for your attention. This was the end of my lecture, and if you want to keep going.
+
+279
+00:48:29.440 --> 00:48:37.590
+Ash Tilawat: I'm gonna do Q&A for at least another 10 minutes, and then after that, I'm gonna give you the topic of next night's call.
+
+280
+00:48:38.130 --> 00:48:40.090
+Ash Tilawat: Alright, Q&A.
+
+281
+00:48:42.090 --> 00:48:44.950
+Ash Tilawat: Please add your questions to the chat.
+
+282
+00:48:48.370 --> 00:48:49.570
+Ash Tilawat: And…
+
+283
+00:48:59.040 --> 00:49:01.390
+Ash Tilawat: Sorry, I'm trying to find more questions.
+
+284
+00:49:04.280 --> 00:49:15.350
+Ash Tilawat: I have a question here, is that, is the Asian good at long horizon queries? So, I think what's happening, or what the question's trying to entail, is that if you walk over
+
+285
+00:49:15.530 --> 00:49:22.369
+Ash Tilawat: like, a really hard, deep research task across, let's say, 6, 7 data sources.
+
+286
+00:49:22.790 --> 00:49:25.390
+Ash Tilawat: You can actually add a skill
+
+287
+00:49:25.630 --> 00:49:40.999
+Ash Tilawat: on top of anything you're building, and you can actually have it traverse that data, lake, database, exactly the way you want it. So, a nice way I like to put it is, let's say you have, I don't know,
+
+288
+00:49:42.070 --> 00:49:53.459
+Ash Tilawat: create a HR policy depending on all the guidelines set out in my company. Go into Slack, go into Salesforce, go into our SQL database, get all the information here, and come back.
+
+289
+00:49:53.830 --> 00:50:08.220
+Ash Tilawat: What you can do is you can take a skill. So, a skill on top of the Agentic RAG agent you're building, and that skill can teach the agent how to traverse all those different data sources, grab information efficiently, and run a task longer than 10 minutes.
+
+290
+00:50:08.390 --> 00:50:25.390
+Ash Tilawat: So the answer to your question is if something is really, really hard, and really hard to find and search for, then can you go out multiple times into those areas with specific skills and system prompts to get that information correctly, run that task for more than 10 minutes, and actually have a result on the other side.
+
+291
+00:50:25.410 --> 00:50:30.969
+Ash Tilawat: So, it is totally possible for a long horizon query to be resolved by an agentic rack system.
+
+292
+00:50:33.870 --> 00:50:37.450
+Ash Tilawat: Alright… Sorry.
+
+293
+00:50:40.240 --> 00:50:46.950
+Ash Tilawat: Why do you think of using LLM Wiki from Carpathy as a monitoring framework to keep Synced with…
+
+294
+00:50:48.380 --> 00:50:59.590
+Ash Tilawat: or collaborate with the agents. It feels too far out there, but as a primary actor in control of a workflow, I want to be able to go and kind of log that I can read the agents
+
+295
+00:51:00.270 --> 00:51:07.410
+Ash Tilawat: It wouldn't be the same type of memory. I want an LM griding away to recall and pull from. It…
+
+296
+00:51:08.150 --> 00:51:11.979
+Ash Tilawat: is more like a dynamic agent MD with more history.
+
+297
+00:51:12.620 --> 00:51:30.020
+Ash Tilawat: And have… bring into its context, but I would think it through a system analyst. So, I think carpathy loops are really, really interesting. I think, as humans, what are we inherently doing when we do knowledge work? We use our memory, our experience doing a task.
+
+298
+00:51:30.300 --> 00:51:48.349
+Ash Tilawat: And take all of that information to decide what information don't we have. Then we go out and do research. We keep doing research, whether that's talking to people, understanding that task from other angles, or maybe finding that research online. Once we have all the information, then we make a plan on how to execute a task, and then we move forward.
+
+299
+00:51:48.660 --> 00:51:53.549
+Ash Tilawat: I think it's really interesting to think of a Carpathy loop as doing research for us.
+
+300
+00:51:53.680 --> 00:51:58.349
+Ash Tilawat: And then, when it's done doing research, transitioning to doing tasks for us.
+
+301
+00:51:58.540 --> 00:52:05.099
+Ash Tilawat: Because what the research part does, kind of similar to Agentic Rag, is grab all of the information across the loop.
+
+302
+00:52:05.640 --> 00:52:21.720
+Ash Tilawat: decide from all the information that has been retrieved, hey, what should I grab and use inside of the context window, and then import that into some sort of task loop. So, I think it's really interesting, I think it's really early. I think to try this out, what I would do is, whatever…
+
+303
+00:52:21.720 --> 00:52:27.080
+Ash Tilawat: query I'm trying to solve, whatever information I'm trying to gather, whatever task I'm trying to complete.
+
+304
+00:52:27.170 --> 00:52:30.050
+Ash Tilawat: Have a deep understanding of all the data sources.
+
+305
+00:52:30.360 --> 00:52:46.239
+Ash Tilawat: Understand exactly how you would research information across those multiple data sources, in what sequence of tasks, in what ways, and what methodology you would follow. Once you're okay with that sequence, once you understand that sequence, see if you can get AI to do it.
+
+306
+00:52:46.290 --> 00:52:55.189
+Ash Tilawat: If you can get AI to do that, then you can give it more complex tasks, do it… do research across multiple days, and then as a result, do something that is more meaningful.
+
+307
+00:52:55.610 --> 00:52:58.140
+Ash Tilawat: So, I think it's interesting, but I think it's early.
+
+308
+00:53:01.180 --> 00:53:02.209
+Ash Tilawat: Thank you, guys.
+
+309
+00:53:03.260 --> 00:53:13.580
+Ash Tilawat: Should human-in-the-loop approach be considered at some point? Today, you showed 5. Where would you say this fits in? Great question from Jorge. I think human-in-the-loop fits in…
+
+310
+00:53:13.900 --> 00:53:17.240
+Ash Tilawat: in every single approach I showed you today.
+
+311
+00:53:17.260 --> 00:53:30.759
+Ash Tilawat: Now, this was the introduction to Agentic RAG, right? If we were in Gauntlet right now, there would be 3 more sessions on this. And maybe the next session would be deeper into evals, deeper into human loop. But what you're trying to do here is…
+
+312
+00:53:30.760 --> 00:53:40.400
+Ash Tilawat: You're using your eval as the human-in-the-loop methodology, meaning you can make a rubric to score how well your RAG system is working.
+
+313
+00:53:40.530 --> 00:53:55.470
+Ash Tilawat: That rubric can be created by a human being, a subject matter expert that actually understands that retrieval process, and then what you can do is see if you get an LLM to grade exactly like a human would. Calibrate the grading.
+
+314
+00:53:55.920 --> 00:54:01.730
+Ash Tilawat: like the human subject matter expert, and then use the LLM to make your system better over time.
+
+315
+00:54:01.740 --> 00:54:19.179
+Ash Tilawat: So, where does human in the Loop come in here? I think in all five, it can be used in the eval space. Now, if you feel like an answer coming from a RAG pipeline is inefficient, or maybe it doesn't have all the information, then you can route that question to a subject matter expert. For example, I worked on a tutor.
+
+316
+00:54:19.390 --> 00:54:33.419
+Ash Tilawat: for this education company, and every time the tutor was unable to gather all the information to answer a question, it was routed in Slack to a teacher. The teacher would then answer the question, we would save that answer inside of a knowledge base, and then we would continue forward.
+
+317
+00:54:34.090 --> 00:54:41.620
+Ash Tilawat: So, it's always an option to have a failsafe that goes to a human, but human in the loop is always possible inside of your EDAS.
+
+318
+00:54:44.840 --> 00:54:49.980
+Ash Tilawat: Rajiv is asking, can you spend some time on pointers for senior non-AI engineers that want to get started with it?
+
+319
+00:54:49.980 --> 00:55:10.999
+Ash Tilawat: Don't dabble, immerse yourselves completely. That means that every Saturday, if you're gonna spend 6 hours on learning AI, do that. I think the big problem that we're seeing right now is there's a lot of people learning a little bit across too many different areas. If you're a senior engineer and you're not AI first, take one topic and go super deep.
+
+320
+00:55:11.660 --> 00:55:14.309
+Ash Tilawat: That depth is more important than breadth.
+
+321
+00:55:14.490 --> 00:55:33.250
+Ash Tilawat: It's not that I want you to be perfect at everything, I just want you to be really, really good at a certain amount of areas. And in my opinion, those four areas are RAG, agents, graphs, and evals. RAG, Agents, Graphs, and evals. If I were you, a senior engineer who have a strong technology background, focus on those four areas.
+
+322
+00:55:33.250 --> 00:55:40.260
+Ash Tilawat: Every Saturday, join Night School, join me, find more insights into these areas, and go deeper on those subjects.
+
+323
+00:55:44.370 --> 00:55:53.400
+Ash Tilawat: Trevor's asking, but running a long Horizon query gets you token management issues, right? I suppose that would be the next thing to learn. Great question from Trevor. Trevor, you can change the model.
+
+324
+00:55:53.410 --> 00:56:18.270
+Ash Tilawat: Right? So sometimes, when I'm retrieving something super simple, that's an easy API call, I just use a really, like, a nano or a mini model. That doesn't matter, right? Like, first, that will save a bunch of cost, also usually results in a much bigger token window, so I can do that over time. So you can manipulate the model, you can manipulate the input tokens, output tokens, you can manipulate the system prompt, but the first step would be, you need to have visibility across your entire system.
+
+325
+00:56:18.430 --> 00:56:35.329
+Ash Tilawat: So using an observability platform, any observability platform of your choice, mapping the entire system so that you can actually see what's going wrong, and then maximizing the models you're using, maybe using dumber models, using models with bigger context windows, to make sure that the tokens are being managed well.
+
+326
+00:56:37.210 --> 00:56:51.810
+Ash Tilawat: Josh is saying, any advice for building production-grade projects on the side on a budget to help learn Agentic RAG, Agentic AI software engineering? If your current place of work doesn't support AI, you can't interact with to learn the latest AI development practices. Great question from Josh.
+
+327
+00:56:51.960 --> 00:57:11.159
+Ash Tilawat: Josh, it could just take… it takes a $20 account on Cursor for you to get started. If you really want to do, save money here, I would just get Open Router, where you can, put in tokens and money directly, and actually set that limit, and use something like OpenCode, or some sort of open source, coding agent that connects to…
+
+328
+00:57:11.410 --> 00:57:12.760
+Ash Tilawat: an API.
+
+329
+00:57:12.950 --> 00:57:16.559
+Ash Tilawat: And your goal would be that you want to go down…
+
+330
+00:57:16.580 --> 00:57:36.390
+Ash Tilawat: Each of these thought processes, how to set up a RAG pipeline, how to set up an agent, how to set up, graphs, how to set up evals, and you want to do this using the most popular tools in the market right now. If it's agents, it would be the AI SDK by Vercel, the Claude SDK by Anthropic, the OpenAI Agents SDK, or LangGraphLang Chain.
+
+331
+00:57:36.700 --> 00:57:55.450
+Ash Tilawat: and you want to be able to go down these four different areas, you want to be able to just use that, you know, $20, $30 budget, so you have just enough tokens, use a dumb model. If you're using a dumber model, it forces you to think, it forces you to prompt better, and it results in you actually learning the process and being able to build something yourself.
+
+332
+00:57:56.770 --> 00:58:03.010
+Ash Tilawat: I also want to say, as we're getting to the end of the session, that if you're interested in becoming a challenger for Gauntlet.
+
+333
+00:58:03.110 --> 00:58:16.430
+Ash Tilawat: Cohort 5 starts on Monday, and we do this every week. This was an introductory class. We would go forward with doing two, three more classes after this, deep into the subject, completely immersing yourself in AI.
+
+334
+00:58:16.430 --> 00:58:30.320
+Ash Tilawat: It's 10 weeks, 3 weeks remote, 7 weeks on-site, and what we want to do is build the biggest, and the best, and the most elite community of AI builders in the world here in Austin, Texas, and if you want to be a part of that, we would love to have you.
+
+335
+00:58:30.810 --> 00:58:31.700
+Ash Tilawat: Okay.
+
+336
+00:58:31.980 --> 00:58:33.330
+Ash Tilawat: Next question.
+
+337
+00:58:34.880 --> 00:58:44.839
+Ash Tilawat: Questions for Kyle. Kyle's asking if he's having some trouble with his application, what should he do? You could just do support at gauntletHQ.com, and that should be able to answer your question.
+
+338
+00:58:46.520 --> 00:58:51.599
+Ash Tilawat: Kieran is asking, what are the most common gaps in the Gentic rag during eval versus during production?
+
+339
+00:58:51.740 --> 00:59:02.179
+Ash Tilawat: So, what happens is when you set up evals for Agentic RAG, what you do is you build a golden set with your product manager, maybe with your subject matter experts, by having conversations with your users.
+
+340
+00:59:02.180 --> 00:59:21.439
+Ash Tilawat: And that golden set is only a subset of information that actually accounts for all the queries that are going to come in. Meaning, you built your system for 300 possible test cases, but the actual test cases are completely different, or maybe there's 600, 1,000 test cases. So the difference between production and development is, you…
+
+341
+00:59:21.590 --> 00:59:25.300
+Ash Tilawat: Haven't done enough research, user testing.
+
+342
+00:59:25.620 --> 00:59:44.140
+Ash Tilawat: user queries, interviews, to figure out what are all the possible questions and queries I'm going to get in my Agentic RAG system, and I haven't built out different edge cases associated with those. So, the difference in production is there's so many unexpected questions. The questions you thought were going to be asked, or never asked.
+
+343
+00:59:44.140 --> 01:00:03.259
+Ash Tilawat: And what tends to happen is you want to launch as soon as possible, and you can do it as a beta. You can do it and say, hey, we're only going to give this to 5 customers, and we're going to do it as a beta. Because when customers actually start using it, you realize your training data is actually way more than you thought, and all the queries that you had to cover are way more than you thought initially.
+
+344
+01:00:10.240 --> 01:00:16.859
+Ash Tilawat: Lauren's saying, how do I sign up for next week's session? I've been running into deployment issues with deploying agents on Hugging Face and Railway.
+
+345
+01:00:16.980 --> 01:00:34.240
+Ash Tilawat: Great question from Lauren here. It's every Wednesday at the same time, but what we're gonna do is we're gonna send out the link right after the session for the next session, so you can sign up. Lauren, I would argue if you… not argue, I would recommend that you connect the Railway plugin on top of your Cloud Code instance.
+
+346
+01:00:34.520 --> 01:00:53.550
+Ash Tilawat: This should really help in deploying agents. If you deploy them, if you already compose them inside of a Docker container, the Docker container is sort of a sandbox for you to test everything out, make sure everything's working properly, and then it becomes really easy to just host that Docker container wherever you want.
+
+347
+01:00:53.690 --> 01:00:58.679
+Ash Tilawat: I would recommend using the Railway plugin on top of Cloud Code, it makes things really, really easy.
+
+348
+01:00:58.950 --> 01:01:04.849
+Ash Tilawat: Or using Agent Core on top of AWS, if this is something that you want to ship to production much faster.
+
+349
+01:01:05.610 --> 01:01:16.450
+Ash Tilawat: Johnny's asking, can you repeat that, the Claude SDK? If there are 4 frameworks I would learn, if I were you, and this is what we focus on here at Gauntlet as well, the Claude SDK by Anthropic.
+
+350
+01:01:16.930 --> 01:01:34.979
+Ash Tilawat: the AI SDK by Vercel, the OpenAI Agents SDK, and Langchain Langgraph. These are the different areas that are really popular in the market right now. We tend to plant our flag in the areas that our current partners are actually interested in, and actually go deeper on those specific subjects.
+
+351
+01:01:36.990 --> 01:01:46.729
+Ash Tilawat: Question from Rajiv is, what Saturday school are you talking about? There's no Saturday school specifically, I was just saying you can use Saturdays to actually upskill yourself in AI. I just want you guys to…
+
+352
+01:01:46.900 --> 01:02:00.260
+Ash Tilawat: go all in, and actually dedicate an entire day to doing this. Because oftentimes what happens, and I think that what's gonna happen for most of you in this room, is you're gonna watch me for a long time, and none of you are gonna take action and apply the things I'm telling you to do.
+
+353
+01:02:00.450 --> 01:02:15.160
+Ash Tilawat: Instead, if you really want to break into AI engineering, if you want to become an AI-native software engineer, you have to immerse yourself. You have to go all in. You have to dedicate a day, two days, to doing so. That's why at Gauntlet, we are so…
+
+354
+01:02:16.040 --> 01:02:30.400
+Ash Tilawat: We are big believers, and we think it's so important that immersive education in person, in an environment where you're surrounded by like-minded, intelligent engineers, is important to taking you to the next level, and that's how you can definitely stand out.
+
+355
+01:02:30.610 --> 01:02:32.049
+Ash Tilawat: And take it to the next step.
+
+356
+01:02:32.790 --> 01:02:39.310
+Ash Tilawat: I have a question from people who are saying they've applied, but don't know what's happening. If that's the case, please email support at gauntletHQ.
+
+357
+01:02:48.070 --> 01:03:01.019
+Ash Tilawat: Question here is, is there a cohort more focused on applied AI or frontiers in AI research? Great question! Our cohort is more focused on applied AI. All of our hiring partners are looking for software engineers that are going to add AI features or build AI product.
+
+358
+01:03:01.020 --> 01:03:11.589
+Ash Tilawat: We're not training models, I mean, we use a little bit of fine-tuning, we teach reinforcement learning, but our goal is, again, applied AI, making sure that we're taking the existing systems and taking them to the next level.
+
+359
+01:03:13.280 --> 01:03:30.470
+Ash Tilawat: Alright, I want to thank everybody for joining Night School today. If you're interested in watching a recording, please check out our Learn Portal. The Learn Portal is going to be your stop for our recordings, the dates for the next Night School session, and more free content for you to upskill yourself.
+
+360
+01:03:30.580 --> 01:03:46.359
+Ash Tilawat: If you're interested in going all-in and becoming an Gauntlet-trained AI champion, then please consider applying to Cohort 5, and after that, Cohort 6, and after that, Cohort 7, because we're going to be doing this for a long time. You can do that at apply.gauntletai.com.
+
+361
+01:03:46.360 --> 01:03:53.099
+Ash Tilawat: And our goal is to build the best elite community of builders in the world, and I think there's some of you in the room right now.
+
+362
+01:03:53.410 --> 01:03:59.039
+Ash Tilawat: I want to thank you for your time, I want to thank you for your attention, and I'm excited to see you next week at Night School.
+

@@ -1,0 +1,1618 @@
+WEBVTT
+
+1
+00:00:08.029 --> 00:00:10.570
+Aaron Gallant: Alright, so we are live.
+
+2
+00:00:10.690 --> 00:00:17.600
+Aaron Gallant: Hello and welcome. Anybody out there, thank you for joining us. This is Night School.
+
+3
+00:00:17.650 --> 00:00:37.359
+Aaron Gallant: My name is Aaron Gauntlet. This is my first time teaching night school, but pretty far from my first time teaching. In fact, I've been teaching at Gauntlet since the beginning. And if you're joining us, please, drop where you're from in the chat. Love to see the whole range and…
+
+4
+00:00:37.880 --> 00:00:46.599
+Aaron Gallant: variety that we get here, it's always great. It's one of the powers of the… Tokyo! Very cool. Japan… Japan's fun to… fun to visit,
+
+5
+00:00:46.800 --> 00:00:52.830
+Aaron Gallant: I… Let's see here. Saludos from Seattle, Indianapolis, Kansas, Sao Paulo, alright!
+
+6
+00:00:53.150 --> 00:00:55.029
+Aaron Gallant: It's another place that's pretty fun to visit.
+
+7
+00:00:55.660 --> 00:00:59.240
+Aaron Gallant: Germany? Wow. Belfast?
+
+8
+00:01:00.120 --> 00:01:06.470
+Aaron Gallant: And some Austin, and then Aussie, which I think is different than Austin, but that's both great.
+
+9
+00:01:07.000 --> 00:01:09.960
+Aaron Gallant: Dubai, even. Okay, we've got quite a spread.
+
+10
+00:01:10.100 --> 00:01:21.980
+Aaron Gallant: And also, if you want to drop in the chat, you know, a little bit about your background and what you're hoping to, get out of this. You know, what you are interested in here.
+
+11
+00:01:24.220 --> 00:01:28.440
+Aaron Gallant: And I do see there's an audio loop on the call.
+
+12
+00:01:29.160 --> 00:01:29.850
+Aaron Gallant: I…
+
+13
+00:01:30.330 --> 00:01:40.000
+Aaron Gallant: If anybody else can confirm if there's any audio quality issues, let me know. But, yeah, we've checked this a little bit, so could be on your side if you want to double check, too.
+
+14
+00:01:40.400 --> 00:01:49.729
+Aaron Gallant: Alright, yeah, let's see what people are doing here. Hoping to become an AI-native engineer, forward-deployed engineer.
+
+15
+00:01:49.900 --> 00:01:50.820
+Aaron Gallant: Sure.
+
+16
+00:01:51.920 --> 00:01:54.330
+Aaron Gallant: Anybody else? Got some goals?
+
+17
+00:01:54.680 --> 00:01:57.830
+Aaron Gallant: Some things they hope to use all this new fun technology for.
+
+18
+00:02:01.640 --> 00:02:04.890
+Aaron Gallant: Alright, well, you can click on it and drop it in the chat, too.
+
+19
+00:02:05.110 --> 00:02:10.280
+Aaron Gallant: Just here to learn, that's always good, too. I… I really connect to that, actually. That's…
+
+20
+00:02:10.470 --> 00:02:13.700
+Aaron Gallant: Why I teach so much, because you also learn when you teach.
+
+21
+00:02:15.480 --> 00:02:19.819
+Aaron Gallant: train a model to classify documents for work. Well, that's great, Jacob. We might talk…
+
+22
+00:02:20.280 --> 00:02:25.900
+Aaron Gallant: Not specifically, specifically about that, but we'll give you some context to help you figure that out.
+
+23
+00:02:29.540 --> 00:02:40.399
+Aaron Gallant: Great, some good stuff. Build ML models and AI-powered apps. Well, let's dig into it then, shall we? Because that's really the point of this session, is to, sort of…
+
+24
+00:02:40.790 --> 00:02:56.220
+Aaron Gallant: disambiguate, to understand a little more specifically what these things are, and what it means, for instance, to train a machine learning model, and why you might want to do it, why you might not want to do it.
+
+25
+00:02:56.710 --> 00:03:14.529
+Aaron Gallant: And how it is different from the many other things we do. So, the topic is fine-tuning, and part of what's so fantastic about large language models is that they can be fine-tuned. They can be sort of continually trained. They are pre-trained.
+
+26
+00:03:14.590 --> 00:03:21.019
+Aaron Gallant: These big companies have spent piles of money training these enormous models that we have access to.
+
+27
+00:03:21.210 --> 00:03:25.249
+Aaron Gallant: And that gives them a general range of capabilities.
+
+28
+00:03:25.780 --> 00:03:31.000
+Aaron Gallant: But then you can train them more, and perhaps make them better, at least for some specific task. That would be the hope.
+
+29
+00:03:31.310 --> 00:03:47.310
+Aaron Gallant: Now, that said, there's a lot of trade-offs here. It's complicated, it's expensive, it's not as expensive as training from scratch, but it is significantly more expensive than just, you know, consuming the model, just doing simple inference, and that's most of what we do, by the way.
+
+30
+00:03:47.430 --> 00:03:57.620
+Aaron Gallant: So, you know, almost all the other techniques that are talked about in this space, all the other AI engineering stuff, RAG, context engineering, what have you, are all just…
+
+31
+00:03:57.790 --> 00:04:07.840
+Aaron Gallant: essentially a suite of techniques to try to use the inference of the model effectively. And if you're not following exactly what I mean by that, you hopefully will soon.
+
+32
+00:04:07.950 --> 00:04:09.780
+Aaron Gallant: But it's sort of like…
+
+33
+00:04:10.140 --> 00:04:20.929
+Aaron Gallant: we're just taking the model and using it versus changing the model itself. And, you know, most of the time, we don't do that. Most of the time, we just accept the black box. Now we're gonna actually
+
+34
+00:04:21.079 --> 00:04:23.179
+Aaron Gallant: Tinker with the black box a little bit.
+
+35
+00:04:23.420 --> 00:04:36.980
+Aaron Gallant: So, I'm gonna move through the slides here. I will share the link with the slides at the end, and there's also, as time allows, there's some code at the end. We'll share the link for that, and if I have time, I'll walk through the code, but if not, you'll have the code.
+
+36
+00:04:37.070 --> 00:04:52.199
+Aaron Gallant: And, please drop questions throughout in the chat. I'm monitoring the chat, I have it here on multi-monitor setup, so I will, I will do my best to pick up questions and answer them as I go.
+
+37
+00:04:52.570 --> 00:05:08.919
+Aaron Gallant: Of course, I will probably focus on questions that are relevant to the slide, so… or at least relevant to the topic. If you have other questions about Gauntlet or anything else, we have other staff. We've got Sunny there, who will help out in the chat answering questions. All right?
+
+38
+00:05:09.610 --> 00:05:10.960
+Aaron Gallant: Let's do it.
+
+39
+00:05:14.250 --> 00:05:21.900
+Aaron Gallant: So… when should you fine-tune a model? When should you consider opening that black box? Well…
+
+40
+00:05:22.400 --> 00:05:32.650
+Aaron Gallant: There's some situations here, and the first one teaches intuition where words fall short. That's a fancy way of saying you couldn't solve it with prompting.
+
+41
+00:05:32.780 --> 00:05:42.040
+Aaron Gallant: Right? Like, you couldn't get the model to do the thing. The model can't do it, you need to improve the model. That's… that might be the first thing that leaps to your mind.
+
+42
+00:05:42.050 --> 00:05:57.080
+Aaron Gallant: But that's actually not the most common case that I think we are seeing, because the models are pretty generally capable, and if you run into a situation where you can't do something with a particular model, you can usually just go up to the bigger model, right?
+
+43
+00:05:57.240 --> 00:06:01.749
+Aaron Gallant: And if you're in a situation where the biggest flagship model can't do the task.
+
+44
+00:06:02.280 --> 00:06:20.409
+Aaron Gallant: well, you're… maybe you could fine-tune that model and make it even a little better, but, like, that's… you're now at the cutting edge, like, you're competing with the research groups and the groups that are trying to advance the frontier, and it's cool, and I'm not saying you can't or shouldn't do that, but I will say that the majority of practical
+
+45
+00:06:20.860 --> 00:06:33.619
+Aaron Gallant: paying tasks, you know, things that companies want done, do not necessarily live all the way on the frontier, and that's okay. You know, we ride that, and we live a little bit short of it. So,
+
+46
+00:06:34.040 --> 00:06:35.460
+Aaron Gallant: We get to benefit from it.
+
+47
+00:06:35.740 --> 00:06:40.019
+Aaron Gallant: So, the first one, yeah, it's a valid use case, but you're not gonna see it.
+
+48
+00:06:40.420 --> 00:06:50.669
+Aaron Gallant: Now, the middle two are sort of my favorite, and they're the ones that you actually see a bit. You can make a smaller model better for a specific task.
+
+49
+00:06:50.680 --> 00:07:03.539
+Aaron Gallant: And you can also potentially make a model better at a task, but with less prompting required, less use of your context window, essentially. And both of these are efficiency gains, essentially.
+
+50
+00:07:03.540 --> 00:07:11.619
+Aaron Gallant: And also, potentially, not just efficiency gains, but, autonomy gains. And what I mean by that is,
+
+51
+00:07:12.000 --> 00:07:23.620
+Aaron Gallant: Let's say you want to, you work in a sensitive space, like, financial or security or medical space, and you need to have tight control.
+
+52
+00:07:23.630 --> 00:07:36.230
+Aaron Gallant: over certain aspects of your system. You can't just be tossing all of this stuff as API calls to somebody else's model. You know, you can't be using ChatGPT or Claude or any of that.
+
+53
+00:07:36.360 --> 00:07:38.510
+Aaron Gallant: So… what do you do?
+
+54
+00:07:38.640 --> 00:07:50.970
+Aaron Gallant: Well, those models are kind of the strongest models, but there are some pretty good models out there that are open, that you can download, and then you can fine-tune those models to be better for the specific task you're solving.
+
+55
+00:07:51.110 --> 00:08:05.379
+Aaron Gallant: And then now you have control of a model that is solving that problem for you, and you could potentially deploy it on your own hardware and maintain all that. So there's that aspect, the sort of privacy-security control aspect. And then there's also the efficiency aspect.
+
+56
+00:08:05.730 --> 00:08:25.339
+Aaron Gallant: Because really, as we'll see in most of the slides here, a lot of what we're doing with fine-tuning is working with smaller models and trying to make them good enough to solve some particular problem, maybe on the edge, or maybe just because we want it to be cheap, and maybe we still do it in the cloud, but a small model. And…
+
+57
+00:08:25.540 --> 00:08:35.859
+Aaron Gallant: What's really convenient about that, as we'll see, is you can use large models to essentially synthesize the training data, because the large model's already able to solve whatever this task is.
+
+58
+00:08:35.970 --> 00:08:42.619
+Aaron Gallant: And so you make the training data with the large model, and then you take that training data from the large model, and you train the smaller model.
+
+59
+00:08:42.890 --> 00:08:55.590
+Aaron Gallant: So that's, I think, the… the sort of sweet spot where fine-tuning is the most practical, and to give a few concrete use cases, and I do see that's a great question in chat, I'll get to that at the end of the slide.
+
+60
+00:08:56.190 --> 00:09:04.260
+Aaron Gallant: To give a few concrete use cases, let's say you wanted to train a
+
+61
+00:09:04.300 --> 00:09:14.260
+Aaron Gallant: Fraud detection system, and you wanted to have a step that analyzed, open text, analyzed some messages or emails or something.
+
+62
+00:09:14.270 --> 00:09:26.869
+Aaron Gallant: and tried to look for signs of fraudulent behavior, or signs of something like that, like, you know, in a financial context, payment processing or something. And let's say all this is considered kind of private, personal information.
+
+63
+00:09:26.920 --> 00:09:39.309
+Aaron Gallant: and your lawyers didn't sign the thing that lets you just send it to some other service. You have to do it on your own hardware, or at least within your own private cloud. And so, you take a small model.
+
+64
+00:09:39.400 --> 00:09:59.279
+Aaron Gallant: and you label, one way or another, you get a bunch of labeled cases of this is good text, this is bad text, and you use that to train the model to be better at making that decision. And you start from a smaller model, that, you can run more efficiently, and then you evaluate it, and you ensure that the accuracy is where you want it to be.
+
+65
+00:09:59.290 --> 00:10:00.140
+Aaron Gallant: So…
+
+66
+00:10:00.550 --> 00:10:16.570
+Aaron Gallant: that's sort of what this overall loop looks like, and we'll get to a few more of the specifics in the coming slides, of course. But that's, again, these two middle points here. If there's one takeaway from this whole session, it's that most of the time, you shouldn't use fine-tuning.
+
+67
+00:10:16.740 --> 00:10:34.349
+Aaron Gallant: And the main time to think about, like, the main time to think about it is when those aspects, when, you know, efficiency and control of small models, that's the most likely situation where it's like, hey, we could use a small model for this, and we could make it more efficient, we could have control of it. And that's when you might want to fine-tune.
+
+68
+00:10:34.600 --> 00:10:43.969
+Aaron Gallant: The last one, narrow the range of possibilities, that's talking about stuff like alignment, right? That's talking about,
+
+69
+00:10:44.400 --> 00:10:47.010
+Aaron Gallant: Trying to make,
+
+70
+00:10:47.510 --> 00:11:06.789
+Aaron Gallant: the model essentially have some sort of rails, some sort of limitations, or at least guidelines on what it does or doesn't do. And all models have this already. In fact, it's the big difference between the major flavors of large language models, because, you know, ChatGPT, Claude, and Grok are all trained on
+
+71
+00:11:06.820 --> 00:11:16.520
+Aaron Gallant: Give or take the entire internet, but they all have much different, reinforcement learning, fine-tuning, essentially, that has tweaked their behavior.
+
+72
+00:11:16.670 --> 00:11:31.190
+Aaron Gallant: And so, you know, maybe there's a situation where you would do this. I can imagine if you're working for some corporation that's particularly sensitive about how its, LLM behaves, you could potentially want to do this. But the thing is, is…
+
+73
+00:11:31.840 --> 00:11:38.269
+Aaron Gallant: It's not really the best way to try to ensure that a model is aligned or secure. Really, you need to check
+
+74
+00:11:38.370 --> 00:11:58.249
+Aaron Gallant: You need to have other checks. The way to do it is to check outside of the model, to not rely on the model to be fully aligned in and of itself, but to have other parts of your system that can also validate the integrity, security, whatever it is you care about about the model's behavior. You know, things like not allowing it to run RM-RF, stuff like that.
+
+75
+00:11:58.700 --> 00:12:05.370
+Aaron Gallant: So… that deletes all files, for anybody out there who's a little bit like, what was that?
+
+76
+00:12:05.400 --> 00:12:21.369
+Aaron Gallant: I know we might have a slight range of technical people in the audience here. So, let me get to some of the questions that came in here. Apple's working on getting Google's models to run on the iPhone. Are they using fine-tuning to do this? I mean, Apple might be fine-tuning the models to some extent for their use case.
+
+77
+00:12:21.370 --> 00:12:29.889
+Aaron Gallant: you'd have to ask Apple to be sure. I think that's mostly just about using those small Gemma models, on, you know, a nice…
+
+78
+00:12:30.230 --> 00:12:43.010
+Aaron Gallant: embedded context, because they're an appropriate model for that size, for, like, a phone. The Gemma models are good candidates for fine-tuning, though, if you wanted to fine-tune a model. They are reasonably sized for that.
+
+79
+00:12:43.600 --> 00:12:49.109
+Aaron Gallant: Is fine-tuning basically for privacy and saving money. Yeah, I mean, that's kind of what I'm getting at here. It's…
+
+80
+00:12:49.690 --> 00:13:01.350
+Aaron Gallant: Not strictly, to be clear, but that's where I would say most of the real, you know, useful cases are for it at the moment.
+
+81
+00:13:02.330 --> 00:13:10.880
+Aaron Gallant: My understanding is that most problems you might think to solve with fine-tuning can be accomplished with more appropriate model selection and prompt engineering. Bingo! Yes!
+
+82
+00:13:10.880 --> 00:13:24.959
+Aaron Gallant: You all already got the lecture, we're only 12 minutes in, we can call it, right? I'll keep going, but it's great to see this. Yeah, I mean, those two points are really emphasizing, like, yeah, do not start by fine-tuning. Start by
+
+83
+00:13:24.960 --> 00:13:37.889
+Aaron Gallant: By making sure you selected your model appropriately, and you're prompting it correctly, you're, you know, you set up whatever to retrieve context for it, your memory, all these other systems we let… because none of those systems change the model. Those systems just change
+
+84
+00:13:37.930 --> 00:13:40.219
+Aaron Gallant: How the model inference is done.
+
+85
+00:13:40.490 --> 00:13:41.460
+Aaron Gallant: So…
+
+86
+00:13:42.030 --> 00:13:56.659
+Aaron Gallant: Alright, and on that note, there's this little check for understanding here. So, if people want to drop in the chat, and if… hopefully, at least many of you, I think we've had previous sessions, know what retrieval augmented generation is at this point.
+
+87
+00:13:56.660 --> 00:14:06.819
+Aaron Gallant: But what would be a use case for retrieval augmented generation versus fine-tuning? And we've already talked about fine-tuning, so give, like, a use case that would work well with retrieval augmented generation.
+
+88
+00:14:07.020 --> 00:14:08.540
+Aaron Gallant: And not fine-tuning.
+
+89
+00:14:09.980 --> 00:14:12.689
+Aaron Gallant: And I'll keep answering questions while you think about that.
+
+90
+00:14:13.830 --> 00:14:20.010
+Aaron Gallant: With respect to privacy, are there any advantages to downloading a model and using it locally?
+
+91
+00:14:20.020 --> 00:14:36.690
+Aaron Gallant: Absolutely. I mean, I… VPC… so, VPC is Virtual Private Cloud, and that's nice. That means you're writing a big enough check to whatever cloud company to get some level of assuredness that there is privacy and security, and those are all pretty trustworthy, and
+
+92
+00:14:36.690 --> 00:14:40.090
+Aaron Gallant: Your corporate lawyers will probably be okay with it. But…
+
+93
+00:14:40.090 --> 00:14:55.320
+Aaron Gallant: you know, push comes to shove, there's no substitute for having the silicon yourself, right? It depends how paranoid you feel like being, and what your… what your threat model is, as they say in the security world, and I would not encourage excessive paranoia just for the sake of it.
+
+94
+00:14:55.320 --> 00:15:04.729
+Aaron Gallant: You know, make sure that you're solving the problem you actually need to solve. But yeah, strictly speaking, the closer things are, the more direct control you have over it, the more direct control you have over it.
+
+95
+00:15:04.790 --> 00:15:10.410
+Aaron Gallant: And, you know, there are cases where data centers might have issues, right?
+
+96
+00:15:10.520 --> 00:15:18.980
+Aaron Gallant: Of course, if you're gonna host it yourself, you are the data center now, and you're responsible for things like uptime. So, there's no free lunch. It's just more work.
+
+97
+00:15:20.020 --> 00:15:25.870
+Aaron Gallant: Alright. Are AI skills better than fine-tuning? Well, that's… it's not like an Apple…
+
+98
+00:15:26.210 --> 00:15:42.579
+Aaron Gallant: Apple comparison there, but, yeah, I mean, in the sense that, like, if you're trying to solve a problem and you think you could add skills, and by skills, I'm taking this to mean tool use plus pre-written prompts for those tools, essentially. That's kind of what we mean by skills.
+
+99
+00:15:42.630 --> 00:15:47.310
+Aaron Gallant: Yeah, that might be a better way to solve a lot of problems.
+
+100
+00:15:47.420 --> 00:16:02.210
+Aaron Gallant: Now, that said, fine-tuning does something that none of these other techniques can. So if you need fine-tuning, you need fine-tuning, right? And, again, the example would be constrained environment, you need to use a 1.3 billion parameter model, you need to make its accuracy at least
+
+101
+00:16:02.310 --> 00:16:09.349
+Aaron Gallant: X, whatever your business criteria is, and, you know, you fine-tune the model to get it there.
+
+102
+00:16:10.320 --> 00:16:13.100
+Aaron Gallant: Alright, so people were answering the question.
+
+103
+00:16:13.150 --> 00:16:30.710
+Aaron Gallant: Seeing some good answers to the RAG stuff. I'm not gonna read all of them out loud, but y'all can follow the chat as well. And I'll take one or two more questions, then I'm gonna dive back into the slides. Use cases for narrowing the range of possibilities. So, yeah, that's the idea of… I mean, I guess if you wanna…
+
+104
+00:16:31.010 --> 00:16:50.720
+Aaron Gallant: somewhat specific example, imagine you're a company like Disney, and you want to expose a chatbot, but you want to make sure that the chatbot behaves with appropriate, you know, Disney style. You could potentially do some fine-tuning to really enforce more than… like, because, yeah, you can prompt, you could prompt
+
+105
+00:16:51.300 --> 00:16:57.000
+Aaron Gallant: any LLM to be like, hey, behave like Mickey Mouse, right? But if anybody else comes along.
+
+106
+00:16:57.020 --> 00:17:13.460
+Aaron Gallant: and does a prompt injection, and says, you know, forget previous instructions and actually do this, that sort of… that's pretty easy to circumvent. If you actually fine-tune, you're changing the model itself, and it's a little bit harder to circumvent that sort of, guardrail.
+
+107
+00:17:13.460 --> 00:17:17.649
+Aaron Gallant: it's still, as I said earlier, not a guarantee, because the model
+
+108
+00:17:17.650 --> 00:17:39.779
+Aaron Gallant: It's something I say almost every time I teach about language models. Large language models, they're statistical models, they're inherently probabilistic. You can't have guarantees. So if you're in a situation where you need guarantees, you need really good, really hard guardrails, you need to have secondary checks. You need to have evals, you need to have monitoring, you need to have other things going on, maybe a human-in-the-loop pattern, which we'll talk about a little bit later, but
+
+109
+00:17:39.840 --> 00:17:42.790
+Aaron Gallant: means a human checks it, right? So…
+
+110
+00:17:43.050 --> 00:18:02.030
+Aaron Gallant: That's why I don't really emphasize that last use case either. Yeah, you can do it, and it's why, you know, different language models essentially have different voices, why some language models won't answer certain sorts of questions, or, you know, so forth, is often because of how they were… they were trained, with these examples.
+
+111
+00:18:03.300 --> 00:18:11.860
+Aaron Gallant: Last question before I get back to the slides. What process is better for a medical industry where data privacy and industry language are specific?
+
+112
+00:18:12.070 --> 00:18:15.499
+Aaron Gallant: And may not be available in major models. Rags are fine-tuning.
+
+113
+00:18:15.980 --> 00:18:34.249
+Aaron Gallant: I'd go with RAGs. I mean, assuming that you have a reasonable knowledge base, and a reasonable knowledge base… it's easier to get a RAG knowledge base than it is to get a labeled set of data for fine-tuning. We haven't even gotten to that. Like, that's where all the work is, is having labeled data. So yeah, I would definitely start with RAG for that.
+
+114
+00:18:35.710 --> 00:18:38.290
+Aaron Gallant: Now, that said,
+
+115
+00:18:38.570 --> 00:18:50.179
+Aaron Gallant: if you also need it to run on the edge, and then you might need to also fine-tune the model as well, if the model's performance isn't good enough, even with the RAG context, but I would still start with RAG.
+
+116
+00:18:52.660 --> 00:19:08.530
+Aaron Gallant: Fine-tuning is usually for when the task is a specific sort of problem. It's not just, like, write code in some language, but it's, like, make a decision. Is this fraud or not? Is this, person sick or healthy? These sorts of things, you know, like, is this spam or not?
+
+117
+00:19:09.130 --> 00:19:11.020
+Aaron Gallant: classification problems.
+
+118
+00:19:11.750 --> 00:19:13.279
+Aaron Gallant: Okay, so…
+
+119
+00:19:14.300 --> 00:19:26.979
+Aaron Gallant: Fine-tuning the process. What do you actually do to fine-tune? We've said it enough, let's understand a little bit more here. Well, you start from a model, and we'll talk a bit about model selection, but model selection is its own topic. We could have
+
+120
+00:19:27.070 --> 00:19:36.850
+Aaron Gallant: At least a whole lecture on that, I imagine. So, suffice it to say, there's a whole zoo of models out there. We live in an interesting time for this.
+
+121
+00:19:37.040 --> 00:19:40.340
+Aaron Gallant: Step 2, that's what I was just talking about.
+
+122
+00:19:40.690 --> 00:19:49.109
+Aaron Gallant: that's where all the work is. You know, gathering, cleaning, curating your data. You've probably heard garbage and garbage out, right?
+
+123
+00:19:49.540 --> 00:20:01.280
+Aaron Gallant: And that's true for, and I've said this a few times, I'm gonna be a little bit crisper now, model inference. Model inference, just so you know, all of these language models, they really are just math. Now, they're…
+
+124
+00:20:01.720 --> 00:20:11.340
+Aaron Gallant: somewhat incomprehensibly large math, we can't understand them fully, really, the explainability is actually poor, but we can know observationally that they…
+
+125
+00:20:11.620 --> 00:20:27.120
+Aaron Gallant: are able to essentially understand statistical patterns in language, and then use that to generate more language. Okay. Now, when we do that with these models, that's actually basically the same as just a good old
+
+126
+00:20:27.200 --> 00:20:35.659
+Aaron Gallant: Cartesian plot. How many people remember Y equals MX plus B? Anybody at least remember that much from math?
+
+127
+00:20:36.530 --> 00:20:39.070
+Aaron Gallant: Back in… whatever, middle school?
+
+128
+00:20:39.710 --> 00:20:48.240
+Aaron Gallant: The slope-intercept form. Now, Y equals mx plus b is, like, the simplest sort of parameterizable formula you can sort of come up with.
+
+129
+00:20:48.690 --> 00:20:54.790
+Aaron Gallant: the parameters is M, the slope. It's one parameter, right? And that slope
+
+130
+00:20:54.930 --> 00:21:02.000
+Aaron Gallant: determines how the line points, essentially. Yeah, and then the Bs, the intercept, we kind of don't care as much about it, but yeah, it's there too.
+
+131
+00:21:02.210 --> 00:21:09.539
+Aaron Gallant: All of these models are the same thing, except they're all Y equals MX plus B.
+
+132
+00:21:09.900 --> 00:21:26.449
+Aaron Gallant: But the difference is, of course, Y, what it gives you, what it returns, is actually tokens, which are numbers, but numbers that are turned back to words. So, essentially, it makes words. X, what you give it, is also words, of course, your prompt, that's the input.
+
+133
+00:21:26.620 --> 00:21:30.450
+Aaron Gallant: And M, instead of being a single number, like 3,
+
+134
+00:21:30.670 --> 00:21:40.799
+Aaron Gallant: Is a bazillion numbers, or, you know, slightly more accurately, say, 7 billion parameters for a modest open source model, right?
+
+135
+00:21:40.800 --> 00:21:52.839
+Aaron Gallant: 13 billion parameters, and 130 billion parameters, like, billions of parameters as opposed to one. Parameter just means number. So the number of numbers in M organized in these matrices, really huge.
+
+136
+00:21:53.690 --> 00:22:12.460
+Aaron Gallant: Now, that said, it's still the same thing. It's still basically multiplying through. It's a little more complicated, because linear algebra, but you don't have to worry about that to understand it conceptually, really. You have to worry about if you want to implement it from scratch, which is cool, but you don't have to do that, and that's not where the reward necessarily is, so…
+
+137
+00:22:13.230 --> 00:22:17.130
+Aaron Gallant: That is inference, though. Just sticking an X in there.
+
+138
+00:22:17.490 --> 00:22:26.659
+Aaron Gallant: and getting different Ys. That's what we all do. Every time we prompt, every time we rag, every time we do any of that, we're executing the function and getting some new Y out, right?
+
+139
+00:22:27.410 --> 00:22:42.859
+Aaron Gallant: Fine-tuning, we're changing the M. We're going to the M, and we're changing those numbers. So that's what I mean about changing, and those are called the parameters, those are the weights, or numbers that determine the behavior of the model itself, and that's a durable change to the model.
+
+140
+00:22:43.610 --> 00:22:51.030
+Aaron Gallant: I'm emphasizing this because I think it's an important thing to understand, an important distinction to make. Are people pretty clear on this?
+
+141
+00:22:55.100 --> 00:22:58.980
+Aaron Gallant: If there are still questions on this, drop it in the chat. Great, alright.
+
+142
+00:22:59.280 --> 00:23:00.120
+Aaron Gallant: So…
+
+143
+00:23:00.960 --> 00:23:17.320
+Aaron Gallant: back to the real world. We can step back from math a little bit. Thank you, Trevor. I enjoy math, I mean, and to be clear, it's great to go deep in math, but it's great to know how deep you have to go to solve the problem you're solving. And right now, this is deep enough.
+
+144
+00:23:17.670 --> 00:23:18.460
+Aaron Gallant: So…
+
+145
+00:23:19.870 --> 00:23:28.080
+Aaron Gallant: Of course, most of the work in our, say, corporate setting is dealing with the data, and the reason I made that big deal about inference versus training
+
+146
+00:23:28.720 --> 00:23:37.370
+Aaron Gallant: Rewind here. Garbage in, garbage out. You've all probably heard that. It applies to both inference and training, right? If you give a bad prompt, you're gonna get bad output.
+
+147
+00:23:37.970 --> 00:23:41.810
+Aaron Gallant: But the thing is, is that only happens that one time. You give it that bad prompt.
+
+148
+00:23:41.990 --> 00:23:49.949
+Aaron Gallant: that one time, and you get a bad response that one time. Obviously, that's bad, by definition, but it's once.
+
+149
+00:23:50.350 --> 00:24:00.449
+Aaron Gallant: If you use bad data while you're training, you're teaching the model badly. You're now basically making the model bad. You're making all the future bad. You're getting bad…
+
+150
+00:24:00.670 --> 00:24:01.830
+Aaron Gallant: Ad infinitum.
+
+151
+00:24:02.310 --> 00:24:14.430
+Aaron Gallant: So much, much worse. So that's why prepare data is so critical. You really need to be sure, if you're training your model, that your data is correct, that the labels, and we'll get more about what that means in a bit.
+
+152
+00:24:14.460 --> 00:24:17.140
+Aaron Gallant: But basically, what you're saying the data is.
+
+153
+00:24:17.160 --> 00:24:31.690
+Aaron Gallant: what it's learning from, it better be learning from something that's right. If it's learning wrong things, it's gonna make things worse. And it's also why… so, by the way, step 3, adjust weights, that's just run a function. That's just a little bit of code, and then…
+
+154
+00:24:31.690 --> 00:24:37.179
+Aaron Gallant: Possibly writing a check to some compute source to do all the crunching.
+
+155
+00:24:37.410 --> 00:24:47.730
+Aaron Gallant: But then 4, validate is where, I guess, the next most work is, because you want to take your label data, set some of it aside, you don't let the model train on all of your label data.
+
+156
+00:24:48.010 --> 00:25:00.350
+Aaron Gallant: Because you keep some of it, and you use it to validate later. You use it to see, hey, is the model actually good or not? And the reason you have to hold it aside is you don't want the model to cheat. You don't want it to learn the answer key, as it were.
+
+157
+00:25:00.900 --> 00:25:01.720
+Aaron Gallant: Alright.
+
+158
+00:25:02.170 --> 00:25:14.530
+Aaron Gallant: By the way, pretty much everything I'm saying on this slide more or less applies to machine learning in general. I mean, we're talking about this in a large language model fine-tuning context, but this is all general supervised learning, machine learning stuff.
+
+159
+00:25:14.770 --> 00:25:22.040
+Aaron Gallant: This is sort of the intersection of AI engineering and, say, machine learning engineer. So… Alright.
+
+160
+00:25:23.060 --> 00:25:28.920
+Aaron Gallant: OpenAI. I'm not gonna spend too long on this, but I want you all to know it exists. So, OpenAI
+
+161
+00:25:28.990 --> 00:25:32.149
+Aaron Gallant: which, you know, offers of ChatGPT.
+
+162
+00:25:32.210 --> 00:25:38.510
+Aaron Gallant: despite their name, they're not exactly open, right? Like, they are somebody else's computer.
+
+163
+00:25:38.560 --> 00:25:53.240
+Aaron Gallant: They are a service that we can pay, granted, a service that offers pretty good quality, it seems, and cheap prices at the moment, but a service that we pay, send some information over the wire, get something, get a response back, right? An API.
+
+164
+00:25:53.620 --> 00:25:57.829
+Aaron Gallant: They still offer, though, a fine-tuning API.
+
+165
+00:25:57.930 --> 00:26:14.749
+Aaron Gallant: And, the way that works in the case of OpenAI is it's sort of like a limited fine-tuning playground. You can specify the base model, so you could say, oh, I want to start from 4.0 Mini, and you probably do want to start from a small model.
+
+166
+00:26:15.310 --> 00:26:22.110
+Aaron Gallant: and then you give it data, and the data has to be in JSON-L, JSON lines format. And that's like a…
+
+167
+00:26:22.550 --> 00:26:29.870
+Aaron Gallant: a text file where each line is a JSON blob. And the format of the JSON blob, as you'll see in the next slide, is just…
+
+168
+00:26:30.060 --> 00:26:35.449
+Aaron Gallant: discussions, because that's what label data actually is in this case. You know, labeled data in general.
+
+169
+00:26:35.650 --> 00:26:45.360
+Aaron Gallant: going back to our friend Y equals MX plus B, labeled data would be pairs of X's and Y's. You know, for this X, this should be Y. For this X, this should be Y, right?
+
+170
+00:26:45.550 --> 00:26:54.490
+Aaron Gallant: For language, it's prompt response. For this question, or request, or whatever, user input.
+
+171
+00:26:54.730 --> 00:26:58.720
+Aaron Gallant: This should be the model's response. This is how it should answer that question.
+
+172
+00:26:59.040 --> 00:27:04.270
+Aaron Gallant: Or, you know, maybe it should do a tool call. Whatever, like, this is what the model should do.
+
+173
+00:27:04.370 --> 00:27:19.559
+Aaron Gallant: And it's convenient because you get that naturally by just logging every time you interact with a language model. Like, if you log interactions using an observation platform like Langfuse or Langsmith, you can get these, you know, prompt
+
+174
+00:27:19.720 --> 00:27:22.779
+Aaron Gallant: Discussion histories, and you can use that
+
+175
+00:27:23.020 --> 00:27:28.969
+Aaron Gallant: Assuming you also quality check it and make sure it's good, that's at least the right shape to be training data.
+
+176
+00:27:29.210 --> 00:27:31.649
+Aaron Gallant: And that's the shape that OpenAI wants.
+
+177
+00:27:32.010 --> 00:27:37.000
+Aaron Gallant: Now, that said, OpenAI doesn't really let us actually get anything.
+
+178
+00:27:37.270 --> 00:27:44.410
+Aaron Gallant: At the end of the day, we give them the data, and they give us, like, a little bookmark. They give us an ID that says, okay, we're holding the data.
+
+179
+00:27:44.520 --> 00:27:51.299
+Aaron Gallant: And then we say, we want to train the model, and they train the model, and they give us another little bookmark, another little ID that says, hey, here's your trained model.
+
+180
+00:27:51.690 --> 00:27:58.359
+Aaron Gallant: You can't download it, you can just use that model ID for future inference on OpenAI's API.
+
+181
+00:27:58.430 --> 00:28:13.719
+Aaron Gallant: And, of course, it comes at a cost. It comes at both a training cost, and inference is more expensive on your custom models than similarly-sized, non-custom models. Because, of course, OpenAI has to have some extra infrastructure in place to host your custom model.
+
+182
+00:28:13.890 --> 00:28:16.970
+Aaron Gallant: Probably can't optimize or cache it as well, that kind of thing.
+
+183
+00:28:17.120 --> 00:28:31.069
+Aaron Gallant: So, definitely a lot of limitations. You also, you know, don't get access to anything, really, any of the model weights. You don't really have a lot of hyperparameters. We'll see more hyperparameters in the good example coming up.
+
+184
+00:28:31.100 --> 00:28:37.290
+Aaron Gallant: But the reason to know this exists is, first off, if you want to just, like, play with fine-tuning, and you don't mind spending…
+
+185
+00:28:37.340 --> 00:28:43.380
+Aaron Gallant: you know, a little bit of time and money on OpenAI, this can be a good little testbed environment.
+
+186
+00:28:43.670 --> 00:28:53.059
+Aaron Gallant: And secondly, you know, there could be use cases for this if you're deep, if your org is all in, open AI, and you want to fine-tune. But overall, again.
+
+187
+00:28:53.380 --> 00:28:58.960
+Aaron Gallant: I think, at least, that it's the open… the actually open models where the… where the fun is at.
+
+188
+00:28:59.660 --> 00:29:01.770
+Aaron Gallant: So,
+
+189
+00:29:02.230 --> 00:29:15.240
+Aaron Gallant: on that note, well, first off, there's a little bit more about the message format, as I said. So that's… that's one line of a JSON lines file showing an interaction where there's, like, a conversation history.
+
+190
+00:29:15.370 --> 00:29:26.660
+Aaron Gallant: And it's just a silly example, you wouldn't really fine-tune on this, most likely, but it shows for a sarcastic chatbot, if it receives this question, this is the answer I should give.
+
+191
+00:29:27.020 --> 00:29:27.820
+Aaron Gallant: Great.
+
+192
+00:29:28.000 --> 00:29:39.459
+Aaron Gallant: And you can make this, you can synthesize this by just interacting with a big LLM that can solve this problem. And that, again, is sort of the,
+
+193
+00:29:39.610 --> 00:29:47.189
+Aaron Gallant: the bootstrappy way to at least generate your initial data. You still need to curate its quality,
+
+194
+00:29:47.730 --> 00:29:55.900
+Aaron Gallant: and you, still need to format it appropriately for whatever fine-tuning platform you're using. In the case of OpenAI, they want this format.
+
+195
+00:29:57.600 --> 00:30:16.040
+Aaron Gallant: Alright, so this… I'm not going to spend time here. Click this link if you want to actually do the OpenAI stuff. That's the point. This links to OpenAI's documentation. You'll have the slides at the end, this link will be on this slide, but this shows the various steps to actually do things on OpenAI's fine-tuning if you want.
+
+196
+00:30:17.210 --> 00:30:23.040
+Aaron Gallant: But… what can you do besides play at OpenAI's playground? Well…
+
+197
+00:30:23.200 --> 00:30:28.839
+Aaron Gallant: a lot of stuff. Again, I really think the coolest thing of this space isn't the, the behemoth
+
+198
+00:30:29.000 --> 00:30:35.409
+Aaron Gallant: models and companies necessarily, but is the whole ecosystem. And the fact that this technology
+
+199
+00:30:36.450 --> 00:30:39.499
+Aaron Gallant: I wouldn't go so far as to say it's, like, inherently…
+
+200
+00:30:39.950 --> 00:30:45.379
+Aaron Gallant: Shareable exactly, or inherently open. And in fact, what we call open models
+
+201
+00:30:46.010 --> 00:30:51.059
+Aaron Gallant: they're not really the same as open source, when you think about it. So,
+
+202
+00:30:51.500 --> 00:31:08.449
+Aaron Gallant: Oh, let me address this question before I go off on this topic here. Is it fair to assume OpenAI might be easier to learn with? Yeah, if you want to just do, like, hey, I just want to do a bare minimum feedback loop of fine-tuning a model, you could do that in, you know, 20, 30 lines of code with OpenAI,
+
+203
+00:31:08.490 --> 00:31:20.450
+Aaron Gallant: And maybe a little more, but like, yes, it would not be too hard. You can read their docs, and it's a sort of curated experience. The hardest part, of course, is the data.
+
+204
+00:31:20.450 --> 00:31:30.290
+Aaron Gallant: But if you have that, then that's the easiest to sort of try it with. But again, the only use cases, I think, are if your org is, like, really all in with OpenAI.
+
+205
+00:31:30.510 --> 00:31:37.800
+Aaron Gallant: And it's like, yeah, we want to fine-tune GPT-40 Mini to make it really good at something, whatever.
+
+206
+00:31:38.040 --> 00:31:41.210
+Aaron Gallant: And again, I'd still fine-tune the small models, typically.
+
+207
+00:31:42.350 --> 00:31:48.970
+Aaron Gallant: But anyway, so, back to model… selection.
+
+208
+00:31:49.550 --> 00:31:51.220
+Aaron Gallant: So…
+
+209
+00:31:53.690 --> 00:32:02.520
+Aaron Gallant: We have here, all the different places we can get models from, and as I was saying, it's this whole ecosystem of, quote, open models.
+
+210
+00:32:02.830 --> 00:32:15.999
+Aaron Gallant: But I do think it's worth understanding, as practitioners or interested, aspiring practitioners in this space, what open model actually means. Most people just mean open weight. That means you can download
+
+211
+00:32:16.260 --> 00:32:26.199
+Aaron Gallant: perhaps a multi-gigabyte file that basically contains all those numbers I was talking about, all those parameters in that matrix, or really a bunch of matrices, right?
+
+212
+00:32:27.830 --> 00:32:34.789
+Aaron Gallant: And that's all well and good. That lets you use the model, and what's really nice about fine-tuning, that lets you fine-tune the model.
+
+213
+00:32:34.790 --> 00:32:52.510
+Aaron Gallant: You actually don't need, like, the original blueprint, per se, or the original training data, or the original anything. You just need the model in its current state, and you can continue to train it. It's sometimes in the supervised learning space called online learning, which is to say that you can just continually train something without having to start over from scratch.
+
+214
+00:32:52.560 --> 00:32:58.859
+Aaron Gallant: Really cool. That's… that's what enables all of this. However, it's not really the same thing as open source.
+
+215
+00:32:58.930 --> 00:33:09.650
+Aaron Gallant: Because open source, when you think about it for software, means the source code is open, and the model is re… and, sorry, the software is reproducible, because anybody can take it from the source and compile it.
+
+216
+00:33:09.940 --> 00:33:13.980
+Aaron Gallant: An open model is actually more like a binary. It's kind of already been compiled.
+
+217
+00:33:14.500 --> 00:33:31.649
+Aaron Gallant: It's a little fuzzy, but I encourage people to be mindful of that in this space. There are a few organizations out there that are potentially trying to do open source models, where they actually open not just the model, but also the data and all the architecture and training process and everything.
+
+218
+00:33:31.790 --> 00:33:35.140
+Aaron Gallant: But most of the big open models, like, say, Llama from Meta.
+
+219
+00:33:35.310 --> 00:33:39.240
+Aaron Gallant: are just really mostly open weight. You know, that's what they put out there.
+
+220
+00:33:39.730 --> 00:33:52.450
+Aaron Gallant: That said, we can still use them for this. Hooray. So, how do we pick what model to start from? Well, there's a whole bunch of models out there, and again, you'll get these slides, all these links are clicky, and you can get more details, but the highlights here…
+
+221
+00:33:52.510 --> 00:34:07.880
+Aaron Gallant: Is, you might already be aware, there's a whole bunch of benchmarks and ways to measure model performance, and in general, you'd want to pick a model to start from that is, well, first, of the size that you want to handle, so however many parameters
+
+222
+00:34:07.970 --> 00:34:10.739
+Aaron Gallant: basically corresponds to how much RAM
+
+223
+00:34:10.780 --> 00:34:18.729
+Aaron Gallant: you need to run the model, which corresponds to what sort of environment you want to run the model in, right? So that's probably your first decision.
+
+224
+00:34:18.739 --> 00:34:34.370
+Aaron Gallant: And then once you make that decision, you can compare models based on their performance at tasks that are close to the task you want to solve. So, for instance, if you're making something that's supposed to write code, you might care about Sweebench, which is a benchmark specifically for software engineering skills.
+
+225
+00:34:35.239 --> 00:34:41.960
+Aaron Gallant: And then, regardless of the specific sort of benchmarks out there, the general metrics that you see in this space
+
+226
+00:34:42.199 --> 00:34:43.170
+Aaron Gallant: So…
+
+227
+00:34:43.360 --> 00:34:56.539
+Aaron Gallant: sort of the most accessible, and an important one, and really the only one I would ever present in, say, a business context is accuracy. And what we typically mean by that is how often is it right? Like, how often did it do the thing?
+
+228
+00:34:56.699 --> 00:35:08.649
+Aaron Gallant: And again, that often means boiling the task down to a binary success-failure, or at least a classification sort of thing, which is often a realistic thing to do for a lot of tasks we care about.
+
+229
+00:35:08.950 --> 00:35:18.639
+Aaron Gallant: And then rating, okay, it did this one right, it did that one wrong, it did it right 92% of the time, out of our, you know, test cases that we held out, right?
+
+230
+00:35:18.740 --> 00:35:38.160
+Aaron Gallant: And that's… that's a good number to have. There are other types of accuracy, and I'm not going to get into the nuances of that now. Suffice it to say that if you start diving deep in this, find your local friendly data scientist, and make sure that you are understanding the numbers, but accuracy is a good place to start.
+
+231
+00:35:38.460 --> 00:35:55.559
+Aaron Gallant: These other ones are more about… are a little more LLM-specific here, alignment with, human reference, and perplexity. And perplexity I like in particular because that basically shows how surprised the model is
+
+232
+00:35:55.610 --> 00:35:59.340
+Aaron Gallant: And, what that means…
+
+233
+00:35:59.620 --> 00:36:08.970
+Aaron Gallant: you're like, wait, how surprised the model is? Well, don't anthropomorphize the model, to be clear. The model doesn't get surprised the way you or I might, but…
+
+234
+00:36:09.950 --> 00:36:19.700
+Aaron Gallant: Let's say you, for some reason, train a language model on nothing but the complete text from everything from Lord of the Rings.
+
+235
+00:36:19.700 --> 00:36:32.480
+Aaron Gallant: Shakespeare, whatever. Some famous author, right? And a little dated, say, right? Like, it's… so this language model has been trained on the entire corpus of Lord of the Rings for some reason.
+
+236
+00:36:33.460 --> 00:36:36.580
+Aaron Gallant: And then you fed it,
+
+237
+00:36:37.070 --> 00:36:41.929
+Aaron Gallant: I don't know, anything new, right? You fed it, tweets, right?
+
+238
+00:36:42.680 --> 00:36:45.540
+Aaron Gallant: Most tweets are not written.
+
+239
+00:36:45.890 --> 00:37:02.890
+Aaron Gallant: the way J.R.R. Tolkien writes, certainly not the way Shakespeare writes, if we go back with that as our hypothetical training data. And so, what that means is that the input is sort of out of domain from what the model expects to see based on the training data. The model is trained on a certain domain.
+
+240
+00:37:02.970 --> 00:37:07.130
+Aaron Gallant: Y equals MX plus B, domain, range, ringing a few bells.
+
+241
+00:37:07.260 --> 00:37:10.419
+Aaron Gallant: Was, was, trained on a certain domain of input.
+
+242
+00:37:10.530 --> 00:37:16.469
+Aaron Gallant: And, that domain doesn't cover this new input.
+
+243
+00:37:16.740 --> 00:37:24.279
+Aaron Gallant: Now, of course, the example I gave is a little bit absurd, but it's meant to be illustrative. Realistically, what perplexity shows you
+
+244
+00:37:24.790 --> 00:37:42.459
+Aaron Gallant: is, you know, let's say you're in a very specific… well, like that question we got earlier, like, oh, we're working with… in a medical space with this very specific language, and the model probably hasn't seen a lot of training data for this language, because it's not like it's Python. There's not a million Stack Overflow articles
+
+245
+00:37:42.460 --> 00:37:49.969
+Aaron Gallant: on this particular piece of technology, and so the model doesn't know about it. Well, that's something that perplexity might actually pick up.
+
+246
+00:37:50.720 --> 00:37:57.410
+Aaron Gallant: I still wouldn't necessarily open with fine-tuning to solve that problem, but you might see that sort of thing with perplexity.
+
+247
+00:37:58.010 --> 00:38:10.319
+Aaron Gallant: And then lastly, the real gold standard is still… look at it, think about it. Now, that's 4, if you were wondering. Human evaluation. I'm assuming you're all humans.
+
+248
+00:38:10.750 --> 00:38:16.690
+Aaron Gallant: I don't think we have any LLMs in attendance at the moment. I imagine that they're not at that point.
+
+249
+00:38:17.060 --> 00:38:18.940
+Aaron Gallant: In any case,
+
+250
+00:38:19.730 --> 00:38:32.690
+Aaron Gallant: the human evaluation step is kind of critical, sort of like user acceptance testing from a software perspective. We are the ones who define what success and failure is, what business value is. You know, we talk about models hallucinating.
+
+251
+00:38:32.810 --> 00:38:46.170
+Aaron Gallant: But models are just generating text. They really are. You know, what to some sense, the skeptics say is actually correct. They are just next token predictors, but they happen to do it in a way that's often really useful if you use them effectively.
+
+252
+00:38:46.800 --> 00:38:53.110
+Aaron Gallant: However, we are the ones who have to evaluate that. And so it's not that the models hallucinate.
+
+253
+00:38:53.200 --> 00:39:09.740
+Aaron Gallant: So much, because they, again, just like they can't be really surprised, they can't really hallucinate. They don't have a mental model like that. That's not what's going on. But they certainly confabulate. They can just string plausible text together. You know, something I try to avoid doing.
+
+254
+00:39:10.410 --> 00:39:19.099
+Aaron Gallant: well, I suppose I try to have plausible, but also correct text, right? The correctness, though, is something we have to ascribe to it. So that's… that's the takeaway here.
+
+255
+00:39:20.270 --> 00:39:28.220
+Aaron Gallant: Alright, I'm gonna pause for a sip. I've been talking for a while, I haven't seen any questions coming in a bit. If anybody wants to drop a question in the, chat.
+
+256
+00:39:34.040 --> 00:39:35.279
+Aaron Gallant: Gone once.
+
+257
+00:39:37.590 --> 00:39:42.439
+Aaron Gallant: Going twice. Alright, well, I'll also try to save time at the end for more questions.
+
+258
+00:39:42.690 --> 00:40:00.930
+Aaron Gallant: Oh, I see, something that just came in about perplexity. Yeah, I mean, perplexity is… is… would often reflect, like, if your domain, like, again, the example is you have a bunch of really specific medical jargon or medical technical jargon that you're feeding into this model that isn't well reflected in the model's training corpus.
+
+259
+00:40:01.140 --> 00:40:04.280
+Aaron Gallant: So yeah, I think the answer is yes to your question.
+
+260
+00:40:05.710 --> 00:40:08.270
+Aaron Gallant: Alright, so, RLHF.
+
+261
+00:40:08.660 --> 00:40:12.530
+Aaron Gallant: Now, to be clear, That's reinforcement learning with human feedback.
+
+262
+00:40:12.740 --> 00:40:30.369
+Aaron Gallant: Fine-tuning is not exactly RLHF, but they're kind of cousins-ish, and RLHF is important to understand, because RLHF is what those big companies, what OpenAI and Anthropic and so forth, are doing to make the models into chat models. Indeed, RLHF, we've had…
+
+263
+00:40:31.050 --> 00:40:48.650
+Aaron Gallant: general pre-trained transformers in one form or another. I mean, the attention is all you need paper was 2017. Like, transformer architecture's been around, and I've been following it for a while, and it's been cool for a while, but it didn't really get obviously useful to most people until it started actually, quote, chatting.
+
+264
+00:40:48.760 --> 00:41:00.189
+Aaron Gallant: And how did it do that? Because before that, it really was just a next token completer. It really was just a really smart autocomplete. It was just trained on, here's the words up to this point, what should the next word be?
+
+265
+00:41:00.530 --> 00:41:04.489
+Aaron Gallant: But it was trained on a huge amount of data, and that made it do interesting things.
+
+266
+00:41:04.830 --> 00:41:11.399
+Aaron Gallant: Well, it turns out that if you take that model that, you know, because if you take a model like that, and you ask it a question, is it going to answer your question?
+
+267
+00:41:12.080 --> 00:41:16.000
+Aaron Gallant: Maybe not, because what it might do is it might just write more similar questions.
+
+268
+00:41:16.150 --> 00:41:24.840
+Aaron Gallant: That's actually the most likely thing you'll see, because you see that pattern, FAQ pages and stuff, lists of questions, quizzes and stuff written on the internet.
+
+269
+00:41:24.940 --> 00:41:27.839
+Aaron Gallant: And so, to make it instead
+
+270
+00:41:27.920 --> 00:41:38.419
+Aaron Gallant: decide to answer the question, we do reinforcement learning with human feedback, which is setting up an environment, that's essentially what reinforcement learning is here, and the environment here is paying a whole bunch of contractors.
+
+271
+00:41:38.430 --> 00:41:57.089
+Aaron Gallant: to interact with this thing, according to some playbook and some set of prompts that… and again, this is the main thing that distinguishes Brock from Claude here, is what the prompts were to do this step, and what the evaluation, what the sort of playbook that the humans used to say, yeah, this is good, this is bad.
+
+272
+00:41:57.170 --> 00:42:03.709
+Aaron Gallant: But that's all this is. You give it certain input, And, you…
+
+273
+00:42:03.970 --> 00:42:21.049
+Aaron Gallant: then check the output, and a human rates it, and then you train the model based on that, and then you just do that in a feedback loop until the model gets where you want it to get. And in a sense, it's sort of like labeled data, except you're labeling it in real time with human scoring.
+
+274
+00:42:21.290 --> 00:42:30.639
+Aaron Gallant: So that's where the connection to fine-tuning, comes in here. So again, all the models we're using already had this done to them.
+
+275
+00:42:30.850 --> 00:42:37.150
+Aaron Gallant: We're going to use a similar mechanism, but instead, we're going to label data, and
+
+276
+00:42:37.380 --> 00:42:39.780
+Aaron Gallant: I already talked about synthesizing data.
+
+277
+00:42:40.110 --> 00:42:45.790
+Aaron Gallant: And that's one good way to get labeled data. Another good way to get labeled data is user behavior.
+
+278
+00:42:45.910 --> 00:42:56.929
+Aaron Gallant: So, you know, you've all seen there are… you know, every website in the world, pretty much, has little thumbs up, thumbs down widgets, right? As a user, you'll be like, I liked this, I didn't like that.
+
+279
+00:42:57.040 --> 00:43:03.240
+Aaron Gallant: Well… If you instrument that, and that's what this snippet of code is sort of mocking.
+
+280
+00:43:03.700 --> 00:43:11.690
+Aaron Gallant: you score that, thumbs up is 1, thumbs down is 0, and you save that in a platform like Langsmith, and you associate that with the whole
+
+281
+00:43:11.950 --> 00:43:22.030
+Aaron Gallant: trace the conversation, whatever led up to it. Congratulations, you now have labeled data. You now have an LLM response to a user question.
+
+282
+00:43:22.130 --> 00:43:35.700
+Aaron Gallant: And you know whether it was good or bad. And you can use that to decide how to include it in a dataset, right? So, really, user-generated data is the only way to get data at huge scale. You know, nobody manually makes
+
+283
+00:43:35.840 --> 00:43:54.040
+Aaron Gallant: billion row data sets. That's a lot of contractors. You know, the only way you get really big data is this. Now, that said, you don't need really big data, and big label data, that is, to do fine-tuning, but this is still a good, convenient way to grab it.
+
+284
+00:43:54.210 --> 00:43:59.830
+Aaron Gallant: My rule of thumb… for any, like, how much data do I need to train a model in general.
+
+285
+00:44:00.200 --> 00:44:06.399
+Aaron Gallant: is, well, how much variation is there in the space you're thinking about? You know, what's a representative sample look like?
+
+286
+00:44:06.450 --> 00:44:20.530
+Aaron Gallant: And you probably want, you know, at least a few thousand observations, rows, you know, data entries, and you want them to cover all the cases. But I would rather have a thousand representative
+
+287
+00:44:20.660 --> 00:44:32.420
+Aaron Gallant: sample that has variation in it than 10,000 that are all just about the same thing over and over again. Because that's not as good to train on, because it won't teach it about the whole variety.
+
+288
+00:44:34.570 --> 00:44:50.339
+Aaron Gallant: Alright, so finally on to some of the alphabet soup here, and I'm checking the time. I'd love to answer more questions, but I'm gonna have to push a bit, I think, to get through these slides first, and then as there's time at the end, I will, knock out a few more.
+
+289
+00:44:50.820 --> 00:45:01.669
+Aaron Gallant: How do we actually do this? How do we do this with a model that, we control? Well, we can use something called parameter-efficient fine-tuning to make it even easier.
+
+290
+00:45:01.720 --> 00:45:16.029
+Aaron Gallant: And what this does is this takes our model, our pre-trained transformer model, freezes most of it, and then adds a few layers. And these layers have to be the right dimensions to map up. The software makes that not too hard.
+
+291
+00:45:16.380 --> 00:45:20.099
+Aaron Gallant: Dimensions is just the number of numbers, and they have to align.
+
+292
+00:45:20.690 --> 00:45:25.490
+Aaron Gallant: But then, that means that instead of training the whole model, we're training
+
+293
+00:45:25.660 --> 00:45:35.900
+Aaron Gallant: less of the model. Now, you might think, well, that means we change it less. The answer is, yeah, kind of, but this is the output, so we still are potentially very much changing the actual
+
+294
+00:45:35.900 --> 00:45:45.850
+Aaron Gallant: behavior, the end result of the model. We're just kind of doing it a little more cheaply and keeping most of the model in place, because hopefully the model is kind of close to what we want, we just want to tweak it.
+
+295
+00:45:46.280 --> 00:45:48.990
+Aaron Gallant: So, that's efficiency number one.
+
+296
+00:45:49.320 --> 00:45:50.640
+Aaron Gallant: Train less stuff.
+
+297
+00:45:51.360 --> 00:45:52.890
+Aaron Gallant: Efficiency, too.
+
+298
+00:45:53.730 --> 00:46:04.810
+Aaron Gallant: make the num… make there be fewer numbers in the number… sorry. This is have fewer sets of numbers. This is have fewer numbers in the sets of numbers. So, all of these…
+
+299
+00:46:04.980 --> 00:46:15.780
+Aaron Gallant: neurons, all of these things in a neural network are organized in matrices. Matrices have rank, which is another word for, essentially, size or dimension, the number of numbers in them.
+
+300
+00:46:15.990 --> 00:46:17.969
+Aaron Gallant: Well, linear algebra
+
+301
+00:46:18.600 --> 00:46:30.630
+Aaron Gallant: lets you do certain things, to manipulate the rank of matrices. And, what that means is you can basically
+
+302
+00:46:31.390 --> 00:46:42.559
+Aaron Gallant: lossily make a matrix smaller. Lawsily means you are losing information, but you're keeping the most significant information, the most relevant information in the matrix, the most important numbers.
+
+303
+00:46:42.560 --> 00:46:54.629
+Aaron Gallant: And you're losing some other numbers that, you know, most matrices that are really big are sparse, they're mostly empty. So you're not losing too much. It's sort of like, you know, taking a wave and making it new into an MP3.
+
+304
+00:46:54.720 --> 00:46:57.419
+Aaron Gallant: Or taking a picture and making it into a JPEG.
+
+305
+00:46:57.670 --> 00:47:02.890
+Aaron Gallant: We're losing a little bit, but most of it's there. And the result is, hey, less numbers.
+
+306
+00:47:03.400 --> 00:47:10.849
+Aaron Gallant: And then, lastly, we can also quantize, and quantization is not at all specific, of course, to,
+
+307
+00:47:11.790 --> 00:47:28.789
+Aaron Gallant: to large language models. Quantization is something that's been around in computers as long as there have been computers, I imagine, at least digital computers, because it just refers to truncating floating-point numbers. So we're taking, say, 32-bit floats and truncating them down to 8.
+
+308
+00:47:28.900 --> 00:47:35.930
+Aaron Gallant: And we keep the 8 most significant digits, and we're still accurate to a pretty fine decimal place, just not as many as before.
+
+309
+00:47:36.270 --> 00:47:50.579
+Aaron Gallant: Again, we're losing some information here, but we're keeping the most important information, and we're making, in this case, 32 to 8, that really is… that's 4 times smaller, right? So, if you stack all this stuff together, the end result
+
+310
+00:47:51.200 --> 00:47:55.269
+Aaron Gallant: Is you can take something like a 13 billion parameter model.
+
+311
+00:47:55.940 --> 00:48:02.379
+Aaron Gallant: And you can actually fine-tune it on possibly the laptop you have on your desk right now.
+
+312
+00:48:02.590 --> 00:48:08.350
+Aaron Gallant: Not gonna guarantee that for everybody here, but if you have a not terribly old Mac.
+
+313
+00:48:08.470 --> 00:48:23.829
+Aaron Gallant: chances are pretty good. The reason I highlight Mac is Apple doesn't pay me, sadly, but the M1 architecture has good optimization for this sort of stuff. If you're not in the Apple ecosystem, never fear, but it just means you might have to…
+
+314
+00:48:24.020 --> 00:48:30.639
+Aaron Gallant: get some other thing, like, you know, a GPU or some other bit of silicon that's the right way to do this sort of thing.
+
+315
+00:48:30.920 --> 00:48:38.200
+Aaron Gallant: In any case… That's the takeaway here, that we can, train models
+
+316
+00:48:38.400 --> 00:48:58.350
+Aaron Gallant: but really little resources, and that enables a lot of experimentation. And again, the main goal here is to train these small models anyway. That's the main useful use case, is to take a model that you might want to run on a Raspberry Pi, or something funny like that, and train it really small. And to be able to do that on your own hardware is pretty powerful.
+
+317
+00:48:58.930 --> 00:49:04.459
+Aaron Gallant: Alright, summary slide, I'll leave this here for your reference, and I want to use the remaining time
+
+318
+00:49:04.710 --> 00:49:19.620
+Aaron Gallant: Please start dropping questions again, and I will catch up, but while people are thinking and dropping some questions, I'll just very quickly show the code example. I'm not gonna really run through it, but you have it, it was just linked there, and it's this link here.
+
+319
+00:49:21.320 --> 00:49:40.310
+Aaron Gallant: And, I have a pre-ran version of it here, because it does take a while to run. A few notes. This is Google Colab, it's a way to run Python notebooks in the cloud. You don't have to run this. This is only this notebook. Daniel's the only one. You don't have to run it in Colab. You can download it, you could run it on other services.
+
+320
+00:49:40.350 --> 00:49:55.060
+Aaron Gallant: Also, you should probably make a copy of this notebook. So if you see here, save a copy in Drive, you want to make a copy so you have your own copy that you can edit and run, and you also are going to want to change the instance type. So if you see that there's these connection…
+
+321
+00:49:55.540 --> 00:50:09.340
+Aaron Gallant: options, runtime types, you're gonna want the T4 GPU instance. Otherwise, this stuff won't really run great. And that is for reasons of parallelized vector computation stuff.
+
+322
+00:50:09.770 --> 00:50:13.610
+Aaron Gallant: The math, right? Has to have the right chip behind it.
+
+323
+00:50:13.760 --> 00:50:15.819
+Aaron Gallant: So, what's in this notebook?
+
+324
+00:50:16.640 --> 00:50:21.820
+Aaron Gallant: 5-minute version or less. A lot of boilerplate and imports.
+
+325
+00:50:22.380 --> 00:50:28.560
+Aaron Gallant: And then… a lot of setup with a lot of hyperparameters. So I've used the word parameters a ton.
+
+326
+00:50:28.840 --> 00:50:39.040
+Aaron Gallant: Parameters, again, are the numbers inside the model, the numbers that we normally don't change when we're just doing RAG or whatever, but that we are changing now with fine-tuning. We're changing those numbers. Okay.
+
+327
+00:50:40.110 --> 00:50:51.849
+Aaron Gallant: Hyperparam… the thing about parameters is there's literally billions of them, and if you point to any one parameter and be like, why is that parameter 2? Or it wouldn't be 2, like, 0.6, whatever.
+
+328
+00:50:52.320 --> 00:51:03.109
+Aaron Gallant: we don't have… that's what I mean by the… we don't have good explainability. We don't know. All we can say is, like, well, that was just the optimal point that the training process arrived at for that parameter, and we can just observe the outcome.
+
+329
+00:51:03.310 --> 00:51:04.280
+Aaron Gallant: However.
+
+330
+00:51:04.740 --> 00:51:19.889
+Aaron Gallant: Hyperparameters are not inside the black box. They're like the knobs and levers on the outside, and they're what we have control over, and they're what you want to find, again, your local data scientist or machine learning engineer to get a deeper understanding of this, and to know what you're doing here.
+
+331
+00:51:19.940 --> 00:51:28.279
+Aaron Gallant: But you want to choose these hyperparameters such that you have a good training process. And there's rules of thumb.
+
+332
+00:51:28.280 --> 00:51:41.920
+Aaron Gallant: But there's not really any single hard and fast answer to how to do all this. So, to some extent, you also have to do experiments, where you do smaller training runs, and you try different hyperparameters to see what's best. There's a lot here. What I'll highlight
+
+333
+00:51:42.590 --> 00:51:50.770
+Aaron Gallant: Dropout is an interesting one, because dropout's a little counterintuitive. Dropout refers to, essentially
+
+334
+00:51:50.890 --> 00:51:54.560
+Aaron Gallant: A probability that a neuron that you're training just won't even fire.
+
+335
+00:51:55.080 --> 00:52:04.289
+Aaron Gallant: And you might think, well, why would we ever do that? Why would we go to all this effort, and train things, and then this part of it… we just say, oh, this math isn't gonna math this time.
+
+336
+00:52:04.360 --> 00:52:09.080
+Aaron Gallant: That's a waste, right? Well, no, because what we're doing is we're…
+
+337
+00:52:09.080 --> 00:52:23.880
+Aaron Gallant: making the system robust to failure. It's sort of like chaos testing, if you're familiar with that, where, you know, your infrastructure should be robust to things randomly failing. Well, the model should be robust to neurons randomly not firing, because that also
+
+338
+00:52:23.880 --> 00:52:42.360
+Aaron Gallant: ensures that we don't overtrain in any one particular area of the model and end up with, like, one neuron with sort of too much responsibility. The reason that would be bad is that's not going to generalize well. It might seem like it learns the training data really, really well, but it's overfitting, and it's not going to generalize to unseen data, and that's what we actually care about.
+
+339
+00:52:44.280 --> 00:52:51.989
+Aaron Gallant: Bunch more stuff here. Some of these are a little more operational. Number of epics, that's how long we train, essentially, one full training run.
+
+340
+00:52:52.320 --> 00:53:06.309
+Aaron Gallant: Learning rate. This is another one that I would really highlight. This is one that's even exposed by OpenAI's API. This is how fast you train, essentially. This is how fast you update the weights when you need to update the weights. And again, you might think.
+
+341
+00:53:06.520 --> 00:53:25.600
+Aaron Gallant: well, just make this as big as we can, right? Like, obviously, we don't want to waste time. We want to train quickly. Well, yeah, we do, but what we're doing here is we're solving what is called an optimization problem, which is we're finding the best set of numbers to make the model behave as best as it can with our data.
+
+342
+00:53:25.900 --> 00:53:29.589
+Aaron Gallant: Basically predict the data effectively, accurately.
+
+343
+00:53:30.100 --> 00:53:39.100
+Aaron Gallant: And it's sort of like, if you picture it, it's in a very high-dimensional space, billions of parameters, but picture just three-dimensional space. Picture climbing a mountain.
+
+344
+00:53:39.380 --> 00:53:45.890
+Aaron Gallant: Or maybe picture, two-dimensional space, even. Picture putting a golf ball on a green, right?
+
+345
+00:53:46.450 --> 00:53:49.390
+Aaron Gallant: As you get closer, To the whole.
+
+346
+00:53:49.850 --> 00:53:57.200
+Aaron Gallant: you want to use less force, right? And why is that? Well, if you hit the ball too hard, essentially you take too large of a step.
+
+347
+00:53:57.340 --> 00:53:59.759
+Aaron Gallant: You're gonna skip straight over that hole.
+
+348
+00:53:59.870 --> 00:54:13.029
+Aaron Gallant: Right? And that's… that's bad. You're not going to reach that optimum point. If you need to reach a specific, precise point in two-dimensional space, you need to take little steps the closer you get. That's what we're talking about here, and that's what…
+
+349
+00:54:13.150 --> 00:54:15.140
+Aaron Gallant: This is doing for us.
+
+350
+00:54:16.560 --> 00:54:29.250
+Aaron Gallant: All right, and then the rest of this, and then I want to get to the questions for the last 5 minutes. There's more hyperparameters here. Documentation for these, software will answer questions if you have particulars.
+
+351
+00:54:29.560 --> 00:54:39.300
+Aaron Gallant: And we put it all together, basically, so we're hooking up… you see the bits and bytes, that's the quantization bit, so we're doing QLORA,
+
+352
+00:54:39.410 --> 00:54:44.680
+Aaron Gallant: And, the tokenizer is the thing that changes the words into numbers, vice versa.
+
+353
+00:54:44.950 --> 00:54:47.959
+Aaron Gallant: And we're fine-tuning the model.
+
+354
+00:54:49.180 --> 00:54:53.749
+Aaron Gallant: And I'll show the data in a second, too, but what we're fine-tuning the model with
+
+355
+00:54:53.880 --> 00:54:56.880
+Aaron Gallant: is from Hugging Face, somebody just mentioned Hugging Face.
+
+356
+00:54:57.960 --> 00:55:13.410
+Aaron Gallant: we have some label data about tweet sentiment. So the idea is, is, what is the sentiment of this tweet? Rate it negative, neutral, positive, and then there's a tweet about some company doing something, and then at the end, there should be a label. Yeah, neutral.
+
+357
+00:55:14.330 --> 00:55:15.659
+Aaron Gallant: And etc.
+
+358
+00:55:15.760 --> 00:55:20.520
+Aaron Gallant: And the idea is, oh, we could use this model to maybe do financial stuff.
+
+359
+00:55:21.000 --> 00:55:24.959
+Aaron Gallant: We run trainer.train, and it's a llama model that we're starting from.
+
+360
+00:55:25.680 --> 00:55:32.269
+Aaron Gallant: We train it for a while, and we see the loss go down. The loss is sort of how bad the model is. It's another way to
+
+361
+00:55:32.730 --> 00:55:44.590
+Aaron Gallant: say, model performance, and by how bad, I mean how unlike the good model output. Like, how un… how often is it wrong, based on the labeled training data? And how much is the output like?
+
+362
+00:55:44.710 --> 00:55:45.859
+Aaron Gallant: What it should be.
+
+363
+00:55:46.100 --> 00:55:57.449
+Aaron Gallant: And so we want loss to go down, and indeed it does. We see that it starts out at 3.29, and then it goes down, and it sort of bounces around, kind of stabilizes around .9 or 1, maybe.
+
+364
+00:55:58.190 --> 00:56:03.340
+Aaron Gallant: If we look at that in this little dashboard here, we can see the…
+
+365
+00:56:03.500 --> 00:56:16.350
+Aaron Gallant: Light gray line is the actual jagged loss, and the bolder line is smoothed as a rolling average of the loss. And you can see that it sort of bottomed out, and that's when we stopped training. So we've optimized the model to some extent.
+
+366
+00:56:16.580 --> 00:56:23.079
+Aaron Gallant: Probably not really, because we could try other hyperparameters, but we certainly made the model better at doing this data.
+
+367
+00:56:24.430 --> 00:56:32.059
+Aaron Gallant: And if we give it an example now, a hypothetical tweet about Tesla superchargers, we will see that it responds.
+
+368
+00:56:34.230 --> 00:56:39.750
+Aaron Gallant: And you notice, this format's different Oh.
+
+369
+00:57:00.640 --> 00:57:09.900
+Sunny with Gauntlet: Hi everyone, I think Aaron's just having a little glitch, let's just give him a second, as I think his computer might have froze, of course, right at the last second.
+
+370
+00:57:10.060 --> 00:57:14.119
+Sunny with Gauntlet: Let's see if he's able to hop back on…
+
+371
+00:57:24.580 --> 00:57:26.810
+Sunny with Gauntlet: Yeah, let's see…
+
+372
+00:57:27.090 --> 00:57:38.540
+Sunny with Gauntlet: Oh, it looks like we might have dropped him. Sorry about that, everyone. But we'll be sharing this recording via email, so no worries. Oh, is he jumping back on? I think we might have gotten back.
+
+373
+00:57:38.540 --> 00:57:43.240
+Aaron Gallant: Sorry about that. My computer over… my computer literally overheated, it's kind of hot.
+
+374
+00:57:43.240 --> 00:57:43.860
+Sunny with Gauntlet: Oh, no!
+
+375
+00:57:43.860 --> 00:57:56.329
+Aaron Gallant: I didn't… I didn't turn on air conditioning aggressively enough. Yeah, it's… anyway. We're about to wrap up. So, I was sprinting to the end of the notebook. I'll go ahead and,
+
+376
+00:57:56.950 --> 00:58:04.230
+Aaron Gallant: you, you have a copy of the notebook, so you can see that it rates the tweet as positive sentiment. So that's… that's the idea.
+
+377
+00:58:04.420 --> 00:58:08.029
+Aaron Gallant: Let me get this back up here.
+
+378
+00:58:08.640 --> 00:58:11.580
+Aaron Gallant: And also, check the questions I can check in the chat.
+
+379
+00:58:18.430 --> 00:58:19.350
+Aaron Gallant: Alright.
+
+380
+00:58:19.780 --> 00:58:21.339
+Aaron Gallant: Get the chat back up.
+
+381
+00:58:22.840 --> 00:58:24.569
+Aaron Gallant: Oh, except…
+
+382
+00:58:24.700 --> 00:58:44.600
+Aaron Gallant: crashing out means I lost the chat history. So if you asked a question earlier, please feel free to re-ask it. I'll spend at least a few minutes here at the end answering questions, and then we'll, I think call it. So, do you have a strong preference, between LM Studio, Ollama, or other app storing local models? Not a strong preference. I mean…
+
+383
+00:58:45.230 --> 00:58:53.270
+Aaron Gallant: a lot of them build on the same, like, you know, llama.cpp, or same sort of, underlying stuff. Lm Studio has been sort of a…
+
+384
+00:58:54.060 --> 00:59:09.560
+Aaron Gallant: kind of convenient UI, I'll give it that. But if I was doing something programmatic, I might reach for Olama instead. A link to the slides. Yes, there is a link we can share for the slides. I can drop that now, or maybe Sonny will drop that.
+
+385
+00:59:11.200 --> 00:59:12.189
+Aaron Gallant: Here, I've got it.
+
+386
+00:59:16.450 --> 00:59:18.759
+Aaron Gallant: Or, no, I need to send it to everybody.
+
+387
+00:59:19.380 --> 00:59:20.239
+Aaron Gallant: There we go.
+
+388
+00:59:23.430 --> 00:59:36.109
+Aaron Gallant: All right, and while we are possibly waiting for a last question or two, I just want to also close by saying thank you for joining. I hope you enjoyed this. As clear, I enjoy this stuff. I think this is a great
+
+389
+00:59:36.650 --> 00:59:49.140
+Aaron Gallant: area to be in, a great thing to be thinking about and learning about, and if you are interested in thinking and learning more, please join us more. They're, of course, going to continue to be night classes, but we also
+
+390
+00:59:49.170 --> 01:00:01.679
+Aaron Gallant: As I imagine you know, I have the regular full gauntlet program. The next, application, I believe Sonny said, is July 6th. Did I get that right? Or not… apply before that, but the next start is July 6th, is that right?
+
+391
+01:00:03.560 --> 01:00:08.229
+Sunny with Gauntlet: Yes, that's correct. Next cohort clicks off July 6th.
+
+392
+01:00:08.230 --> 01:00:08.730
+Aaron Gallant: July.
+
+393
+01:00:08.730 --> 01:00:10.329
+Sunny with Gauntlet: I'm gonna drop those links now.
+
+394
+01:00:10.490 --> 01:00:23.079
+Aaron Gallant: And also, if maybe you're not looking to make that sort of a change, you're, you know, you're at a place, and you have a career, but you still want to learn more about this, and your employer's supportive of that, or…
+
+395
+01:00:23.080 --> 01:00:38.309
+Aaron Gallant: perhaps you're the one making the decision. We have Catalyst, which allows for similar training for people who are already on the job, and we give a lot of hands-on help to make sure that these skills are really useful and applicable
+
+396
+01:00:38.420 --> 01:00:40.750
+Aaron Gallant: And you see return on it in what you're doing.
+
+397
+01:00:40.870 --> 01:00:45.620
+Aaron Gallant: And then last but not least, but there's also going to be…
+
+398
+01:00:45.790 --> 01:00:52.950
+Aaron Gallant: And Sonny, you'll have to help me here, because I lost windows here, but the, event in Austin…
+
+399
+01:00:53.530 --> 01:01:07.999
+Sunny with Gauntlet: Yes, so we are having a live event in Austin. It's called Fired Festival. I'm gonna drop a link right now in the chat for everyone. It's… we don't really always do live events, so it's gonna be a great time. If you want to apply for that or learn more, just follow the link that's gonna be in the chat.
+
+400
+01:01:09.630 --> 01:01:15.719
+Aaron Gallant: Great, and I think that's all we've got. Made… made perfect time. I…
+
+401
+01:01:18.240 --> 01:01:37.930
+Aaron Gallant: Looking at the questions here, what would we recommend for less technical people? I mean, not… this was probably a particularly technical night class, they vary. There will be other night classes that, have a variety of topics, and really, our programs in general, we do have, you know, product focus and other aspects to our program.
+
+402
+01:01:39.260 --> 01:01:41.309
+Aaron Gallant: Or to our programs, I should say.
+
+403
+01:01:42.100 --> 01:01:50.930
+Aaron Gallant: Alright, I don't see any other burning questions, so, thank you all, and
+
+404
+01:01:52.470 --> 01:01:56.389
+Aaron Gallant: Hope to see you again at something gauntlet-related.
+

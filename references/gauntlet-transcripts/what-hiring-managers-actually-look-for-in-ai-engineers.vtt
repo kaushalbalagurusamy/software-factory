@@ -1,0 +1,1682 @@
+WEBVTT
+
+1
+00:00:03.600 --> 00:00:04.830
+Ash Tilawat: Alright.
+
+2
+00:00:05.260 --> 00:00:12.320
+Ash Tilawat: I want to welcome everybody to night school. We have a bunch of people popping in, so we're going to give them a few minutes.
+
+3
+00:00:13.810 --> 00:00:17.940
+Ash Tilawat: And as everybody pops in here, in the chat.
+
+4
+00:00:18.350 --> 00:00:27.829
+Ash Tilawat: Let's write wherever we're coming in from. So, is it New York? Here in Austin, Texas? SF, around the world? Let us know where you're dialing in from.
+
+5
+00:00:31.270 --> 00:00:41.969
+Ash Tilawat: Now, we have over 400 people signed up for this session, so there's gonna be a lot of people all over the place, so I'm excited to see. Louisiana, New Zealand, that's the farthest.
+
+6
+00:00:42.620 --> 00:00:47.010
+Ash Tilawat: We have Orange County, Canada, Love it.
+
+7
+00:00:48.410 --> 00:01:07.250
+Ash Tilawat: Now, there's a few people in the room who are going to be sort of my helpers, staff members from Gauntlet. You'll see, they're gonna write with Gauntlet or from Gauntlet on their display names, so help answer some of your questions. But as you're hopping into this class, please add where you're dialing in from.
+
+8
+00:01:07.630 --> 00:01:10.989
+Ash Tilawat: And let's also add why we are joining this class.
+
+9
+00:01:11.490 --> 00:01:22.820
+Ash Tilawat: Why are you joining this class on how to interview as an AI-first engineer? I want to deliver value to you guys, and so this is completely live, I'll be doing a ton of Q&A at the end.
+
+10
+00:01:22.930 --> 00:01:25.860
+Ash Tilawat: So, what is the reason why you joined the class?
+
+11
+00:01:31.160 --> 00:01:32.859
+Ash Tilawat: Poland. That's another one.
+
+12
+00:01:36.650 --> 00:01:38.589
+Ash Tilawat: New Hampshire, alright.
+
+13
+00:01:40.370 --> 00:01:43.869
+Ash Tilawat: Okay, you don't interview well, looking for a better job.
+
+14
+00:01:44.100 --> 00:01:51.690
+Ash Tilawat: To get better understanding, Transitioning from senior writer… Former Lambda school.
+
+15
+00:01:52.240 --> 00:01:57.109
+Ash Tilawat: Yes, the session is going to be recorded and available on YouTube afterward.
+
+16
+00:01:57.830 --> 00:02:01.200
+Ash Tilawat: I have an opportunity to join an AI company, amazing.
+
+17
+00:02:01.400 --> 00:02:03.830
+Ash Tilawat: McKinney, Texas, looking for a job.
+
+18
+00:02:05.030 --> 00:02:08.839
+Ash Tilawat: Transitioning from TPM to AI engineer. Love it.
+
+19
+00:02:09.130 --> 00:02:14.860
+Ash Tilawat: Exploring the AI landscape, Looking for a better job.
+
+20
+00:02:17.510 --> 00:02:23.849
+Ash Tilawat: Would love to learn more about experimenting, don't interview well, imposter syndrome, of course.
+
+21
+00:02:25.160 --> 00:02:28.669
+Ash Tilawat: This is great. The awesome part about this is…
+
+22
+00:02:29.860 --> 00:02:39.370
+Ash Tilawat: This is gonna help me decide what other classes I should have for night school. So the whole point of Night School is to take the Gauntlet AI curriculum.
+
+23
+00:02:39.370 --> 00:02:57.919
+Ash Tilawat: and to ensure that there is an open version of that curriculum that all of you can use to get better at either a technical skill, an interviewing skill, and just get hired much faster in this job market. So I'm excited to see all this inside of the chat, so we can actually see what the next classes might be.
+
+24
+00:02:58.730 --> 00:03:06.000
+Ash Tilawat: We're gonna give people another minute. We have 109 people already joining us. We're gonna get started here in just a minute.
+
+25
+00:03:06.120 --> 00:03:11.109
+Ash Tilawat: And we'll get started on our session on how to interview as an AI-first engineer.
+
+26
+00:03:12.220 --> 00:03:20.540
+Ash Tilawat: Someone is saying, being an AI engineer is a completely new role to me, and it's an interesting change. For sure. This is a role that didn't exist 8 months ago.
+
+27
+00:03:20.960 --> 00:03:30.960
+Ash Tilawat: Right? The 8 months ago, this role was completely something that people were thinking about, HR didn't have a name for it. All of a sudden.
+
+28
+00:03:30.960 --> 00:03:49.910
+Ash Tilawat: Claude Code reaches a maxima, and everybody is looking for an AI-first engineer. And so, I think this is going to be really insightful for all of you, and I'm excited to get started. Okay, so I want to go through how Night School works. Night School is a weekly session that we have here at Gauntlet AI that is open to the public.
+
+29
+00:03:49.940 --> 00:04:00.810
+Ash Tilawat: And this session is going to go over either a technical skill, a soft skill, or something that has to do with both of those areas when it comes to getting hired as an AI engineer.
+
+30
+00:04:00.930 --> 00:04:09.949
+Ash Tilawat: We run a 10-week accelerator, 3 weeks remote, 7 weeks on-site, where all we do is completely immerse ourselves in AI.
+
+31
+00:04:10.070 --> 00:04:19.729
+Ash Tilawat: That means I have over 100 students at our headquarters right now in Austin, Texas, that are devoting over a thousand hours to being at the frontier of AI.
+
+32
+00:04:19.740 --> 00:04:32.150
+Ash Tilawat: My goal is to take that curriculum and bring it to you for free. So, if you have questions, if you have specific concerns, if you're wondering about something, please, please, please add it to the chat.
+
+33
+00:04:32.430 --> 00:04:44.269
+Ash Tilawat: Here's how Q&A's gonna work. I have 3 of my Gauntlet staff members, Derek, Aaron, and Nina, inside of the chat with you. They're gonna be able to answer your questions on the fly as I'm teaching.
+
+34
+00:04:44.460 --> 00:04:50.480
+Ash Tilawat: At the end of my session, I'll be spending about 15 to 30 minutes on Q&A alone.
+
+35
+00:04:50.590 --> 00:04:56.189
+Ash Tilawat: I've also asked the staff, Sunny and Tom, to highlight some of the best questions for me.
+
+36
+00:04:56.230 --> 00:05:14.389
+Ash Tilawat: These best questions are then being highlighted on my phone here, so I can actually answer them out loud. So we're… there's a lot of people in the room, so we're gonna do our best to make sure all your questions are answered, but here's what you should do. For the next 40 to 45 minutes, lock in. Pay attention to what I'm trying to say.
+
+37
+00:05:14.420 --> 00:05:24.809
+Ash Tilawat: participate in some of the exercises, note down your question in the chat, and we'll have one of our staff members answer it async, or I'll answer it out loud at the end of the session.
+
+38
+00:05:24.820 --> 00:05:44.950
+Ash Tilawat: This is exactly how classes work here at Gauntlet AI. We take a portion of the class and have it focused on the lecture material. Once the lecture material is over, we usually have a Q&A session for about 15 to 30 minutes, and then an exercise at the end that individuals can do to sort of get prepared and take themselves to the next level.
+
+39
+00:05:44.950 --> 00:05:46.899
+Ash Tilawat: That's exactly what we'll be doing today.
+
+40
+00:05:48.160 --> 00:05:49.210
+Ash Tilawat: Alright.
+
+41
+00:05:51.940 --> 00:05:56.939
+Ash Tilawat: Today's class is going to be on how to interview as an AI-first engineer.
+
+42
+00:05:57.190 --> 00:06:12.849
+Ash Tilawat: The reason why I think I can talk about this is because I've partnered with over 81 companies and teams, I've trained over a thousand engineers over the last 2 years, and I've placed over 300 Gauntlet grads as AI-first engineers. We partner with organizations like
+
+43
+00:06:13.490 --> 00:06:21.679
+Ash Tilawat: GoFundMe, Zapier, Nerdy, Nexa, and my graduates are becoming AI-first engineers at all of these organizations.
+
+44
+00:06:21.680 --> 00:06:45.700
+Ash Tilawat: Our goal here at Gauntlet is to train the next generation of engineers, leaders, managers, and business owners to be AI-first across the board. That is why I can come to you and say, I understand how people are trying to hire for these AI roles. I've talked to CTOs across the board, I've hired personally as a CTO, and the system is entirely broken.
+
+45
+00:06:46.320 --> 00:06:56.610
+Ash Tilawat: This is real data from a job posting that I recently had, where 88% of all of the applications I got were
+
+46
+00:06:56.610 --> 00:07:20.210
+Ash Tilawat: AI-generated resumes. You could tell by how exact the keywords were being used, you could tell by how precise everything matched my job description, you can tell that it's just really hard to find signal in a sea of noise. There is so much noise out there where people are claiming, over-exaggerating, and not actually talking to the exact skillset that they have.
+
+47
+00:07:20.830 --> 00:07:33.770
+Ash Tilawat: When you actually start talking to these people, and you start interviewing them, you realize, hey, he doesn't actually have the knowledge for this specific position, or no, they did something similar, but it's not exactly what I'm looking for.
+
+48
+00:07:33.840 --> 00:07:49.060
+Ash Tilawat: Based on that job posting, I had 88%, which I thought were AI-generated resumes. I saw identical keywords for about 76% of that, those applications. About 12%, in my opinion, were like, okay, this guy's probably good.
+
+49
+00:07:49.270 --> 00:08:00.529
+Ash Tilawat: He has a brand name, he has a referral, there's some signal here that makes it… me seem like, hey, this is actually a valid candidate. And then finally, about 8% did move on to the interview round.
+
+50
+00:08:00.850 --> 00:08:03.239
+Ash Tilawat: That is what's happening
+
+51
+00:08:03.240 --> 00:08:27.299
+Ash Tilawat: on this side of the hiring cycle. Let's say you're a CTO. Let's say you're an engineering manager. Let's say you're a product leader. It doesn't matter what area this is happening in, but what's happening is we're getting 10,000 AI-generated applications. There's, like, another agent coming out that is doing job search for you and then uploading your apps, and we have little to no way to discern
+
+52
+00:08:27.300 --> 00:08:30.570
+Ash Tilawat: Signal from noise. And so, I… this is important.
+
+53
+00:08:30.620 --> 00:08:45.950
+Ash Tilawat: Because this signal is broken, we are then going to referrals, and we're going to brand names, and we're going to test, and we're going to other in-person events, conferences, college meetups, and we're trying to find our engineers in that location.
+
+54
+00:08:46.120 --> 00:09:06.279
+Ash Tilawat: Now, what happens when you do that virtual interview? Everybody's using some sort of coding assistant on the right side, they have some sort of hidden earpiece, there's, like, a screen overlay app that we've heard of, like, 8 of them now. There's also these, like, ghostwriting co-pilots. It's really hard to discern, even in the interview, if this person actually knows what they're talking about.
+
+55
+00:09:06.280 --> 00:09:23.390
+Ash Tilawat: That is to the point where I have individuals come into my headquarters now and interview, because I have better signal watching them in person, talking to them directly, than I do over some sort of virtual meeting. That is the state of the market, and everything is becoming a knowledge round.
+
+56
+00:09:23.390 --> 00:09:42.189
+Ash Tilawat: Meaning, if we know that AI can generate code, if we know that AI is able to do XYZ portion of the entire software development lifecycle, then what part becomes important? Judgment. Taste. The ability to decide when to do what with your AI is the key skill.
+
+57
+00:09:42.780 --> 00:09:45.300
+Ash Tilawat: There's two tracks that I want you to focus in on.
+
+58
+00:09:45.600 --> 00:09:57.499
+Ash Tilawat: And these two tracks correspond with the Gauntlet curriculum. The Gauntlet curriculum focuses on coding with AI and building AI applications. Now, coding with AI means you have
+
+59
+00:09:57.500 --> 00:10:22.150
+Ash Tilawat: Codex, Claude Code, OpenCode, whatever you've decided your harness is for coding, you have a methodology on top by which you code with that harness. I'll give you an example of this. Currently, I use Cloud Code as my primary harness. Cloud Code uses linear as a task management tool, I use Plan Mode on Cloud Code, I have a testing suite with 3 other sub-agents, and then I do code review with Greta.
+
+60
+00:10:22.150 --> 00:10:41.469
+Ash Tilawat: That is my AI-first methodology. I've taken 3 or 4 tools, 4 or 5 skills, and the exact steps from start to finish to better understand how to actually code with AI. I want to make sure that as I'm coding, I can outline and talk about this methodology step-by-step.
+
+61
+00:10:41.720 --> 00:10:55.739
+Ash Tilawat: I have seen, inside of interviews for both Gauntlet students and for individuals that are interviewing across the board here in Austin, Texas, that people are asked directly, how do you use Claude Code? What skills are you using?
+
+62
+00:10:55.740 --> 00:11:10.279
+Ash Tilawat: How are you manipulating these skills? How are you automating the things like code review and deployment? What is a plugin? Are you using a plugin for deployment? These are important questions to discern if you actually know what you're doing when it comes to using coding agents.
+
+63
+00:11:10.300 --> 00:11:11.270
+Ash Tilawat: there is…
+
+64
+00:11:11.380 --> 00:11:31.239
+Ash Tilawat: there's dabbling, and there's actually understanding something. I would encourage all of you to actually put in the time. Spend 20 to 40 hours with your coding agent of choice, understand the nuances, understand the prompting, understand the skills, understand the exact methodology before you start thinking about your methodology.
+
+65
+00:11:31.610 --> 00:11:54.990
+Ash Tilawat: The other part is building AI applications. If you were to take all of the big AI applications in the market right now, they all come down to four primitives, and I think people complicate this a lot, but the four primitives are RAG, agents, graphs, and evals. Now, each of these topics is going to be key, because when you're interviewing to be an AI engineer, these are the questions that you might get.
+
+66
+00:11:54.990 --> 00:12:03.410
+Ash Tilawat: What's agentic rag? What's metadata filtered RAG? What vector database are you using for your rag system? Where do rag systems work, and where do they break?
+
+67
+00:12:03.510 --> 00:12:12.529
+Ash Tilawat: What's an agent? What's the difference between an agent and a graph? What's an eval? Why are you scoring something? What's LLM as a judge? What's an observability platform?
+
+68
+00:12:12.720 --> 00:12:19.360
+Ash Tilawat: Questions like these are exactly what you should be exposed to and be working with to be even
+
+69
+00:12:19.490 --> 00:12:22.810
+Ash Tilawat: in the arena to be hired as an AI-first engineer.
+
+70
+00:12:23.370 --> 00:12:26.860
+Ash Tilawat: The most important part about this is you need to have
+
+71
+00:12:27.260 --> 00:12:43.750
+Ash Tilawat: one, two, three tools in each of these categories, you don't need to go crazy. One of the biggest things that happens in AI is there's a new discovery, or something comes out every single day, and we think that the breadth of what we learn is important, when it's not the breadth, it is the depth.
+
+72
+00:12:43.750 --> 00:12:52.490
+Ash Tilawat: Meaning, you need to go deeper into Langchain, deeper into Cloud SDK, deeper into Langsmith. You need to pick your toolset and stick with it.
+
+73
+00:12:52.670 --> 00:13:00.859
+Ash Tilawat: Okay, so those are the two areas that you should be ramping up on, and this is exactly what Gauntlet focuses on in terms of our curriculum.
+
+74
+00:13:01.580 --> 00:13:12.230
+Ash Tilawat: Now, when I talk about coding with AI, I talked about a methodology, but I also want to give you specific things I would focus on for practicing during the interview and what you might be asked to do.
+
+75
+00:13:13.010 --> 00:13:30.269
+Ash Tilawat: Walk me through your Cloud Code workflow step by step. To some people, this might be like, hey, this is a stupid question. My Cloud Code workflow is just answering and prompting and, you know, answering whatever I have to answer, or giving the information I need to give, or connecting something. It's pretty straight and simple.
+
+76
+00:13:30.800 --> 00:13:33.400
+Ash Tilawat: That shows that you are a novice.
+
+77
+00:13:33.780 --> 00:13:53.030
+Ash Tilawat: If you truly have a Cloud Code workflow, you should have one for greenfield projects and brownfield projects. You should understand how your Cloud Code orchestrator is taking in all of the context and the data. You should understand how… what your testing strategy is, your code review strategy is, what model you're using when.
+
+78
+00:13:53.140 --> 00:13:59.599
+Ash Tilawat: That all makes up your methodology. The first week of Gauntlet, we tell everybody, hey.
+
+79
+00:14:00.160 --> 00:14:19.319
+Ash Tilawat: there's no manual coding for the next 2 weeks. Your goal is to build an AI-first methodology, which means that you and your coding agent should be, in a symbiosis, be able to code and work with each other perfectly. So when someone tells you, walk me through your cloud code workflow, you should be able to say, I start off with
+
+80
+00:14:19.350 --> 00:14:44.120
+Ash Tilawat: doing meetings across the team, the product manager, the UX designer, across whoever's designated as a subject matter expert, and I do interviews. I use Granola to take down every single thing that they're saying, and I make sure that I understand exactly what the ticket requires. Once I have all of this information, I'm taking all my Granola notes, I'm taking the ticket from Jira, and I've connected the MCP servers across both of those different tools.
+
+81
+00:14:44.120 --> 00:14:48.710
+Ash Tilawat: I'm bringing in all this information into Cloud Code inside of an MD file.
+
+82
+00:14:48.880 --> 00:15:02.259
+Ash Tilawat: Then I turn on plan mode inside of Cloud Code, where I am walking through the exact implementation process, the directories that are going to be updated, the exact code that I'm going to write through, and I'm using voice dictation through Aqua to do so.
+
+83
+00:15:02.520 --> 00:15:16.510
+Ash Tilawat: After I do that, I'm gonna walk through and start implementing a task list, where I'll create a simple MD file with all… a checklist of all the things that have to be completed, plus phases that I can walk in and see if everything is working perfectly.
+
+84
+00:15:16.540 --> 00:15:23.480
+Ash Tilawat: Once I have that, then I can go step by step by step and actually ship that piece of code. That is a methodology.
+
+85
+00:15:23.710 --> 00:15:41.790
+Ash Tilawat: It is a string of connected tools that you know exactly how to use well, so that you can get the code on the other side properly. You should be able to convey this in an interview if you want to be an AI-first engineer. Now, there's 3 other areas that I think are super important.
+
+86
+00:15:41.790 --> 00:15:58.249
+Ash Tilawat: One of them is, how do you manage tasks? If you have so many things that are happening within an entire coding workflow, one of the key questions you'll get inside of the interview is, are you using linear? Are you using a task management platform? Is there something that you're doing specifically to manage these tasks?
+
+87
+00:15:58.320 --> 00:16:07.450
+Ash Tilawat: Skills are by far one of the most important things that you could be doing, and they are available across all of the coding agents, whether it's cursor, codecs, or Cloud Code.
+
+88
+00:16:07.550 --> 00:16:14.729
+Ash Tilawat: A skill is essentially taking domain expertise from whichever area of the company that you're working in.
+
+89
+00:16:15.090 --> 00:16:22.860
+Ash Tilawat: Putting that domain expertise in a single file that Claude Code can then progressively disclose to the context window.
+
+90
+00:16:23.030 --> 00:16:36.079
+Ash Tilawat: is exactly one of the key ways of making your coding strategy, your coding methodologies, 10 times better. So if you have not tried any skills yet, knowing what a skill is and how to use it is super important.
+
+91
+00:16:37.460 --> 00:16:54.179
+Ash Tilawat: Alright, next one is staying in control. Now, one of the key areas that we try to build credibility in an interview, and I do this myself, and this could be with even some of the hiring partners here at Gauntlet AI, for example, Mark from Replicated, for example,
+
+92
+00:16:54.180 --> 00:17:04.190
+Ash Tilawat: I don't know, all the CTOs that we're talking to, they're asking this one question. How do you verify AI-generated code before it ships? That might be building a test suite.
+
+93
+00:17:04.190 --> 00:17:14.219
+Ash Tilawat: That might be having a code review sub-agent. That might be ensuring that each of the things follow a certain skill that identifies and outlines engineering standards.
+
+94
+00:17:14.240 --> 00:17:20.239
+Ash Tilawat: Verification is going to be the first question you get when you try to get an AI engineer job.
+
+95
+00:17:20.510 --> 00:17:31.849
+Ash Tilawat: They want to make sure that you have the underlying experience and skillset as a software engineer already, but you can also be a stopgap to AI going off the rails.
+
+96
+00:17:32.220 --> 00:17:49.100
+Ash Tilawat: A nice analogy that I've heard before is, before we used to be the actors in a movie when we were building software, but now we're the director of those actors. Each of these agents can go in multiple different directions, and we want to see inside of the interview that you're able
+
+97
+00:17:49.100 --> 00:17:58.069
+Ash Tilawat: to actually know exactly when AI is correct, when AI is wrong, when AI is partially right, when AI needs to be directionally turned around.
+
+98
+00:17:59.220 --> 00:18:04.049
+Ash Tilawat: That is going to be one of the questions you get in your interview, no matter what.
+
+99
+00:18:04.510 --> 00:18:28.189
+Ash Tilawat: Now, the other thing that happens when you're using a ton of AI on top of your codebase is that you lose track of your codebase as AI keeps adding code, keeps adding code, keeps adding code. Once you start losing track of that codebase, and you're not understanding what each directory is doing, what each file is doing, what all the different agents, all the different endpoints, all the different software that you've created is doing.
+
+100
+00:18:28.190 --> 00:18:30.309
+Ash Tilawat: Then that is a red flag.
+
+101
+00:18:30.650 --> 00:18:49.809
+Ash Tilawat: I'm not saying that you need to understand every single line of code. What I'm trying to tell you is, you need to understand, at the directory level, what each part of your codebase is doing, why you've used certain dependencies, what this class is doing, what this endpoint is doing, what the goal of what you're trying to build is.
+
+102
+00:18:49.990 --> 00:19:02.699
+Ash Tilawat: What happens is, we try to vibe code so much that we lose complete control of our codebase. If that becomes what is happening, then you are not an AI engineer, you're just letting go of the reins.
+
+103
+00:19:03.340 --> 00:19:18.390
+Ash Tilawat: Now, the other thing is, as engineers, there's so many things that we know already, that we want to make our code as simple as possible. We want to ensure that there's no dead code. We want to have comments on our code. We want to be able to review the code in a really nice way.
+
+104
+00:19:18.500 --> 00:19:36.320
+Ash Tilawat: You should still keep all of those things intact. Your comment structure, your testing strategy, your code review methodology, your ability to say that, hey, I have this exact methodology or engineering standard from what I'm building, and keeping those set, keeping those intact, is key.
+
+105
+00:19:36.600 --> 00:19:51.719
+Ash Tilawat: So, what are we looking for when we're asking you this question? We're trying to discern if you actually know how to wield your coding agent well or not. We're trying to see if you're losing control of your codebase, or you know when to stop AI or when to let AI go.
+
+106
+00:19:52.070 --> 00:20:02.149
+Ash Tilawat: We're trying to check and see if you actually understand the code that you're generating. We're trying to see if the code that you're generating can be verified, and you have an actual system by which you're doing so.
+
+107
+00:20:02.450 --> 00:20:10.049
+Ash Tilawat: This whole thing is your AI-first development methodology, and that is going to be tested in an interview, no matter what.
+
+108
+00:20:11.240 --> 00:20:15.360
+Ash Tilawat: Okay, now, when you're building AI, there are 4 pillars.
+
+109
+00:20:15.360 --> 00:20:31.550
+Ash Tilawat: Now, people will say, hey, why don't you add fine-tuning, or reinforcement learning, or classical learning? That is important, don't get me wrong, but if you're a software engineering… if you're a software engineer, excuse me, building at the application level, then these are the four pillars by which you should focus.
+
+110
+00:20:32.070 --> 00:20:39.820
+Ash Tilawat: RAG, graphs, agents, evals. By far, the thing that people forget always is evals, because they don't think it's important.
+
+111
+00:20:40.650 --> 00:20:59.149
+Ash Tilawat: Right now, every single thing that you see in the market, whether it's Cloud Code Agent Harness, whether it's some of the graph-based agents across banking systems, whether it's a customer support agent, whether it's Manus, everything is based off of these four primitives, and they are the foundations of everything that is being built.
+
+112
+00:20:59.710 --> 00:21:22.360
+Ash Tilawat: RAG, or retrieval, which means how can you grab context whenever you need it? How can you reliably get context from a vector database, structured context from a SQL database, context across documents, context across different areas of your codebase? That is what RAG is. It's retrieval, adding it to your context window, and then being able to have a better output.
+
+113
+00:21:22.800 --> 00:21:24.100
+Ash Tilawat: A graph!
+
+114
+00:21:24.100 --> 00:21:46.980
+Ash Tilawat: A graph is nodes and edges that can go in multiple different directions and simulate, well, how an agent would act across, let's say, 8, 9, 10 pathways. When you have a regular agent, that regular agent can act in a million different ways. But what a graph lets you do is have guardrails across all the different ways an agent can act. That means you start by building a graph.
+
+115
+00:21:47.050 --> 00:21:55.949
+Ash Tilawat: That graph gets better and better and better over time. You understand all the different areas where a graph should be performing, and you can then turn it into an agent.
+
+116
+00:21:56.140 --> 00:22:14.629
+Ash Tilawat: An agent is going to be a single orchestrator with multiple skills, multiple connectors, MCP, API connections, that the agent is able to then orchestrate over 20 tools to actually do something, to actually make up new sequences of work and workflows that complete task end-to-end.
+
+117
+00:22:14.630 --> 00:22:23.340
+Ash Tilawat: And finally, evals. Evals are the scoring system, which let us know if the last three foundations are actually working well or not.
+
+118
+00:22:23.600 --> 00:22:37.000
+Ash Tilawat: Right? A lot of people love to have demos. I was working with this team who was building a website builder on top of their application, and they had this website builder running for about 6 months, but they had no idea if it was even leading to any conversion.
+
+119
+00:22:37.250 --> 00:22:53.629
+Ash Tilawat: We set up a complete eval suite, which tracked if a human would actually move from joining the website all the way to converting, and converting to a premium account. We mapped it out step-by-step with checkpoints, and then we were able to see the evals, and how people move through that funnel.
+
+120
+00:22:53.710 --> 00:23:02.369
+Ash Tilawat: That is what you need. The ability to score the performance, the ability to see traction on top of your application, using actual numerical data.
+
+121
+00:23:02.740 --> 00:23:07.839
+Ash Tilawat: These evals become by far, one of the most important things you can do to get started in AI.
+
+122
+00:23:07.970 --> 00:23:20.569
+Ash Tilawat: So, these four topics you're gonna get asked about inside of your interview, no matter what, so if you don't know anything about them, that's totally fine. There's YouTube University, and YouTube University has so many videos across all four of these topic areas.
+
+123
+00:23:21.400 --> 00:23:31.769
+Ash Tilawat: Now, evals is what separates everybody from being a true engineer or from somebody that's just kind of dabbling. What is an eval set? How do you build one? That's a question you'll be asked.
+
+124
+00:23:32.430 --> 00:23:43.169
+Ash Tilawat: There's how do you run experiments on top of different models? If you have an agent, can you manipulate which model you're using, run your eval suite, and then as a result, see which model performs best.
+
+125
+00:23:43.390 --> 00:23:59.940
+Ash Tilawat: What is observability? What are observability platforms? How do you connect to an observability platform and actually use one? And then, what are the different ways you can use observability to see what's working well and what's working… what's not working well? What's Lang Smith? What's LangFuse? What's a good eval pipeline look like?
+
+126
+00:24:00.100 --> 00:24:07.010
+Ash Tilawat: When I look at candidates, there's people who can prompt. That's basically everybody. Everybody at this point can prompt.
+
+127
+00:24:07.110 --> 00:24:19.519
+Ash Tilawat: Then there's people who can measure. That means they understand how to actually connect an observability platform, that they actually understand that there should be some sort of measurement and what to measure. And then finally, there's people who can improve
+
+128
+00:24:19.580 --> 00:24:29.130
+Ash Tilawat: Agentic Systems. So if you've set up your agent, if you've set up your chatbot, if you've set up your RAG pipeline, you should be able to iterate on it and improve it over time.
+
+129
+00:24:29.290 --> 00:24:35.420
+Ash Tilawat: That is the gold standard when deciding who is a true AI engineer and who isn't.
+
+130
+00:24:36.900 --> 00:24:39.789
+Ash Tilawat: Now, this is gonna be some of, like.
+
+131
+00:24:40.360 --> 00:24:59.079
+Ash Tilawat: the key topics in Gauntlet Week 3, 4, 5, where it's important for you to do complete projects. If you decide to build a RAG system, add evals to it. If you decide to build a graph for an agent, add evals to it. Walk through your methodology for testing that system, and then improving that system over time.
+
+132
+00:25:00.260 --> 00:25:05.550
+Ash Tilawat: Okay, so this is the interview arc. This is what's gonna happen in your AI interview.
+
+133
+00:25:06.080 --> 00:25:10.220
+Ash Tilawat: AI first interview. I think we'll have AI interviews sometime soon.
+
+134
+00:25:10.270 --> 00:25:33.520
+Ash Tilawat: Probably as well. Fun fact, we use AI interviewers and Gauntlet for grading. Okay, so the interview arc is… they're gonna start with a credibility check. It's gonna be hyper-specific questions and edge cases on top of the tech stacks that you have experience in. This is not gonna be like leapcode. This is not gonna be like some of the questions that we're used to getting in the old software engineering lifecycle. It's gonna be like…
+
+135
+00:25:33.580 --> 00:25:52.790
+Ash Tilawat: hey, you have experience in Node? Tell me about MVM. You have experience in Python? Tell me how to port C-sharp into Python. I'm not sure, right? Decide what exactly is going to be the knowledge base or the foundation that certifies that your experience in a tech stack is valid.
+
+136
+00:25:52.790 --> 00:25:58.309
+Ash Tilawat: Those questions are going to be asked to you. These questions can be generated by AI really well.
+
+137
+00:25:58.460 --> 00:26:15.129
+Ash Tilawat: You can go into AI, say that, hey, I'm going to be interviewing for X, Y, and Z position as an AI-first engineer, I'm gonna have Python and Java as the two things that they asked me about, and can you generate some questions for me? Saying those questions out loud, answering them really well is going to be important.
+
+138
+00:26:15.300 --> 00:26:21.949
+Ash Tilawat: So that's gonna be the first approach that these managers take to deciding if you're worth it for the job.
+
+139
+00:26:22.850 --> 00:26:31.010
+Ash Tilawat: The next part. They're gonna talk about probing how deep your knowledge is of software engineering. Software engineering is not just coding.
+
+140
+00:26:31.010 --> 00:26:43.009
+Ash Tilawat: One of my first mentors told me that there's coding, and then there's actually software engineering. Because software engineering has security, has deployment, has scalability. All of these things are things that you're going to be asked about.
+
+141
+00:26:43.150 --> 00:26:48.069
+Ash Tilawat: If coding agents have pretty much taken over the generation
+
+142
+00:26:48.450 --> 00:26:54.569
+Ash Tilawat: portion of the software development lifecycle. There's 7 other areas that you can focus in on.
+
+143
+00:26:54.710 --> 00:27:05.460
+Ash Tilawat: Maybe that's task generation. Maybe that's, scaffolding a repository. Maybe that's deployment. Maybe that's security. Maybe that's scaling this across your cloud infrastructure.
+
+144
+00:27:05.670 --> 00:27:08.489
+Ash Tilawat: These are questions you're gonna get no matter what.
+
+145
+00:27:08.800 --> 00:27:27.319
+Ash Tilawat: So, you need to first have some sort of credibility check to make sure that your knowledge of a tech stack is valid. You need to have the ability to talk about the full software development lifecycle, meaning that, hey, I can talk about security, I can talk about scalability, and I can talk about deployment. Finally, you need to have some set level of product sense.
+
+146
+00:27:27.620 --> 00:27:46.199
+Ash Tilawat: Gauntlet believes that as we get closer and closer to coding being dominated by AI, product manager and engineer are becoming the same profession. I have worked with teams that are making product manager and engineer the same position.
+
+147
+00:27:46.200 --> 00:27:51.189
+Ash Tilawat: I'm calling it an AI-first builder. There's another company calling it a full-stack builder.
+
+148
+00:27:51.190 --> 00:28:04.429
+Ash Tilawat: Having a little bit of product sense, understanding what the user wants, actually understanding the intent of a ticket, making sure that the user's able to discern what is supposed to happen with this feature is going to be important.
+
+149
+00:28:04.590 --> 00:28:08.069
+Ash Tilawat: In the past, as an engineer, it was required less
+
+150
+00:28:08.290 --> 00:28:21.780
+Ash Tilawat: of you to understand exactly what the user wanted. You needed to be involved in user interviews much less. Now, it is a part about what you're doing. It is going to be important to discern
+
+151
+00:28:21.870 --> 00:28:36.630
+Ash Tilawat: that skill inside of your interview, so the manager feels like, hey, this guy actually understands a little bit of product, he knows what decision to make when, he has good judgment when it comes to users. As a result, this can be a better product on the other side.
+
+152
+00:28:36.850 --> 00:28:45.239
+Ash Tilawat: Finally, workflow openness. What do I mean by this? Alright, there are some people who say they are AI-first, when they're truly not.
+
+153
+00:28:46.180 --> 00:28:54.900
+Ash Tilawat: there's a bunch of people out there who don't believe that AI should be involved in work at all. There's individuals who kind of embrace it, but kind of don't.
+
+154
+00:28:54.950 --> 00:29:10.809
+Ash Tilawat: There's individuals who have a ton of reservations, there's individuals who have a ton of preconceived notions. That's fine. You can believe what you want to believe, but when you go into an interview, they're 100% going to check how open are you to adopting a new way of work?
+
+155
+00:29:10.960 --> 00:29:21.429
+Ash Tilawat: In the era of AI, the way we work is fundamentally changing. And if the way we work is fundamentally changing, then you should be open and adaptable to whatever that may be.
+
+156
+00:29:21.670 --> 00:29:30.309
+Ash Tilawat: Now, there… it could be spec-driven development, it could be something else, right? But the goal here is, are you open to changing the way you've been doing things?
+
+157
+00:29:31.210 --> 00:29:45.789
+Ash Tilawat: Okay, so how to pass the credibility check is to have projects that can speak to your experience. These could be deployed work, this could be complete work at the… that you've done across your experience. You need to have
+
+158
+00:29:45.810 --> 00:30:02.359
+Ash Tilawat: the ability to open up that app inside of your portfolio, go under the hood, articulate maybe how AI helped you build what you just built, if it did, and describe any of the bugs it may have, the trade-offs you made, and then the judgment you had when building the application.
+
+159
+00:30:02.790 --> 00:30:08.979
+Ash Tilawat: You want to make sure that you are the engineer, AI is the tool, and that's it.
+
+160
+00:30:09.430 --> 00:30:16.949
+Ash Tilawat: One more time, you are the engineer, AI is the tool, and what you're trying to show is that you can wield your tool
+
+161
+00:30:17.400 --> 00:30:20.410
+Ash Tilawat: The best compared to whoever else is interviewing.
+
+162
+00:30:21.520 --> 00:30:25.949
+Ash Tilawat: Now, product sense in the AI era just means that you have good judgment.
+
+163
+00:30:26.070 --> 00:30:33.000
+Ash Tilawat: That means that if, let's say you were bottlenecked for 2 weeks, and you had a bunch of tickets to do, you would know what ticket to focus on.
+
+164
+00:30:33.000 --> 00:30:47.019
+Ash Tilawat: Maybe you would use AI to take in all of the user interviews to better understand exactly what was going on to pick the right ticket to work on. Maybe you'd be better able to prioritize which features would drive more user adoption than other features.
+
+165
+00:30:47.160 --> 00:30:58.910
+Ash Tilawat: This level of judgment is what people are looking for. That doesn't mean that you have to completely go out and be a product manager. That means you need to have a certain level of taste and judgment to decide what ticket is more important.
+
+166
+00:30:58.910 --> 00:31:18.609
+Ash Tilawat: How should I approach this ticket? How can I thoughtfully make sure that we account for X, Y, and Z scenarios? What's the trade-off between doing this ticket and doing that ticket? What's the trade-off in this approach and that approach? This architecture and that architecture? That level of judgment you should have going to the interview.
+
+167
+00:31:19.660 --> 00:31:29.020
+Ash Tilawat: Now, workflow openness is what I talked about earlier, and I think this diagram illustrates properly what I'm talking about. There's…
+
+168
+00:31:29.360 --> 00:31:42.170
+Ash Tilawat: too resistant, which just means I'm never going to adopt AI at all. Or they might come off as, hey, I'm gonna adopt AI just to, like, autocomplete, but I'm never gonna actually let it take over my workflow.
+
+169
+00:31:42.310 --> 00:31:57.339
+Ash Tilawat: Then on the other side, we have, hey, I'm gonna vibe code everything, I'm gonna generate a million lines of code, not review it at all, not have testing suites, and actually go down the line and just ship as much as I can. I think the right answer is in the middle.
+
+170
+00:31:57.550 --> 00:32:19.929
+Ash Tilawat: Right? And I think as AI gets better and better and better, AI will become our digital coworker. But until it gets there, we need to have good verification systems to ensure that this is a methodology. This is leverage being given to me as an engineer, and it's going to introduce some risk. And my goal should be to mitigate that risk.
+
+171
+00:32:19.930 --> 00:32:24.750
+Ash Tilawat: The director of this movie, I need to make sure that the actors are in the right location.
+
+172
+00:32:26.220 --> 00:32:37.569
+Ash Tilawat: Okay, so this is what we're looking for, to give you a sort of breakdown of all the skills. If you were to go into an AI-first engineer interview right now, you want to be able to code with AI.
+
+173
+00:32:37.810 --> 00:32:42.670
+Ash Tilawat: Understand methodology, understand plan mode, what skills are, task management.
+
+174
+00:32:42.670 --> 00:33:00.960
+Ash Tilawat: You need to have some sort of verification strategy. Could be testing suites, could be manual review, code review, sub-agents, whatever that philosophy is. You need to understand the primitives, RAG, agents, graphs, evals, and then you need to have some level of product sense. Talk about trade-offs, prioritization.
+
+175
+00:33:00.960 --> 00:33:02.849
+Ash Tilawat: Comms across the entire team.
+
+176
+00:33:03.110 --> 00:33:18.199
+Ash Tilawat: When you're thinking about preparing for an interview as an AI-first engineer, these are also the areas that you should get really good at. I'm not saying you need to be perfect and handle all edge cases, but if you had to figure out what are the key areas of focus, this is what I would focus on.
+
+177
+00:33:20.040 --> 00:33:24.920
+Ash Tilawat: Okay, so we are about 35 minutes in.
+
+178
+00:33:25.460 --> 00:33:30.370
+Ash Tilawat: what I'm gonna start doing now is, we're gonna do a few practice rounds together.
+
+179
+00:33:30.510 --> 00:33:40.580
+Ash Tilawat: I don't believe in completely theoretical lectures, that's not who I am. The goal here is, I want you guys… I'm gonna give you a question from the list.
+
+180
+00:33:40.580 --> 00:33:56.550
+Ash Tilawat: And inside of the chat, I'm going to ask you to answer that question as you would, based on the experience you have, and as if you're inside of an interview. If you have a dictation app, I use Aqua, for example, you can use the dictation app to just answer your question and add it to the Zoom chat.
+
+181
+00:33:56.740 --> 00:34:03.530
+Ash Tilawat: But… I'm gonna pick… Question number 5.
+
+182
+00:34:04.270 --> 00:34:08.560
+Ash Tilawat: Tell me about a time AI gave you bad code, how did you catch it?
+
+183
+00:34:10.350 --> 00:34:12.320
+Ash Tilawat: So the question posed to you…
+
+184
+00:34:13.010 --> 00:34:15.240
+Ash Tilawat: Act like this is a real interview.
+
+185
+00:34:15.370 --> 00:34:20.130
+Ash Tilawat: Tell me about a time AI gave you bad code, how did you catch it?
+
+186
+00:34:48.210 --> 00:34:52.370
+Ash Tilawat: Integration tests are good. Type check, bang on. Unit test.
+
+187
+00:34:57.260 --> 00:35:02.059
+Ash Tilawat: I did manual Q&A of the feature, and I asked it to build, and it did work properly. Good.
+
+188
+00:35:05.680 --> 00:35:08.340
+Ash Tilawat: Some… through, you know, test?
+
+189
+00:35:09.180 --> 00:35:11.150
+Ash Tilawat: unconnected AI triggers.
+
+190
+00:35:16.130 --> 00:35:19.320
+Ash Tilawat: I'll use TDD, great, and evals.
+
+191
+00:35:19.570 --> 00:35:20.620
+Ash Tilawat: Well done.
+
+192
+00:35:27.340 --> 00:35:30.190
+Ash Tilawat: Terraform code created by AI,
+
+193
+00:35:30.520 --> 00:35:38.729
+Ash Tilawat: I was building a multiplayer game, and the backend needed to hide information from one player than the others. Master to change, okay?
+
+194
+00:35:39.590 --> 00:35:41.889
+Ash Tilawat: with my project, I caught a PR,
+
+195
+00:35:45.310 --> 00:35:48.609
+Ash Tilawat: I also keep the output small so I can see it all. Nice.
+
+196
+00:35:49.010 --> 00:35:52.719
+Ash Tilawat: I made sure to run tests to see if everything was working.
+
+197
+00:35:56.270 --> 00:36:03.569
+Ash Tilawat: AI gave me bad code… Visibility, mythos, yeah, exactly.
+
+198
+00:36:05.380 --> 00:36:07.600
+Ash Tilawat: Bad separation, test the output.
+
+199
+00:36:12.290 --> 00:36:14.709
+Ash Tilawat: Okay, not bad. Not bad at all.
+
+200
+00:36:15.450 --> 00:36:23.279
+Ash Tilawat: Keep going. I'm gonna give you my answer, because I think it's important. I think what I'm looking for when I ask this question in an interview is the following.
+
+201
+00:36:23.840 --> 00:36:42.680
+Ash Tilawat: I actually broke up the exact tasks that Cloud Code was supposed to do into phases. Each of the phases had acceptance criteria. This acceptance criteria was either a playwright test, integration test, end-to-end test, a unit test, and maybe some things I could check manually on the deployed application.
+
+202
+00:36:42.970 --> 00:36:51.030
+Ash Tilawat: I had already deployed the application earlier, and what I was doing is deploying it to a dev branch, so I can actually see and test out what I was building.
+
+203
+00:36:51.310 --> 00:36:56.699
+Ash Tilawat: As Claude Code would go through each of the phases, I would check the acceptance criteria.
+
+204
+00:36:56.950 --> 00:37:10.829
+Ash Tilawat: I would go into the dev branch and actually see what was breaking, what was working, and then I would run the test manually, because Cloud Code likes to lie about test passing all the time, and I would make sure that those tests were actually passing.
+
+205
+00:37:11.260 --> 00:37:24.479
+Ash Tilawat: This is exactly what happened when I was building the Gauntlet AI LMS. The LMS had this one bug where it was unable to showcase all the scheduled classes in a single calendar view.
+
+206
+00:37:24.730 --> 00:37:31.149
+Ash Tilawat: I found that bug, and AI kept telling me, no, it was working. I was able to do that through my acceptance criteria.
+
+207
+00:37:31.440 --> 00:37:38.779
+Ash Tilawat: The fact that I broke down the entire task into phases, the test suite that I had, and by reviewing the output myself.
+
+208
+00:37:39.270 --> 00:37:57.820
+Ash Tilawat: Okay, what did I include in my answer? I included a walkthrough of my methodology, I included exactly what I would do in a specific scenario, and I included an example of something I was actually building that if I was asked to showcase, I can open up the GitHub repository and talk about.
+
+209
+00:37:58.280 --> 00:38:01.080
+Ash Tilawat: That is what you need to do out loud.
+
+210
+00:38:01.590 --> 00:38:09.340
+Ash Tilawat: Now, one of the things we have here at Gauntlet is we have an AI interviewer, and each of the students is forced to actually input
+
+211
+00:38:09.600 --> 00:38:27.660
+Ash Tilawat: like a video of them walking through their project for their submission every single week. And the goal here is, you should act like it's a real interview. Your goal should be that, hey, I'm talking to my future interviewer, and I'm gonna walk through X, Y, and Z the way I would for that specific project.
+
+212
+00:38:28.040 --> 00:38:40.429
+Ash Tilawat: Now, if that's the case, then everything we do with the questions I'm giving you right now, you need to be able to take that question, answer it out loud, even record yourself, and then see how you perform.
+
+213
+00:38:40.770 --> 00:38:53.530
+Ash Tilawat: Okay, next one. Building with AI. Now, many of you may not have actually started learning about some of these primitives of AI. There are a bunch of resources that you can go out and find.
+
+214
+00:38:53.730 --> 00:39:03.619
+Ash Tilawat: The Gauntlet cohort focuses on this in the first two weeks of our program, where we talk about RAG, graphs, agents, and evals, but the goal here should be
+
+215
+00:39:03.900 --> 00:39:20.440
+Ash Tilawat: how can I take some of the specific questions I may be asked in these areas, and then be able to answer them really well out loud? So, back in the chat, I want everybody to see if they can answer question number 6. What does observability mean in an LLM application?
+
+216
+00:39:21.660 --> 00:39:26.450
+Ash Tilawat: What does observability mean in an LLM application?
+
+217
+00:39:36.110 --> 00:39:50.689
+Ash Tilawat: Also, I'm seeing a ton of questions about Gauntlet AI. If that's the case, you can go to gauntletai.com forward slash FAQ. You can see all of our questions that our little agent can answer for you there. That's gauntletai.com forward slash FAQ.
+
+218
+00:39:51.030 --> 00:40:03.300
+Ash Tilawat: Alright, observability means that you can trace the decision all the way through. Observability means that you have the ability to see the reasoning and the agent and its tool calls. Visibility to reasoning.
+
+219
+00:40:04.070 --> 00:40:05.970
+Ash Tilawat: Be able to access data.
+
+220
+00:40:07.050 --> 00:40:10.820
+Ash Tilawat: I've been reviewing the thinking, seeing the thought process.
+
+221
+00:40:10.930 --> 00:40:18.610
+Ash Tilawat: Observability in LLM means application visibility, Metrics, good.
+
+222
+00:40:20.160 --> 00:40:29.359
+Ash Tilawat: Observability means monitoring, tracking, and understanding what's happening inside your LLM application, not just whether it works. Dashboarding and alerting, correct?
+
+223
+00:40:30.420 --> 00:40:31.430
+Ash Tilawat: Correct?
+
+224
+00:40:34.140 --> 00:40:40.009
+Ash Tilawat: Observability means being able to see the work behind the element, understand what's going on. Well, nice.
+
+225
+00:40:46.530 --> 00:40:51.809
+Ash Tilawat: Alright, not bad. Not bad at all. For me, observability is the key
+
+226
+00:40:52.200 --> 00:41:05.990
+Ash Tilawat: information that is hidden behind the black box that is your LLM application. We send all these calls back to some API, they do some sort of reasoning inside of their neural network, and we get these answers back by them guessing tokens.
+
+227
+00:41:06.290 --> 00:41:21.899
+Ash Tilawat: We need to be able to see the tool calls, the inputs and the outputs, the system prompt and the user prompt, to exactly know how our system is solving a problem or completing a task. As a result, observability is that view. Every single interaction.
+
+228
+00:41:21.900 --> 00:41:27.519
+Ash Tilawat: collated, sequenced, and organized for us to see the end-to-end interaction of an LLM.
+
+229
+00:41:28.550 --> 00:41:31.809
+Ash Tilawat: Each of these questions can be found
+
+230
+00:41:31.980 --> 00:41:45.859
+Ash Tilawat: by just having them generate… generated through AI, some of the questions that are available online, each of you can take these questions and practice them for your next AI First Engineer interview. So again, coding with AI and building with AI.
+
+231
+00:41:46.680 --> 00:41:58.790
+Ash Tilawat: Okay, next up is product sense. So, again, product manager and engineers becoming the same profession. If that's the case, we need to make sure that we have some level of judgment.
+
+232
+00:41:59.640 --> 00:42:02.789
+Ash Tilawat: How would you roll out an AI coding workflow to your team?
+
+233
+00:42:03.820 --> 00:42:07.180
+Ash Tilawat: What framework would you use between fine-tuning and RAG?
+
+234
+00:42:07.550 --> 00:42:14.940
+Ash Tilawat: The ability to discern exactly what to use when, what to do to ensure that the quality of what you're building is correct.
+
+235
+00:42:15.150 --> 00:42:21.429
+Ash Tilawat: Now, in the Gauntlet program, what we like to do is, every single project that we have, there's a target user.
+
+236
+00:42:21.500 --> 00:42:30.939
+Ash Tilawat: That target user might be video editors, it might be social media content creators, it might be professors. Whoever it is, you have an avatar.
+
+237
+00:42:30.940 --> 00:42:43.539
+Ash Tilawat: You start by understanding that avatar, you research that avatar, you understand the problems that they're facing, you then build out a project according to their needs. This level of product sense is super important for any AI engineer.
+
+238
+00:42:43.540 --> 00:42:47.200
+Ash Tilawat: If AI is able to generate all of the code in the world for you.
+
+239
+00:42:47.200 --> 00:43:01.739
+Ash Tilawat: then the discerning factor between you and everybody else using the same AI coding agent is going to be how you use that agent, how you manage that agent, what you put that agent on, how you distribute what you built with that agent. Those are your moats.
+
+240
+00:43:02.050 --> 00:43:08.050
+Ash Tilawat: So having some level of judgment into exactly what you're building is really, really important.
+
+241
+00:43:10.200 --> 00:43:34.020
+Ash Tilawat: Okay, there's some hard questions. So, these are questions that actual Gauntlet challengers have gotten when they went into their interviews. So, the way this works is, if you join Gauntlet, during week 4, you start interviewing with our Platinum partners. And that interview starts halfway through the program, then we try to minimize, like, the number of interviews you have to do back and forth, and then you get an offer at the end of the program.
+
+242
+00:43:34.490 --> 00:43:43.020
+Ash Tilawat: But these are some real interviews that we have seen, some questions that we have seen in real interviews across the last cohort.
+
+243
+00:43:43.350 --> 00:43:56.210
+Ash Tilawat: Can you explain every line of your code? Now, this is a trick question, because most of the time, there's no way that an engineer in, like, a million-line codebase, 100,000-line codebase can explain every single line of code. Now.
+
+244
+00:43:56.210 --> 00:44:03.929
+Ash Tilawat: If it's a greenfield project, if it's a small project, that's a different story, that's pretty straightforward and easy. But let's say you were taking a disgusting
+
+245
+00:44:04.210 --> 00:44:15.169
+Ash Tilawat: brownfield repository, a bunch of duct tape everywhere. You know, you're in the filth of that code, then it's really hard to say what every single line of code is doing. But what is important here is.
+
+246
+00:44:15.510 --> 00:44:19.810
+Ash Tilawat: To say, this was my thought process when I was adding this diff.
+
+247
+00:44:20.530 --> 00:44:28.330
+Ash Tilawat: This is how AI helped me decide, these are the things that AI produce, this is how I verified that code, and then this is what that file is doing.
+
+248
+00:44:28.920 --> 00:44:41.149
+Ash Tilawat: You should understand, at least at the file level, what is going on. Be able to understand, hey, at the file level, I am manipulating this data in this way. As a result, I'm getting X, Y, and Z output.
+
+249
+00:44:42.080 --> 00:44:52.809
+Ash Tilawat: Another question that's often asked, and I think the reason what makes this hard is not enough people actually plan and practice this question, which is, what's your methodology with AI-first development?
+
+250
+00:44:53.040 --> 00:45:05.920
+Ash Tilawat: You really need to be able to talk through the exact tools that you use, be able to connect those tools step by step, and then walk through what would happen, and how you verify what's going on inside of that sequence of actions.
+
+251
+00:45:06.090 --> 00:45:15.950
+Ash Tilawat: If you're now managing or directing these coding agents, you should be able to explain exactly what you do at a manner that is reliable, easy to understand, and
+
+252
+00:45:16.110 --> 00:45:20.779
+Ash Tilawat: Can be understood by the manager who's interviewing you on the other side.
+
+253
+00:45:21.190 --> 00:45:31.830
+Ash Tilawat: Finally, deciding between two different tools is sometimes difficult. You know, for example, we have Langchain, AI SDK by Vercel, the Agents SDK by Claude.
+
+254
+00:45:32.110 --> 00:45:40.770
+Ash Tilawat: The OpenAI Agents SDK. If you're building an agent, how do you decide what to use when? You have the Google models, Gemma.
+
+255
+00:45:40.830 --> 00:45:55.409
+Ash Tilawat: Gemini, you'll have Anthropic, Opus, Sonnet, you have OpenAI, all of these models that you can use. Kimi, DeepSeek, a ton of open source models. How do you decide what model you should use when?
+
+256
+00:45:55.560 --> 00:45:57.720
+Ash Tilawat: How do you manage your tokens?
+
+257
+00:45:58.040 --> 00:46:06.950
+Ash Tilawat: One of the key areas I look for is when I ask somebody about their methodology with AI, I always say, how do you manage your token spend across your coding agents?
+
+258
+00:46:07.440 --> 00:46:11.440
+Ash Tilawat: That sometimes, how do you decide to use the dumber model over the smarter model?
+
+259
+00:46:11.920 --> 00:46:17.770
+Ash Tilawat: When you're building out an agent, what do you do to decide what model to use and what framework to use?
+
+260
+00:46:17.810 --> 00:46:23.570
+Ash Tilawat: This is really important, and sort of the best way to sort of do this is to actually build.
+
+261
+00:46:23.580 --> 00:46:38.269
+Ash Tilawat: So if you take nothing away from what I'm trying to tell you right now, it's this, that you have to build real projects in these real areas, RAG, agents, graphs, and evals, and you have to make sure that you know how to wield your coding agent really, really well.
+
+262
+00:46:39.290 --> 00:46:45.319
+Ash Tilawat: Okay, the mindset that wins is you need to have a methodology that you can articulate.
+
+263
+00:46:45.710 --> 00:46:49.130
+Ash Tilawat: You need to take ownership that, hey, you are using AI.
+
+264
+00:46:49.130 --> 00:47:06.490
+Ash Tilawat: But you understand how that AI is doing work, you can verify its output, and you're confident that you can wield it well. Wield it well. You can explain trade-offs, not just implement them. Meaning you have a higher level understanding of architecture, system thinking, and system design.
+
+265
+00:47:06.490 --> 00:47:13.159
+Ash Tilawat: You treat evals as engineering fundamentals, like regression tests, or scores on top of something you're building.
+
+266
+00:47:13.360 --> 00:47:24.349
+Ash Tilawat: You're adaptive. You understand that things are changing. Workflows are changing, the way we do work is fundamentally changing. You understand that, hey, I can move with the times.
+
+267
+00:47:25.100 --> 00:47:29.890
+Ash Tilawat: If you are interviewing for an AI-first engineer, these are the things to keep in mind.
+
+268
+00:47:31.700 --> 00:47:32.690
+Ash Tilawat: Alright.
+
+269
+00:47:32.870 --> 00:47:40.999
+Ash Tilawat: The one thing I want to leave you with at the end of this lecture, about 45 minutes in now, before we start Q&A, is this final checklist.
+
+270
+00:47:41.290 --> 00:47:59.470
+Ash Tilawat: This checklist is exactly what I would do before I walk into an interview for an AI engineering role. Can you narrate your AI coding workflow, step by step, without notes? That means out loud, slowly, clearly, and so that someone can understand, like a recipe, exactly what you do.
+
+271
+00:47:59.980 --> 00:48:14.429
+Ash Tilawat: Can you explain every file in the projects that you've added to your portfolio? Doesn't have to be lines, it could be the file itself. What is the purpose of every single file? What are we trying to get at? And what are we trying to do in this structure of this repository?
+
+272
+00:48:14.530 --> 00:48:27.520
+Ash Tilawat: Can you talk through RAG, agents, graphs, and evals coherently? That doesn't mean you have to be perfect in these areas, you have to understand them at a certain level, and be able to showcase maybe a project in one or two of those categories.
+
+273
+00:48:27.520 --> 00:48:39.809
+Ash Tilawat: Do you know what an observability platform is? Langsmith or LangFuse? Can you walk through how you use observability in your LLM applications? Can you describe what an eval is, and your eval methodology?
+
+274
+00:48:39.810 --> 00:48:45.919
+Ash Tilawat: how you went from just this basic LLM application to the complete eval suite with an agent.
+
+275
+00:48:46.090 --> 00:49:04.940
+Ash Tilawat: Have you practiced how you use Claude Code out loud? Do you have a clear answer to how you stay ahead in the world of AI? Don't just say X. You know, everybody just says X. No, what do you do specifically to make sure you can discern what is a real event in AI and what is just another, spammy headline?
+
+276
+00:49:05.580 --> 00:49:14.770
+Ash Tilawat: Are you ready to decide on a product decision, not just the technical one? Do you have some level of product judgment, or the ability to showcase your product judgment out loud?
+
+277
+00:49:15.020 --> 00:49:25.709
+Ash Tilawat: So this is what I would take away from exactly what was given in this class so far. Hopefully, you can take this checklist, pick it up, and then use it in your next interview.
+
+278
+00:49:25.900 --> 00:49:26.950
+Ash Tilawat: Alright.
+
+279
+00:49:28.340 --> 00:49:33.149
+Ash Tilawat: Excuse me. We're gonna start Q&A now. It's about 45 minutes into class.
+
+280
+00:49:33.940 --> 00:49:41.099
+Ash Tilawat: And what I'm gonna do for Q&A is I'm gonna have the team highlight some questions here on my phone for me to answer.
+
+281
+00:49:41.390 --> 00:49:48.209
+Ash Tilawat: And then we'll also go into some of the questions you've been asking over and over again inside of the Zoom chat.
+
+282
+00:49:49.230 --> 00:49:55.229
+Ash Tilawat: Now, if any of you are interested in Gauntlet AI, we do have a cohort starting on April 27th.
+
+283
+00:49:55.270 --> 00:49:59.670
+Ash Tilawat: Gauntlet AI is a 10-week accelerator that is completely free.
+
+284
+00:49:59.700 --> 00:50:16.210
+Ash Tilawat: We don't charge anything, there's no clawbacks, there's no tuition, we don't charge for food, nothing at all. You can join this program for free and be an AI engineer on the other side, and we only get paid is if you get placed. This has never happened before in the world of education.
+
+285
+00:50:16.210 --> 00:50:23.810
+Ash Tilawat: Every single time, you have to give tuition up front, you have to pay for things up front. Gauntlet doesn't charge you anything, and it never will.
+
+286
+00:50:24.100 --> 00:50:37.590
+Ash Tilawat: There's no ISA, there's nothing. All you have to do is participate and be involved, and we will only make money when we place you on the other side. So, Gauntlet AI, if you want to check us out, it's gauntletai.com forward slash apply.
+
+287
+00:50:38.990 --> 00:50:41.110
+Ash Tilawat: Alright, what are some questions we're getting?
+
+288
+00:50:46.860 --> 00:50:55.519
+Ash Tilawat: Okay, first question is from Alicia, which is, what are some good ways to stay in control of codebase if you are using AI to code using a tech stack that is new to you?
+
+289
+00:50:55.520 --> 00:51:20.500
+Ash Tilawat: Go learn the tech stack first. It doesn't have to be… you don't have to learn a tech stack end-to-end. It could be, like, a 3-hour window. It could be a 2-hour window, where you take a step back and you understand the underlying principles. If you're already good in one coding language, for example, you can pretty much translate to another coding language the same principles and concepts, but it's important for you to take some time and fully understand exactly what you're building.
+
+290
+00:51:20.790 --> 00:51:22.420
+Ash Tilawat: And for that reason.
+
+291
+00:51:22.800 --> 00:51:34.749
+Ash Tilawat: I would take 2-3 hours, take a step back, and actually understand everything you're doing. Once you do that, then you can say, I'm gonna go back into the coding agent and continue coding in the language I would like.
+
+292
+00:51:34.860 --> 00:51:53.869
+Ash Tilawat: So that is my recommendation. I say this to Gauntlet students as well. What I like to do is have them take a step back, spend 2-4 hours actually learning it. This could be, I don't know, C, React, whatever. And once they are more familiar with it, they can add a skill associated with that new language, and then continue coding with the coding agent.
+
+293
+00:52:04.930 --> 00:52:10.270
+Ash Tilawat: Another question from Anup is, how do you handle the temptation to tell the AI?
+
+294
+00:52:10.750 --> 00:52:13.510
+Ash Tilawat: To just do it while building an application.
+
+295
+00:52:13.910 --> 00:52:17.969
+Ash Tilawat: You know, there's this thing that happens with gauntlet students, it's like…
+
+296
+00:52:18.020 --> 00:52:24.460
+Ash Tilawat: They see an error that, like, you can see it in the console log, and they're just like, hey, there's an error, go fix it.
+
+297
+00:52:24.460 --> 00:52:48.500
+Ash Tilawat: I really think that it's gonna be hard to stop that temptation from actually happening all the time, because sometimes even I just want to kind of rip my coding agent and have it build something end-to-end, and I actually have a lesson on that, it's called Software Factory, where can you give a ticket to a coding agent on exactly what to build and can just do it for you, but do it for you really well, with good coding standards, good test suite, a nice deployment pipeline.
+
+298
+00:52:48.500 --> 00:52:50.470
+Ash Tilawat: But that's a whole different scenario.
+
+299
+00:52:50.480 --> 00:53:02.960
+Ash Tilawat: In this scenario, to stop this temptation, even just walking through the console, having some sort of acceptance criteria, giving it a little bit more detail is important. The goal here is to make sure
+
+300
+00:53:03.480 --> 00:53:21.789
+Ash Tilawat: that what you're trying to build is not… you're not wasting tokens on it. Wasting tokens is going to become one of the key areas where engineers can actually learn to excel. Because in the future, the cost of these tokens is going to skyrocket. So we want to get really good at managing these tokens, and making sure that we're not just saying.
+
+301
+00:53:21.790 --> 00:53:36.619
+Ash Tilawat: hey, go solve this without more context or details, because if we did give it the context or details, then it would need to do less thinking, and maybe find the error much quicker. Now, if it's something super small, yeah, say that, but most of the time, give it some level of context.
+
+302
+00:53:41.480 --> 00:53:48.380
+Ash Tilawat: Question from Sean is, how much weight is given to having an active GitHub, hugging Face, with active repos for you to demo?
+
+303
+00:53:48.440 --> 00:53:55.649
+Ash Tilawat: Or, like, is… are HTML dashboards to share, for example, something to sort of weigh in on when you bring it to an interview?
+
+304
+00:53:55.700 --> 00:54:11.760
+Ash Tilawat: I think it's super important. I actually use GitHub as high signal. One of the best areas for me to find engineers is, like, open source contributions on some of the top AI projects. So, I really like, talking through that, because what's happening is…
+
+305
+00:54:12.070 --> 00:54:19.570
+Ash Tilawat: The open source contributions are going to be a nice way to judge, hey, is something actually…
+
+306
+00:54:20.210 --> 00:54:44.570
+Ash Tilawat: Or does somebody actually have the skills necessary to build in this era? Do they understand the different primitives of this era? And are they actually skilled in what they do? So, in my opinion, GitHub is a very, very nice location to better understand exactly what to do. I would make sure you have GitHub contributions. Hugging Face, maybe if you're going for an ML role, or maybe, like, an AI platform role, that's more important.
+
+307
+00:54:44.660 --> 00:54:50.329
+Ash Tilawat: But, for an AI-first software engineer, you can actually go straight and just focus on GitHub.
+
+308
+00:54:53.500 --> 00:54:56.510
+Ash Tilawat: Alright, what other con- questions do we have?
+
+309
+00:55:04.920 --> 00:55:13.909
+Ash Tilawat: I have a question here from Dee, which is, I've applied to Gauntlet multiple times, scored in the 99th percentile, crushed the coding assessment, have a portfolio.
+
+310
+00:55:14.840 --> 00:55:21.930
+Ash Tilawat: And I am a Navy veteran, where I served in most of the technical role in the entire military, now leaving active duty.
+
+311
+00:55:22.120 --> 00:55:30.129
+Ash Tilawat: We'd love to know any insights into another avenue I can pursue to get a spot into the next Gauntlet cohort. I deeply believe I would excel in every capacity.
+
+312
+00:55:30.580 --> 00:55:41.830
+Ash Tilawat: Okay, so we have Gauntlet for America, which I think is perfect for you, especially coming from the Navy background. Right now, we have over 20 students in Gauntlet for America who are going to serve
+
+313
+00:55:42.880 --> 00:55:52.890
+Ash Tilawat: as engineers in the IRS and the Department of Treasury. So, I think we are now partnering with many civilian government organizations, and with your background.
+
+314
+00:55:52.890 --> 00:56:04.790
+Ash Tilawat: your ability and your application, that is going to be a really nice location for you to excel. So, I would put in the Gauntlet application for Cohort 5, and you'd be automatically considered for both.
+
+315
+00:56:09.570 --> 00:56:28.119
+Ash Tilawat: For applying to Gauntlet AI, what would you recommend for someone who scored a 43 on the CCAT, is currently building it, but has weak formal engineering experience? Great question here, Chris. We do have a Wonderkin program. Our Wonderkin program is essentially for those who don't have 3 years of experience, but still want to be exposed to the Gauntlet program.
+
+316
+00:56:28.170 --> 00:56:47.960
+Ash Tilawat: For those to qualify under the Wonderkin program, it's the level of project that you can send over to our admissions team. So we have you submit sometimes your GitHub, you can fill out your profile, add your GitHub. What we're looking for is that you have, more than usual engineering and coding ability, and you would qualify underneath the Wonderkin program.
+
+317
+00:56:48.020 --> 00:56:58.140
+Ash Tilawat: Now, at the same time, you can also just continue down the road, get the experience, and then apply in a couple of years. We plan to do Gauntlet for a long time, so we're not gonna go anywhere.
+
+318
+00:57:03.060 --> 00:57:19.300
+Ash Tilawat: Jacob is saying, I would love to hear your lesson and insight on letting it take over your entire end-to-end software development lifecycle. I just got my agent crown scheduler a cost, swapped API usage, and it's somehow… I need to heavily optimize. When is the application cut off for the next cohort?
+
+319
+00:57:19.660 --> 00:57:22.319
+Ash Tilawat: The application cut off for the next cohort.
+
+320
+00:57:22.490 --> 00:57:32.360
+Ash Tilawat: is going to be the week before the 27th, so it's the graduation date of the last cohort. I believe it's the 24th or 25th. So you can… you still have some… over 3 weeks to apply.
+
+321
+00:57:32.360 --> 00:57:46.629
+Ash Tilawat: Jacob, to answer your question directly on sort of an end-to-end implementation, I like to call it a software factory. I actually have an open-source GitHub repository called Minimum Viable Factory, and I've done a night school session on this earlier.
+
+322
+00:57:47.610 --> 00:57:53.600
+Ash Tilawat: And the night school session on this earlier that I did, It was basically, like.
+
+323
+00:57:54.250 --> 00:58:05.930
+Ash Tilawat: how do you set up the factory? How do you add a product manager agent, and a QA agent, and a deployment agent, and connect all the different platforms, and actually build an end-to-end system that can ship software for you?
+
+324
+00:58:05.930 --> 00:58:15.530
+Ash Tilawat: So, to answer your question directly, to give you a more substantial answer, please check out my open source project, it's called Minimum Viable Factory, and it's on GitHub.
+
+325
+00:58:20.100 --> 00:58:22.710
+Ash Tilawat: Alright, what other questions?
+
+326
+00:58:25.850 --> 00:58:29.150
+Ash Tilawat: Questions from a little document I have here is.
+
+327
+00:58:30.290 --> 00:58:34.040
+Ash Tilawat: Can I say I code in language if AI is doing the work? The answer is no.
+
+328
+00:58:34.330 --> 00:58:50.300
+Ash Tilawat: The goal here should be that you guys focus in on what you have experience in, because you want to make sure that the things that you're conveying out loud cover the things that you have actual experience building in. Now, if you did a significant project in them, that's a different story, but you need to have tangible proof.
+
+329
+00:58:51.230 --> 00:58:57.960
+Ash Tilawat: Number two, what AI skill set should we start and acquire for senior developers out there? The ability to orchestrate agents.
+
+330
+00:58:58.040 --> 00:59:20.979
+Ash Tilawat: and actually change the way your entire team is working. So, I did a training in SF just about a week ago on changing the entire software development lifecycle using spec-driven development. If you're a staff engineer, if you're an engineering manager, you should be thinking about how to restructure your work so that your entire team can benefit from the ability to code much faster.
+
+331
+00:59:21.180 --> 00:59:29.590
+Ash Tilawat: Think about shared context, and think about the ability to make sure that everybody across the entire team can code at the speed of the best engineer.
+
+332
+00:59:29.830 --> 00:59:34.729
+Ash Tilawat: So, check out Spec Driven Development, SpecKitty, these are all on GitHub.
+
+333
+00:59:35.300 --> 00:59:43.620
+Ash Tilawat: what is the… what are the compensation expectations for AI engineers? 200K is the full floor or the ceiling? In my opinion, 200K is the floor.
+
+334
+00:59:43.660 --> 00:59:46.119
+Ash Tilawat: What happens with AI engineering
+
+335
+00:59:46.120 --> 01:00:10.330
+Ash Tilawat: is we need less and less engineers that are just doing day-to-day junior-level work, and more engineers who are orchestrating agents. And you could be orchestrating agents across many different organizations, across several different industries, and the thought process there is, even, like, for example, in Gauntlet, we have a minimum 200K bar, but based on your experience, your skill set, and your ability to lead, that could go really, really high. So, it is a floor.
+
+336
+01:00:10.330 --> 01:00:12.500
+Ash Tilawat: At 200K, not a ceiling.
+
+337
+01:00:13.330 --> 01:00:29.809
+Ash Tilawat: People keep asking this question, and I've got multiple texts about it, which is, will we have access to this recording and the slides? The answer is yes, we are creating a free Learn Portal. So, you can actually go into the Learn Portal, get this entire recording, and then the associated slides.
+
+338
+01:00:31.190 --> 01:00:40.240
+Ash Tilawat: How much Python knowledge is essential to hiring partners? I come from a Java background and have some experience in Python. This is a great question. It's not that a specific
+
+339
+01:00:41.120 --> 01:00:59.359
+Ash Tilawat: coding language is required for certain partners. It's that… it's good to have that coding language and understand the primitives and the different concepts behind that coding language, but the goal here is that you're able to be adaptable, use what you know already to understand and learn something new.
+
+340
+01:00:59.360 --> 01:01:07.540
+Ash Tilawat: One of the most amazing parts of being a Gauntlet graduate is that you understand how to code with AI, build AI, and learn with AI.
+
+341
+01:01:08.330 --> 01:01:27.049
+Ash Tilawat: They're able to learn 10x faster and say, hey, I can put in 10 hours into learning this skill, use AI to magnify my usage of that skill, and then, as a result, be better at a concept much quicker. So, the thought process here is, you may not have any Python knowledge, or Java knowledge, whatever it is.
+
+342
+01:01:27.090 --> 01:01:35.570
+Ash Tilawat: But, you want to use what you know already to then inform what you're working on next, and then use AI as a learning mechanism to accelerate that.
+
+343
+01:01:37.490 --> 01:01:44.440
+Ash Tilawat: If your experience is probably 70-30 front-end and back-end, is that seen as a negative for hiring partners coming out of government? The answer is no.
+
+344
+01:01:45.650 --> 01:01:51.699
+Ash Tilawat: You need to have core engineering experience, that's what we're looking for here at Gauntlet. If that's front-end, back-end, that's okay.
+
+345
+01:01:53.290 --> 01:02:09.630
+Ash Tilawat: Are the partners you have more established companies, or are they newer startups looking for founding engineers, AI-first engineers to move fast? There's a combination. We have, seed-level startups, Series B, C startups, to publicly traded companies. We have PE firms, we have,
+
+346
+01:02:09.630 --> 01:02:22.420
+Ash Tilawat: conglomerates, we have huge, multinationals. There's so many different gauntlet hiring partners, and we try to find the perfect spot for you. We have a whole team dedicated to matching you with a role.
+
+347
+01:02:24.770 --> 01:02:30.919
+Ash Tilawat: Okay, so I think that was my last one there, because I answered the GitHub and Face one, but…
+
+348
+01:02:31.060 --> 01:02:34.269
+Ash Tilawat: Would love to see more questions.
+
+349
+01:02:36.930 --> 01:02:44.170
+Ash Tilawat: DevOps and network engineering are things that you can use to join. We have multiple DevOps engineers that were in the program.
+
+350
+01:02:48.170 --> 01:03:02.379
+Ash Tilawat: Alright, we're at the hour, so if anybody wants to stay on and still ask some questions, you totally can. But I want to just say, if you have any questions about Gauntlet, you can go to gauntletai.com forward slash FAQ. If you decide to apply and join us, and
+
+351
+01:03:02.480 --> 01:03:12.610
+Ash Tilawat: Build with us for over a thousand hours here at our Austin, Texas HQ. You can do that by April 27th. Our Cohort 5 starts on April 27th.
+
+352
+01:03:15.080 --> 01:03:24.070
+Ash Tilawat: Rajiv is asking, how many applications do I get, and what's the acceptance rate? I think we get, like, 12,000 applications. The acceptance rate is, like, 2%.
+
+353
+01:03:25.390 --> 01:03:27.929
+Tom Babb: Ask, can you clarify GFA?
+
+354
+01:03:28.520 --> 01:03:31.790
+Ash Tilawat: GFA, how many applications did we get for GFA?
+
+355
+01:03:32.610 --> 01:03:35.819
+Tom Babb: No, just what the program is, the difference between the two.
+
+356
+01:03:36.090 --> 01:03:54.339
+Ash Tilawat: Yes, so we have two programs running, which is our Gauntlet Prime and our GFA, which is Gauntlet for America. Gauntlet Prime is to work in the commercial sector with our private hiring partnerships, all the different companies that we partner with per cohort. And then GFA is our Gauntlet for America program, where we're partnering with the government.
+
+357
+01:03:54.750 --> 01:04:10.470
+Ash Tilawat: So different civilian agencies, like the IRS and Treasury, to make sure that they get the engineering talent that they need. So both of these areas are looking for talent, and we have two different programs situated, to make sure that they get the talent they need.
+
+358
+01:04:13.800 --> 01:04:28.610
+Ash Tilawat: Chad is asking, what's the length and time commitment for Gauntlet? It is 10 weeks, starting April 27th for Cohort 5, and it is 80 to 100 hours a week. I am not joking. If you don't believe me, you can ask any of our graduates, we follow all of them on X.
+
+359
+01:04:28.820 --> 01:04:40.430
+Ash Tilawat: It is actually 8200 hours a week. It is full-time. Our goal is to completely immerse you in learning. That complete immersion results in the best engineers in the world.
+
+360
+01:04:44.320 --> 01:04:48.569
+Ash Tilawat: There is no remote-only cohort, I don't believe in that, so it's never gonna happen.
+
+361
+01:04:49.450 --> 01:04:59.820
+Ash Tilawat: We have to have some level of on-site, in-person learning. That is one of the tenets and a standard here at Gauntlet AI that I will never
+
+362
+01:05:00.130 --> 01:05:01.959
+Ash Tilawat: As long as I work here, change.
+
+363
+01:05:02.070 --> 01:05:17.900
+Ash Tilawat: So, every single program we do has some sort of in-person portion. For Gauntlet, it is 3 weeks remote, 7 weeks on-site. For our corporate training, it's 4 weeks remote, 2 weeks on-site. For our custom courses, there's always going to be 1 week to whatever number of weeks on-site.
+
+364
+01:05:24.330 --> 01:05:26.060
+Ash Tilawat: Any more questions?
+
+365
+01:05:26.060 --> 01:05:28.680
+Tom Babb: Ash, sorry, I have one more question that someone's asking.
+
+366
+01:05:28.780 --> 01:05:36.290
+Tom Babb: There's just some confusion with GFA in general. Can you talk about how you apply to GFA, and how there's really no difference?
+
+367
+01:05:36.630 --> 01:05:52.510
+Ash Tilawat: Yep, great question. If you want, or if you're interested in Gauntlet Prime, or GFA, which is Gauntlet for America, there is no different application process. All you have to do is go on gauntletai.com forward slash apply. You can go to the bottom of the page here.
+
+368
+01:05:53.110 --> 01:06:08.229
+Ash Tilawat: And you can click, I'm ready to apply now. This application that you fill out is for GFA and for G Prime, and makes you a contender for both of those programs. So if you would like to join any of those programs, please apply now.
+
+369
+01:06:16.090 --> 01:06:29.400
+Ash Tilawat: Jordan's asking, have you thought about creating a sort of transfer portal that would allow previous grads who have been working for a certain amount of time to level up through hiring partners, who might have someone… Not really, Jordan, I want to make sure that
+
+370
+01:06:30.160 --> 01:06:42.650
+Ash Tilawat: the standard I held for all of the cohorts of Gauntlet so far is the same standard for everybody. So if everybody put in 1,000 hours, I think I'm gonna make it fair by saying everybody in the future also has to put in 1,000 hours.
+
+371
+01:06:45.260 --> 01:06:51.179
+Ash Tilawat: As someone who is in sales and doesn't code, it seems like I can use a lot of these core values you discussed to build my own AI tools.
+
+372
+01:06:51.290 --> 01:07:03.339
+Ash Tilawat: Where would you recommend I spend my time learning something in that area? Great question, Anthony. I just ran a go-to-market sales and marketing training, and the main area you should focus your time on is Claude Co-work.
+
+373
+01:07:03.350 --> 01:07:19.040
+Ash Tilawat: and building skills on cloud co-work, scheduling those skills, and then connecting all the different applications you use. So it might be your CRM, might be your enrichment platform, might be your email or your calendar. What happens is when you connect all these tools to a single
+
+374
+01:07:19.040 --> 01:07:28.649
+Ash Tilawat: app, like Co-work, and then you add skills on top, which break down your domain expertise in sales, they do a brilliant job of pretty much automating all your grunt work.
+
+375
+01:07:35.840 --> 01:07:39.130
+Ash Tilawat: Alright, I think… Are we there, Tom?
+
+376
+01:07:41.370 --> 01:07:41.920
+Ash Tilawat: Sunny?
+
+377
+01:07:41.920 --> 01:07:44.100
+Tom Babb: Yeah, we're good, this has been amazing.
+
+378
+01:07:44.470 --> 01:07:47.550
+Tom Babb: There's someone actually raising their hand
+
+379
+01:07:47.730 --> 01:07:50.070
+Tom Babb: Do you mind if we want them to talk?
+
+380
+01:07:50.310 --> 01:07:51.940
+Ash Tilawat: Sure. Who's raising their hand?
+
+381
+01:07:51.940 --> 01:07:54.380
+Tom Babb: Let me… I'm gonna make… let them come off mute.
+
+382
+01:07:54.550 --> 01:07:55.220
+Ash Tilawat: get…
+
+383
+01:07:57.560 --> 01:07:59.299
+Tom Babb: Alright, Lang, you're on.
+
+384
+01:08:04.200 --> 01:08:06.590
+Lang Rose Xu: Hello. You guys hear me okay?
+
+385
+01:08:06.770 --> 01:08:07.490
+Ash Tilawat: Yes.
+
+386
+01:08:07.490 --> 01:08:22.799
+Lang Rose Xu: Oh, okay, sorry. I'm not expecting you guys. So, I'm… yeah, actually, I'm very, interested in this program. Sorry, I missed the first part. How much cost per week? And,
+
+387
+01:08:23.020 --> 01:08:27.139
+Lang Rose Xu: And the location-wise, where you guys located? So I'm just trying to see.
+
+388
+01:08:27.340 --> 01:08:27.930
+Lang Rose Xu: Okay.
+
+389
+01:08:27.930 --> 01:08:36.710
+Ash Tilawat: Yeah, we're located in Austin, Texas, so the program is 3 weeks remote, 7 weeks on-site, and it's completely free.
+
+390
+01:08:36.750 --> 01:08:53.099
+Ash Tilawat: So we cover your tuition, your food, your laundry, your flights, your everything. The program is completely free. The way we… the way we sort of make money on our side is if we place you at a company, we get a recruiting placement fee. So we're like a recruiting firm and a training center.
+
+391
+01:08:53.609 --> 01:08:54.359
+Lang Rose Xu: Okay.
+
+392
+01:08:54.469 --> 01:08:57.309
+Lang Rose Xu: Okay, yeah, I think I'm gonna sign up, so…
+
+393
+01:08:57.310 --> 01:08:58.140
+Ash Tilawat: Yeah, please.
+
+394
+01:08:58.149 --> 01:09:03.789
+Lang Rose Xu: Yeah, because, yeah, so I… I started with data migration engineer in Java.
+
+395
+01:09:03.790 --> 01:09:05.130
+Ash Tilawat: Yeah, yeah.
+
+396
+01:09:05.130 --> 01:09:08.850
+Lang Rose Xu: And then later on, add the DevOps and the platform on AWS.
+
+397
+01:09:08.850 --> 01:09:09.510
+Ash Tilawat: Yeah.
+
+398
+01:09:09.760 --> 01:09:21.519
+Lang Rose Xu: Yeah, the last one year, I added AI, so I tried to go further, go deeper into AI, because I work for a dental office, I built up an AI agent for them.
+
+399
+01:09:21.670 --> 01:09:24.029
+Lang Rose Xu: So I tried to go to it before, so, like, I'll…
+
+400
+01:09:24.290 --> 01:09:27.169
+Lang Rose Xu: Oh, go a little bit deeper, rather than…
+
+401
+01:09:27.170 --> 01:09:27.910
+Ash Tilawat: Oh, yeah.
+
+402
+01:09:27.910 --> 01:09:29.000
+Lang Rose Xu: You're late!
+
+403
+01:09:29.010 --> 01:09:33.419
+Ash Tilawat: Lang, we would love to have you. Please apply. Someone of your caliber, you do a great job.
+
+404
+01:09:33.880 --> 01:09:35.349
+Lang Rose Xu: Okay, thank you so much.
+
+405
+01:09:35.350 --> 01:09:36.069
+Ash Tilawat: Of course.
+
+406
+01:09:36.569 --> 01:09:49.830
+Ash Tilawat: Questions in the chat… is the… oh, Anthony, you're asking if the marketing class is online. It is not, but I can make it one of the night school sessions. So, Tom and Sonny, we're gonna have a go-to-market session for night school coming up.
+
+407
+01:09:50.340 --> 01:09:51.170
+Ash Tilawat: We're up.
+
+408
+01:09:51.170 --> 01:09:51.890
+Tom Babb: and…
+
+409
+01:09:54.490 --> 01:10:07.959
+Ash Tilawat: Neil's asking, who pays the fee, the student or the hiring company, and how much is the fee? Neil, the hiring companies pay the fees, so we are a recruiting firm, right? So after we train you, we place you, and then we charge 25% of first year's salary.
+
+410
+01:10:10.030 --> 01:10:12.519
+Ash Tilawat: It's, like, pretty standard recruiting fee.
+
+411
+01:10:13.460 --> 01:10:18.009
+Ash Tilawat: Anup is saying, silly question, if you could only use…
+
+412
+01:10:19.930 --> 01:10:26.369
+Ash Tilawat: Sorry, I just lost that question. If you could only use one AI model for everything, which one would you pick? The cheapest one.
+
+413
+01:10:26.700 --> 01:10:32.170
+Ash Tilawat: Which is a controversial question, but the answer… as a CTO, I would pick the cheapest one.
+
+414
+01:10:34.600 --> 01:10:41.740
+Ash Tilawat: Varun is saying, 7 weeks in Austin. If I live in Austin, do I have to move to your location, or can I commute? You can commute, my friend.
+
+415
+01:10:45.240 --> 01:10:46.360
+Ash Tilawat: Alright.
+
+416
+01:10:46.690 --> 01:10:51.680
+Ash Tilawat: I'm gonna call it there, guys. It was great having you join us for Night School.
+
+417
+01:10:51.810 --> 01:11:04.180
+Ash Tilawat: Gauntlet AI is trying to retrain the entire workforce for what's coming in the AI era, and it's gonna take us a long time to change the way that we actually think about work.
+
+418
+01:11:04.590 --> 01:11:20.520
+Ash Tilawat: If you like night school, if you think night school gave you value, please share night school with somebody else. Have them join Night School next week, because I'll be doing this for a long time, and my goal is to provide you with value, and if you're getting value, please share that across the board.
+
+419
+01:11:20.740 --> 01:11:38.660
+Ash Tilawat: Thank you again for your time. If you're interested in applying to Gauntlet AI Cohort 5, the cohort starts on April 27th, and you can go to gauntletai.com forward slash apply to do so. Thank you for your time, and thank you for all the questions, and thank you to my amazing staff for helping facilitate everything.
+
+420
+01:11:39.050 --> 01:11:42.049
+Ash Tilawat: Thank you, have a good day. Thank you, everybody.
+

@@ -1,0 +1,339 @@
+Aaron Gallant (00:07.078)
+All right, we got people joining us now. Hello and welcome. Excited to have you with us. My name is Aaron Gowan. We're gonna be talking about MCP and all such things today. But first I just want to welcome and thank you for joining and and throw out a question. You know, where are you all joining from? We always love to see the wide geographic range that the internet enables, one of the promises of technology. So if you see on the side here there should be a chat and you can get into that chat.
+
+And you can drop where you're coming in from.
+
+Austin, always got Austin. We got Utah. Tennessee. Alright. Chicago. LA. Another West Coaster. I'm West Coast. Pittsburgh. Philadelphia. But apparently wanting Austin. Well, why not go, right? Nebra Nebraska. Alright, that's good. All all over. See to sign sea to shining sea.
+
+Where she sells seashore, et cetera. and here we go. Our we've got other we've got somebody a a real dedicated person, three thirty AM and somebody coming from Sydney, Australia, where it's also I imagine a different hour. Well, thank you both for joining from so far away. I'm glad that our electrons can reach you.
+
+Aaron Gallant (01:37.968)
+All right, well, I'm gonna go ahead and get started here, but please feel free to use the chat to ask questions. there's other staff connected as well who can answer whatever questions you have for us. I'll certainly focus on questions about the material we'll be talking about. but yeah, let's get to it and thank you again for joining and sharing where you're from. So the topic today.
+
+is an MCP factory. what do we mean by this? Well we're sort of combining a few a few concepts here. you know we've we've got our blurb here, a solid, which is a design principle here that one of our developers here at Gauntlet, Tom Tarpey really loves. plugin based foundation for building model context protocol servers. Basically we already know from using language models and using modern tooling with them.
+
+That the model context protocol is basically really nice convenience dev UX. That's what it is. And and that's not something to be underestimated, because if you make things convenient for developers, you get more productivity. That's the name of the game, or at least a lot of it. And how does it do that, right? Well, it does that by dynamically adding discoverable capabilities to your agents, to whatever LLM tooling you're using. and essentially it's
+
+a decorated REST API. I mean that's what I kind of boil it down to. I it's it's still cool. I'm not minimizing it by saying that, but it's a it's a you know, we're taking REST APIs and we're adding some sugar to make them a little bit nicer for L LMs. Great. Okay. What are we adding here then? Well, because these things are convenient, if we make it more convenient to build them, then that, you know, further greases the skids and you know, can enable rapid
+
+prototyping and development of a variety of tools and and so forth, right? Because, you know, what if you depend on some API out there and you'd love to integrate it with your Claude or your cursor or what have you. but whoever does that API, you know, they haven't put together an C P server or package for you yet. Well, now you can. And now you can quite
+
+Aaron Gallant (04:04.79)
+simply and extensibly really just by using this factory and and a little bit of prompting. So that's what we'll be talking about. and as time allows we will demonstrate a bit as well, but since we are constrained for time, I'm also gonna share these resources. the slides, because you can all just load this. I'm dropping these links in the chat. That's the link for the slides.
+
+Aaron Gallant (04:34.821)
+This is the link for the factory itself, the code package. And this is the generated documentation for the factory, which we probably won't look at too much, but is certainly useful for reference if you choose to build with this. So pausing, keeping an eye on chat here and no no questions so far. We all on board, are we excited? we get emoji. Let's let's let's see some emoji.
+
+in celebration of of MCP, more MCP faster. All right. Good to see. Thank you all. Let's go then. All right.
+
+Aaron Gallant (05:15.203)
+There we go. So again, a little bit more motivation here. We don't want to have to just rebuild the same thing over and over again. Every MCP server is remarkably similar. As I said, it's just a bit of sugar on top of REST. And so if the REST APIs already exist, let's be consistent in our sugar, right? Let's let's put it in nice packets. Let's make sure that we're doing it cleanly and consistently and let's reuse the parts that make sense to reuse.
+
+So all the plumbing, you know, error handling, how we're dealing with HTTP calls and markdown formatting and all that, which you have to think about if you're gonna make an C P server from scratch, let's just standardize all that because it should basically always work the same.
+
+So the way that we're approaching it here is we're using a service plugin architecture. So each individual MCP server implementation within the factory is a plugin, right? And this plugin lives under services and has its own self-contained code and tooling and such. And so this does potentially mean that there's a little bit of redundancy in the generated code.
+
+we're not trying to reuse literally the same library file across all the plugins. But because it's boilerplate and we're generating and making it easy and consistent to generate, it's worth that slight bit of redundancy to give us the ability to be really flexible with the operation and deployment of these services. We don't want these services to depend on each other. We want it to be like when we make an MCP server, we've made an MCP server and we can ship it if we wanted.
+
+Now we're using Fast MCP, which despite the name is not actually related to Fast API, I checked. But maybe can claim to be a fast API inspired MCP server. It seems to exhibit a similar philosophy. So it's a a Python framework for the rapid development of performant you know, asynchronous APIs but focused on MCP. And Python three thirteen, which, you know.
+
+Aaron Gallant (07:29.869)
+still has security patches for at least a couple of years. And we ship with a couple of reference services. So we'll look at that when we get to some of the code. But really the whole point of this is you can make your own. You can add services to this pretty easily. You can you can certainly drop the sample services if you want. and all you really have to do is take this and add your service and it's pretty close to production grade. I mean
+
+Of course, your definition of production and how you actually put it out there and if you need auth, for example, will vary, but all of that tends to have fairly standard solutions as well and is a little out of scope for today. Any questions on this, the high level picture of our MCP factory? 'Cause this is kind of what I want you all to have in your head as we continue.
+
+Aaron Gallant (08:26.534)
+Alright, we good? Alright. Well, I will I will take lack of questions and the occasional emoji for we're good. Alright. So we're going to i is this standard I.O. or SSH? so
+
+an HD. All right, got some questions coming in. So standard I.O. transport by default. and HTTPS. yeah, standard IO by default. and if you wanted to deal with like actual HTTPS deployment, you need to, you know, solve the cert side of that. I would be willing to bet that FastMCP has some fairly easy ways to do that. So but yeah, the it's it's the transport
+
+Default is this for now.
+
+Alright, so the goal here is to basically be as simple as this. The main server.py for the MCP factory just imports services and then instantiates and adds, you know, registers the services essentially. So each of the service again is its own self-contained thing, and that's and that's part of why it's self-contained. And we just add it to the registry.
+
+and expose the ones we want to expose. And this way we have the resources for any client that wants to see them.
+
+Aaron Gallant (09:58.87)
+And another part of the design principle here, this open close principle, you can add new plugins, but you're not going to edit the existing services or plugins, at least when you're working within the context of, you know, some other plugin or some other part of the code. You know, once a service is done and shipped, that service is done and shipped.
+
+So the overall stack here, the entry point is main.py, and you'll see in the readme that's like the thing you run. And we use UV for managing the Python dependencies and environment and such. So you'll need that as well. server.py is the actual fast MCP server. and then the service registry is what we sort of saw.
+
+here in the previous slide. It's the bit of code where you'd actually register the new services that you're going to make for the factory. And then the result is the clients can connect and can do things. So all right, and I'll go ahead and drop the repo link again. Give me one second for that.
+
+Aaron Gallant (11:12.069)
+Alright, all right. Somebody already did. Thank you. and yeah, Tom, thank you for handling that that other question. So this slide. So here are these four building blocks that we are using you know, with each plugin. So there's the base API client, and what this is doing is this is a contract.
+
+which is sort of related to the whole promises language if you're familiar with that idea. And is really it's because we're dealing with async, right? And async, because these are network requests, the runtime is unpredictable, or at least very difficult to accurately predict reliably. And so we don't treat them as blocking. We want them to be able to just run. But that means that we need to accept when they get back. And that is basically solved for you here.
+
+and assuming that the underlying API that you're dealing with can put up with whatever scale and asynchronous thing you want to do to it, then that should be fine. you just have to implement the fetch for the routes that you need, right? And when I say you, of course, you can ask an LLM and we'll get to there's some sample prompts that we ship with the repository that show how you can pretty simply get started adding a service to this
+
+with, you know, your development harness or tool of choice.
+
+There's the base formatter, and this is just formatting data into a markdown string because markdown is kind of an important format for MCP and for interacting, you know, with with LLMs. It's both human and LLM friendly. the service plugin is what handles the registering of the service. So duct typed, what that basically means is we're being flexible. If you're not familiar with duct typing, Python is is said to be duct typed as a whole, unless you
+
+Aaron Gallant (13:14.091)
+use strict annotations. Because duck typing means, well, if it walks like a duck and it talks like a duck, then it's a duck. So basically the typing of something is defined by what it actually does, by its observed behavior. And this we need this flexibility at this layer because of how wide-ranging this package or really framework is, or factory, I guess that's what we're calling it, right?
+
+And it is a factory in terms of the the design pattern. So we are able to be flexible and have an MCP for whatever, an MCP for NASA, an MCP for stock quotes, an MCP for any API again that you want to build on. And to be clear, I've been framing this like, there's somebody else developing an API, but they're not shipping the MCP. This is how to add it. You could also use this if you're the one shipping the API, by the way. There's
+
+Nothing wrong with that. In fact, let's see some emoji. Who out here has been building or is builds APIs with any frequency? I know there's people soft I know there's some software engineers out there. How many of you ship APIs, support APIs? A few? All right. Yeah. I mean they're they they've been around. in fact, one other important tidbit in my opinion, the way I've been using API this whole time.
+
+And the correct way for the most part is to refer to network requests, right? That's why I made a big deal out of async. It really means you're asking somebody else's computer to do stuff. That's what an API is, if I know I I moved without even introducing that. So I hope most people are already on board with me there. Nobody asked a question. But you know, that's that's what we mean. We're asking somebody else's computer to do something and give us some response, some data, some something.
+
+or or it can have a side effect. You might ask another, you know, c make an API call to delete something, right? Which doesn't really you're not caring about the return value, you're caring about what it does. But the point is, is you're sending a request via some transport protocol where it's like a message that you're passing telling the computer to do it. And actually originally, you go back to the stone age of the nineteen nineties, APIs were not necessarily primarily thought of for network.
+
+Aaron Gallant (15:36.302)
+stuff they were thought of for GUI programming. which was just like this is the contract that you have with the operating system if you want to open a window or close a window or, you know, do things with Windows. So, you know, API just means it's the interface, application programming interface. And so our transport protocol here by default is standard I.O. 'Cause we're just building with it with that. But
+
+you could use whatever protocol and it can become a network thing and it could run on somebody else's computer that you don't control, or you could be the person running the API server as well. I mean, fundamentally it's sort of a client server relationship and the ownership and control of that can be whatever it is. Anyway, I I I hope you all enjoy my little historical interludes. I find them rather important for understanding all of this because I think it gives context. But
+
+You know, feel free to ask questions or put in the chat now. Let's get back to the code, and I will get to the code. So, anyway, the last one on this slide that I didn't quite get to is the service registry, which is where the plugins all go. So we we already talked about that a few times. The point is, is these are all this is the way that we've sort of encapsulated some of the core reusable functionality across all the MCP servers. so
+
+There we go. and the result is you just need these files, and each file is doing one job. So this is part of the solid principles again. And and this is all good engineering practices we're trying to have here. So we're trying to say, hey, you know, code should do one thing, it should do it well. We shouldn't have more code than we need. at at risk of going into another history lesson, I would say that's one of for the
+
+biggest challenges of the current boom because lines of code have never been a measure of productivity. Not really, right? Some people sometimes act like it is, but lines of code are always really debt. They are something that you then have to take care of, that you have to pay to run. If you could have, assuming you're in say a corporate context, if you could have a functioning business that could make a million dollars a month on ten lines of code.
+
+Aaron Gallant (17:56.176)
+Well, that's better than making a million dollars a month on a million lines of code, right? That's a purposefully absurd example. But the general idea is you don't want code for code's sake, right? And LLMs give us code, which is great, but it is important to apply these sorts of principles to make sure that we don't over engineer. Because if you you you know, maybe you're coming into this thinking like, why do I need all this? Why do I need an MCP factory? Couldn't I just start up Claude?
+
+or whatever, and pretty much always just zero shot, point it at an API server and say, Hey, make me an MCP on top of this and just let it churn for half an hour. I mean, yeah, that might give you something, right? That then and it might might well run. With the tools have gotten pretty scary good at this sort of stuff. But is it going to run well? Is it going to be consistent if you do it multiple times? If you know, if you do it across multiple projects
+
+Are the tech stack choices going to be consistent? Is the code going to be redundant? Is the you know, all these sorts of concerns which really matter if you actually care about using these things and not just about having a cute little example that you made in a half hour and you look at and then you're like, Okay, well that was fun. Right? So r and really I wanna say that's a call out. That's this embodies a lot of what we're about here at Gauntlet because
+
+Again, it's an exciting time, a lot is changing, but what matters still matters. And we very much believe in shipping quality products and learning to build quality, you know, h well engineered systems and services and, you know, things that can work at scale, things that can be maintained, and even using using all this to go into those old things that were hard to maintain and fix them, make them better. So
+
+That's what we're about, not just about shipping a crazy amount of stuff just because we could, right? So we still like shipping, of course. but you gotta make it good. So little bit of a a call out for what we do here. What do each of these files do? Well they basically correspond to the functionality we already talked about. So I'll leave it at that and we can also look at the code when we get
+
+Aaron Gallant (20:19.503)
+Alright, so what are the actual practical steps to do all this? Well, you make a new folder for the mcp service you want to add. You add your config, and this might also be loading environment variables, say, because a lot of APIs require API keys to authorize. And so you might set that up and and and have it be loaded correctly in the config.py. Of course, don't put it in the config.py.
+
+'Cause then you're checking in a a secret value. then you implement the four client or three s these first two clients, the API interaction, which is the base layer, and that's just fetching and interacting with the rats of the API you care about, and the formatter to make things work with Markdown. But again, with both of these, you're not doing it from scratch. You're extending existing classes that come with a fair amount of functionality.
+
+Then it's just a bit of boilerplate to hook it up. You register it, you add a line to the server.py. You add tests. That's more than boilerplate. I want to call it. In fact, I would be tempted to say you could move tests up. You could write the test before you write the server. I'm a big fan of test-driven development, especially now because it's easier to do. But whether you do it at the beginning or you do it at the end, write some tests. and if it's your API, you might have existing API tests you could adapt.
+
+pretty easily and then you test it. So the other thing here though is most of this is just creating files and you only really have to edit server pie for the integration. Like in terms of touching the existing project. Alright, so what does this tool do at well let me pause a bit because I feel like I've talked a lot. Emoji checks slash any questions in the chat.
+
+Aaron Gallant (22:21.838)
+I do see so it was asked and answered, but I do want to call out that we've been doing these sessions for a while. And so if you're enjoying it and want to watch recordings of previous ones, those are up at the URL that Sunny shared. If I have a developed standard IO MCP server Golang-based, can I integrate that with a service class? That's interesting.
+
+I mean, not out of the box. I want to be clear. I this is me thinking about it because it's kinda cool. And I I like Go, actually. I think Go is is a is a worthy language in a lot of ways. I am mostly a Python person. Python is typically the first class citizen for everything in this space, everything with data and statistics. It's just how things landed the last decade or so. Python is pretty good at having shims and integrations that work across languages. So
+
+I now I've I've mostly done it with C and a bit of Fortran. I've not done it with Go specifically so much. But I've got to imagine, yes, that's a solvable problem. This is not gonna solve it out of the box for you, but basically if you let y what it would look like hopefully is a little bit of Python code that can, you know, package up and run the Go code. I mean, worst case you can shell out, but I it's better to maybe do it a little bit tighter than that.
+
+Anyway, it's it's an interesting idea. The direct answer is no. This doesn't just solve that problem, but I don't think it would be too much of a lift. and of course the other thing you could do if you're not opposed to it is if you have the existing Golang server, a very easy and probably reliable prompt to an LLM would be to say, Hey, refactor this to be in Python using this thing, right? And, you know, give it the context of the existing server.
+
+and this factory and it could probably get quite a bit of the way. Now you may or may not want to do that. You might want to stick with Go and that's all well and good. and thank you, Raven. I appreciate I appreciate the compliment. I really do enjoy teaching. I hope that that comes across to some extent. So all right, I think we covered this though. Onwards. what is the tool doing?
+
+Aaron Gallant (24:41.486)
+Well, we've talked conceptually that this is basically enabling us to rapidly, reliably, and consistently integrate various APIs, services, other people's computer stuff into what we're doing with L LMs. So that's the the high description. But specifically, when you are using this, what you do is what MCP really does under the hoods, we've got the agent
+
+What I meant when I said discoverability, the agent gets to explore. We don't have to prompt the agent like, Hey, here's this service and it lets us look up stock quotes and you can use this part of it and but you can only fetch this many stock quotes and it takes twenty minutes after to update after the market and what like we're we're we don't have to do all that. All that sort of information is basically baked in at the MCP layer.
+
+And in a standard way, so that if your agent is MCP aware, as essentially all of them are these days, it knows where to look to find that stuff out. So in a sense, it is getting the prompt. Like I do want to be clear here, the underlying LLM is still just tokens in, tokens out. That really is true. And we're just making it far more convenient to get those tokens that solve our problem without us having to think about it each time. So
+
+the doc string, and this is a you know a common you know literate code standard that's been around for decades. this this triple quote string at the top of a function, that makes the code more friendly for humans. So I hope you're adding doc strings and stuff like that to your code just for your fellow humans. But that is also what ends up getting picked out, and literate code basically makes literate pre-prompted
+
+code and services for LLMs too, because LLMs, like us, use language. And so that's all pulled together, prompts the agent. And so instead of us telling the agent how to use the service, we just drop it in. And the agent gets to look it up, discover what the service is, how it works, what the limitations are, et cetera, et cetera. And then it's you just focus on telling it the problem you're solving and it decides
+
+Aaron Gallant (27:04.421)
+when to use what service, how do you and it knows or figures out how to use it. And this gives a lot of power, right? So now to get this, you know, we have to validate all these other steps. We have to implement this correctly basically. So all those things I was talking about work. But it's pretty straightforward and it's what we're standardizing here. And I also do want to emphasize, because the word agent
+
+gets floated around a lot, right? anybody out there think they can define agent? Anybody have a definition for agent that they want to try to drop in the chat?
+
+Aaron Gallant (27:47.143)
+And then thank you, Keith, as well. I'll I'll take the compliment. Now now I have to rewatch Harry Potter.
+
+Aaron Gallant (27:55.77)
+AI that does stuff. Yeah, I mean that's that's not a bad definition. That's certainly, I think, kind of the an employer. Markdown files. A dynamic set of related rules. I like that one. Although it's kind of more general, really. An LLM plus harness. Okay. Yeah, we're getting kind of specific, but not in a bad way. AI that uses intuition. Ooh. Alright. Well, all right. so.
+
+Yes, all those sort certainly touch on some of the some of the truth of it. But tool using LLM, I like where you're going too. The the the preferred mental model I have here is an agent is when you, the programmer, are seeding the control flow of the program to a model. So, and you'll notice I've not even been saying the word AI all that much, right? And
+
+We are called gauntlet AI. We are bullish on this as a whole, as a technology. But I I do try when I'm teaching to be really precise about my language. And AI, what does that even mean? I'm not going to even ask you to define that one, because that one I think gets even thornier. But certainly we have incredibly powerful models that are capable of solving tasks that, you know, until recently could not be solved by computers and require human intelligence to solve.
+
+Whether that now how intelligent that makes the machines, I will set that aside for the time being. But these models that are doing it, these large language models, they're statistical models. And that means that they are inherently probabilistic. And that means that you can't really a hundred percent rely on what they do, right? They can they can handle unstructured input. They can solve things that you can't solve with deterministic rules and code.
+
+Like we're used to from the not too distant past, but they can also make mistakes, just like humans can, I suppose, right? And we all know this, we all talk about hallucinations. So what I'm getting at here is an agent is when you're letting that model, that artificial intelligence, if that's what you see it as, make decisions that impact what your program does at a branching level. What I mean by control flow is things like if statements.
+
+Aaron Gallant (30:19.691)
+Like if this, then run this function. If that, do that. For loop. The just the the fundamental route of execution. And that control flow is kind of like the heart and soul of a computer program and is what, you know, in a traditional program should typically in almost all situations be well defined. We don't like it when our programs are unpredictable, when they do things that we can't explain or we don't expect, or
+
+random or seemingly random. That's bad. That's a bug. But with language models we're saying no, now we're solving a new class of problems. These problems themselves are unstructured, and so we can't come up with a structured way of solving them. And so the agent gets to do it. Anyway, that's that's my definition of agent. I hope that that makes sense to people and everybody who who answered, thank you as well. I mean these are all definitely in the same concept space. All right.
+
+End of the end of the story of this slide, I do want to call out this check here. Return a string. Tools always return text. So that is a sort of a core part of the interface here, because language models are text to text, right? You know, they take tokens, natural language, or code, but you know, tokens, text, and they return text. So we need to live in that world too.
+
+Alright. So how do we do all this? Well this is just for if you choose to use this toolkit and and implement your own server. You can start by copying a service template and making your service and fill in all the to dos and register and verify and all that. the things we've talked about already. So it's a pretty simple to do list. And again, you could some of these steps you might want to do yourself, but a lot of this you could
+
+prompt an L L and have it help you. I suppose if you wanted it might be fun to make a skill that specializes in doing these things.
+
+Aaron Gallant (32:29.543)
+And then another important thing, I already called out the tests are important, and I'm at least a fan of writing them as early as you are willing to in the development process. and what I mean by that is if you write the test before you even have the code, well, that means the tests are gonna fail, but then you know when you finish the code, because that's when the tests pass. That's test-driven development. But you need two types of tests, at least. Unit tests are the tests that work on each bit.
+
+one at a time, right? So we've got and because we're using the solid principles, because we're taking this standard, reliable, and consistent approach, unit tests are very natural. In fact, it's kind of a code smell. If you've ever written code and then it's hard to test, you can't like come up with a good unit test for it, that might mean the code actually has a problem. Because that might mean that the function is too long.
+
+too messy, does too many things, and you need to break it up, decompose it into smaller pieces. My rule of thumb is if I have to scroll to read a function, it might be too long. so it's good to break things up and have tests of their individual expected input, output, or whatever it is they do. But that doesn't give you the whole picture. And that's why we also need end to end tests, because unit tests they capture that isolated logic, but of necessity they have to mock
+
+bunch of other things in your system, right? You know, if if you're just testing the whatever, the markdown formatter, you're not going to you know have a real database up. You're not going to be making actual requests or stuff like that. You're just going to be testing like for this input the markdown formatter should do that. So to do those other sorts of tests where pieces actually connect
+
+well, I mean you can do integration tests that are smaller and just like pick a few pieces, but a good place to start is just at least a few good end-to-end tests. And if you're doing, say, proper software development with design and you've user stories and such, that can be a natural inspiration for what an end-to-end test looks like, because a user story would be something like, well, the user should be able to. And you should be able to capture that as like, if this is the initial input, these are all the steps the system should take, and this is what the output should be.
+
+Aaron Gallant (34:53.303)
+And this is the test so the unit tests are tests you would run all the time. They should be cheap to run and they help you keep the code quality high. The end-to-end tests you definitely want to run before, say, you merge your changes back into the main branch, that kind of thing. because that's the sort of way to really ensure the system still works as a whole. All right.
+
+testing content. I don't wanna be clear, this is just general testing principles. I mean I'm s I'm teaching it in this context, but I hope you're doing this in general.
+
+All right. So if you wanna make your own new completely separate server, you can fork this whole package. So feel free to you know, do these sorts of things to to look at this and make your own you know, make this a template for your own multifaceted MCP server with however many services that you need to have and follow all the steps from before. And you can make, you know, any domain and you know
+
+A few examples for inspiration if you need to retrieve information from the real world, any REST API that does that. But another good use of it is if you want maybe a curated connection to a database, right? there are lots of ways to connect to databases, of course, and MCP might not always be the way you would choose, but you know, it might be overkill, might even be a little bit unsafe to give an agent direct raw
+
+SQL access to a database and you might want to just expose an API that shows, you know, a view and and has some smaller aspects of it. So all right. What we ship with, and I'll start looking at the code in just a minute here, and also happy to take more questions. we ship with two little examples. there's a NASA astronomy picture of the day, and what this does is
+
+Aaron Gallant (36:53.993)
+if you're not familiar with it, the NASA API, you know, it's fun to look at. So I'm gonna switch real quick here. Gonna get some different color in front of you all. NASA provides a great number of public APIs. Their most well known is probably the Astronomy Picture of the Day, which shows really neat pictures and you can just retrieve them. But they also have some actual let's see here.
+
+They have a bunch of other like event trackers and and more informational. You can retrieve a lot of actual information. So it's not just a few pictures. And they have a demo key that works up to 50 requests a day. So if you took this repo and ran it, you should be able to just use it. But if you want more than 50 requests, you can sign up for a free API key with NASA. So we ship with that.
+
+Aaron Gallant (37:49.257)
+And we ship with an example non HTTP service Code Guardian that is including a few tools to basically look for issues in a code base, security issues particularly. so you're I mentioned earlier, don't put your API keys in your config.py. This is the sort of thing that would hopefully catch that and tell you, hey, don't do that. You know, that's not what you should be doing for that. You should put it in a secure place.
+
+So as well as other vulnerability scanning and so forth.
+
+So
+
+Summing it all up here, we're giving you a factory that gives an overall template for creating and combining MCP servers on top of whatever APIs you'd like. And the design of this is intended to be extensible, simple, maintainable, transparent, all those good things. we reuse the pieces where we can.
+
+And you should really only be adding one line to the base server for any given service. I mean, there is the actual side implementation of the service, but this is all you really need to do. And that way you're delivering some convenience and making it easier for people with LLMs. Cause I know all of you here must be at least a bit of an enthusiast in this space. You chose to come to this. Thank you. But I bet you also know people who
+
+Aaron Gallant (39:27.324)
+are maybe curious about this space, but aren't devoting as much time to it, perhaps. And that's fair. We all got things to do. Well, if you create an MCP server for something that they're interested in, a coworker, maybe a friend I don't know if you're friends with software engineer, whoever, whoever whoever would want it, whoever's curious about this stuff, that lets them add tools and get their agent running and more capable without them having to actually understand all of this, which
+
+Hopefully they choose to do that later anyway. But yeah, this is this is really I think the power of these approaches in general is sort of making it easier to share what we've built. and that's a common story in software engineering and technology and the marketplace. You know, if if you make it easy to share something and discover something, that gives it a lot of power. So that's it for the slides. I'm gonna take a breath and a sip of water.
+
+And pause for questions before we switch gears to also looking at the code base at least a bit in the time we've left.
+
+Aaron Gallant (40:38.416)
+Any other questions out there?
+
+Aaron Gallant (40:43.144)
+Does everybody feel like they they understand what this system does and why we're doing it?
+
+Hydration is important, especially with all the heat.
+
+Aaron Gallant (40:58.802)
+Alright, well I'm gonna take the emoji as affirmation. So here's the code base. and slide sorry, the link has been shared in the repository. so you hopefully have it. and it's a public repo, so you can pull it down. and if we look at it here, I just want to call out a few things. So most of this stuff is just sort of boilerplate.
+
+good Python development practices, and I'm not gonna talk through all of it. One thing I will say, if you're new to Python, if you wanted to add dependencies to this project, other Python packages, Pyproject.tomal is the place to do it. not UV Lock. UV Lock, like Yarn Lock or whatever else you use in other ecosystems, is programmatically generated, and you should generally not be editing this yourself.
+
+Main.py, of course, is the actual entry point. And it's pretty simple, right? It's just running the MCP server. And we're using the standard I/O transport, but if you look at the MCP server, I'm sure that we can get other options up fairly easily if you wanted to. But for running this locally, for interacting with your own local harness, this is fine. And I want to be clear here, this transport.
+
+is standard I.O., but the underlying MCP services, if you set them up to make REST requests to because yeah, I'm not I'm not getting to NASA with standard I.O. I don't have NASA's computer in front of me. So that is still a network request, but the layer of it from that to us is what's happening just here. you could absolutely change that and if you really want to share it with others, that's probably what you do. But it wouldn't be too hard
+
+if the person really is a developer, to just at least give them a bundle of code that they can just run and that's it. It's just this line that they're running. So that's the consumption of this. now let's dig in. So we got a bunch of directories here. I'm gonna call out that you know, this is the actual like heart of it. So again, it's good to use good names. Naming stuff isn't always easy, but it's important.
+
+Aaron Gallant (43:22.068)
+And MCP factory here is our main package directory. And here, server.py is that part where I was talking about where we add services to the service registry. So if you were gonna add that one line because you made your new service, this is where you would do it. You know, line twenty two. You move this one down, right? That's it. That's the only code we really and need to be touching here. I guess also importing it.
+
+config.py, this is the top level config, so you probably wouldn't be touching this too much unless you choose to hack on this whole factory a little bit, which you could, it's code, but if your goal is to just make an MCP service within it, you shouldn't have to touch that. You should live in a services place, right? And you actually shouldn't even really need to touch any of this. You should be making your own directory. Because if we look at this,
+
+These are just the base abstractions. So when I said that, you know, you're just building on an existing class for extending it. Well, this is the existing API client. And you can see it has the common things you need from an API client. It knows about timeout, knows about API keys, it it can fetch, right? There you go. And so all you really need to do is implement fetch. That is the so that is the only thing you actually have to do to get this to work. You could do other stuff, but
+
+it actually has a default timeout and it picks up the API key if you set it correctly in your config. So you don't need to do any changes there. You just override the fetch method. And then similar for the base formatter, you just override format. And we see we're using type annotations here. so I talked about type earlier and duct typing and I'm actually kind of a fan of stricter typing than duct typing when we can because it gives us
+
+a good way to understand the behavior of the code and a good way to do static checks to make sure the code works. But what we see here is we need to implement this method and it needs to take data, which is a dict of string to any. What do you think a a dict of string to any is? Does anybody know what that probably kind of corresponds to in the wild if I was making a network call?
+
+Aaron Gallant (45:41.488)
+Any guesses in the chat? Guarantee you you've heard of it. Almost guarantee.
+
+Aaron Gallant (45:50.804)
+That would correspond to JSON. JavaScript object notation. Key value pairs. A dictionary is key value pairs. Let me ask Claude, sure. yeah, you can do that too. but really a Python dictionary, Python dictionaries are better than JSON. I'm I'm a little biased again. I'm a Python person. so to make a Python dictionary behave like JSON.
+
+You say, well, really the only fundamental limitation of JSON is JSON, the keys all have to be strings. Python dictionaries, the king keys just have to be immutable. You can use ent's keys if you want. But here, the keys are all strings, just like just like Jason, right? And then the value is whatever. It's a blob, it's key value store, so key value. And that's basically saying this is going to be taking responses from an API, an API response.
+
+Because that's typically JSON, right? We're making API requests, we're getting back JSON, and we take whatever that is, plus whatever other arguments you want to throw in if you want, and we return a string. We return, again, language, as it were, or at least text for the LLM, because that's the point of this. That's that's what we're adding here. So you put these two things together, the retrieval step.
+
+Where you put however it is you need to connect to the API and retrieve what you want. And the formatting step where you actually decide this is how we take that response and make it LLM friendly. And that's it. That's the heart. That's the only unique thing about MCP for any given MCP implementation on REST. And that's why we focus really on saying, like, this is what you have to do, or ask Claude to do perhaps, but hopefully review the output a little bit. or at least test it.
+
+and that's all you add and we standardize the rest. and we do also see you do need to have some logic for register, and this will make more sense if you look at the examples as well. So I'll I'll get to that in a little bit. and then the base, let's see here, that was that was this, right? The registry I don't think you have to touch this one at all. And I mean to be clear, you're not touching any of these, but the code you're writing in here is gonna extend
+
+Aaron Gallant (48:13.413)
+On those abstract classes we just talked through in base. So if we look at astronomy picture today and we look, say, at client, we see that it takes the base API client. So that's the one that has timeout and API key, and we need to implement fetch. So that's what we do. We make a new fetch method and we make it specific for NASA. So we get the API key and we get the base URL, which is gonna, I guess I should start by showing the config real quick.
+
+Because of course we do need to configure for each API. So here's the actual route for the REST API where it lives on the internet. Here's what we're going to call the environ the API key, and this is the this key does work. It's limited, but this key actually works. You don't need to register for a key if you don't want to. and we're also setting a few a few other little variables here that we want to set, the timeout stuff. So
+
+Now that we go back into client, we're taking those variables, including the base URI, the base reference for the API, and we're saying, Well, how do we fetch? Well, we use an HTTP client, we try to get from it, and if there's a bad status, we raise an error. Otherwise, we'd return the responses JSON. And we add a little bit of error handling. Okay, if it's a status error, then we log an error. And if it's a request error, then we log
+
+a slightly different error, right? And that's it. So like thirty lines, little less than thirty, twenty some lines of code. and that's the connection to NASA. And then the formatter overriding, you know, the method in that abstract class that's responsibility is taking the JSON response and making it human friend or human LLM friendly, language friendly. it's going to basically
+
+Do a little bit Python logic. Python is great for this sort of thing for parsing dicts and handling strings. we are gonna make a little string by we're gonna get the header out of the response and we're gonna append a little bit of data. And I I don't have Unicode memorized, so I'm not sure exactly what that character is supposed to be, but I imagine it's just an indicator. perhaps it's an emoji. but you can see the actual date.
+
+Aaron Gallant (50:39.975)
+And title, we're pulling out the core aspects of the response, right? Because we don't need to you could, by the way, just dump the full JSON response on an LLM and say, hey, figure it out. That kind of works. But again, like I said earlier, we're about making reliable systems here and consistent systems. And this is going to be more reliable. Pulling out the parts that matter, so we don't have to trust the random judgment of the LLM and sticking them together and summarizing them a little bit, formatting them a little bit.
+
+And this is a fairly simple example, but you could end up having quite a bit of logic here if necessary if you're actually parsing a a complicated response. In which case I encourage you to use multiple functions and such, don't just put it in one long function. But in any case, we return the important bits as a string. And then finally, if we look at let's see here, does the client have this as well?
+
+Aaron Gallant (51:40.343)
+yeah, we have some validation, so we are making some utilities to make sure that we are po processing things correctly. And yeah, I mean I think that's basically the heart of it. Any questions on this example?
+
+Aaron Gallant (52:04.147)
+Alright. Now, I'm gonna skip the other example for now. You can look at this and look at the code base more in your ledger. What I want to do real quickly before we're out of time here is in the background, like a cooking show here, I've been running a little example. So let me see if I can get this up correct.
+
+Aaron Gallant (52:34.066)
+People see a clawed session.
+
+Aaron Gallant (52:40.872)
+Great. Okay, so this is Claude Desktop. And I want to before I look at the the specific prompt and response that I did, I did connect this to the MCP server. So if you look here under connectors, you see the MCP factory is on. And you can even see the famous space dates, which is the APOD, and the OWASP top 10 reference, which is the code guardian. So it discovered.
+
+both of the services. And if you added new services and refreshed this, you'd have more services all exposed conveniently for Claude to use in all the ways we've discussed, right? So that's where that lives. And there's instructions in the README how to add it, but you you add it the way you add any MCP to Claude. So if you're a Claude person, you should you should know how to do that or figure it out. And there's similar instructions for cursor and so forth. Now what I did here
+
+Aaron Gallant (53:37.936)
+f let me make this a little bigger and see I want this to be readable for you all, but it'd be nice to fit a little bit more.
+
+All right. Is that still clear for people?
+
+Great. So if we scroll up here, all I did was I gave it one of the example prompts. And I'll go back to the repo after this just to quickly show where I pulled this from. But I pointed it at another API. And this API is actually completely open. That's why I picked it. I didn't have to even sign up for an API key. And it's an API that lets you convert currencies. So for instance, from US dollars to Euros. That kind of thing. Yeah. Certainly convenient in some situations.
+
+And this prompt basically says, hey, I want a new MCP factory service following the house rules. And the house rules refer to if you look at the MCP factory, there's a claw.md, there's some information there, basically pre-prompting and context for the agent to discover to see how to extend the factory. And I want you to connect to this. I want you to give me these tools in the MCP. here's some resources you can use, here's something about the validation.
+
+I want you to register the service, I want you to run tests and you know, do this in the existing C P factory. And I I started this shortly before we started, just to let it run. And it has certainly run. It
+
+Aaron Gallant (55:06.781)
+set up the environment. Or it looked at it looked at NASA first, so it looked at the reference implementation. It is good to have a reference implementation of the code base for the LLM as well. And then it's running some tests. Then it's registering stuff. It's writing tests. It's running the tests on the new code. 11 tools and three resources. Blah blah blah. I built.
+
+Currency service and MCP factory services currency following the house rules, gives you a cute little summary. Here's a a diff on the side. We can see some of the code. We can see that it's you know, importing the Frankfurter base URL and the timeout. It has a currency service to handle the currency responses. it it puts a c it's it's doing conversion, historical rate, because this API actually supports a couple of things.
+
+makes a client, so here's the actual HTTP REST request to get the stuff. and has a config where we have some supported codes. So we only support these and we have some validation of things and some formats we expect, et cetera, et cetera. So I didn't write any code. I just asked the LLM to extend itself well not extend itself exactly, but to extend the MCP services that are available to it. And it went and did it.
+
+Now, I would still probably review this a little bit more and bang on it a little bit, but it's probably pretty close to ready to go. So I just wanted to share that and yeah, sorry if the screen wasn't large enough for people. maybe it'll be clearer in the recording as well. But what I'm gonna do now is show you the prompt so you can also just do this yourself.
+
+So the ready to run prompts.
+
+Aaron Gallant (57:04.136)
+Live here.
+
+Aaron Gallant (57:08.281)
+And I did what did I do? I did number four. Number three also does not require an API key. So if you want to just do that one, get a Hacker News MCP going, you absolutely could. And the others, you know, API key I think they're all at least free services or services with free tiers. So you should be able to play with any of them you want to. now to be clear, I'm not guaranteeing that your agent of choice will zero shot a perfect MCP service with this prompt. But it's a pretty good starting point.
+
+and it's a demonstration of a good, you know, AI first workflow for solving these sorts of problems. And on that note, I wanna just pause. thank you all again and see if there's any questions for the last couple of minutes.
+
+Aaron Gallant (58:07.432)
+Thank you. Glad you enjoyed.
+
+Aaron Gallant (58:12.452)
+We've yep, we've got a a night school next week. Highly encouraged. There's a go to market is a is a big deal.
+
+Aaron Gallant (58:24.572)
+And yes, if you're interested in applying, we have all the links for that available. and we also have an FAQ and I believe an FAQ question answering agent of some sort, if you have questions about the program.
+
+Why exactly should we use MCP over an API? Thank you. Thank you for getting I I think that's a good cause yeah, at the end of the day, we are adding some complexity here, right? And whenever as engineers we're adding complexity, we should ask, is it worth it? And I would say in this case, the reason to do it, and the reason it often is worth it, is we are making it more consistent and yes, reliable for an L L to use a service.
+
+We are decreasing the work needed by the developer because if you say, just pointed at the API directly, well the developer now has to think more about the prompts or the user, whoever it is. So we're we're essentially doing a lot of pre prompting and also pre processing of the output and cleaning and validation of the output. And all this, yes, is intended to make it significantly more reliable. And the discoverability aspect, the self documented aspect, is significant as well, I think.
+
+some APIs already kind of have that. Some APIs might be discoverable, but it's not an inherent part of necessarily any API that you're guaranteed that it's discoverable and self documenting, right? But MCP that it's built in, you you need to have that to be MCP. How would you properly bang out a bit more to make it ready rather than accepting what it made? Well, I mean the first thing I do is run it, but we're out of time and I'm not gonna do that right this second and see if it runs and run the test suite.
+
+And, you know, depending what the error messages are, I might just pass the errors back to the LLM with a bit of a tip and say, hey, it looks like you still need to fix this or something. Or I might I might look at a little bit of it myself and it it depends a little bit. I mean, to be clear, everybody's developing their own development methodology with all these new tools, and I'm not necessarily I'm certainly not the only and I'm I I would even say I'm definitely not the best at, you know
+
+Aaron Gallant (01:00:31.426)
+saying all the ways to do the things. I've found the flows that I believe work well for me and part of being in the space is developing your own experience and opinions and finding the flows that work for you. But definitely use language models because they save a tremendous amount of time if you use them correctly. And I think that's a good note to end on. So I don't know, Sonny, if there's anything else?
+
+Aaron Gallant (01:00:59.432)
+All right, well, thank you everybody. Hope to see you at future night classes and possibly at Gauntlet.
+

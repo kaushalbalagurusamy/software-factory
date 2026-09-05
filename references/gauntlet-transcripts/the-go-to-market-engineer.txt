@@ -1,0 +1,461 @@
+Tom Babb (00:07.295)
+Hello, hello, and welcome. It looks like we have about 32 people. We're good, Sonny. Hello everyone. We'll let everyone kind of trickle in here. Sonny and I are typically behind the scenes on these calls, but today we are going to be on screen. So would love everyone to navigate over to the chat and drop in where you're calling from and maybe how many times you've been to night school. We'd love to see that.
+
+Hello, Will?
+
+Will and William in the chat.
+
+Tom Babb (00:48.731)
+Utah, second time. Thanks for coming, Jacob. Hey Will. Will we love to know how you heard of us? If it's your first time at night school. A lot of first timers coming in today. It looks like almost everyone's a first time. Austin, Texas.
+
+While you are looking at our marketing team here, we are typically behind the scenes, but today we're gonna be leading this call. North Carolina, first time, Lily, hello.
+
+Josh (01:25.031)
+I'm glad we have East Coast represented here so everyone else feels the six o'clock meeting time that you've scheduled for your coworkers, Tom.
+
+Tom Babb (01:29.141)
+Six report.
+
+Sunny (01:34.536)
+We also have a lot of Austin people it seems like.
+
+Tom Babb (01:38.505)
+Will was recommended from a friend in Austin. Lots of friends seem to know about us. That's great to hear. Nathan's in from Columbia.
+
+Kansas City represent that's where I moved from, Jeremy, so welcome. Should definitely try to come down to Austin if you are getting sick of Kansas City, I can say it's a great move.
+
+Josh (02:04.079)
+do you guys wanna maybe pop open the fur? I don't know how much longer you wanna cite locations, but I wanna make sure we use everyone's time here wisely and get started. So why don't I just do a little bit of very brief housekeeping and then we'll do introductions and we'll jump in here. But one of the key things that I wanna make sure we highlight as we start the session is that we wanna keep it interactive. We have some cool things to talk about, some interesting things to show, but
+
+If something comes to mind, we'll be having the chat open throughout the course of the discussion. So pop it in. When we're done, we will answer your questions. You don't have to wait until we end. I'm in Northern Virginia, so I say Washington, D.C. there. So I feel pretty good about how this is working out. so why don't we do a round of introductions for everybody and then we'll get started. So my name is Josh Martin. I lead the marketing team here at Gauntlet. I joined in December with the idea that.
+
+It's really important to figure out how marketing teams and in general the market is adopting and using AI tools. And I'm hoping that what you'll see through the course of the conversation today is that engineers and marketers can be friends. We can even work together and hopefully d deploy some solutions that are really unique and different that are not available otherwise. You wanna go next, Tom?
+
+Tom Babb (03:16.434)
+Yep. my name is Tom Babb, as I've mentioned multiple times. Sonny and I typically sit behind the scenes on these night school sessions, so fun to be on screen this time. I've been with Gauntlet for the longest on this team. It's actually coming up on my one year mark next week, so been here for a while but really like it. I'm in Austin, Texas and spend a lot of time at events and and in the office as well. So if you're in Austin I'd love to meet you sometime. I'll pass it over to you, Sonny.
+
+Sunny (03:44.323)
+Hi everyone, welcome. Yeah, I'm usually in the chat with Tom running night school. I'm the senior content manager over here at Gauntlet. I joined back in April. I do a lot of organic social or digital footprint and kind of just strategizing with that. I run a lot of night school stuff. If you've seen any like follow-up emails, I usually design them. So I'm always in and out of things. I love always interacting with you guys on the chat. And I've been doing marketing for now about over seven years. Coming over to Gauntlet's definitely been
+
+eye opening and, you know, a change for me in education and also tech. But it's been really cool to be a part of the team. And I'll pass it over to our embedded AI engineer, Ariel.
+
+Arial Gardner (04:25.339)
+Hey everyone, my name is Ariel. I've been with Gauntlet for about six months now and I actually graduated from Gauntlet's program from cohort three last fall, so I kind of have the inside scoop of what it's like to go through the program and I work as the embedded AI engineer on the marketing team here.
+
+Josh (04:46.224)
+I think that's a great transition point to talk about why we're here today. So anybody that's an engineer knows that the market is changing pretty dramatically in terms of the expectations of what you can deliver to your organization. And anybody that's in marketing recognizes that AI is really also fundamentally changing what you're expected to deliver to your organization and really what you can do and enable yourself to accomplish. So over the last year or so, really since Tom joined and certainly since I joined, and we've had this ongoing discussion and debate about
+
+How do we get more scale and capabilities out of our marketing team? And of course, working for an AI company, the obvious solution is let's do more AI things. And what we found, as you can see on the slide here, is that we can be really, really powerful by ourselves. We can create some really interesting tools. We can automate some workflows. We can get pretty far pretty fast. However, we cannot get far enough to take the projects that we want to work on.
+
+To integrate them with all the systems that we're using to solve organizational problems and overcome some of the hurdles that multi-channel systems and multi-domain expertise require. So when we were trying to decide what the next hire is on the marketing team, even before we got a content manager who's incredibly important to the business, we said the next thing we need to hire for is an AI engineer embedded within the team. One of the questions.
+
+That if you're an AI engineer, you may be asking, and if you're a marketing person that happened to join this for one reason or another, we're happy to have you. Is do you hire an AI engineer first and then teach them marketing? Or do you hire a marketer and try to teach them AI engineering? I think the jury is still out, honestly, on that question. And it's something that we constantly talk about. And while we have an AI embedded engineer on the team, and Ariel went through the program, she's a traditional software engineer in the sense of,
+
+She's a coder. She learned how to do this stuff. She's not a marketer. And she'll admit that during the course of this conversation. She'll probably share some more stories with anybody that wants to talk to her after the session about all the silly things that marketing people do. But it's it's a true debate. And I don't think that there's the proper answer or even a right answer yet. But what I can say is if you are an engineer and you're thinking about becoming an embedded engineer within a functional area, learning about that functional area is very important because there's a very steep learning curve for Ariel.
+
+Josh (07:10.31)
+And a very steep learning curve for the marketing team to figure out what are the capabilities that we can truly deliver to the market. How do we work with an engineer, truly work with an engineer versus just researching some SaaS solution and then going on a demo and downloading it and then complaining when it doesn't do what we want it to do? So we've we've really kind of settled into a nice groove here and we've identified real problems as a team that we want to solve for. And that's kind of the last part of my spiel here at the beginning is.
+
+The one key thing if you're an engineer or if you're a marketer that's thinking about ad advancing your career, becoming an invented engineer, is focus on solving business problems that you're trying to tackle. AI is amazing for letting you run down rabbit holes until you're blue in the face and there's nothing else that you can do because you can do a lot of cool stuff. But if you are always focused on what is the actual business problem we're trying to solve, how do I expand my scope of responsibilities while diminishing the
+
+minor tasks that I'm responsible for, you're going to be, you know, streets ahead of anybody else that's in the market right now. And I believe that us as a marketing team, the things that we'll talk about today will demonstrate, you know, an advanced approach to marketing, not because we're graded it, but we're fortunate enough to work at a mar at an AI company that afforded us an embedded engineer to solve these problems. So we're happy to answer questions about prioritization of responsibilities or what you want to look for.
+
+If you're looking for an embedded engineer role, but really before we answer any of those questions, and again, you're welcome to put them in the chat, probably should show you what Ariel's working on and what she's doing to see if it's even of interest to you, if you like it, or if you think, holy cow, I want to just work with developers all the time. I think with that, we'll we'll transition to the good stuff of this conversation.
+
+Arial Gardner (08:56.837)
+So yeah, I guess just touching on some of those points that Josh just just made, there's a couple decisions to make when filling this kind of role in in engineering or in an organization. I think that the benefit of bringing on an engineer versus upskilling a traditional marketer kind of frees up the space for the marketers could to continue doing what they're doing while the engineer can tie up those loose ends, can build solutions and kind of be the glue that kind of helps everything stay running. I think it definitely goes both ways in that
+
+With AI, marketers are also able to upskill themselves with AI. And I've seen that with my own team. Like Sunny and Tom and Josh, they build their own tools sometimes and they make skills, but I think it's kind of like a everyone is kind of raising the bar, and that helps the team work more efficient and faster and do cooler stuff. then some things I've found helpful in this role.
+
+Is in the engineering background just like being able to build like robust solutions, kind of leaning more from the vibe coding to the AI engineering kind of spectrum, falling more on the AI engineering side where I know that if I'm building something, I will be able to like maintain it. there's gonna be like observability built in, those kinds of things. so those are kind of my thoughts on that. And Sunny and Tom, I wanna see if you guys have any thoughts you wanna contribute to that, or I'll keep going.
+
+Sunny (10:18.252)
+Yeah, no, I would love to add in something like as we're talking about the embedded world too and how we try to do tickets and stuff. I'm definitely really guilty of going to Ariel and being like, I need to get this live really fast. And sometimes my brain can't even comprehend the in-depth of what she's actually doing. And I'm like, and we're a small team, so our turnaround is always really quick. So maybe you can shed some light on, you know, setting boundaries with the team too and trying to make us understand also
+
+what your building's a little more complex when I'm like, I need to get this out and you know, trying to find like the right line between
+
+Arial Gardner (10:52.655)
+Yeah, I think it's like a question of figuring out how the team works best together. Like, for example, our team we've
+
+used an Asano board. We've used like internal tracking software. We've sent Slack messages. And I think it's just kind of finding what works best for us. And I think those one off conversations work well because of the size of our team and just slacking things back and forth. But yeah, and especially 'cause I'm just one engineer on the team, like I'm able to like triage the work pretty easily. So that's kind of where I found a bit of a balance with that.
+
+Yeah, and going along with that, I think that being embedded on the team has allowed us to be a little bit more efficient in that Sunny's not passing a ticket off to some random engineer where it needs to go through an engineering manager, become a ticket, get passed down, and maybe it's like an isolated unit of work where another engineer is gonna pick up a different piece of it. So that just helps us move a little bit faster and get some of these these initiatives off the ground a little bit quicker. And also, going along with that, we meet
+
+pretty regularly as a team and with that I'm able to like get context for all the work that I'm doing itself. So I already know how some things are built, I know what the initiative is behind what I'm doing. and then also another piece of that is that
+
+When we're having these conversations, like we have stand-up two times per week where we're talking about like the higher level objectives and all that, what we've got on the plate, who's passing what off to who, all that kind of thing. I'm able to like proactively seek out improvements in like ways we can improve our workflow. Maybe if I connected this API to this tool, then we would be able to do this faster or solve this problem, versus where if it were like a more traditional engineer, that proactive eye would not be able to happen.
+
+Tom Babb (12:40.956)
+And I will just add one quick thing before we jump into these demos, which is that working with Ariel and just being at an AI company in general is super awesome for Josh, Sonny and I because like we are request we are starting to wrap our heads around what's possible.
+
+in ways that we didn't even really understand maybe a year ago. As an example, we're asking like, hey, can we, you know, combine five MCPs and build this massive dashboard that then passes information off or, you know, there's just extremely complicated things that we're starting to wrap our heads around and then drive forward with Arial and having these things. So I think that's a good transition. Let's jump into some of these tools we built.
+
+Arial Gardner (13:25.701)
+We can go past this. all right. So I the first thing that I wanted to showcase was this lead generation pipeline that I was able to build for the team. So just to give a little bit of context into what this looked like, so we were going through this initiative to generate some lead lists for our account executives to support them on the sales side. And for gauntlet.
+
+Tom Babb (13:27.752)
+Take it away, Ariel.
+
+Arial Gardner (13:50.906)
+Our ICP is we hire or we train engineers to become AI first and then we upskill within companies to train their engineers to be AI first. So something that's really important to us is hiring signal. And so that's the first signal I was looking for. If you want to go to the next slide, Sonny, I'll touch on that a little bit.
+
+so this is a pipeline that I was able to build, and I want to show kind of how the engineering side and then also being embedded in the marketing team was kind of helpful for allowing me to build this. So from the back end here, I used a managed agent to do a variety of headed and headless scraping, calling APIs, and built this robust pipeline to kind of seek out hiring signals from job boards like LinkedIn, Indeed, Built in Austin, a bunch of other sources.
+
+And store those store them in a database, score them based on how well they fit our ICP. And leaning towards the front end, I built a UI for our account executives to be able to come in, determine which leads fit best and which are worth pursuing, and then assign them out. And then from there, the account executives are able to just click a button, get back enrichments with clay, pass to HubSpot, and engage in sequences.
+
+so this was kind of like the overall architecture of the pipeline I was able to build. And I think that the most valuable thing for being able to make this was that I kind of understood like how I could make something that is not really a black box and kind of more of like a maintainable pipeline, but also because I'm involved in the conversations about what kind of sales sequences are we looking for, what's our ICP and
+
+the specifics of the data we want to enrich with. that allowed me to take it from just a pipeline to a complete like back end, front end, through HubSpot, through Clay, like build it how the account executives would like to work with it. And
+
+Tom Babb (15:58.261)
+Ariel have a quick question on this. just for you, that might be helpful for the audience. Like when you're building out these multi-step tools, I feel like scope creep is like pretty common. Like we we want to go in all of these different directions. If someone was gonna try to build this themselves just based on looking at this and understanding this, where would you recommend they really like narrow down the scope to try not to make it like so complicated?
+
+Arial Gardner (16:25.893)
+That is a great question. I also I kind of faced that when I was building it because nowadays there's just so many different ways to do things, like so many different pieces of software to use, so many platforms that you can leverage. And I think just like being clear on the requirements and making I mean, I think some like I didn't really have to go gather requirements and learn what needed to be built because I kind of understood that already. But just making sure that's very well defined up front. that's I think that's
+
+how I was able to get good results of it.
+
+Josh (16:58.455)
+If I can just make one comment on this, I think the thing that's amazing about this, and you'll show it, and I think when people see it, it'll make a lot more sense, is that there are elements of this that the marketing team maybe could have done themselves, but there's no way.
+
+that we could have built this on our own, but more importantly than not building it on our own is we were able to develop a purpose built application for the organization for exactly how people want to work. We were on a meeting earlier today and we got a feedback from the sales team. It's like, can we change this?
+
+Yeah, we can change that. And now it's ready to go. It's like by the end of the meeting, it's live and and ready to roll. And I think that's fundamentally different. There's a lot of complex things that are happening in this rather clean looking chart that make it really, really difficult to build what area you'll build. And when she shows it to you, it's going to seem even easier to use because she intentionally designed it that way. But we can we can show it. But I just want to highlight the fact that now three departments within the company are using this tool to solve a real business problem, which is we need more leads.
+
+We want to have meaningful outreach to people and we need to know who to reach out to when we're ready to do that.
+
+Arial Gardner (18:03.606)
+Yeah, and like Josh was saying, I think that anyone on this team probably could have built something to do this, but I I think especially with AI tools and everyone learning to code a little bit, but just making sure that making it more of like a robust kind of thing that's like repeatable and pivotable and maintainable and that kind of thing was like the leverage that I had with it.
+
+Tom Babb (18:27.58)
+The thing I'll mention really quickly before we go to the next slide is that our sales team was already using HubSpot sequences. And so this is really harness on top of that. And that's another, like I think, key element to having an embedded engineer is being able to build things that don't change the existing workflows inside of the organization. Essentially building something on top of that that feeds right into this. When we see the tool in a second, like you'll see there's literally a button that
+
+pushes it into HubSpot and then just enters the sequence right away in HubSpot. So this is really kind of like a wrapper on top of HubSpot that does the scraping, does the database, and then allows us to enrich it and ultimately push it in.
+
+Josh (19:12.41)
+Time you got through a spoiler alert before you tell them what we're gonna show them.
+
+Tom Babb (19:15.4)
+Well, this is I'm just helping them understand.
+
+Sunny (19:19.03)
+Also to say that you know this looks like a nice originally, but Ariel when we were asking, like, how can we present this? Or initially she had sent kind of this breakdown. So I think it's just interesting when we're collabing with like an engineer and like how her brain is working, and she's This is how I'm gonna try to explain it to you guys. And then Tom took it and he was like, Okay, I think this might be a little more digestible. So it's always like collaborating too. I feel like that's just the funny example of how it was and how she could explain it throughout with all the arrows and all the steps that go into it. And also
+
+Ariel you had said, like, I think they could have built this with some bob coating and stuff but
+
+The time that it probably would have taken us to build it just would have been at the end of it, we probably would have so frustrated and just wanted to walk away. Cause I even experienced with vibe coding here and there, and it can just be so time consuming. And then also to push it to the rest of our organization, we want to make sure that it's, you know, working to a T before we're giving it to the sales team and all that stuff. And I think that's why it's also so important to have you a part of the team. Yeah.
+
+Arial Gardner (20:19.375)
+Yeah, definitely.
+
+Sunny (20:20.494)
+Oeda's got a comment says Ariel is being nice. You can't build this with icoding. This is a good example.
+
+Arial Gardner (20:25.297)
+That's funny. well I I'll dive into my next example. I don't I did not come prepared to do a little demo today, but maybe at the end if we have some time I can jump into it. But I did wanna share another little tool that I was able to build for the team and kind of share the yeah, just share that with you guys. So another objective to give you a little context that our team was working on is our SEO effort. Like
+
+We want to make sure we're doing well with SEO, with AEO, and with making sure we're appearing in search results, we're ranking, all of that. So in the past, what we've done is for our blog, we have hosted our blog on a third party, and that gives not much value to us because that doesn't br build our brand authority, it doesn't give us like the keywords, the information, the density that p hosting on your own website would.
+
+So this initiative kind of came in two parts. We wanted to move the existing blog from where it was hosted and make sure we're not breaking any SEO, causing any negative effects to come from that. And then also I built a CMS for us to use internally so that if Sonny or Tom have blog posts or Josh that they want to add to our website, it's kind of like a self-serve system. and that kind of came in two parts.
+
+One, we build back the SEO, immediate effect, immediate positive. But the second piece of that is that now it's kind of removing that bottleneck between going from idea to publish, where typically it'd be like go from idea to content, pass it to an engineer to get it live. And there's just a little bit of friction in that process. So making this more self-serve and going from idea to setting it live really fast was the value that I was able to make.
+
+And also because my time is dedicated full time to just supporting marketing initiatives and sales initiatives, that kind of thing, I was able to just like pick, okay, this is a high priority, I'll work on this and get it done really quickly.
+
+Arial Gardner (22:36.517)
+And then now moving forward that direction. Sorry, go ahead.
+
+Tom Babb (22:36.518)
+Ariel, we a good question. We have a good question from Ash in the chat, Ash Cherry, that says, so how much time do you spend in discovery slash observation before you push a single line of code for this? As this feels like a brown field project.
+
+Arial Gardner (22:55.407)
+Yeah, this is definitely a brownfield project. So for a little more context, our organization operates with what we call HQ. And that has a lot of features that enable all the functional teams in the engineering team to like do what we do every day as kind of like a source of truth. So in terms of discovery for this, I think I don't know, I was kind of as a team, we've had these conversations together. So that and that side of it
+
+Josh (22:56.227)
+Yes, this is
+
+Arial Gardner (23:24.761)
+it was pretty simple to like have the requirements on hand, but in terms of discovery for like putting it into an existing code base, the good thing is I work in it pretty often so I'm pretty familiar but
+
+Yeah, I think just making sure that the code base is built in a way that the L L can understand it and yeah, I I guess that's what I have to say about that. Good question.
+
+Josh (23:54.65)
+Hey, Ariel, I'm gonna I'm gonna tackle one of a previous question because we switched to the next slide, but can you possibly load up Bullseye and walk everybody through it? I think everyone's gonna wanna see that. I know that you're not putting you on the spot here, but you've already demoed it about three times today. So I feel like you're gonna be very capable of showing it off to folks. we had a question before about lead gen scoring. the way that we're handling that right now is through and
+
+Again, Ariel will show this in just a minute, but we're primarily focusing on our ICP with the Bullseye tool specifically. So we're honing in on specific companies, and then we have a pretty tightly defined ICP in terms of titles. So then we're also identifying the right titles when the data is enriched so that we're bringing in mostly the right people, right? Some people won't want to talk to us, some people will want to talk to us.
+
+We have not added more sophisticated lead gen scoring within HubSpot, for example, because you know we're a small company. It's not like we're getting hundreds of inbound leads a day. However, if we were, and hopefully we will soon, tell your friends about Gauntlet, we will work with Ariel to to do lead scoring within HubSpot itself that would surface the most high-value leads that are interacting with the most valuable pages that are
+
+the right title, working at the right kind of company. So it would probably be something pretty rudimentary at first, but it would alert the sales team to somebody that's engaging in behavior that suggests they're ready to make a buying decision. Hopefully that was helpful. Not too nerding out on marketing stuff.
+
+Tom Babb (25:29.266)
+I want to address like one kind of question that we had internally, and it's kind of a a more macro question around AI and SaaS right now, which is do you build things or do you buy things? and so for example, like HubSpot, which is our CRM, has a CMS, a content management system that we could deploy blogs through technically. But there are tons of restrictions around what that looks like, and we have our own workflows internally that we want to essentially flow.
+
+into the blog and the CMS. And so what we we went about it a couple times trying to decide are we going to host this on HubSpot? Are we going to build our own thing? What is this going to look like? Ultimately we decided because we have these workflows and these specs that we want to reach internally, we're going to build it ourselves. And what that gave us the flexibility to do is really look at best practices, skills out there, Claude skills, etc., that we want to build around.
+
+And then ways to measure that as well. So now I mean Josh really took a lead on this, but we have a system that we built that works with our workflows and that's gonna be something that we can scale and also report on efficiently. and we're not working within the constraints of the HubSpot software. One thing I will mention though is we've gone back and forth on wanting to build things that we ended up buying. So we're not always building every single SAS product from scratch.
+
+Some of the things like our CRM for example, which is HubSpot, we've decided that it makes more sense to use a large enterprise SaaS for instead of building it ourselves.
+
+Arial Gardner (27:06.575)
+Yep, and I think that there's just more option to choose whether to build or buy. You're not as restricted, just to add a little bit to that. Well, I can share my screen and go through bullseye a little bit.
+
+Josh (27:21.361)
+I think we're getting a lot of questions on this.
+
+Arial Gardner (27:25.583)
+So this is just the UI portion of it that I'll show you.
+
+Let me just you can see all my email addresses. okay, so it's I built this in a way, my idea here was to make it feel like a spreadsheet because you know that's what sales people like to use, that's what account executives like to use when they do their job. It's just more intuitive. so these are a subset of leads that we've pulled. and up here we've got a filter by our account executives. So if I were an operator coming in here, which is
+
+someone maybe someone who manages the account executives, they're gonna look at these leads and assign them out here. And if I were coming in as an account executive, who's gonna actually consider reaching out to these companies and managing those sequences, doing the outreach themselves, they're
+
+they're able to see a little bit more information about the company that we've pulled. So maybe a news trigger about what they're talking about with AI, what their stance is about it, get their LinkedIn, a little bit more metrics about the company.
+
+And what you're seeing here are contact cards. So if this is a company that's worth engaging with, then I would come over here and click enrich. And that's calling the Clay API to pull contacts who meet a certain criteria, who are at a certain level or higher, who meet someone who we'd want to reach out to to do business and get those to return them back to the UI. This also has their LinkedIn, a little news about the company, and a summary of what their role might look like.
+
+Arial Gardner (29:02.829)
+The company. And from here there's a contacts view, which is also very spreadsheet-like. And these are where you can see each of the contacts that you've added for each of the companies, and this is where you can see if they're worth reaching out to, add them to HubSpot. Then I'm not going to show you HubSpot, but in HubSpot we have a bunch of configuration to initiate these sequences for them.
+
+Josh (29:26.894)
+So I just want to put a pause there for just a second, Ariel, and I'll give you a second to read Will's question. But we went from a world of there's untold amounts of data out there about companies that are hiring, and we have no idea how many people they're hiring or or if hiring's an issue for them that they're trying to solve. And by using OpenClaw and various agents, you know, Ariel was able to.
+
+To shrink the universe for us. And she started by looking at the Austin area because one of the questions we had before was like, well, how do you get your arms around this? Cause otherwise, there's just untold amounts of data. So there are some guardrails around some of the data, and there's two versions of Bullseye. We can talk about that in just a second. But we went from a world of like, how do we identify companies that are probably a good fit for Gauntlet? To I have a live active running sequence in HubSpot as a sales rep.
+
+That I all I have to do is press two buttons and it's ready to go. Like the amount of effort and engineering that went into the six different systems that this tool traverses, the number of API calls that are required, the number of advanced technologies that are being used, the workflows within the different systems. Clay has a variety of interesting workflows. We could potentially show that maybe. But I think that goes back to the original question that we asked, which is like do you need an AI engineer or do you need a marketing engineer?
+
+Person. And again, you can see that there are pros and cons of each. Like Ariel had to spend a lot of time learning HubSpot. Sorry about that, Ariel. She had to spend a lot of time lear learning clay. And on the flip side, you know, someone would have had to spend a lot of time learning how to wire these systems together, right? As a marketing operations person would have to do. But the fact that we went from an idea to a solution that has two configurations, one being this sort of hiring.
+
+approach and one being an ICP based solution that's really looking at we think these are the right companies. We're going to identify five people you to reach out to. You collect that data. You now have all this information and you can run a sequence against them is really, really different than what we would have been. We would have had to buy six different tools. We would have had people like literally copying and pasting things from tool to tool. Sales would have hated it. Marketing would have been mad that they hated it. And it wouldn't have worked. And we would have been spending a lot, a lot of money on it. So this
+
+Tom Babb (31:29.862)
+Mm-hmm.
+
+Josh (31:46.102)
+is a very elegant solution that starts with all of this open world data and ends up with hopefully a lead that's interested in having a conversation with us.
+
+Tom Babb (31:56.661)
+I'd love to touch on one quick thing which is on the bullseye, which is where we decided to insert human in the loop steps, because I think this was very strategic and i it maybe wasn't obvious in that tool.
+
+Arial Gardner (31:56.752)
+Yeah.
+
+Tom Babb (32:10.544)
+So there are multiple times where you have to press a button to get more information. So for example, where you're looking at it, you're looking at the database of all the people that are hiring or all the companies that are hiring. And then if you find a company that you that looks interesting, you then have to enrich, you have to press a button that says enrich. And that goes and uses Clay's API to actually enrich that data. The reason that we didn't just enrich everything from the start is because enriching actually is fairly expensive.
+
+There's we were I think pretty strategic about when we want to kind of fill more information in. And we have a similar button for HubSpot, right? We don't want to push every single contact in Bullseye into HubSpot because that's gonna be a complete mess. So there's multiple steps where human is introduced into the loop on top of the tool to make a decision to kind of move forward, but all of that is completely streamlined and for the user or the salesperson they they feel like they're just pressing a button.
+
+And then a massive action is taken in the background. Sorry, Ariel, I didn't mean to cut you off. Go ahead.
+
+Arial Gardner (33:15.213)
+No, I think that's a great point that I wasn't even thinking about making, so thanks for emphasizing that. And
+
+Josh (33:20.728)
+There are a couple of questions in the chat. Are you gonna tackle those next, Ariel?
+
+Arial Gardner (33:24.111)
+Let's see, let me take a look.
+
+Josh (33:28.108)
+One of them is about how long it took for you to build it. And then there's a longer question, maybe Sonny, you can cue that one up for Ariel.
+
+Arial Gardner (33:35.281)
+how long did it take to build it end to end? Yeah, it was kind of like an ongoing process where f initially my goal was to just like kind of keep tabs on hiring signals. So I built that part out first and that kind of came with the learning curve of getting familiar with a managed agent and setting it up in the right ways to be able to like properly scrape and pull this information. There's good ways to do it, there's bad ways to do it, and that was kind of the first step of it. So that took a little bit and then
+
+Setting up the rest of the pipeline. I don't know, like a matter of a few days, it depends on like the amount of time that I had to dedicate to it, but it wasn't like some crazy initiative and then tying the pieces together. I kind of iterated on that as I showed it to the sales team and to the marketing team and the people who are gonna be using it. So yeah, I don't really have a definitive answer for you, but I think just working on it iterativ iteratively kind of like laid it out nicely.
+
+Sunny (34:31.116)
+And then we have
+
+Josh (34:31.224)
+You mentioned data scraping, Ariel. And I think somebody's probably gonna ask you the same thing, which is part of Will's question, which is how you said scraping correctly. He's talking about, you know, apartment data and other information. More more companies are putting their data behind gates. Like how do you think about data access and what's the right way to do it? And what happens if it goes behind a wall?
+
+Arial Gardner (34:54.589)
+I I think it's interesting. I mean, we know L LMs are trained on a lot of data that ness not everyone necessarily wants it to be. if the data is out there I generally like to find a way to access it. And of course you don't wanna like as a company I don't want to like break laws, whatever, but I don't know, I d I don't have I think th when I was saying like the right way, there's like I was more talking about like
+
+ways to get around barriers and like not overload APIs, like do it in a respectful way I guess, 'cause I'm making a lot of requests, like pulling a lot of data and so that's kind of what I'm thinking about in terms of that.
+
+Tom Babb (35:38.697)
+I'll definitely note we are using things like OCR image. we're using web browsing as a as a form. So like one example is LinkedIn doesn't have a strong API, and so even though we don't have access via API to LinkedIn, we we are still looking at ways, again, respectfully, to potentially get some of that information with it as you probably know if you've tried this, it's a lot more expensive. So we have to be fairly strategic on where we want to use that form of of
+
+Collecting information.
+
+Arial Gardner (36:11.835)
+Yeah, for sure.
+
+Sunny (36:14.659)
+We have a few
+
+Josh (36:14.798)
+The nice part about tools like clay being integrated into the system is if you can start collecting the information, they have a lot of their own capabilities and waterfall processes that they run to identify things like phone numbers, job titles, LinkedIn profiles, social media listening tools to say this person said X, Y, and Z. So there's a variety of things that we are using.
+
+Maybe we're looking the other way about how they choose to do that, but I believe they're using licensed data providers to get that information. So we do think that we're putting back into the system as much as we're getting out of the system, but it always is a little bit of a dance around data access.
+
+Tom Babb (36:57.106)
+I can ask a question here for Ash, which is pretty much are we evaluating like user behavior data in the app to try to optimize the UX for the team?
+
+Arial Gardner (37:09.701)
+Yeah, I think one piece with that is that our team is so small, so like direct feedback is probably like the easiest route. I think if this was being used by like a larger organization, that would be a great way to like keep tabs on these kind of things. I track user data or usage data, so that's another something that we can use. right now, yeah, Bullseye is not necessarily shadowing the team and how it's interacting, but I do have like metrics on that, I guess. But that would be something interesting to take a look at.
+
+Josh (37:38.123)
+Now I'm interested what are the metrics that we have on that, just so I know to hold sales's feet to the fire.
+
+Arial Gardner (37:43.255)
+Interactions on different buttons like who chooses to enrich, who's logging in at what time or like yeah, so we can see like what what companies are getting enriched, like what how it's being used.
+
+Tom Babb (37:58.504)
+Tot.
+
+Josh (37:58.532)
+Interesting. On the on the flip side in HubSpot, we are seeing how many new contacts are being created and added, how many people are being dropped into sequences. So I think to Ariel's point, if got more complex or there was a wider audience of people, we would probably want that. Maybe less for oversight, but to the point of a question like for usability, are we seeing three clicks where it could be one click? but we haven't we haven't gotten that far yet.
+
+Arial Gardner (38:22.075)
+Yeah, exactly. And we're still getting some of that data back about from the account executives who are actually using these leads, like what is what d performs best in sequences, like what combination of data should we provide for them, what would be most useful, that kind of thing.
+
+Josh (38:35.457)
+The great thing about being on marketing is if you do something sales doesn't like, they will absolutely let you know the second that they get a hold of you that they don't like it. So they are their own UX and UI person.
+
+Tom Babb (38:35.71)
+Yeah.
+
+Arial Gardner (38:43.791)
+Is three.
+
+Tom Babb (38:48.156)
+Hey Josh, I have a quick question for you actually, putting on the spot. so for the SEO tool, there's a lot of information and a lot of skills and just tons of research on the web about best practices for SEO. it seems like it's an it's just a black hole and like it's it's just ongoing of all the different best practices.
+
+So how did you navigate what we should do for SEO? how did you decide which repos to use or which skills to use? Like what did that process look like and when did you know that you kind of had enough?
+
+Josh (39:26.209)
+I mean, I would love to tell I'm gonna be honest, with my seventy-one plus closest friends that are on the meeting here. I'm not an SEO expert by any stretch of the imagination. I don't wanna ever be one, to be honest, because to your point, a lot of it's a black box and a lot of the SEO best practices change constantly that if you're not an SEO expert, and there are lots of companies that do this, this is their profession, then you're not likely to really win the game. You just need to compete in the game. And secondarily to that, when you add in things like AGO.
+
+Or AEO or whatever term you want to use for answer optimization, that's a whole other game. And those rules are changing pretty dramatically as well. Some of that has to do with own media versus partner media that you're distributing through. So the honest answer is I did some research on like what skills were people using, and someone built a skill and it seemed pretty
+
+Good from what people said. So then we tried it and I read some stuff and I said, okay, well it's better than what we're doing. So let's just roll with it. Now you like that. let me, if you don't mind, I'm gonna share my screen briefly because this is another tool that Ariel built and it's aligned with the conversation around.
+
+Arial Gardner (40:27.355)
+Someone called it A E I O U in the chat.
+
+Tom Babb (40:29.884)
+Right.
+
+Josh (40:42.731)
+with SEO and and AEO and everything else, but this is our new capability for deploying a blog. And one of the key things I would say here is it's not super fancy, but we don't need a blog tool to be super fancy. We need it to produce text and that text needs to go onto the website. The nice part about this is historically for us, the website has been locked down. So we need to go to the dev team. Dev team says like we'll get back to you when we have some time and we'll we'll update this blog in like three weeks.
+
+The reason that this was built is the original blog had some weird interexchange thing where it wasn't rendering on the front end. So we weren't tracking or getting any SEO value from anything at all. So Ariel built this tool. And while I'm not going to go deep into this element of it, but it's interesting. I'll get to another point about it in just a second, is that she gave us all of these really great SEO capabilities directly within the application itself. So we drop a blog post in here.
+
+It then gives us what the preview will look like from a search perspective. We can update the meta titles and defaults. And you get a lot of really interesting capabilities. And what we're going to do next, we haven't really used this is brand new, like we haven't even used it once yet. What we're going to do next is start adding in optimizations. So maybe it's in the already aerial, but I know one of the key things that we're going to look at is when we put in like meta keywords, we're going to connect to data for SEO, which is the SEO tool that we're using to track and measure keywords. And it will say like,
+
+This is a pretty dumb key word. You probably shouldn't use it. I would prefer if it actually told us that in that way, Ariel, that would be great. Again, not something a SaaS tool would do for you, but it really empowers the team to address some of both our shortfalls from a technical perspective, but get very precise solutions in place for the things that we need. And what we need is to make really good content that will index and hopefully get people to show up on our website. the other thing that we're doing, and we're go ahead.
+
+Sunny (42:35.758)
+I mean
+
+I was just gonna say we did have a question that said which tool did the marketing team find the biggest time saver? And I feel like it goes really hands in hand with this tool we're about to roll out when we're talking about like blogs, SEO, all that research. It's all in one spot. I can just push it over to Josh, quick approval and then it goes right to the site. And you know, that's huge for us.
+
+Josh (42:55.722)
+Yeah. I would even argue it's it's a little bit less about time savings and more about like doing it right. Like it might take the same amount of time, but we're gonna get 10x more value for the thing that we did because before we're monkeying around with copying and pasting stuff and having HubSpot like auto-render something in AI and it tells you like this is good now, but it has too many words and too many characters and doesn't make any sense.
+
+So having these integrated capabilities, and this is what we've done kind of across the board, is really powerful. The other thing that we're trying to integrate this with over time is a blog generator that we've created in another application stack. So the ability to literally press the button, have it show up in this tool, do all the SEO work and make sure that it's fully optimized, and then press the publish button. That will be a time saver. And that's the thing that I keep going back to. I've talked about this other places, is it's all about the orchestration of AI.
+
+That an AI engineer needs to solve for the marketing team. Because sure, we can create point solutions like a little thing here, a little thing there, another thing there. But when you want to make those different applications talk to each other and you want to make them talk to other third-party applications, and that's where the magic is, right? Is solving that problem of connectivity between different non-conforming applications, that's where you get stuck. And then you wind up in a situation where you're constantly fighting a battle of, okay, well, I got it to here.
+
+And then you're back to the situation of like, okay, now I got to copy this thing and move it there. Or now I've got to save it as a file and upload it to Google Drive and then export it as a PDF and then email it to my friend. And you know, I'm being a little hyperbolic with those examples, but they're very real, legitimate examples that marketing teams face. And when I was at my last job, a company called Decision Lens, we faced this all the time. We'd some really, really good ideas and they worked in pieces, but the whole puzzle was never, we were never able to put that together. And a lot of initiatives wound up.
+
+failing as a result.
+
+Tom Babb (44:51.08)
+Sony, I'm gonna ask you a question from
+
+The audience, I think you're the right person for this one. And I'm also gonna paraphrase the question. But they're pretty much asking, is there a way to make a self-improving marketing factory? So like fully automated content from copy to design, etc. What what is your answer to that? I know you've tried a lot of different things and I think your output on everything you do is extremely strong. How do you manage where AI fits in and where the human needs to be in the loop?
+
+Sunny (45:22.72)
+Yeah, I saw this question. I was actually thinking I was gonna maybe ask it to you because it talks a little bit about meta and ads. Tom does a lot of our ads, but I definitely do a lot of maybe like the creating and kind of doing that like human touch and me and him have really tried to see how much we can get the, you know, the AI to run on its own without us having to like mass produce the content with the human touch. But every time we always have to come back to it that we do need to have our eyes on it.
+
+I think the biggest thing for me, especially stepping into like an AI company, AI first company, is I didn't really play around with these tools. I was using very basic, like copy and stuff and like some design feedback. So really I think immersing yourself like in Claude, in Chat GPT, and like really understanding codecs and like what how powerful they all are and what makes them work. Like we've seen with like Claude when I'm building stuff, it's very wireframes and then you pass it off to Chat GPT or anything like that, and it can
+
+design it on a new level, even if it's just giving you kind of some inspiration for you to then maybe mass design it in Canva. So there's like so many like different moving pieces, but we've definitely seen that like the human eye to it is so important when you're working with these. Especially since you don't want to produce like a bunch of AI slop and you don't want to produce things that are not going to resonate with your audience.
+
+Tom Babb (46:40.276)
+I'm gonna add one thing just because I think this is the biggest unlock, and this will also answer your question, Daniel. and hopefully the question that Sunny's answering. I think one of the biggest things that I've found recently that is just like absolutely mind-blowing, is that Google Ads and Med ads have an MCP now, and you can go and interact with those ad platforms without ever having to open the ad platform. And so, what this allows you to do, especially on the
+
+Google side is I'll run a deep research report on a URL. So I'll just give it a URL gomletai.com and I'll say what keywords should we be bidding on if this is our strategy. And then it will come back. The deep research report will take about 30 minutes, it will come back with like a 15-page strategy document, and then I can just upload that to Claude with the MCP on and it will go build it for me. And this is a service that there's agencies that specialize in that exact process.
+
+They'll write the copy, etc. And now the AI will do that for you with the MCP. So something I'm really looking forward to with where marketing is headed with AI is getting more, getting away from all the individual platforms that you have to manage, like all the ad platforms, for example, and just connecting all those MCPs to Cloud or whatever AI you use, and then just having one giant conversation for your campaigns, because that's pretty much what the campaigns are, right? You're using
+
+the platforms as channels, but ultimately you have a campaign that you're trying to distribute against different platforms. And so the more you can bring that into one central platform like Claude and have that conversation go branch out, that's something I'm really excited about. It's a huge, huge time saver.
+
+Josh (48:24.907)
+I would weigh in with one other thing. This is sort of marketing adjacent, but it's not marketing stack necessarily, but is the ability to deliver new experiences from a lead flow perspective. So we had this idea a few weeks ago where it was we're well positioned to understand kind of job descriptions, right? We work with hundreds of companies that are looking to hire AI engineers. We help them go through the interview process. They come into our office, we're talking to them all the time. I would say that there are probably fewer, not very many companies more than us that.
+
+are at the at the fulcrum between the candidate and the job description and the hiring manager. So we wanted to build the tool to say, let's give hiring managers the ability to assess the job description and determine if it would be appealing to AI engineers. Now typically what we would do is like some sort of for lack of a better scripts and janky quiz where it's like select this, select this, select this.
+
+But what we're able to do now is I went to our CTO and Ariel's involved with this as well. And I said, hey, we want to build a model that's, I don't know, leverages our internal expertise and experience. We review a bunch of JDs, we build a model, and then someone else can upload that and get a report. So now the way that this is going to work, and it will come out later this week, is your hiring manager, you show up, you can put in your URL. It will give you direct feedback on whether the job is likely to appeal to an AI engineer.
+
+With direct specific recommendations on things that you can change from bullet order to highlighting certain things in in a in a job description. And then on the flip side, we could do the same thing with resumes. It's not the most advanced capability, but it's something that we can build and deploy very quickly that we would have had to hire a third party to do in the past. And this is something the longest part of that whole process has been how do we build a model that is correct and accurate and giving people good advice versus just a bunch of stuff that we make up.
+
+so there's a lot of really cool things that you can do. We've talked about updating forms to be like an interactive, exciting experience. You just really have to think outside the box of what kind of an experience would differentiate what you're putting out there into the world. And does it actually make it better? Does it make it worse? Does it just make it more fun and different? And let your imagination kind of run wild. Again, with what I said at the beginning, you have to maintain the goal and objective, which is the company needs to grow. We need to get more leads. Is this serving that goal or is it just
+
+Josh (50:47.893)
+Something we think is cool.
+
+Arial Gardner (50:50.107)
+There's another question in the chat that says, How does your HQ app integrate with your internal communications, Slack email, etc., and Frontier AI tools, Claude, et cetera? Any insights to share there as well? It does in a variety of ways. Like we have all kinds of external connectors and workflows built into it. It's kind of like our go-to default software that we use for a variety of use cases. But I wanted to share one use case. For example, we have a couple other engineers in the organization besides myself, and we have an internal Jira board that
+
+one of the engineers made, and we have that connected to Slack where we can add the bot, we call it ticket bot, and that will create a ticket on our backlog, and that will be on the board. From there, inside of our HQ software where this board lives, we can just click one button, it'll create an issue in GitHub. And then on top of that, something I've built is a bot that will go, it's a Slack bot that will launch every day two times. Go check GitHub if there's any new issues, decide if it's
+
+work that can be done without a human, which is a lot of stuff these days, do the work and then report back via Slack. So that's an example of one of the workflows we've been able to build through having our HQ software but integrating it with other tools for like a good workflow.
+
+Josh (52:03.967)
+marketing still refuses to use Ticket Bot because we have Ariel on the phone with us multiple times a week.
+
+Arial Gardner (52:06.162)
+Yes. They I hear what they say and then I type it and then it goes into the system.
+
+Tom Babb (52:18.718)
+Questions do we have? We have a sorry, go ahead.
+
+Josh (52:19.34)
+We We have a question on MCPs here and the ability to make them work together. this individual is saying that they don't use this at work, but clients ask about it. So if you have any thoughts on that and then we'll we'll close out with some final questions and also discuss about kind of what Gauntlet is, because I don't think we got into that at the beginning.
+
+Arial Gardner (52:40.337)
+I feel like Tom loves his MCP, so I'll let him touch on that one.
+
+Tom Babb (52:44.272)
+I can say that I don't always use the MCP that it that you'd expect to use. So for example, with Google Ads, even though Google Ads has its own MCP, I'm using something called Pipe Board. And it took me a lot of research to figure out which one I should use, by the way. And also a lot of trial and error as well. But there are essentially like harnesses that people have built around MCPs, and I found that there are
+
+There are sometimes better MCPs than what the platform actually has. so it's a lot of trial and error, but in terms of using MCPs together, I built these like meta prompts that essentially ask Claude, which is my primary AI, I'm using cowork most of the time. It it it's like it's essentially like a workflow for MCPs because if you just like compile too many at once, it's it might break the system. So
+
+I almost like break out when to ask what in what order that I would actually do the work in. So if I want top of funnel data first, I might go ask about top of funnel MCP data, and then as I work my way down the funnel, I'm gonna introduce questions that would get different MCP data. So I'm not just throwing it all at the wall at once and saying, give me Hubspot, Google Ads, Google Analytics, blah blah blah all at once. I'm actually thinking through the way that I would actually like my chain of thought.
+
+And then I'm introducing those prompts along the way to not overload it.
+
+Josh (54:19.903)
+I see that we're almost at the end of time here. So I want to do a short just review of what Gauntlet is, because I don't know if people we didn't start with that. That's on me because I just double right into introductions. But so for those of you that are not familiar, obviously we focus a lot on AI here at Gauntlet. And what Gauntlet offers is a 10 week fellowship. We run four of them a year. the interesting part about the fellowship, if you don't know, is that there's no cost to participate and there's no income share agreements. It is a fully funded program.
+
+Again, runs 10 weeks. We run four of them a year, 10 weeks full-time in person for seven of the 10 weeks, but we don't ask you to come to Austin and pay your own way. We actually cover all the costs when you're here. So we have a hotel that we partner with and put all the challengers up. We have a great office that people learn, train, educate themselves in, instructors that are available, food provided to all of the challengers, airfare back and forth from wherever you live.
+
+And at the end of the day, the goal for us is to get you placed at a new role and a new opportunity. So we have two sides of the business. The marketing team here, as you saw with Bullseye, is focused on also identifying challengers to bring into the program, but also hiring partners that want to recruit from the talent that are trained through Gauntlet and bring them into their organizations. So it's a full end-to-end lifecycle for a challenger that's looking to become from a software engineer to an AI first engineer.
+
+And it's really changed the lives of a lot of people. I know that everyone on this team is very passionate about it. So if you are interested and you're currently a production software engineer with several years, three years of experience or more, we would highly encourage you to apply for the program and see if you're interested. Or if you have any questions, find us on LinkedIn and ask us before you want to apply. It's a pretty lightweight application process. There's not a lot to it. And we have one more cohort running this year. It starts in early September.
+
+The most recent cohort just came to Austin last week. So if this is something that you're thinking about, you are ready to take the next step in your career, you're looking for the next challenge, you want to become AI enabled, you want to get a new gig, I would say think about it. And we've got great instructors, great places. You can go meet Tom in person. He's based in the office office in Austin. And so is it so is Ariel for that matter? You probably want to pick her brain more, but we need we need her to focus on getting bullseye out the door for us.
+
+Josh (56:40.298)
+But we're here to answer any questions offline if you have them about the program. But we're really excited about what we're doing, what we're building, and we hope that you'll be equally excited.
+
+Arial Gardner (56:52.869)
+Thanks for the questions, everyone.
+
+Sunny (56:55.052)
+Yeah, and I dropped all the links in the chat. There's no more questions. And I guess we'll maybe wrap up and this will be recorded and the slides will all be shared via email by Friday.
+
+Tom Babb (56:55.336)
+So
+
+Sunny (57:07.726)
+Great, thank you everyone.
+
+Josh (57:08.426)
+Thanks everyone.
+

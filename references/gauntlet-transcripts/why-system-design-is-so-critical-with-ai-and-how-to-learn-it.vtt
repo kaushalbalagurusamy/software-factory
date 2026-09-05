@@ -1,0 +1,1994 @@
+WEBVTT
+
+1
+00:00:02.310 --> 00:00:03.499
+Byron Mackay: There we go.
+
+2
+00:00:05.340 --> 00:00:07.140
+Byron Mackay: Alrighty.
+
+3
+00:00:09.450 --> 00:00:10.939
+Byron Mackay: Oh, hello, everyone!
+
+4
+00:00:14.340 --> 00:00:16.540
+Byron Mackay: Just kidding. Let's see here.
+
+5
+00:00:19.870 --> 00:00:22.260
+Byron Mackay: That's not what I wanted there. Okay.
+
+6
+00:00:22.400 --> 00:00:23.729
+Byron Mackay: Hey, everybody!
+
+7
+00:00:24.080 --> 00:00:31.850
+Byron Mackay: Welcome, welcome, welcome. I'm gonna actually stop sharing my screen just for a moment while I get a few things configured here, and then we will go from there.
+
+8
+00:00:32.229 --> 00:00:38.130
+Byron Mackay: Let's see here… hope everyone's having a good, good evening.
+
+9
+00:00:43.990 --> 00:00:45.260
+Byron Mackay: Alright…
+
+10
+00:00:50.970 --> 00:00:57.890
+Byron Mackay: Okay, here we go. We're gonna go… Here we go. Alright.
+
+11
+00:00:58.310 --> 00:01:17.039
+Byron Mackay: Okay, everybody, I have got chat opened up here. If you have any questions, feel free to pop them in there. And, we're gonna go get started. So, my name is Byron. I'm a Director of Learning here at Gauntlet, and I'm gonna talk to you tonight about a topic that I've seen a lot
+
+12
+00:01:17.310 --> 00:01:32.239
+Byron Mackay: as of late here, here at Gauntlet, we do a couple of things. We teach people how to use AI, and we teach them how to build AI products. That's a big one, right? I think that's what we're generally known for.
+
+13
+00:01:32.380 --> 00:01:42.419
+Byron Mackay: And then the other thing is we help people through interview processes so that they can get great positions, high-paying salaries, with this new skill set that they have.
+
+14
+00:01:43.570 --> 00:01:47.390
+Byron Mackay: Having gone through this experience a number of times with a lot of people.
+
+15
+00:01:47.570 --> 00:02:01.870
+Byron Mackay: I have seen the impact of knowing good system design, and how much more it has become a thing as companies start to embrace AI. Now, I want to hit this
+
+16
+00:02:02.010 --> 00:02:15.549
+Byron Mackay: topic tonight with all of you, and share some of my experiences that I've had. These are experiences I've had with other challengers that we've had come through Gauntlet who have gone through this process.
+
+17
+00:02:15.740 --> 00:02:22.689
+Byron Mackay: Who have gone through the interview process, and just the stories, some of the stories that they've shared with me, and what we can learn and take away from that.
+
+18
+00:02:23.170 --> 00:02:31.370
+Byron Mackay: So, before I do anything, I want to just share a really quick story that happened to me when I was talking to a friend.
+
+19
+00:02:31.370 --> 00:02:47.519
+Byron Mackay: And this friend needed to buy a product for his company. He needed… well, he needed something for his company to make it work. It was a SaaS platform, and I said, oh, there's a lot of great SaaS platforms out there, you should really go look into one. And I was giving some suggestions, and while I was talking, he goes.
+
+20
+00:02:47.520 --> 00:02:54.239
+Byron Mackay: well, wait, I just built it, though. And he, like, showed me, he's like, yeah, while we were talking, I just vibe-coded this one up. Can I just use this?
+
+21
+00:02:54.880 --> 00:03:09.660
+Byron Mackay: And I kind of look, and I smile, and I go, you could. But there's a lot of decisions, that go into making good software, that really make
+
+22
+00:03:09.740 --> 00:03:14.920
+Byron Mackay: What he just did, unstable and, quite frankly, not trustworthy.
+
+23
+00:03:15.070 --> 00:03:20.480
+Byron Mackay: Not that he's not a trustworthy person, he is, but his application is not.
+
+24
+00:03:20.750 --> 00:03:26.709
+Byron Mackay: And that's where we have some issues that I think a lot of people don't really see.
+
+25
+00:03:27.010 --> 00:03:30.690
+Byron Mackay: They vibecode these things, they get to build these amazing apps.
+
+26
+00:03:31.130 --> 00:03:44.230
+Byron Mackay: But there's a lot of thought that they just left out. They're not even aware that they needed to think about some things before they pulled that trigger. Now, it's fine on small little projects, but if this is something you're going to rely on for your business.
+
+27
+00:03:44.490 --> 00:03:47.390
+Byron Mackay: That's where good software engineers come in.
+
+28
+00:03:47.680 --> 00:03:52.450
+Byron Mackay: So… I want to talk a little bit about what was actually built.
+
+29
+00:03:52.680 --> 00:03:53.840
+Byron Mackay: So…
+
+30
+00:03:54.230 --> 00:03:59.820
+Byron Mackay: he built this UI that looked really good, that seemed to have some functionality. That's what he built, right?
+
+31
+00:03:59.910 --> 00:04:17.929
+Byron Mackay: What did he not know? He didn't know the schema. What kind of database schema was put into this system? Is it expandable? Did he think about how one document might affect another one, or how one table might need to pull some stuff out so that he could make it more flexible in the future?
+
+32
+00:04:18.149 --> 00:04:32.900
+Byron Mackay: He had made none of those decisions. And for anyone who has, anybody who has built a database schema knows there's a lot of thought and intention put behind every single data field and type
+
+33
+00:04:32.900 --> 00:04:40.530
+Byron Mackay: That goes into that. And… but that was, you know, obviously he just decided that he didn't need to do that, or he just even realized that that was something he needed to do.
+
+34
+00:04:40.660 --> 00:04:47.359
+Byron Mackay: Second, security. Was there auth? What kind of auth was it? Do we have roles?
+
+35
+00:04:47.490 --> 00:05:00.850
+Byron Mackay: Could an LLM go through and build those things out? I'm sure it probably could, but to what extent… to what extent, and to… and, how much debt would there be that they might have to go back and fix later? And what kind of holes would exist?
+
+36
+00:05:01.120 --> 00:05:13.410
+Byron Mackay: And then finally, scale. That's one that really stands out, because LLMs don't have this foresight of saying, I'm gonna build this for the future. They're just building for whatever you prompted it with. That's all the context it's going off of.
+
+37
+00:05:14.200 --> 00:05:18.619
+Byron Mackay: So, I'm sure now, I'm sure we've all seen this, we've all probably done it ourselves, right?
+
+38
+00:05:18.740 --> 00:05:34.769
+Byron Mackay: Here we've got an app, we want to build it, so let's put something together real quick, and and make it work. Look, I do it, I still do it, from time to time when I just need something really quick. But this is something his business was relying on, and I told him, I don't trust this one bit.
+
+39
+00:05:35.330 --> 00:05:48.060
+Byron Mackay: So, let's talk about some metrics. Let's talk about some of the things that we're seeing in the world today of how people are responding to what AI is doing.
+
+40
+00:05:48.480 --> 00:05:58.989
+Byron Mackay: First off, what is AI doing? Well, here's some statistics for you. Some of them might shock you. They are real, they are prevalent.
+
+41
+00:05:59.260 --> 00:06:13.030
+Byron Mackay: Let's start with the top one. AI-authored PRs produce 1.7x more issues than human-authored. Now, that might sound like it's not very much more, but compounded it does, but let's look at what these issues are.
+
+42
+00:06:13.400 --> 00:06:24.709
+Byron Mackay: So, let's see, so we've got more logic errors, okay? We have 2.74 times more security vulnerabilities. We're gonna talk about security vulnerabilities a little bit more later.
+
+43
+00:06:25.170 --> 00:06:32.550
+Byron Mackay: But that's a big one. That's a big, big issue that we're seeing, and the market is actually responding quite a bit to that.
+
+44
+00:06:32.780 --> 00:06:36.650
+Byron Mackay: We see 8 times more I.O. performance issues.
+
+45
+00:06:36.910 --> 00:06:39.609
+Byron Mackay: That's a big one, right? We are seeing
+
+46
+00:06:39.800 --> 00:06:45.329
+Byron Mackay: A lot of issues there that, were just performance is just degrading.
+
+47
+00:06:45.720 --> 00:06:46.620
+Byron Mackay: Okay?
+
+48
+00:06:47.700 --> 00:06:55.740
+Byron Mackay: And of course, readability, that's gonna be a big problem as well. How can we… how can we maintain something we can't even go in and dig through and read?
+
+49
+00:06:57.380 --> 00:06:59.219
+Byron Mackay: Alright, here's a scary one.
+
+50
+00:06:59.470 --> 00:07:11.419
+Byron Mackay: This has to do with security issues. So, it used to be that when there was a security issue, it took nearly 2 years for that to be exploited.
+
+51
+00:07:11.920 --> 00:07:18.200
+Byron Mackay: Right? Two years. More than two years. Almost two and two years, two and a third? Anyway…
+
+52
+00:07:18.890 --> 00:07:23.339
+Byron Mackay: No, that would be just a little over 2 years. Don't do math live. Alright.
+
+53
+00:07:24.090 --> 00:07:25.520
+Byron Mackay: What is it now?
+
+54
+00:07:25.810 --> 00:07:31.879
+Byron Mackay: Less than 2 months Less than 2 months, and these exploits are being found.
+
+55
+00:07:32.590 --> 00:07:41.280
+Byron Mackay: So, combine that… With the fact that there are nearly 3 times more security vulnerabilities, We've got a problem.
+
+56
+00:07:42.030 --> 00:07:43.690
+Byron Mackay: We have a problem.
+
+57
+00:07:44.190 --> 00:07:45.710
+Byron Mackay: And it's up to us to solve it.
+
+58
+00:07:46.580 --> 00:07:48.040
+Byron Mackay: So how do we solve it?
+
+59
+00:07:48.920 --> 00:07:53.359
+Byron Mackay: Well, let's see how the… let's see what the companies are doing as it relates to jobs.
+
+60
+00:07:54.230 --> 00:07:57.539
+Byron Mackay: They're hiring more security people. That's their solution.
+
+61
+00:07:59.910 --> 00:08:19.289
+Byron Mackay: So, we are, so that's what they're doing. They're hiring more security. All right, great, great. We have more security issues, more security roles, let's do it. You know, doubling, right, year over year. AIML roles, those are increasing, right? Of course we know that's increasing, because there's so many more opportunities for that nowadays.
+
+62
+00:08:19.500 --> 00:08:26.050
+Byron Mackay: Cybersecurity engineers, you know, that's growing. Open cybersecurity roles, nearly half a million.
+
+63
+00:08:26.410 --> 00:08:27.210
+Byron Mackay: Now.
+
+64
+00:08:27.830 --> 00:08:38.339
+Byron Mackay: I'm not saying we all have to become security experts. That's not what I'm saying at all. What I am saying is that the security issues are being felt.
+
+65
+00:08:38.799 --> 00:08:51.799
+Byron Mackay: They're being felt in a very big way, and companies are making adjustments for it. I don't think everybody, every engineer needs to drop what they're doing and go become a security expert. In fact, I'm going to advocate you don't, unless you really like security.
+
+66
+00:08:52.350 --> 00:09:07.150
+Byron Mackay: But I will also point out the bottom here, entry-level general software engineering roles, going down. Now, is that a surprise? No, I don't think it is to anybody. We can do more with less these days, that is true. That is an absolute, truth there, fact.
+
+67
+00:09:07.630 --> 00:09:11.370
+Byron Mackay: But, there are problems, and we haven't solved for them yet.
+
+68
+00:09:11.490 --> 00:09:14.399
+Byron Mackay: So this is what the world is doing, this is what the market's trying to do.
+
+69
+00:09:15.070 --> 00:09:19.230
+Byron Mackay: But I will show you what I think we should do instead.
+
+70
+00:09:20.120 --> 00:09:21.870
+Byron Mackay: But first, what does this tell us?
+
+71
+00:09:22.200 --> 00:09:28.879
+Byron Mackay: Alright, this will lead us into what we should do, right? First, judgment is scarce, alright?
+
+72
+00:09:29.730 --> 00:09:37.540
+Byron Mackay: the… it used to be that the problem was, is that we couldn't write code fast enough, right? Obviously, that's not the problem anymore.
+
+73
+00:09:37.820 --> 00:09:53.509
+Byron Mackay: Now we're just writing so much code that we don't even know what it's doing, right? So second, catch it, don't complete… don't compete with it. Companies need engineers who can catch the problems before they get released, okay?
+
+74
+00:09:53.820 --> 00:09:55.240
+Byron Mackay: And then finally.
+
+75
+00:09:56.510 --> 00:10:03.570
+Byron Mackay: Asking the right questions before anything is built is the best way to start to solve this problem.
+
+76
+00:10:04.170 --> 00:10:06.230
+Byron Mackay: I will say this on that last note.
+
+77
+00:10:07.310 --> 00:10:08.670
+Byron Mackay: Communication.
+
+78
+00:10:08.910 --> 00:10:25.860
+Byron Mackay: has always been an essential quality of a good leader, of a good coworker, a good peer. We all know that communication throughout history of human history, right, communication has been a very key, thing for us to progress.
+
+79
+00:10:26.540 --> 00:10:30.219
+Byron Mackay: It is far more important for software engineers to be good communicators now.
+
+80
+00:10:31.560 --> 00:10:33.560
+Byron Mackay: We need to ask better questions.
+
+81
+00:10:33.720 --> 00:10:35.370
+Byron Mackay: We need to listen better.
+
+82
+00:10:35.500 --> 00:10:39.280
+Byron Mackay: We need to articulate better what we want to do, and how we want to do it.
+
+83
+00:10:40.320 --> 00:10:42.990
+Byron Mackay: I've seen a lot of people go through this program.
+
+84
+00:10:43.160 --> 00:10:46.760
+Byron Mackay: And by far, the better communicators go a lot further.
+
+85
+00:10:47.460 --> 00:10:54.069
+Byron Mackay: So, if that's something, where you feel like you need to get more up to, you know, better skills with.
+
+86
+00:10:54.210 --> 00:11:00.759
+Byron Mackay: Go do meetups, go get presentations, try asking more questions next time you're at work.
+
+87
+00:11:00.810 --> 00:11:12.989
+Byron Mackay: To go talk to people about the problems that they're trying to solve, and see if you can understand what's going on, articulate solutions to them. This is a very important skill that we need as software engineers, more now today than ever.
+
+88
+00:11:13.010 --> 00:11:21.010
+Byron Mackay: I think in the past, we could just talk amongst engineers, and we could talk our engineering speak, and it was great, right? I long for those days.
+
+89
+00:11:21.180 --> 00:11:22.890
+Byron Mackay: But that's not where we're at right now.
+
+90
+00:11:23.150 --> 00:11:33.329
+Byron Mackay: Now we have to communicate at a higher level and be more meaningful with the decisions that we make. And I'll talk about what I mean by being more meaningful here in just a moment.
+
+91
+00:11:34.050 --> 00:11:44.939
+Byron Mackay: Because now we're going to talk about what system design is. System design, in my opinion, is the new base skill that engineers need to be successful.
+
+92
+00:11:46.160 --> 00:11:57.970
+Byron Mackay: It is not enough to just know a little bit about something, and make that your one, you know, specialty. All those specialties can still be important. What you really need, though, is the breadth.
+
+93
+00:11:58.220 --> 00:12:01.900
+Byron Mackay: Breath is just as important as depth today.
+
+94
+00:12:03.160 --> 00:12:07.639
+Byron Mackay: We need to understand the decisions we're making, We understand what we're telling.
+
+95
+00:12:08.630 --> 00:12:10.949
+Byron Mackay: the computer to do, or the AI to do.
+
+96
+00:12:11.230 --> 00:12:14.350
+Byron Mackay: So that it can build the right thing for us.
+
+97
+00:12:16.550 --> 00:12:17.530
+Byron Mackay: Alright.
+
+98
+00:12:19.030 --> 00:12:27.849
+Byron Mackay: So, this… what system design is, is a set of decisions that determine how a system behaves, scales, fails, and changes over time. Now.
+
+99
+00:12:28.210 --> 00:12:30.210
+Byron Mackay: Take that all in for a second.
+
+100
+00:12:30.440 --> 00:12:43.790
+Byron Mackay: behaves. Okay? I think we've all done that, right? We've all written applications, we talk about how it behaves. Scales. Sometimes, some of us maybe have had the opportunity to really scale an application. Doesn't mean we shouldn't know how to do it, though.
+
+101
+00:12:44.240 --> 00:12:45.730
+Byron Mackay: How it fails.
+
+102
+00:12:45.920 --> 00:12:52.160
+Byron Mackay: I don't like to think about failure very often, but we need to think about failure, because it will happen.
+
+103
+00:12:52.440 --> 00:13:03.179
+Byron Mackay: And then how can it change over time, okay? These are 4 areas, and they aren't the only areas, but these are some major ones that we need to be very aware of and know
+
+104
+00:13:03.520 --> 00:13:07.200
+Byron Mackay: How to build an application with these things in mind.
+
+105
+00:13:07.710 --> 00:13:08.580
+Byron Mackay: Right?
+
+106
+00:13:12.980 --> 00:13:27.690
+Byron Mackay: So, let me go ahead and move on to the next one here, because I want to get to a certain point here, but what is system design not? I want to make sure that we are clear on what it's not. It is not just knowing one language very well. That's what it used to be. We used to be able to get away with that, right?
+
+107
+00:13:27.690 --> 00:13:36.690
+Byron Mackay: And I think that's still very valuable. In fact, I would encourage you to still go learn a language really, really well. For example.
+
+108
+00:13:36.930 --> 00:13:41.249
+Byron Mackay: I used to do an interview with, a TypeScript interview.
+
+109
+00:13:41.690 --> 00:13:47.750
+Byron Mackay: Where we were trying to gauge how somebody would control state within an object.
+
+110
+00:13:48.110 --> 00:13:56.199
+Byron Mackay: And what I… what I came up… my solution to it, was to use what's called a discriminated union.
+
+111
+00:13:56.850 --> 00:13:59.759
+Byron Mackay: What a descript… if you're not familiar with that concept.
+
+112
+00:13:59.940 --> 00:14:07.510
+Byron Mackay: It's all… it's very similar to inheritance in that a single object could be represented as multiple objects.
+
+113
+00:14:08.290 --> 00:14:13.460
+Byron Mackay: It's a TypeScript specialty, I would say, but it's one that's very powerful.
+
+114
+00:14:13.680 --> 00:14:17.139
+Byron Mackay: And I tell ya, nobody I ever interviewed came up with it.
+
+115
+00:14:17.350 --> 00:14:36.929
+Byron Mackay: And that was kind of surprising to me. I thought… I felt like… now, of course, I wrote the question, so it's probably me, like, manifesting myself in the question, so I'll take that if that was the case. I felt like it was pretty evident, though, and I ended up teaching a lot of people, about discriminated unions when I was interviewing them.
+
+116
+00:14:37.130 --> 00:14:46.569
+Byron Mackay: Now, I'm not saying that's, like, an end-all, be-all. We hired… I hired people, even if they didn't understand it, because they were good learners, and they understood the concepts really well.
+
+117
+00:14:47.050 --> 00:14:51.159
+Byron Mackay: But it's worth understanding what tools are available.
+
+118
+00:14:51.750 --> 00:15:02.490
+Byron Mackay: if I were to prompt an AI to build something, and I wanted to use a discriminated union to help better facilitate messages or objects or types.
+
+119
+00:15:02.850 --> 00:15:09.840
+Byron Mackay: I would want to be very explicit about that. I wouldn't necessarily trust the LLM to build that on its own.
+
+120
+00:15:10.020 --> 00:15:23.310
+Byron Mackay: Likewise with every other language or framework that you use, it's important to understand its capabilities so that you can dictate those specific capabilities to the LLM and know what's going on.
+
+121
+00:15:23.480 --> 00:15:31.589
+Byron Mackay: Again, this is not going to probably… it used to be, if you knew one language really well, you could get a job anywhere. I don't feel like that's the case anymore, I'm just not seeing it.
+
+122
+00:15:32.110 --> 00:15:37.120
+Byron Mackay: And so, but it is still extremely valuable to understand.
+
+123
+00:15:38.470 --> 00:15:40.549
+Byron Mackay: What else is not system design?
+
+124
+00:15:41.810 --> 00:15:53.259
+Byron Mackay: Being able to implement a feature quickly. Alright, we all know this, right? Anybody can do it, right? Anybody can go and type whatever, and it's done. It's amazing. It's still magical to me.
+
+125
+00:15:53.450 --> 00:15:54.440
+Byron Mackay: Okay.
+
+126
+00:15:54.660 --> 00:15:56.340
+Byron Mackay: But it's not gonna get you a job.
+
+127
+00:15:56.640 --> 00:15:57.450
+Byron Mackay: Alright.
+
+128
+00:15:58.460 --> 00:16:02.350
+Byron Mackay: Breath of understanding matters as much as depth.
+
+129
+00:16:02.860 --> 00:16:04.440
+Byron Mackay: And I really believe that.
+
+130
+00:16:04.930 --> 00:16:14.719
+Byron Mackay: I really, really believe that. We have to understand all the… all the different facets of what we're dealing with so that we can make really smart decisions.
+
+131
+00:16:14.970 --> 00:16:16.569
+Byron Mackay: With what we're building.
+
+132
+00:16:17.350 --> 00:16:24.879
+Byron Mackay: The… letting the LLM decide how to architect is not a good answer. In fact.
+
+133
+00:16:24.980 --> 00:16:26.710
+Byron Mackay: It's probably the worst answer.
+
+134
+00:16:26.850 --> 00:16:27.920
+Byron Mackay: Quite frankly.
+
+135
+00:16:28.340 --> 00:16:31.569
+Byron Mackay: Companies don't want that. They could do that on their own if they really wanted to.
+
+136
+00:16:32.090 --> 00:16:35.569
+Byron Mackay: But to be very intentional, that goes a long way.
+
+137
+00:16:37.510 --> 00:16:46.060
+Byron Mackay: Alright, I'm gonna pause here for a second, because I know the chat's been going down. I just want to make sure I'm not missing any questions. I don't think I have so far. Well, there might have been one here.
+
+138
+00:16:50.330 --> 00:16:53.569
+Byron Mackay: I wanna, I wanna highlight,
+
+139
+00:16:53.720 --> 00:16:55.760
+Byron Mackay: I want to highlight something that Josh said.
+
+140
+00:16:56.110 --> 00:16:57.890
+Byron Mackay: You don't know what you don't know.
+
+141
+00:16:58.650 --> 00:17:13.750
+Byron Mackay: That is a huge issue. I'm gonna tangent here for just a second, because there's something that I love. I can't remember the exact name of it, but there's… there's four quadrants of knowledge, that's how I like to put it. There's the…
+
+142
+00:17:14.500 --> 00:17:16.340
+Byron Mackay: You don't know what you don't know.
+
+143
+00:17:17.050 --> 00:17:19.330
+Byron Mackay: There's the, you know what you don't know.
+
+144
+00:17:20.280 --> 00:17:23.560
+Byron Mackay: There's the, I know what I know.
+
+145
+00:17:24.140 --> 00:17:26.360
+Byron Mackay: And then the really fun one is…
+
+146
+00:17:26.470 --> 00:17:28.089
+Byron Mackay: I don't know what I know.
+
+147
+00:17:29.140 --> 00:17:30.150
+Byron Mackay: Now…
+
+148
+00:17:30.930 --> 00:17:42.179
+Byron Mackay: There's another way of putting it, and I won't get into… there's, unconsciously incompetent, and consciously competent, and all these things. I won't worry about that, that's just… that's… but big words, won't worry about that.
+
+149
+00:17:43.670 --> 00:17:50.180
+Byron Mackay: But Josh is absolutely right, we don't know what we don't know. And that is where learning starts, and it's the scariest step.
+
+150
+00:17:50.800 --> 00:18:00.639
+Byron Mackay: Because we don't want to get… we don't want to admit that we don't know something. It's true for… I think, generally speaking, most humans will feel this way. I definitely feel this way.
+
+151
+00:18:00.900 --> 00:18:06.589
+Byron Mackay: It takes a step. It takes a step of faith to go out there and discover what you don't know.
+
+152
+00:18:06.740 --> 00:18:11.530
+Byron Mackay: And then… start to try and learn it. The great thing is today, so we have LLMs.
+
+153
+00:18:11.740 --> 00:18:22.560
+Byron Mackay: And LLMs are really great tools for figuring out things that you don't know. And they're really helpful to learn those things really fast. So that bar to learn is actually significantly lower than it ever has been.
+
+154
+00:18:22.720 --> 00:18:32.540
+Byron Mackay: So, it's an opportunity for us. I'm actually going to come back to that thought here in just a second. Dan, Rumsfeld Matrix, the Rumsfeld matrix. There we go.
+
+155
+00:18:33.900 --> 00:18:34.880
+Byron Mackay: Love that.
+
+156
+00:18:35.100 --> 00:18:36.080
+Byron Mackay: That's it.
+
+157
+00:18:37.470 --> 00:18:38.590
+Byron Mackay: Yeah, alright.
+
+158
+00:18:41.280 --> 00:18:42.820
+Byron Mackay: Let's talk about…
+
+159
+00:18:42.940 --> 00:18:51.200
+Byron Mackay: some of the most important decisions we can make when it comes to system design. These are one-way doors. Now, if you're not familiar with that concept.
+
+160
+00:18:51.360 --> 00:19:02.929
+Byron Mackay: In business, and in engineering, and in most of life, there are one-way doors, and there are two-way doors. One-way doors are the ones you walk through once, and it's really hard to come back out.
+
+161
+00:19:04.230 --> 00:19:08.200
+Byron Mackay: These are decisions that you make, and when you make them, you better be certain.
+
+162
+00:19:08.360 --> 00:19:11.479
+Byron Mackay: Because if you make them wrong, it's gonna be a lot of pain down the road.
+
+163
+00:19:11.720 --> 00:19:24.639
+Byron Mackay: Two-way doors, on the other hand, are very easy to switch, right? So, if you have a two-way door, you make it as… if you're spending a lot of time deciding on a two-way door, don't. It's a two-way door. If you need to backtrack, you can.
+
+164
+00:19:24.870 --> 00:19:32.549
+Byron Mackay: Knowing which one's which… knowing which one you're dealing with is a really important piece there. But we're going to talk about some one-way doors here.
+
+165
+00:19:32.660 --> 00:19:35.319
+Byron Mackay: Where backtracking is really expensive.
+
+166
+00:19:36.730 --> 00:19:37.670
+Byron Mackay: Alright.
+
+167
+00:19:38.250 --> 00:19:49.030
+Byron Mackay: Database schemas. My favorite. I actually really like database schemas. I love designing tables, and where data goes, and the relationships,
+
+168
+00:19:49.300 --> 00:20:00.499
+Byron Mackay: I really enjoy… I think it's a really fun exercise, and it really causes me to be very intentional about how things fit and how I perceive things in our application.
+
+169
+00:20:00.800 --> 00:20:02.680
+Byron Mackay: I think it's really, really fun.
+
+170
+00:20:03.060 --> 00:20:04.670
+Byron Mackay: But it is a one-way door.
+
+171
+00:20:05.440 --> 00:20:10.029
+Byron Mackay: Which is… A good thing to stop and take a lot of time to figure this out.
+
+172
+00:20:10.610 --> 00:20:21.269
+Byron Mackay: Because you have to think… you want to think about every table and every object that you hold, and all the data you hold, in a certain way. Do I want this to be, you know, for example.
+
+173
+00:20:21.590 --> 00:20:26.660
+Byron Mackay: I never… I wanna make sure I…
+
+174
+00:20:26.990 --> 00:20:35.759
+Byron Mackay: when I use the word never, I want to make sure it's true. I don't think I ever have. I've never combined the company data with the user data.
+
+175
+00:20:36.180 --> 00:20:53.589
+Byron Mackay: Right, my applications. If I have a company that uses my app, I have a company table, I have a user table. I do not mix those two into one table. If I need to, I'll link them, right? The user should have an ID to the company, but I don't want to link them. Now, I think most LLMs will make that distinction and just make the decision for us.
+
+176
+00:20:53.590 --> 00:21:01.580
+Byron Mackay: But that's not true about many other things. And the reason is because we can't possibly give the LLM all of our information.
+
+177
+00:21:01.700 --> 00:21:03.410
+Byron Mackay: Right, all of our context.
+
+178
+00:21:03.950 --> 00:21:20.689
+Byron Mackay: And so there are trade-offs to be made. There's ways that we're thinking about, how this data works, and LLMs are going to fail eventually if we let them make all the decisions. So, I would personally say anytime I deal with data-based tables and what… and constructing them.
+
+179
+00:21:20.720 --> 00:21:25.910
+Byron Mackay: I'm making that call, I'm making it very, very explicitly. I'm using LM to help me design it.
+
+180
+00:21:26.200 --> 00:21:28.639
+Byron Mackay: But I'm the one signing off of it every time.
+
+181
+00:21:28.880 --> 00:21:37.279
+Byron Mackay: Because you do not want to migrate that table differently if you have to go back later. That is a painful, painful experience. I'm sure many of you are familiar.
+
+182
+00:21:38.670 --> 00:21:43.339
+Byron Mackay: Of course, architecture compounds. Point number 2 here. Wrong choices today.
+
+183
+00:21:43.720 --> 00:21:45.780
+Byron Mackay: Become bigger problems 18 months from now.
+
+184
+00:21:46.280 --> 00:21:50.779
+Byron Mackay: You want to make sure that you are very intentional about that as well.
+
+185
+00:21:50.980 --> 00:21:56.030
+Byron Mackay: One interesting thing here that I want to point out is that as we make these intentional decisions.
+
+186
+00:21:57.190 --> 00:22:09.809
+Byron Mackay: The LLM of the future does not know our intent. It sees the code, and it has to interpret what that intent is from the code, but it does not always make the right assumption, right?
+
+187
+00:22:10.030 --> 00:22:13.479
+Byron Mackay: We know the assumptions. We need to understand what those are.
+
+188
+00:22:13.620 --> 00:22:16.550
+Byron Mackay: In fact, it's always kind of baffled me a bit.
+
+189
+00:22:16.740 --> 00:22:22.400
+Byron Mackay: When, like, how companies with lots and lots of engineers working on one application
+
+190
+00:22:22.540 --> 00:22:24.399
+Byron Mackay: And by lots and lots.
+
+191
+00:22:25.110 --> 00:22:27.380
+Byron Mackay: Like, what do I mean? Like, 10, 20?
+
+192
+00:22:27.580 --> 00:22:29.970
+Byron Mackay: 20 feels like a lot to work on one application.
+
+193
+00:22:30.110 --> 00:22:44.579
+Byron Mackay: And yeah, I know companies that have 20 people working on one application, and not just, like, one back… a couple backends, a couple… no, like, maybe the mobile app has 20 engineers working on it. How in the world are they supposed to pass that tacit knowledge back and forth and intention? They can't.
+
+194
+00:22:45.280 --> 00:22:59.770
+Byron Mackay: And so there's ways of organizing that and making that work, but if you think you can't do it with a human, try doing it with an LLM. It's a whole different ballgame, because they make it look really good. And we're in trouble at that point, because then they'll make decisions that we really don't want.
+
+195
+00:23:01.490 --> 00:23:19.809
+Byron Mackay: Alright, next one. Auth. Auth is expensive, derivative fit. You also can… it also can be expensive if it goes wrong, right? So you want to make sure that these really important points, these single points of failures, or these ways that people can break into your system, we want to make sure that we understand what's going on here.
+
+196
+00:23:20.260 --> 00:23:27.610
+Byron Mackay: Right? It's not enough just to understand the code, but it's also important to understand these other components that go into it, like auth.
+
+197
+00:23:27.800 --> 00:23:31.400
+Byron Mackay: We must understand auth better, if you don't already.
+
+198
+00:23:31.530 --> 00:23:46.750
+Byron Mackay: It's very expensive to go back and try to fix, or maybe you want to switch it out for something else. You've got tokens you gotta manage, you've got re-encrypting that you have to do. It can be a very painful process. So you want to make sure you get that right, and you want to do it with intention.
+
+199
+00:23:47.750 --> 00:23:51.049
+Byron Mackay: Alright, this last one is… depends. APIs.
+
+200
+00:23:51.570 --> 00:24:04.869
+Byron Mackay: If you have a public API, that can be expensive. That's kind of a one-way door, right? You don't want to make a… you don't want to make some massive change and then break everybody else's apps, and then they're all mad at you, right? And of course, there's strategies around how to manage that.
+
+201
+00:24:05.110 --> 00:24:20.439
+Byron Mackay: If the API is internal, alright, it's a little more of a two-way door there, right? Because I control what the website receives and how it manages it, so I just have to make this, you know, maybe a rollout plan, right, where
+
+202
+00:24:21.520 --> 00:24:26.240
+Byron Mackay: you know, where I can add some fields here, make it backwards compatible there, and then we're okay, we're good.
+
+203
+00:24:26.420 --> 00:24:31.279
+Byron Mackay: Hard to do that when it's public. So, again, kind of depends a little bit there.
+
+204
+00:24:32.290 --> 00:24:33.230
+Byron Mackay: Alright.
+
+205
+00:24:33.520 --> 00:24:40.660
+Byron Mackay: Now, these are just a couple examples. I'm not going to go through all the different things that we could go over, but I just wanted to highlight some of the big ones.
+
+206
+00:24:41.140 --> 00:24:51.979
+Byron Mackay: And just explain that, once again, this all comes back to system design. And just understanding not just what one piece is doing, but what the whole is doing. And being able to work
+
+207
+00:24:52.150 --> 00:25:07.690
+Byron Mackay: Through those… make those decisions in that… in that space, so that you can build a application that can then scale and fail, one that you can change, one that you can, continue to build with.
+
+208
+00:25:09.060 --> 00:25:09.760
+Byron Mackay: Alright.
+
+209
+00:25:10.080 --> 00:25:11.769
+Byron Mackay: I'm gonna pause here for a second.
+
+210
+00:25:11.970 --> 00:25:14.080
+Byron Mackay: Just go through, let's see…
+
+211
+00:25:16.350 --> 00:25:24.240
+Byron Mackay: Let's see… there is no repo today, but I do have something that I'm going to share with you after.
+
+212
+00:25:24.630 --> 00:25:25.830
+Byron Mackay: But no repo.
+
+213
+00:25:31.920 --> 00:25:51.130
+Byron Mackay: Alright, Josh has an interesting, story, it looks like here. I recently ran into an issue with a one-way door. It built a rag pipeline that uses Voyage AI for embeddings. My database table stores vectors of 1024. I was going to switch to a more performant AI model, but it only outputted in 1536. That's too bad.
+
+214
+00:25:51.580 --> 00:25:54.120
+Byron Mackay: Yeah, there you go. So,
+
+215
+00:25:54.310 --> 00:25:58.109
+Byron Mackay: Yeah, what do you… what do you do, right?
+
+216
+00:25:58.290 --> 00:26:14.140
+Byron Mackay: I know exactly… I'm laughing because I know the problem personally as well. But now you know, right? It's a tough lesson, but yeah, that's those kinds of things where it's like, you want to understand that beforehand so you know what you're getting into.
+
+217
+00:26:14.350 --> 00:26:22.040
+Byron Mackay: And we just… we haven't… we haven't always hit, that extremely well. I will say this,
+
+218
+00:26:22.890 --> 00:26:25.000
+Byron Mackay: When it comes to system design.
+
+219
+00:26:26.610 --> 00:26:38.729
+Byron Mackay: It used to be that this was the kind of thing that got you promoted. It got you pushed up that ladder, you became a leader when you understood how systems worked, and how your company's systems worked.
+
+220
+00:26:38.970 --> 00:26:47.910
+Byron Mackay: That was a big deal, and now it feels more and more, from what I can tell, that this is becoming more of an expectation of all, not just a few.
+
+221
+00:26:48.650 --> 00:26:54.509
+Byron Mackay: Or at least it's expected that everybody will learn to some breadth of what's going on, more than just a few.
+
+222
+00:26:56.060 --> 00:26:58.580
+Byron Mackay: So… There you go.
+
+223
+00:27:00.060 --> 00:27:01.479
+Byron Mackay: Let's go on to the next one.
+
+224
+00:27:03.440 --> 00:27:09.640
+Byron Mackay: Alright, the trade-off layer. I alluded to this earlier, but I want to emphasize this again.
+
+225
+00:27:10.060 --> 00:27:12.469
+Byron Mackay: AI sees only the code.
+
+226
+00:27:12.710 --> 00:27:15.449
+Byron Mackay: Not why your team made the decision to do it.
+
+227
+00:27:16.350 --> 00:27:18.850
+Byron Mackay: I think this is really important, too.
+
+228
+00:27:19.150 --> 00:27:22.829
+Byron Mackay: To underst… to… to accept, right?
+
+229
+00:27:23.490 --> 00:27:30.940
+Byron Mackay: AI only sees your code, so when it's looking at the code, and when I say your code, it's probably not code you wrote, right? It's what other LLMs wrote.
+
+230
+00:27:31.530 --> 00:27:35.249
+Byron Mackay: But when it sees the code, it has to… Infers so much.
+
+231
+00:27:35.420 --> 00:27:38.519
+Byron Mackay: From that information, and only that information.
+
+232
+00:27:38.700 --> 00:27:52.430
+Byron Mackay: Now, you can write CloudMD files or agent.md files to kind of help it know more about intention. I think I would encourage anybody to do that. But at the end of the day, there's still trade-offs that you made, that you consciously made.
+
+233
+00:27:52.660 --> 00:27:56.500
+Byron Mackay: Hopefully, that you are consciously… that you consciously made.
+
+234
+00:27:56.840 --> 00:27:59.820
+Byron Mackay: that the AI will have a hard time inferring.
+
+235
+00:28:00.390 --> 00:28:05.860
+Byron Mackay: So… Really important that you take the time
+
+236
+00:28:06.380 --> 00:28:11.329
+Byron Mackay: To understand those trade-offs and somehow document those. Or…
+
+237
+00:28:11.850 --> 00:28:17.979
+Byron Mackay: With a smaller… if you have a team where you can all discuss these trade-offs and understand the implications.
+
+238
+00:28:18.470 --> 00:28:22.409
+Byron Mackay: Then you can, relay those into the prompt.
+
+239
+00:28:22.790 --> 00:28:26.450
+Byron Mackay: Right? Or you can at least detect it when the PR comes out.
+
+240
+00:28:27.580 --> 00:28:37.470
+Byron Mackay: But this is invisible context, right? This is what's… what context is not necessarily known that sometimes we hope the LLM will figure out on its own.
+
+241
+00:28:42.090 --> 00:28:48.319
+Byron Mackay: So, there is this idea of comprehension debt, which is not… it's technical debt, comprehension debt,
+
+242
+00:28:48.800 --> 00:29:04.749
+Byron Mackay: But this is a problem that we see a lot of with, of course, LLMs producing so much code, and nobody really understanding all the nuance inside of it. I'm not saying that you need to understand all the code line by line. I really don't think that's a requirement these days.
+
+243
+00:29:04.910 --> 00:29:10.279
+Byron Mackay: We can get by doing a lot better if we do understand the interfaces.
+
+244
+00:29:11.340 --> 00:29:21.340
+Byron Mackay: So, if we have a component in our application, we understand the interfaces of how it interacts, that will go a long way. The business logic inside, we should review and make sure, at least at the time that it's working.
+
+245
+00:29:21.680 --> 00:29:27.299
+Byron Mackay: But we don't need to understand all the ins and outs, right? We don't need to understand so much of the deep detail that
+
+246
+00:29:27.670 --> 00:29:32.110
+Byron Mackay: That would take way too long. And quite frankly, we never have.
+
+247
+00:29:32.260 --> 00:29:33.100
+Byron Mackay: So…
+
+248
+00:29:33.620 --> 00:29:41.070
+Byron Mackay: And we've worked just fine without it. But understanding the interfaces and understanding the components it's working with, all very important things.
+
+249
+00:29:42.130 --> 00:29:43.050
+Byron Mackay: Okay.
+
+250
+00:29:43.160 --> 00:29:52.669
+Byron Mackay: So we've gone through a lot of, you know, what makes system design important, what are the pitfalls that we can pull into when we don't have good system design.
+
+251
+00:29:53.320 --> 00:29:56.899
+Byron Mackay: What do we even want to know about system design? Where should we even begin?
+
+252
+00:29:57.510 --> 00:30:07.379
+Byron Mackay: And what are companies doing about it? Like, we've seen them hire a lot of security roles. I talk about all the system design stuff. Let me give you an example, really quick, two stories.
+
+253
+00:30:07.670 --> 00:30:10.739
+Byron Mackay: Of questions that were asked in interviews.
+
+254
+00:30:10.960 --> 00:30:15.930
+Byron Mackay: That related to even just basic understanding of system design.
+
+255
+00:30:16.980 --> 00:30:26.689
+Byron Mackay: And the outcomes that happened there. The first instance was when an interviewer asked the other… asked the interviewee.
+
+256
+00:30:28.140 --> 00:30:31.349
+Byron Mackay: What is the difference between Postgres and Mongo?
+
+257
+00:30:34.150 --> 00:30:37.439
+Byron Mackay: And that's what… that was the whole question. There's nothing else to it.
+
+258
+00:30:37.840 --> 00:30:41.269
+Byron Mackay: Now, some of you might go, oh, I know exactly what that is.
+
+259
+00:30:41.390 --> 00:30:48.399
+Byron Mackay: And some of you might be going, I actually have no idea. And you're fine either way. I'm not here to call anybody out.
+
+260
+00:30:48.690 --> 00:30:53.200
+Byron Mackay: But the fact is, that was the question… those were the kinds of questions that I'm seeing me ask more and more and more.
+
+261
+00:30:53.920 --> 00:30:59.259
+Byron Mackay: There are people who are asking these kind of questions to see, do they understand the breadth?
+
+262
+00:30:59.620 --> 00:31:04.480
+Byron Mackay: Not necessarily the depth. That question is a fairly high… is a very, very high-level question, I would say.
+
+263
+00:31:05.110 --> 00:31:11.549
+Byron Mackay: But, do they have that… they want to see if you have that comprehension of understanding the decisions
+
+264
+00:31:11.860 --> 00:31:25.659
+Byron Mackay: Of when to choose one or the other. And you may not even be a database guy, right? I mean, I talk about building schemas all the time, but did I ever live outside of, relational databases? Hardly ever, right? I'm a relational database guy.
+
+265
+00:31:26.190 --> 00:31:30.740
+Byron Mackay: I don't know if I'm a traditional database guy, but that's what I've worked in a lot, and I'm really good at building those tables.
+
+266
+00:31:30.870 --> 00:31:32.680
+Byron Mackay: Understanding them, and going through them.
+
+267
+00:31:33.220 --> 00:31:39.690
+Byron Mackay: But I would, but anyway, in this particular situation, the person had no idea.
+
+268
+00:31:40.510 --> 00:31:44.349
+Byron Mackay: And, as you can imagine, That… went down.
+
+269
+00:31:45.760 --> 00:31:52.270
+Byron Mackay: Daniel, you nailed it. Postgres structured, relational, Mongo, unstructured, document-based.
+
+270
+00:31:53.600 --> 00:31:57.209
+Byron Mackay: I don't think it's too overly simple. I think for that question, that's perfectly fine.
+
+271
+00:31:57.570 --> 00:32:05.959
+Byron Mackay: Now, they might go deeper, right, after that first question. Maybe it was one of those cases where it's like, let's start high level and then dig down and see how far they go, but he didn't go very far.
+
+272
+00:32:06.590 --> 00:32:07.680
+Byron Mackay: Obviously.
+
+273
+00:32:08.470 --> 00:32:10.460
+Byron Mackay: Let me tell you another interview story.
+
+274
+00:32:10.480 --> 00:32:29.799
+Byron Mackay: This was from a very accomplished engineer who went into an interview, and they said, they were talking about their architecture, and they said, we're using this Postgres database, and here's all of our systems, and here's how everything works, and so she had a pretty good idea of how the data was being passed through, and the person asked.
+
+275
+00:32:29.830 --> 00:32:34.500
+Byron Mackay: What would you do when you got to 50,000 users in the database?
+
+276
+00:32:35.340 --> 00:32:42.149
+Byron Mackay: Now, that is… I'm missing a lot of context here of how this answer was produced.
+
+277
+00:32:42.380 --> 00:32:44.110
+Byron Mackay: But that was the question.
+
+278
+00:32:44.650 --> 00:32:54.370
+Byron Mackay: And her response, and again, I can't explain it entirely, because I wasn't the one that interview, and I was hearing this from her, was I wouldn't use Postgres anymore.
+
+279
+00:32:55.770 --> 00:33:00.929
+Byron Mackay: I thought that was such an interesting answer. But then she goes on to explain why.
+
+280
+00:33:01.120 --> 00:33:06.670
+Byron Mackay: And the person agreed with her. He said, that's absolutely right, that's what we should do, is get off of Postgres at that point.
+
+281
+00:33:07.320 --> 00:33:22.510
+Byron Mackay: And I thought that was so interesting. There was this understanding that she had of what happens when you start to scale an application. I don't think 50,000 is necessarily super big. I don't know, and again, I can't remember all the details, but she had this understanding. This is a separate company, by the way. Different company.
+
+282
+00:33:22.700 --> 00:33:30.870
+Byron Mackay: Asking similar questions. They want to see our breadth as engineers. This is what we're seeing, this is what's happening.
+
+283
+00:33:31.350 --> 00:33:39.289
+Byron Mackay: And so we need to… we need to figure out, we need to obtain this breadth so that we can become…
+
+284
+00:33:39.640 --> 00:33:48.090
+Byron Mackay: engineers that companies want to hire. Features right now today are so cheap to build, anybody can build them, right? So what do we offer? Judgment.
+
+285
+00:33:48.340 --> 00:34:00.489
+Byron Mackay: We offer breadth of understanding. When we build systems, when we build an application, it's not just the website anymore, but it's everything that goes around it. And how do we make those decisions? How do we make them very clear?
+
+286
+00:34:00.550 --> 00:34:17.090
+Byron Mackay: And how do we articulate that? When we tell somebody in business we're using Mongo over Postgres, we need to come up with a good reason to explain why. Well, maybe not to them, they'll just take our word for it. At least that's what I usually have seen in the past, when I've offered Mongo over, you know, or something else over a relational database.
+
+287
+00:34:17.949 --> 00:34:25.580
+Byron Mackay: But how do we make sure that our decisions are going to help the product scale and build, and fail appropriately, and all those kinds of things?
+
+288
+00:34:25.739 --> 00:34:27.270
+Byron Mackay: So,
+
+289
+00:34:28.050 --> 00:34:39.929
+Byron Mackay: Anyway, I'm sending this out to you all to say this is what we're seeing, it's becoming very evident, and this solves, by the way, coming back a little… coming back to what I talked about in the beginning.
+
+290
+00:34:40.010 --> 00:34:49.079
+Byron Mackay: In a lot of ways, knowing how to design a good system will resolve a lot of the security errors that we're starting to see.
+
+291
+00:34:49.810 --> 00:34:52.010
+Byron Mackay: We will understand how…
+
+292
+00:34:54.620 --> 00:35:03.079
+Byron Mackay: how encryption works, how roles work, how access to data works. There's all these pieces that we need to be very aware of.
+
+293
+00:35:03.440 --> 00:35:05.810
+Byron Mackay: And companies are picking up on it.
+
+294
+00:35:07.680 --> 00:35:12.389
+Byron Mackay: That's… that's what I want to… that's kind of the big takeaway… one of the big takeaways I want you to have tonight.
+
+295
+00:35:12.540 --> 00:35:15.370
+Byron Mackay: Is that's where companies are seeing the need.
+
+296
+00:35:15.680 --> 00:35:19.669
+Byron Mackay: They're afraid of the security issues, so some companies are hiring more security people.
+
+297
+00:35:20.180 --> 00:35:34.840
+Byron Mackay: And we are seeing the need for companies needing engineers who understand applications at a higher level, so that they can avoid those security issues entirely, but also build a more scalable solution.
+
+298
+00:35:35.230 --> 00:35:40.129
+Byron Mackay: We can all take a good guess what would happen if we just let an LLM churn on an app for a year.
+
+299
+00:35:41.230 --> 00:35:43.059
+Byron Mackay: Probably run into a lot of issues.
+
+300
+00:35:43.970 --> 00:35:47.009
+Byron Mackay: Especially in large legacy codebases.
+
+301
+00:35:47.620 --> 00:35:54.689
+Byron Mackay: So we need people who understand the system design principles a lot better.
+
+302
+00:35:55.030 --> 00:35:56.739
+Byron Mackay: And companies are keying in on it.
+
+303
+00:35:59.030 --> 00:36:02.059
+Byron Mackay: Tanya, I'm gonna answer your question here.
+
+304
+00:36:02.620 --> 00:36:08.460
+Byron Mackay: Yeah, because I think it's… it might lead into my next point here, so I'm gonna stop here and answer that.
+
+305
+00:36:08.830 --> 00:36:16.630
+Byron Mackay: How should a beginner with limited hands-on experience in architecting systems prepare for solutions architecture or system design interview questions like these?
+
+306
+00:36:17.490 --> 00:36:19.379
+Byron Mackay: I am so glad you asked that question.
+
+307
+00:36:20.270 --> 00:36:22.499
+Byron Mackay: I'm gonna go through a few of those right now.
+
+308
+00:36:27.400 --> 00:36:30.800
+Byron Mackay: Okay, this is… this part here is largely…
+
+309
+00:36:30.940 --> 00:36:33.170
+Byron Mackay: Callbacks to something we had earlier.
+
+310
+00:36:35.370 --> 00:36:39.959
+Byron Mackay: But, so let's… let's… I'll move on here, to this part. How do you do this?
+
+311
+00:36:43.350 --> 00:36:48.819
+Byron Mackay: First off, this is not in order. Don't do this in order. These are just…
+
+312
+00:36:49.090 --> 00:36:51.300
+Byron Mackay: Some helpful resources for you.
+
+313
+00:36:52.090 --> 00:36:54.559
+Byron Mackay: There are a couple books I would recommend.
+
+314
+00:36:54.970 --> 00:36:56.560
+Byron Mackay: Screenshot this page.
+
+315
+00:36:58.090 --> 00:37:01.769
+Byron Mackay: Read, read System Design Interviewed Volume 1 and 2.
+
+316
+00:37:02.390 --> 00:37:07.370
+Byron Mackay: Very, very helpful. Designing data-intensive applications. I…
+
+317
+00:37:08.610 --> 00:37:10.239
+Byron Mackay: I think this book is phenomenal.
+
+318
+00:37:11.750 --> 00:37:22.380
+Byron Mackay: I think this book is really hard to read. I wouldn't read this as your first book. Let me put it that way. I would make sure you have a very good foundation first.
+
+319
+00:37:23.560 --> 00:37:25.539
+Byron Mackay: Before you go into this.
+
+320
+00:37:27.100 --> 00:37:30.340
+Byron Mackay: Understanding distributed systems is another one I'd also recommend.
+
+321
+00:37:31.490 --> 00:37:42.249
+Byron Mackay: I've talked about this, number two, I talked about this a lot. Learn all the features of your language. So, I mentioned things like description unions, this is for TypeScript records, type nearing, that's all TypeScript…
+
+322
+00:37:42.570 --> 00:37:49.429
+Byron Mackay: jargon, if TypeScript is not the one you're using, go learn it for Java, go learn it for whatever else you're learning.
+
+323
+00:37:49.980 --> 00:38:09.520
+Byron Mackay: But they exist, these features exist for a reason, right? Somebody really smart, probably a lot smarter than me, definitely a lot smarter than me, put these together, and there's a really good intention around it. Understanding that intention and when do you leverage those things, becomes very important, and LLMs will generally regress to the mean, will not always leverage those.
+
+324
+00:38:10.050 --> 00:38:13.149
+Byron Mackay: But, if we're aware of them and understand how to use them.
+
+325
+00:38:13.320 --> 00:38:18.120
+Byron Mackay: then we can just dictate to the LLM how and when to use those appropriately.
+
+326
+00:38:18.650 --> 00:38:20.199
+Byron Mackay: Very, very powerful there.
+
+327
+00:38:20.580 --> 00:38:24.079
+Byron Mackay: Number 3. This is where I would actually start.
+
+328
+00:38:24.740 --> 00:38:26.620
+Byron Mackay: Use Claude as a teacher.
+
+329
+00:38:26.910 --> 00:38:27.820
+Byron Mackay: Okay?
+
+330
+00:38:27.950 --> 00:38:33.550
+Byron Mackay: And when you, coming back to Tanya's question about where do I begin.
+
+331
+00:38:34.290 --> 00:38:37.339
+Byron Mackay: I'm gonna give you a resource tonight to help you do that.
+
+332
+00:38:37.940 --> 00:38:44.209
+Byron Mackay: And I will talk about that here, I think, in just the next… actually, I might do it right now, might be the next slide.
+
+333
+00:38:46.680 --> 00:38:58.379
+Byron Mackay: Actually, I may have missed this part in the slide, so I'm going to tell you, but we'll come back to it in a second. The fourth thing you do is, once you kind of feel comfortable, try deploying this for real. I think Railway's actually a really great place to start.
+
+334
+00:38:58.590 --> 00:39:14.310
+Byron Mackay: I always get nervous… I know AWS is where most people are, GCP, Azure. I get really nervous on those, because I've had, as anybody who's probably used them to an extent, has used those, I have definitely cost a lot more money than I intended to.
+
+335
+00:39:14.310 --> 00:39:21.069
+Byron Mackay: And and I know many other people who have done the same thing.
+
+336
+00:39:21.210 --> 00:39:35.050
+Byron Mackay: So I get really nervous about using AWS or Azure to try to do anything new, unless I am really comfortable. Like, I can spin up a Lambda just fine, right? But if you're… if I start to venture outside of that too much.
+
+337
+00:39:35.370 --> 00:39:37.789
+Byron Mackay: I get nervous. I get nervous.
+
+338
+00:39:38.470 --> 00:39:40.540
+Byron Mackay: So…
+
+339
+00:39:40.660 --> 00:39:56.040
+Byron Mackay: But Railway's great, because they handle a lot of the behind-the-scenes work that you don't need to worry about. You can still practice with different databases, you can practice with different servers, and all these different configurations, so it's a really nice place to kind of live.
+
+340
+00:39:56.040 --> 00:40:01.839
+Byron Mackay: and practice in. It does cost a little bit of money, but you're probably not gonna spend the…
+
+341
+00:40:02.180 --> 00:40:04.790
+Byron Mackay: Thousands? Tens of thousands?
+
+342
+00:40:05.270 --> 00:40:10.170
+Byron Mackay: Hundreds of thousands that I've seen some people spend by accident.
+
+343
+00:40:10.820 --> 00:40:13.210
+Byron Mackay: Okay.
+
+344
+00:40:14.080 --> 00:40:17.820
+Byron Mackay: So, I'm gonna send out a resource, but here's what the resource is.
+
+345
+00:40:18.480 --> 00:40:28.060
+Byron Mackay: I'm gonna send out a resource after this that is a top-to-bottom, list of… System design, topics.
+
+346
+00:40:28.630 --> 00:40:31.140
+Byron Mackay: And here's what I do, that I recommend you do.
+
+347
+00:40:31.570 --> 00:40:36.879
+Byron Mackay: And I still do this, even today. So, it's right and true method here.
+
+348
+00:40:37.590 --> 00:40:47.339
+Byron Mackay: You put this into Cloud Chat, or ChatGPT Chat, or whatever it is, and you give it this document. And this document, again, is going to have just a list of all these topics of system design.
+
+349
+00:40:47.800 --> 00:41:03.470
+Byron Mackay: And you're gonna… you can say something like, okay, I want to get through all of this, and I want to understand it. You are… yeah, give it a role, right? You're going to be a teacher, an expert tutor that's gonna help me understand these, and I would encourage you to say.
+
+350
+00:41:03.540 --> 00:41:15.269
+Byron Mackay: I want you to occasionally quiz me, or rather, I will occasionally ask for quizzes to help me check my understanding of each topic, and occasionally I will ask for case studies.
+
+351
+00:41:15.510 --> 00:41:22.670
+Byron Mackay: Those two alone will go a long, long way to learning this. So, to Tanya's question, and anybody else wondering…
+
+352
+00:41:23.210 --> 00:41:26.539
+Byron Mackay: That's how I would address it. I would set it up that way.
+
+353
+00:41:26.730 --> 00:41:39.789
+Byron Mackay: And then I would say, let's start from the top. I think the first one's gonna be databases, so they'll go through databases, and it'll go through each kind. And as you go through each topic, at the end, you can go back and forth and ask all the questions you want to, get all the clarification you need.
+
+354
+00:41:40.010 --> 00:41:50.099
+Byron Mackay: And then at the end, you can say, okay, quiz me. Quiz me right now. Let's find where the gaps are, right? Coming back to what I don't know what I don't know.
+
+355
+00:41:51.580 --> 00:41:58.180
+Byron Mackay: Even after you learn it, sometimes you don't realize you don't know it, so get the questions, take a quiz, and based on those answers.
+
+356
+00:41:58.590 --> 00:42:03.060
+Byron Mackay: You say, okay, anything I got right, put into another document called mastered.
+
+357
+00:42:03.640 --> 00:42:07.329
+Byron Mackay: And anything I got wrong, put into another document called Review.
+
+358
+00:42:08.950 --> 00:42:12.520
+Byron Mackay: And then you keep going. Okay, next topic, next topic, next topic.
+
+359
+00:42:12.730 --> 00:42:21.860
+Byron Mackay: Every once in a while, after a few topics, I encourage, and you can do it after every topic if you want, but sometimes some topics are simpler than others, I stop and go, okay, give me a case study.
+
+360
+00:42:22.010 --> 00:42:27.879
+Byron Mackay: Give me a case study to help me actually implement this. And, of course, that generates some pretty decent case studies.
+
+361
+00:42:28.760 --> 00:42:44.019
+Byron Mackay: Usually not very… anyway, I won't get to that, because your experience is probably going to be a little different than mine, but in terms of the output the LM gives you. But those case studies are really critical, I find, because it gives you these problems where you have to make a decision, and it's not always clear what to do.
+
+362
+00:42:44.650 --> 00:42:47.350
+Byron Mackay: Which is great, because life's like that as well.
+
+363
+00:42:47.610 --> 00:42:55.799
+Byron Mackay: So, it produces this case study, you work through it, and it can give you great feedback and highlight areas where, hey, you missed this, you missed that. Again.
+
+364
+00:42:55.990 --> 00:42:58.219
+Byron Mackay: If you miss anything, put it into review.
+
+365
+00:42:59.140 --> 00:43:02.269
+Byron Mackay: And you can continue that way, just going through it.
+
+366
+00:43:04.080 --> 00:43:12.270
+Byron Mackay: After a few days of this, you can go back to it. If you find the time every day, you do this for 30 minutes, do it on a walk.
+
+367
+00:43:12.720 --> 00:43:15.460
+Byron Mackay: Do it between sets if you work out.
+
+368
+00:43:15.660 --> 00:43:21.930
+Byron Mackay: Just find little pockets of time to do it, and after a few days, you say, okay, let's go over everything in review.
+
+369
+00:43:22.170 --> 00:43:33.390
+Byron Mackay: Give me a quiz on everything in review, let's review it. And you'll review it, and it'll start to strengthen those connections in your brain to help you understand the material better. That's spaced repetition for everybody who knows that concept.
+
+370
+00:43:34.360 --> 00:43:35.560
+Byron Mackay: Anyway…
+
+371
+00:43:35.970 --> 00:43:43.530
+Byron Mackay: That has helped me solidify so many topics that I've always just kind of let exist without really digging into it.
+
+372
+00:43:43.950 --> 00:43:57.570
+Byron Mackay: And you can go through this full list, and it can just keep going. After every topic, you can say, let's go deeper, or let's do an adjacent, or let's just go somewhere completely different, so it really gives you a lot of flexibility, to go into these different spaces.
+
+373
+00:43:58.010 --> 00:44:07.659
+Byron Mackay: Anyway, Tanya, that's where I would start, and for anybody else, that's where I would start. I'm gonna have that resource be sent out to everybody after this, and it'll have…
+
+374
+00:44:08.060 --> 00:44:09.850
+Byron Mackay: It'll help you get started.
+
+375
+00:44:10.360 --> 00:44:16.050
+Byron Mackay: From there, I would actually start, recommend starting with that, and then going to the books.
+
+376
+00:44:16.270 --> 00:44:18.889
+Byron Mackay: Reason being is because those books will assume you already know that.
+
+377
+00:44:19.460 --> 00:44:23.210
+Byron Mackay: So start with that, get Claude, get Claude to help you get up to speed.
+
+378
+00:44:23.420 --> 00:44:29.070
+Byron Mackay: Then go to the books, and the books are fascinating, because the books cover topics that Claude does not even realize exist.
+
+379
+00:44:29.180 --> 00:44:30.020
+Byron Mackay: Okay?
+
+380
+00:44:30.780 --> 00:44:31.550
+Byron Mackay: Alright.
+
+381
+00:44:32.210 --> 00:44:38.020
+Byron Mackay: I'm gonna pause there for a second and go through some questions here. So, give me just a second.
+
+382
+00:44:38.760 --> 00:44:42.609
+Byron Mackay: And then I have a little visitor. So… one second, sorry.
+
+383
+00:44:42.820 --> 00:44:43.580
+Byron Mackay: Hate.
+
+384
+00:44:43.980 --> 00:44:55.669
+Byron Mackay: Can you go upstairs? I actually cleaned up the toilet. Good job. Alright, you need to go upstairs now. Your niece now. I will after. Okay, I'll see you later, okay?
+
+385
+00:44:56.390 --> 00:44:57.070
+Byron Mackay: Bye.
+
+386
+00:45:00.960 --> 00:45:01.810
+Byron Mackay: Alright.
+
+387
+00:45:03.080 --> 00:45:11.239
+Byron Mackay: Let me… oh, it looks like a lot of questions have been here, let's see. I'm just trying to find my spot here. Okay, here we go.
+
+388
+00:45:11.470 --> 00:45:12.410
+Byron Mackay: Alright.
+
+389
+00:45:12.780 --> 00:45:14.640
+Byron Mackay: Let's see…
+
+390
+00:45:15.020 --> 00:45:26.539
+Byron Mackay: Daniel, Opus, I've… can't remember which one I've been using. I want to say I've been using Opus, but maybe I've just been using Sana, and it's been fine, I think, for myself. Opus 47, yeah, there's…
+
+391
+00:45:27.190 --> 00:45:31.940
+Byron Mackay: I don't know, I don't feel like it… they did a great job with that one. I'm with you there.
+
+392
+00:45:32.310 --> 00:45:35.090
+Byron Mackay: Okay, let's see.
+
+393
+00:45:37.920 --> 00:45:42.589
+Byron Mackay: Okay, yep, there are… Peyton points out the certifications, those are out there too.
+
+394
+00:45:43.640 --> 00:45:45.670
+Byron Mackay: Very, very helpful.
+
+395
+00:45:48.010 --> 00:45:49.490
+Byron Mackay: Awesome, awesome.
+
+396
+00:45:53.270 --> 00:45:55.870
+Byron Mackay: Okay, I don't see a lot of questions. A lot of great comments, though.
+
+397
+00:45:56.420 --> 00:45:59.840
+Byron Mackay: Okay, Lauren has a question here.
+
+398
+00:46:00.270 --> 00:46:15.479
+Byron Mackay: I've been using ChatGPT to teach me about some design combined with my own learning of articles and YouTube videos and do mock interviews. Excellent. Well done. Do you think it would help me if I build my own system so I can see how I can fail and scale? Yes.
+
+399
+00:46:15.590 --> 00:46:29.480
+Byron Mackay: Absolutely. It's not enough just to know, we've got to be able to do, right? We have to understand there's nothing like actually doing to show you what you don't know, and that's, that's oftentimes where we get stuck. So, it's wanting to walk the walk.
+
+400
+00:46:29.700 --> 00:46:31.070
+Byron Mackay: Talk the talk.
+
+401
+00:46:31.670 --> 00:46:41.260
+Byron Mackay: but it's something else entirely to sit down and actually implement. So I would recommend trying to set up some simple applications where you can test some functionality there.
+
+402
+00:46:41.830 --> 00:46:51.030
+Byron Mackay: Sometimes when I do mock interviews, I draw a blank. Yeah, that's… that's… that would be helpful with just some practice. And I think you're doing that.
+
+403
+00:46:51.400 --> 00:46:57.239
+Byron Mackay: But yeah, that's what I would… that's what I would go with. Definitely go with some implementation. Go… start simple.
+
+404
+00:46:57.400 --> 00:47:03.310
+Byron Mackay: It doesn't need to be huge, but definitely be intentional, right? If you want to test,
+
+405
+00:47:03.840 --> 00:47:17.709
+Byron Mackay: you know, encryption, right? Try various encryption methods out, that exist. Of course, learn security, right? If you don't know what OWASP is, that's a really good place to start.
+
+406
+00:47:17.760 --> 00:47:34.370
+Byron Mackay: You know, understanding all those things so that, you can have that context and build on it when… and again, even if you're not, like, a system expert, you're just building the software, still great to understand what those… those different pieces are so that you can… you know how your code is, is interfacing with that.
+
+407
+00:47:35.540 --> 00:47:39.270
+Byron Mackay: Alright, let's see here…
+
+408
+00:47:39.600 --> 00:47:48.620
+Byron Mackay: Do, Tonya asked, do professional cloud certifications from Amazon or Google add value? And Daniel answered, and I would agree, and big companies, yes.
+
+409
+00:47:49.050 --> 00:47:55.550
+Byron Mackay: It's not bad to have them, doesn't hurt you to have them. Nobody's gonna think less of you if you have them. So, always good.
+
+410
+00:47:56.840 --> 00:48:05.760
+Byron Mackay: Alright. Let's see here… Alright, let's see. Is there a question here?
+
+411
+00:48:07.950 --> 00:48:11.269
+Byron Mackay: Okay, let me keep going…
+
+412
+00:48:14.210 --> 00:48:22.079
+Byron Mackay: Rob, thank you for your comment. Yeah, apparently my daughter cleaned the toy room, so… we're a happier family now.
+
+413
+00:48:23.780 --> 00:48:42.010
+Byron Mackay: Okay, so Josh, brings up, mentioned at the beginning that AI-authored PRs produce 1.7 more issues in humans. Wondering if this is related to the fact that AI-authored PRs are an average 1.5 to 2x the size of humans' PRs. More code doesn't mean better. Hope CEOs will take notes sooner rather than later.
+
+414
+00:48:42.010 --> 00:48:51.379
+Byron Mackay: I would agree with that to some extent, yeah. I don't know if it's this… it's… I don't think it's the sole, sole reason, but I've definitely seen PR bloat, as I'm sure many of us have.
+
+415
+00:48:51.380 --> 00:48:56.350
+Byron Mackay: And that can definitely lead to a lot more issues. The more code, the more opportunities for failure, right?
+
+416
+00:48:57.500 --> 00:49:00.060
+Byron Mackay: Okay.
+
+417
+00:49:00.570 --> 00:49:08.050
+Byron Mackay: Alright, those are all the questions. Alright, so, I want to make a couple of…
+
+418
+00:49:08.280 --> 00:49:22.910
+Byron Mackay: plugs here at the end of this. Again, this recording will be available, and I will also make the slides available, and I'll make this resource that I'm talking about available that you can drop into any chat and say, let's get started on learning system design.
+
+419
+00:49:23.050 --> 00:49:30.470
+Byron Mackay: Now… a couple things. First off, I want to, highlight,
+
+420
+00:49:30.500 --> 00:49:50.360
+Byron Mackay: And Sunny, stop me if I'm stealing your thunder here, but I want to highlight that we have Gauntlet that we would… if you are interested in learning more, and having a lot of time to dedicate to just learning AI, learning how to leverage it, learning how to build AI products.
+
+421
+00:49:50.360 --> 00:49:55.070
+Byron Mackay: Learning how to be a more proficient software engineer.
+
+422
+00:49:55.190 --> 00:49:57.099
+Byron Mackay: Come and talk to us at Gauntlet.
+
+423
+00:49:57.230 --> 00:50:05.039
+Byron Mackay: Come and talk to us, we will help you get to that where you want to be. We'll help you get placed at great companies with great salaries for engineers.
+
+424
+00:50:05.370 --> 00:50:08.230
+Byron Mackay: I also want to put another plug out there.
+
+425
+00:50:08.380 --> 00:50:10.290
+Byron Mackay: for,
+
+426
+00:50:11.100 --> 00:50:17.589
+Byron Mackay: for a special event that we're doing in Austin in, in about two and a half weeks here.
+
+427
+00:50:17.710 --> 00:50:24.470
+Byron Mackay: We're calling… this is an event that… where you get to come and do gauntlet for a day, and we're calling it Fired Festival.
+
+428
+00:50:24.770 --> 00:50:38.879
+Byron Mackay: This is, it is an opportunity… it is a chance for you to come in and learn, have an opportunity to learn about AI, learn about how to build it, and just experience our learnings the way that we learn here at Gauntlet.
+
+429
+00:50:38.880 --> 00:50:45.909
+Byron Mackay: and then have time to build and work alongside, current Gauntlet students and also our staff.
+
+430
+00:50:45.930 --> 00:51:05.720
+Byron Mackay: to really push the limits of AI, and really gain a lot more knowledge and understanding, and also learn about the job market, and what's out there, and what companies are looking for. We're gonna have some, we're gonna have somebody come in from, from another company, a CEO, and talk about what they're looking for.
+
+431
+00:51:05.720 --> 00:51:15.369
+Byron Mackay: And, and software engineers these days, that'll give you some very valuable insight. We're gonna have some of our instructors talk about Agentech harnesses, and how we can leverage those.
+
+432
+00:51:15.490 --> 00:51:29.179
+Byron Mackay: some of the details that go into that. We're gonna… you're gonna have an opportunity to come into our office and learn right alongside with us. It's a great opportunity, to come in and just learn, or if you want to see the Gauntlet experience and what it's like.
+
+433
+00:51:29.250 --> 00:51:48.799
+Byron Mackay: We will feed you, and we will have prizes at the end. So, awesome networking opportunity. If you live in Austin, and you want to apply, or you want to come to the Fired Festival, come on in. We'll post a link, and you can register there. It's going to be a lot of fun. Really excited for it. So…
+
+434
+00:51:48.800 --> 00:51:57.279
+Byron Mackay: Alright, I just, put a few more feelers out there. I'm gonna check one more time for some questions. Sunny's got some of those links there in the chat.
+
+435
+00:51:57.390 --> 00:52:09.700
+Byron Mackay: So I want to… let's see, I did see, Daniel had a question here. Bit of a tangent, but can you comment on what you've seen with AI-proficient, super icy engineers and Comp?
+
+436
+00:52:09.920 --> 00:52:17.820
+Byron Mackay: Yes, they do get some pretty high… we've seen some amazing, highly high salaries.
+
+437
+00:52:18.250 --> 00:52:37.890
+Byron Mackay: what I've seen those individuals do, I think there's definitely… they have, kind of, all of the skill sets in space, from communication, system design, good coding, acumen. They have the experience that backs it up, right? They've done a lot of things where they've built a lot of great things.
+
+438
+00:52:38.370 --> 00:52:42.270
+Byron Mackay: a lot of scalable things. Those are just skills that…
+
+439
+00:52:42.470 --> 00:53:01.289
+Byron Mackay: you know, not everybody even has an opportunity to… to work at such high… high levels of scale, and those people are highly sought after. So, I think it just comes with opportunities, I think it comes with knowing, know-how, and, just taking, and again, being a really good communicator with somebody that can work well with leadership.
+
+440
+00:53:01.760 --> 00:53:17.139
+Byron Mackay: But yes, it's interestingly enough, I've seen… I've seen… I would say, generally speaking, salaries have gone up. And on the other side, the number of positions may have… it feels like theirs are decreasing.
+
+441
+00:53:17.760 --> 00:53:20.260
+Byron Mackay: But if you can do it, then those salaries go up.
+
+442
+00:53:20.400 --> 00:53:21.330
+Byron Mackay: Quite a bit.
+
+443
+00:53:22.440 --> 00:53:31.040
+Byron Mackay: I have seen it with C. As far as other companies, I can't recall the exact companies.
+
+444
+00:53:32.260 --> 00:53:40.290
+Byron Mackay: But I have seen things close to that number, or even half that number or more. So, they're definitely out there.
+
+445
+00:53:41.210 --> 00:53:42.590
+Byron Mackay: Okay.
+
+446
+00:53:43.570 --> 00:53:53.299
+Byron Mackay: Josh asks, is system design a strong emphasis in the Gauntlet AI program? Are there projects in the program that help strengthen system design acumen? Great question, yes.
+
+447
+00:53:53.300 --> 00:54:08.800
+Byron Mackay: It is a stronger emphasis, it's becoming stronger as things go on. We've modified the way our assignments work so that you have to think through problems more and implement more system design thought. We have an app that we use internally right now to help learn.
+
+448
+00:54:08.820 --> 00:54:12.060
+Byron Mackay: System design principles, and to help people get caught up.
+
+449
+00:54:12.090 --> 00:54:25.230
+Byron Mackay: So, those are all things that we do internally. We also talk about it, and we're developing more curriculum right now to address the system design need there. So, yes, very much something that we focus on.
+
+450
+00:54:25.420 --> 00:54:30.769
+Byron Mackay: Along with all of the other AI topics that we… I've always covered.
+
+451
+00:54:31.150 --> 00:54:37.210
+Byron Mackay: Mike asks a forward-looking question here, when will we know the dates for Cohort 8? Okay.
+
+452
+00:54:37.720 --> 00:54:41.609
+Byron Mackay: Let me think about this, because I have to remember what… we're in 5.
+
+453
+00:54:41.760 --> 00:54:47.899
+Byron Mackay: 6 and 7 will be this year, and 8 will be the beginning of next year. Look for late January.
+
+454
+00:54:48.400 --> 00:54:53.170
+Byron Mackay: I think it's about when that one will be happening, so…
+
+455
+00:54:53.810 --> 00:55:07.820
+Byron Mackay: Alright, Pedro asks, there is any way to learn from Gauntlet if I am not authorized to work in the US, even if I have to pay for it? That is something that I would say you probably could figure out without us, quite frankly.
+
+456
+00:55:07.820 --> 00:55:18.170
+Byron Mackay: So, if you require sponsorship to be here, or, sorry, to work here, excuse me, then that's… then that's something that… where you would be authorized.
+
+457
+00:55:18.500 --> 00:55:25.849
+Byron Mackay: And generally speaking, if you're… If you're not,
+
+458
+00:55:26.300 --> 00:55:34.639
+Byron Mackay: Yeah, generally speaking, if you need a sponsorship, then… then yeah, that's… that's kind of how we would go off of it. There's a… might be one or two exceptions, but very few and far between.
+
+459
+00:55:36.160 --> 00:55:37.139
+Byron Mackay: Alright.
+
+460
+00:55:37.380 --> 00:55:38.700
+Byron Mackay: Let's see.
+
+461
+00:55:39.520 --> 00:55:45.079
+Byron Mackay: Is the program at Gauntlet only for software, engineers? asked Tanya.
+
+462
+00:55:45.300 --> 00:55:53.419
+Byron Mackay: it does focus on software engineers as it stands. Now, that being said, I have had a few people
+
+463
+00:55:53.690 --> 00:55:54.520
+Byron Mackay: Phew.
+
+464
+00:55:55.150 --> 00:56:00.219
+Byron Mackay: Come in with more of a product management background,
+
+465
+00:56:00.460 --> 00:56:09.159
+Byron Mackay: you know, less of an engineering, but some engineering. Those people, if they are willing to kind of catch up really fast.
+
+466
+00:56:09.300 --> 00:56:19.669
+Byron Mackay: And they can do it. It's harder… a lot harder, though, and not everyone makes it. But it is possible, it just takes a lot of drive, a lot of grit, a lot of willing to…
+
+467
+00:56:20.240 --> 00:56:24.930
+Byron Mackay: A lot of willing to just know when you don't know, right?
+
+468
+00:56:25.370 --> 00:56:28.869
+Byron Mackay: But we do focus mainly on software engineers.
+
+469
+00:56:29.850 --> 00:56:33.980
+Byron Mackay: Mina asks, any prerequisites for participating in Fired Festival?
+
+470
+00:56:34.060 --> 00:56:42.809
+Byron Mackay: The biggest one is you have to be in Austin, because it's just in Austin. We're gonna have it at our headquarters, in Austin, so, I would…
+
+471
+00:56:42.870 --> 00:56:55.519
+Byron Mackay: reach out there, apply, and and you'll hear from me. So, when I say, yeah, just let… yeah, so just go to that website, fill out the form, and we'll… we'll get you, we'll get you put in.
+
+472
+00:56:56.710 --> 00:56:59.520
+Byron Mackay: Alright.
+
+473
+00:57:01.800 --> 00:57:06.289
+Byron Mackay: So, yeah, and about Fido Festival,
+
+474
+00:57:07.510 --> 00:57:16.369
+Byron Mackay: It's… it's… it's really… we're gonna be doing a lot of events, software engineering as well, so if you're not a software engineer, you're probably gonna feel lost.
+
+475
+00:57:16.690 --> 00:57:25.260
+Byron Mackay: Quite frankly, but, it's, it's, it's definitely something that I feel,
+
+476
+00:57:25.730 --> 00:57:31.309
+Byron Mackay: But yeah, so if you don't have any, then I probably wouldn't consider too much, but if you do, then why not? Come on in.
+
+477
+00:57:31.980 --> 00:57:45.159
+Byron Mackay: Is there a place for SDETs at Gauntlet? For those of you who don't know what SDTET is, it's Software Development Engineer in Test. So this is your QAs, kind of engineering,
+
+478
+00:57:45.470 --> 00:57:54.000
+Byron Mackay: I would say… I think there actually… actually really is. And because… the biggest thing that stands out to me is in the world of evals.
+
+479
+00:57:54.380 --> 00:58:02.049
+Byron Mackay: Llms require a lot of testing to ensure that they're good, and we need good evals. It's a full-time job.
+
+480
+00:58:02.210 --> 00:58:15.830
+Byron Mackay: It was my job at the last company. I was part of the platform team, and I slowly migrated over to the evals, because I was the only one that was willing to really take on that kind of beast there. It's a big need, and people are willing to pay a lot for it.
+
+481
+00:58:16.030 --> 00:58:35.869
+Byron Mackay: Silis, yes, there is this fired festival… yes, there is a little bit of play on words there with the other one. But it is definitely… it's something to help us as an engineering community to really understand the market and how we can continue to be successful in this market as it changes.
+
+482
+00:58:36.650 --> 00:58:46.680
+Byron Mackay: Alright, lots more questions. I probably don't have enough time, so I'm gonna really quickly try to answer a few, and then we're gonna end it. Can I build something during the first, during the Fyre Fest?
+
+483
+00:58:46.680 --> 00:58:58.520
+Byron Mackay: thing side-by-side, an expert willing to help. I have something I want to build. So, we will have a specific project that we're building. We're going to talk about a very specific topic, and we'll dig into it really deep that we feel like is
+
+484
+00:58:58.520 --> 00:59:11.949
+Byron Mackay: kind of where everything's starting to go in terms of AI, so that would be something… but it is open to where you can incorporate… we're not… we're saying you have to reveal it this certain way. We're making it very open. You can apply any
+
+485
+00:59:12.130 --> 00:59:17.289
+Byron Mackay: vertical, any, other industry to it. So, you probably can, yes.
+
+486
+00:59:17.710 --> 00:59:29.079
+Byron Mackay: Is Gauntlet right for me if I'm a Scrum Master and familiar with web design and cybersecurity? That cybersecurity one stands out to me. It might be. Apply, let's take a look at your profile and see what we've got.
+
+487
+00:59:29.440 --> 00:59:35.629
+Byron Mackay: Side of this, have you any thoughts about rolling out to more geographic areas? For Fyre Festival, I'm assuming?
+
+488
+00:59:35.830 --> 00:59:41.349
+Byron Mackay: Yes, this is our first one, so we're starting in Austin. Be fun to go outside of that as well.
+
+489
+00:59:41.550 --> 00:59:43.509
+Byron Mackay: Let's see here…
+
+490
+00:59:44.470 --> 01:00:02.330
+Byron Mackay: I got a good system analyst and design textbook and learned to draw data flow diagrams. Anything else? Or get a good book and learn those data flow diagrams? Yes, as you start going through the topics, you'll identify more and more things that you can learn and build, and it'll be, they'll become very apparent.
+
+491
+01:00:03.650 --> 01:00:08.410
+Byron Mackay: Hank, you wanna speak a few minutes after this? I've gotta run, actually, but…
+
+492
+01:00:08.840 --> 01:00:14.389
+Byron Mackay: Feel free to reach out to us, and we can get you the answers that you need.
+
+493
+01:00:15.000 --> 01:00:18.490
+Byron Mackay: Let's see, a sample application for Gauntlet for America.
+
+494
+01:00:18.930 --> 01:00:21.389
+Byron Mackay: We are still automatically considered for both.
+
+495
+01:00:21.560 --> 01:00:28.880
+Byron Mackay: Blaze, that's the answer to your question there. But if you have a preference, let us know. If you want to go out for America, I think it's an excellent program myself.
+
+496
+01:00:29.430 --> 01:00:30.960
+Byron Mackay: I would definitely just let us know.
+
+497
+01:00:31.440 --> 01:00:41.390
+Byron Mackay: Alright, when I started scrolling at this point, it was 18, and now there's 21 new messages. So, I am… we are just over time, I don't wanna… I don't wanna… I gotta… I gotta hop myself.
+
+498
+01:00:41.690 --> 01:00:58.230
+Byron Mackay: But thank you all for coming, really appreciate y'all being here. This is gonna be something that we'll talk more about later, but you all have a great, great evening, and we will go, have, have a great evening, and we'll see you next time at night school. We will see you later.
+

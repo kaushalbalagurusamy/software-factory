@@ -63,6 +63,18 @@ In the modern AI development loop, code velocity is no longer the bottleneck. Wh
 
 ---
 
+## Curriculum & Reference Transcripts
+
+The repository includes foundational transcripts and curriculum frameworks from **The Gauntlet** AI engineering fellowship in [`references/`](references/README.md):
+* **Syllabus & Pedagogy:** [`Master_Engineering_Curriculum_Blank.md`](references/gauntlet-transcripts/Master_Engineering_Curriculum_Blank.md), [`the-gauntlet-learning-model.vtt`](references/gauntlet-transcripts/the-gauntlet-learning-model.vtt)
+* **System Design & Architecture:** [`why-system-design-is-so-critical-with-ai-and-how-to-learn-it.vtt`](references/gauntlet-transcripts/why-system-design-is-so-critical-with-ai-and-how-to-learn-it.vtt), [`how-to-build-a-software-factory.txt`](references/gauntlet-transcripts/how-to-build-a-software-factory.txt)
+* **Multi-Agent & Tool Infrastructure:** [`infrastructure-for-multi-agent-apps.vtt`](references/gauntlet-transcripts/infrastructure-for-multi-agent-apps.vtt), [`mcp-factory.txt`](references/gauntlet-transcripts/mcp-factory.txt), [`hermes-openclaw-and-managed-computer-agents.txt`](references/gauntlet-transcripts/hermes-openclaw-and-managed-computer-agents.txt)
+* **Deterministic QA & Evals:** [`ai-code-review-from-vibe-checks-to-real-qa.vtt`](references/gauntlet-transcripts/ai-code-review-from-vibe-checks-to-real-qa.vtt), [`plan-before-you-prompt-the-ai-first-product-loop.vtt`](references/gauntlet-transcripts/plan-before-you-prompt-the-ai-first-product-loop.vtt)
+
+Full transcript index and summaries available in [`references/README.md`](references/README.md).
+
+---
+
 ## How to Mount in Antigravity CLI (AGY)
 
 To mount these skills into your Antigravity environment:

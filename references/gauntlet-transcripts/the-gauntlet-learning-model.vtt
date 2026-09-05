@@ -1,0 +1,5474 @@
+WEBVTT
+
+1
+00:00:04.960 --> 00:00:07.040
+Ash Tilawat: Welcome to Night School. I'm Ash, the
+
+2
+00:00:07.040 --> 00:00:09.679
+Ash Tilawat: CTO of Gauntlet AI. Over the last 2
+
+3
+00:00:09.679 --> 00:00:11.679
+Ash Tilawat: years, Gauntlet has trained over,200
+
+4
+00:00:11.679 --> 00:00:14.480
+Ash Tilawat: engineers on how to code with AI, use
+
+5
+00:00:14.480 --> 00:00:16.320
+Ash Tilawat: coding agents, build harnesses, and
+
+6
+00:00:16.320 --> 00:00:18.720
+Ash Tilawat: software factories, and to build AI
+
+7
+00:00:18.720 --> 00:00:21.279
+Ash Tilawat: applications like rag pipelines, agentic
+
+8
+00:00:21.279 --> 00:00:24.640
+Ash Tilawat: rag, agents, and graphs. Night School is
+
+9
+00:00:24.640 --> 00:00:27.199
+Ash Tilawat: our open opportunity for you to get free
+
+10
+00:00:27.199 --> 00:00:29.359
+Ash Tilawat: lessons on all of these topics every
+
+11
+00:00:29.359 --> 00:00:32.079
+Ash Tilawat: single week. Each of the teachers are
+
+12
+00:00:32.079 --> 00:00:33.840
+Ash Tilawat: members of my staff. They're
+
+13
+00:00:33.840 --> 00:00:35.760
+Ash Tilawat: practitioners by day and they teach
+
+14
+00:00:35.760 --> 00:00:38.399
+Ash Tilawat: about 7 to 10 hours per week by night.
+
+15
+00:00:38.399 --> 00:00:40.719
+Ash Tilawat: We want to give you the hands-on lessons
+
+16
+00:00:40.719 --> 00:00:42.239
+Ash Tilawat: that we're giving in our corporate
+
+17
+00:00:42.239 --> 00:00:44.399
+Ash Tilawat: training, our gauntlet, and our Gauntlet
+
+18
+00:00:44.399 --> 00:00:46.559
+Ash Tilawat: for America programs.
+
+19
+00:00:46.559 --> 00:00:48.559
+Ash Tilawat: Please look at the description if you
+
+20
+00:00:48.559 --> 00:00:50.879
+Ash Tilawat: want the slides, the repositories, or
+
+21
+00:00:50.879 --> 00:00:52.480
+Ash Tilawat: any other materials that are covered in
+
+22
+00:00:52.480 --> 00:00:55.199
+Ash Tilawat: class. Please visit us at
+
+23
+00:00:55.199 --> 00:00:57.440
+Ash Tilawat: gauntletai.com/nightchool
+
+24
+00:00:57.440 --> 00:00:58.719
+Ash Tilawat: if you want to sign up and see the
+
+25
+00:00:58.719 --> 00:01:00.719
+Ash Tilawat: topics for the next session. If you join
+
+26
+00:01:00.719 --> 00:01:03.120
+Ash Tilawat: us live, you get to ask questions and
+
+27
+00:01:03.120 --> 00:01:05.040
+Ash Tilawat: get to be a part of our community.
+
+28
+00:01:05.040 --> 00:01:06.080
+Ash Tilawat: Thanks for watching.
+
+29
+00:01:06.080 --> 00:01:08.720
+Byron Mackay: Hey there everybody.
+
+30
+00:01:08.720 --> 00:01:11.680
+Byron Mackay: Welcome to tonight's night school. My
+
+31
+00:01:11.680 --> 00:01:15.040
+Byron Mackay: name is Byron. It's good to see you all.
+
+32
+00:01:15.040 --> 00:01:17.200
+Byron Mackay: Well, good to be with you and I'm
+
+33
+00:01:17.200 --> 00:01:18.640
+Byron Mackay: excited to talk to you about tonight's
+
+34
+00:01:18.640 --> 00:01:23.119
+Byron Mackay: topic. Uh it's it's one that I spend a
+
+35
+00:01:23.119 --> 00:01:25.040
+Byron Mackay: lot of time with. I'm the director of
+
+36
+00:01:25.040 --> 00:01:27.040
+Byron Mackay: learning here at uh Gauntlet and we're
+
+37
+00:01:27.040 --> 00:01:29.040
+Byron Mackay: going to be talking about the
+
+38
+00:01:29.040 --> 00:01:31.360
+Byron Mackay: environment, the learning environment,
+
+39
+00:01:31.360 --> 00:01:33.840
+Byron Mackay: which uh may not sound like most
+
+40
+00:01:33.840 --> 00:01:35.040
+Byron Mackay: exciting, but I'm going to do my very
+
+41
+00:01:35.040 --> 00:01:38.960
+Byron Mackay: best to make it exciting. Uh there's a
+
+42
+00:01:38.960 --> 00:01:41.280
+Byron Mackay: lot that we do here at Gauntlet that
+
+43
+00:01:41.280 --> 00:01:45.439
+Byron Mackay: really focuses on the environment and uh
+
+44
+00:01:45.439 --> 00:01:48.399
+Byron Mackay: it's part big part of my job is to make
+
+45
+00:01:48.399 --> 00:01:51.920
+Byron Mackay: sure that what we teach and how we learn
+
+46
+00:01:51.920 --> 00:01:54.799
+Byron Mackay: and the experience we have here uh helps
+
+47
+00:01:54.799 --> 00:01:56.720
+Byron Mackay: you become the best engineer that you
+
+48
+00:01:56.720 --> 00:02:00.640
+Byron Mackay: can. Um, especially in the age of AI
+
+49
+00:02:00.640 --> 00:02:02.640
+Byron Mackay: when everything's changing and moving so
+
+50
+00:02:02.640 --> 00:02:06.479
+Byron Mackay: quickly, it's uh it's it's a hard it's a
+
+51
+00:02:06.479 --> 00:02:08.560
+Byron Mackay: it's a it's a hard and interesting
+
+52
+00:02:08.560 --> 00:02:09.759
+Byron Mackay: challenge for us to make these
+
+53
+00:02:09.759 --> 00:02:12.640
+Byron Mackay: adjustments and the faster we can do it,
+
+54
+00:02:12.640 --> 00:02:15.120
+Byron Mackay: the more successful we will be. Um I
+
+55
+00:02:15.120 --> 00:02:16.879
+Byron Mackay: talk to a lot of great engineers all the
+
+56
+00:02:16.879 --> 00:02:19.760
+Byron Mackay: time and it's so interesting to hear uh
+
+57
+00:02:19.760 --> 00:02:21.120
+Byron Mackay: especially ones that have gone through
+
+58
+00:02:21.120 --> 00:02:24.400
+Byron Mackay: this before when it was now things are
+
+59
+00:02:24.400 --> 00:02:26.080
+Byron Mackay: moved to the cloud now we have mobile
+
+60
+00:02:26.080 --> 00:02:30.000
+Byron Mackay: development and now we have AI and then
+
+61
+00:02:30.000 --> 00:02:32.319
+Byron Mackay: it all comes back to well now people
+
+62
+00:02:32.319 --> 00:02:34.640
+Byron Mackay: still need cobalt developers and these
+
+63
+00:02:34.640 --> 00:02:37.040
+Byron Mackay: uh this vast experience of going through
+
+64
+00:02:37.040 --> 00:02:38.560
+Byron Mackay: these changes and seeing how things can
+
+65
+00:02:38.560 --> 00:02:40.720
+Byron Mackay: revert and how they learn and stayed up
+
+66
+00:02:40.720 --> 00:02:43.840
+Byron Mackay: to date um is really inspiring and it's
+
+67
+00:02:43.840 --> 00:02:45.120
+Byron Mackay: shaped shaped a little. It's kind of
+
+68
+00:02:45.120 --> 00:02:47.680
+Byron Mackay: molded and helped molded what we've um
+
+69
+00:02:47.680 --> 00:02:49.040
+Byron Mackay: what we've been able to accomplish here.
+
+70
+00:02:49.040 --> 00:02:50.080
+Byron Mackay: So, I'm going to share some of those
+
+71
+00:02:50.080 --> 00:02:53.440
+Byron Mackay: learnings with you all today uh as you
+
+72
+00:02:53.440 --> 00:02:56.879
+Byron Mackay: all embark and really uh you know
+
+73
+00:02:56.879 --> 00:03:00.560
+Byron Mackay: traverse this uh this new age that we're
+
+74
+00:03:00.560 --> 00:03:04.480
+Byron Mackay: in. So, without further ado, I'm going
+
+75
+00:03:04.480 --> 00:03:07.360
+Byron Mackay: to uh put up some slides and we'll go
+
+76
+00:03:07.360 --> 00:03:08.959
+Byron Mackay: through we'll go through this and I'll
+
+77
+00:03:08.959 --> 00:03:11.440
+Byron Mackay: talk through it all. Um, and please feel
+
+78
+00:03:11.440 --> 00:03:17.040
+Byron Mackay: free uh to ask questions. Um, I will be
+
+79
+00:03:17.040 --> 00:03:20.560
+Byron Mackay: uh I will be answering them as we go.
+
+80
+00:03:20.560 --> 00:03:22.720
+Byron Mackay: Um, and I have a lot to say. So, please
+
+81
+00:03:22.720 --> 00:03:24.640
+Byron Mackay: answer ask ask any questions you have.
+
+82
+00:03:24.640 --> 00:03:26.720
+Byron Mackay: Help me uh address you what you want to
+
+83
+00:03:26.720 --> 00:03:29.840
+Byron Mackay: learn out of tonight. Um, so that we can
+
+84
+00:03:29.840 --> 00:03:31.599
+Byron Mackay: you can get the most out of it. All
+
+85
+00:03:31.599 --> 00:03:34.000
+Byron Mackay: right. Give me just a moment here as I
+
+86
+00:03:34.000 --> 00:03:38.789
+Byron Mackay: uh pull these up really quick.
+
+87
+00:03:38.799 --> 00:03:41.589
+Byron Mackay: Okay.
+
+88
+00:03:41.599 --> 00:03:45.120
+Byron Mackay: Let me just get configure my screens
+
+89
+00:03:45.120 --> 00:03:46.560
+Byron Mackay: here a bit so I make sure I can see
+
+90
+00:03:46.560 --> 00:03:49.360
+Byron Mackay: everything and everybody. Okay.
+
+91
+00:03:49.360 --> 00:03:52.319
+Byron Mackay: So,
+
+92
+00:03:52.319 --> 00:03:54.560
+Byron Mackay: tonight's presentation is titled why the
+
+93
+00:03:54.560 --> 00:03:58.080
+Byron Mackay: environment beats the lesson plan. Uh
+
+94
+00:03:58.080 --> 00:04:00.640
+Byron Mackay: there are lots of ways to learn, but
+
+95
+00:04:00.640 --> 00:04:02.879
+Byron Mackay: there are also ways to learn fast and
+
+96
+00:04:02.879 --> 00:04:04.480
+Byron Mackay: effectively.
+
+97
+00:04:04.480 --> 00:04:07.519
+Byron Mackay: And it does not require allnighters. It
+
+98
+00:04:07.519 --> 00:04:09.040
+Byron Mackay: does not require your head being in a
+
+99
+00:04:09.040 --> 00:04:12.480
+Byron Mackay: book all day and it does not require you
+
+100
+00:04:12.480 --> 00:04:14.239
+Byron Mackay: to hit your head constantly against a
+
+101
+00:04:14.239 --> 00:04:15.920
+Byron Mackay: problem until you figure it out.
+
+102
+00:04:15.920 --> 00:04:19.280
+Byron Mackay: Sometimes we romanticize that. We see
+
+103
+00:04:19.280 --> 00:04:21.919
+Byron Mackay: these montages of people learning and
+
+104
+00:04:21.919 --> 00:04:24.560
+Byron Mackay: growing and doing all the hard things uh
+
+105
+00:04:24.560 --> 00:04:28.479
+Byron Mackay: by themselves. And quite frankly, that
+
+106
+00:04:28.479 --> 00:04:30.800
+Byron Mackay: is a one way to learn it. And you'll get
+
+107
+00:04:30.800 --> 00:04:32.160
+Byron Mackay: there eventually, but you won't get
+
+108
+00:04:32.160 --> 00:04:34.560
+Byron Mackay: there very fast. And so I want to talk
+
+109
+00:04:34.560 --> 00:04:36.479
+Byron Mackay: about tonight are some strategies and
+
+110
+00:04:36.479 --> 00:04:38.240
+Byron Mackay: some ideas and concepts that you can
+
+111
+00:04:38.240 --> 00:04:40.720
+Byron Mackay: take to improve your environment and
+
+112
+00:04:40.720 --> 00:04:43.280
+Byron Mackay: what that requires.
+
+113
+00:04:43.280 --> 00:04:46.400
+Byron Mackay: So first I want to show this. This is
+
+114
+00:04:46.400 --> 00:04:50.800
+Byron Mackay: the 702010 model. The 702010 model was
+
+115
+00:04:50.800 --> 00:04:52.160
+Byron Mackay: developed by the center for creative
+
+116
+00:04:52.160 --> 00:04:54.800
+Byron Mackay: leadership and it shows you what su what
+
+117
+00:04:54.800 --> 00:04:58.320
+Byron Mackay: a successful uh distribution of of
+
+118
+00:04:58.320 --> 00:04:59.919
+Byron Mackay: exercises looks like in terms of
+
+119
+00:04:59.919 --> 00:05:03.680
+Byron Mackay: learning. Now, I want you to look at the
+
+120
+00:05:03.680 --> 00:05:07.440
+Byron Mackay: right side. That is formal training.
+
+121
+00:05:07.440 --> 00:05:10.000
+Byron Mackay: That you might think, Byron, that's what
+
+122
+00:05:10.000 --> 00:05:11.840
+Byron Mackay: you do for a living is formal training.
+
+123
+00:05:11.840 --> 00:05:14.639
+Byron Mackay: You're right. I do. I'm 10% of the
+
+124
+00:05:14.639 --> 00:05:17.680
+Byron Mackay: equation. I'm necessary. Well, formal
+
+125
+00:05:17.680 --> 00:05:20.160
+Byron Mackay: training is necessary, right? But it's
+
+126
+00:05:20.160 --> 00:05:21.919
+Byron Mackay: just a small piece of it. Look at these
+
+127
+00:05:21.919 --> 00:05:24.000
+Byron Mackay: other two. Interactions with others,
+
+128
+00:05:24.000 --> 00:05:26.320
+Byron Mackay: 20%. It's so important, and we're going
+
+129
+00:05:26.320 --> 00:05:28.160
+Byron Mackay: to talk about that. on the job
+
+130
+00:05:28.160 --> 00:05:32.000
+Byron Mackay: experience critical, right? Huge piece
+
+131
+00:05:32.000 --> 00:05:35.440
+Byron Mackay: of how we learn. So, you combine all
+
+132
+00:05:35.440 --> 00:05:38.160
+Byron Mackay: these things together and then you start
+
+133
+00:05:38.160 --> 00:05:40.400
+Byron Mackay: to find there's this sweet spot. There's
+
+134
+00:05:40.400 --> 00:05:42.880
+Byron Mackay: this place where you can accelerate and
+
+135
+00:05:42.880 --> 00:05:46.479
+Byron Mackay: go really, really fast. Um, somebody
+
+136
+00:05:46.479 --> 00:05:48.000
+Byron Mackay: mentioned that the slide isn't showing.
+
+137
+00:05:48.000 --> 00:05:50.400
+Byron Mackay: I just want to make sure that it is
+
+138
+00:05:50.400 --> 00:05:53.600
+Byron Mackay: working. Can anybody else uh same issue?
+
+139
+00:05:53.600 --> 00:05:56.080
+Byron Mackay: Okay, so we've got Oh, you know what? I
+
+140
+00:05:56.080 --> 00:06:00.240
+Byron Mackay: know why. Hold on. Hold on.
+
+141
+00:06:00.240 --> 00:06:03.120
+Byron Mackay: That's the one. Personal problem. User
+
+142
+00:06:03.120 --> 00:06:06.400
+Byron Mackay: error. I apologize. So, let me touch on
+
+143
+00:06:06.400 --> 00:06:09.440
+Byron Mackay: this one more time real quick. Um,
+
+144
+00:06:09.440 --> 00:06:12.880
+Byron Mackay: formal training 10%. Right? Very, very
+
+145
+00:06:12.880 --> 00:06:15.919
+Byron Mackay: small piece. Look at this. The other 90%
+
+146
+00:06:15.919 --> 00:06:18.160
+Byron Mackay: big chunk of it on the job experience.
+
+147
+00:06:18.160 --> 00:06:19.680
+Byron Mackay: Another chunk of it interacting with
+
+148
+00:06:19.680 --> 00:06:22.800
+Byron Mackay: others. You put all these together and
+
+149
+00:06:22.800 --> 00:06:25.600
+Byron Mackay: now you're going to get ahead. you're
+
+150
+00:06:25.600 --> 00:06:29.120
+Byron Mackay: going to move so much faster. Um, I have
+
+151
+00:06:29.120 --> 00:06:31.120
+Byron Mackay: been in the boat where I have just been
+
+152
+00:06:31.120 --> 00:06:33.360
+Byron Mackay: trying to do the 70% the on the job
+
+153
+00:06:33.360 --> 00:06:35.680
+Byron Mackay: experience, right? I've been in that I
+
+154
+00:06:35.680 --> 00:06:37.039
+Byron Mackay: would stay there and I would just work
+
+155
+00:06:37.039 --> 00:06:39.600
+Byron Mackay: my head down typing away on the
+
+156
+00:06:39.600 --> 00:06:42.400
+Byron Mackay: computer, making apps thinking, "Oh, I'm
+
+157
+00:06:42.400 --> 00:06:44.960
+Byron Mackay: going I'm learning so much." And to my
+
+158
+00:06:44.960 --> 00:06:47.919
+Byron Mackay: to my effort, I was right. But the
+
+159
+00:06:47.919 --> 00:06:50.800
+Byron Mackay: problem is is I lived in a silo. I don't
+
+160
+00:06:50.800 --> 00:06:53.039
+Byron Mackay: know if any of you have felt that way,
+
+161
+00:06:53.039 --> 00:06:55.039
+Byron Mackay: but you live in your own little silo and
+
+162
+00:06:55.039 --> 00:06:57.199
+Byron Mackay: you just think, I'm doing it because I'm
+
+163
+00:06:57.199 --> 00:06:59.280
+Byron Mackay: building and doing something. It feels
+
+164
+00:06:59.280 --> 00:07:01.520
+Byron Mackay: really productive. But at the end of the
+
+165
+00:07:01.520 --> 00:07:02.800
+Byron Mackay: day, if you ever poke your head out of
+
+166
+00:07:02.800 --> 00:07:04.800
+Byron Mackay: the silo and you look around, other
+
+167
+00:07:04.800 --> 00:07:05.919
+Byron Mackay: people are going in different
+
+168
+00:07:05.919 --> 00:07:08.240
+Byron Mackay: directions. They've got different ideas.
+
+169
+00:07:08.240 --> 00:07:09.919
+Byron Mackay: And it's the ones that interact with
+
+170
+00:07:09.919 --> 00:07:13.840
+Byron Mackay: each other that really uh start to
+
+171
+00:07:13.840 --> 00:07:15.759
+Byron Mackay: explore and get out of their comfort
+
+172
+00:07:15.759 --> 00:07:17.440
+Byron Mackay: zone, start doing more. They get out of
+
+173
+00:07:17.440 --> 00:07:19.039
+Byron Mackay: their silos. they get out of their echo
+
+174
+00:07:19.039 --> 00:07:22.720
+Byron Mackay: chambers and they start to accelerate
+
+175
+00:07:22.720 --> 00:07:24.800
+Byron Mackay: even more. And then there's this piece
+
+176
+00:07:24.800 --> 00:07:26.960
+Byron Mackay: of it where we still need some formal
+
+177
+00:07:26.960 --> 00:07:28.400
+Byron Mackay: training. We still need to sit down,
+
+178
+00:07:28.400 --> 00:07:30.080
+Byron Mackay: have somebody get up there and say,
+
+179
+00:07:30.080 --> 00:07:33.120
+Byron Mackay: "This is how we do it and this is the
+
+180
+00:07:33.120 --> 00:07:35.680
+Byron Mackay: way it's going." And we put all that
+
+181
+00:07:35.680 --> 00:07:37.599
+Byron Mackay: together and suddenly we can move a
+
+182
+00:07:37.599 --> 00:07:40.319
+Byron Mackay: whole lot faster. So it's a balancing
+
+183
+00:07:40.319 --> 00:07:43.840
+Byron Mackay: act of of a sort that we need to go for.
+
+184
+00:07:43.840 --> 00:07:45.840
+Byron Mackay: I want to make that that point very
+
+185
+00:07:45.840 --> 00:07:47.199
+Byron Mackay: clear because I think it's very easy as
+
+186
+00:07:47.199 --> 00:07:49.360
+Byron Mackay: engineers and especially in the world
+
+187
+00:07:49.360 --> 00:07:51.360
+Byron Mackay: where we have an LLM that's constantly
+
+188
+00:07:51.360 --> 00:07:52.880
+Byron Mackay: on that we can just talk to all the
+
+189
+00:07:52.880 --> 00:07:55.120
+Byron Mackay: time. It doesn't count that doesn't
+
+190
+00:07:55.120 --> 00:07:56.800
+Byron Mackay: count as as your friend as you're
+
+191
+00:07:56.800 --> 00:07:57.919
+Byron Mackay: interacting with your other I'm just
+
+192
+00:07:57.919 --> 00:07:59.360
+Byron Mackay: going to say that out loud right now.
+
+193
+00:07:59.360 --> 00:08:01.199
+Byron Mackay: They have a place they're very important
+
+194
+00:08:01.199 --> 00:08:03.440
+Byron Mackay: very powerful but they're not your
+
+195
+00:08:03.440 --> 00:08:05.120
+Byron Mackay: friend that you're going to talk to. So
+
+196
+00:08:05.120 --> 00:08:06.560
+Byron Mackay: we'll we'll talk about a little more of
+
+197
+00:08:06.560 --> 00:08:08.879
+Byron Mackay: that in a second here. But I first want
+
+198
+00:08:08.879 --> 00:08:12.400
+Byron Mackay: to focus on that 70%.
+
+199
+00:08:12.400 --> 00:08:15.599
+Byron Mackay: doing is better is more than consuming.
+
+200
+00:08:15.599 --> 00:08:18.800
+Byron Mackay: Right? I think that we I think we can
+
+201
+00:08:18.800 --> 00:08:20.960
+Byron Mackay: all attest to this in our careers that
+
+202
+00:08:20.960 --> 00:08:22.400
+Byron Mackay: reading a book doesn't make you an
+
+203
+00:08:22.400 --> 00:08:25.360
+Byron Mackay: expert. Right? Listening to YouTube
+
+204
+00:08:25.360 --> 00:08:26.879
+Byron Mackay: videos doesn't make you an expert. It
+
+205
+00:08:26.879 --> 00:08:29.120
+Byron Mackay: produces some ideas. It gives you some
+
+206
+00:08:29.120 --> 00:08:31.520
+Byron Mackay: direction, but it's not going to take
+
+207
+00:08:31.520 --> 00:08:34.080
+Byron Mackay: you from where you are to an expert
+
+208
+00:08:34.080 --> 00:08:36.640
+Byron Mackay: level. There needs to be doing. and
+
+209
+00:08:36.640 --> 00:08:39.200
+Byron Mackay: doing is going to take you far further
+
+210
+00:08:39.200 --> 00:08:41.599
+Byron Mackay: than consuming ever will because there's
+
+211
+00:08:41.599 --> 00:08:43.919
+Byron Mackay: just things that you will not learn just
+
+212
+00:08:43.919 --> 00:08:47.760
+Byron Mackay: from consuming. Now I'm this is also
+
+213
+00:08:47.760 --> 00:08:49.760
+Byron Mackay: true when it comes to learning with
+
+214
+00:08:49.760 --> 00:08:52.000
+Byron Mackay: LLMs. LM can get us over humps and
+
+215
+00:08:52.000 --> 00:08:53.519
+Byron Mackay: hurdles and do all sorts of great things
+
+216
+00:08:53.519 --> 00:08:56.080
+Byron Mackay: for us but we still have to do it. And I
+
+217
+00:08:56.080 --> 00:09:00.320
+Byron Mackay: worry sometimes that as engineers uh
+
+218
+00:09:00.320 --> 00:09:03.200
+Byron Mackay: with coding agents as good as they are
+
+219
+00:09:03.200 --> 00:09:05.279
+Byron Mackay: that we're missing that boat. That's one
+
+220
+00:09:05.279 --> 00:09:07.040
+Byron Mackay: thing at Gaunt that we really strive for
+
+221
+00:09:07.040 --> 00:09:08.880
+Byron Mackay: where we use coding agents, we leverage
+
+222
+00:09:08.880 --> 00:09:11.279
+Byron Mackay: coding agents, but we push ourselves to
+
+223
+00:09:11.279 --> 00:09:14.000
+Byron Mackay: do more with them. We push ourselves to
+
+224
+00:09:14.000 --> 00:09:15.680
+Byron Mackay: do a lot more with them so that we can
+
+225
+00:09:15.680 --> 00:09:17.600
+Byron Mackay: build these new skill sets that we need
+
+226
+00:09:17.600 --> 00:09:20.320
+Byron Mackay: today. Um, we have very difficult
+
+227
+00:09:20.320 --> 00:09:21.839
+Byron Mackay: assignments. Sometimes we do many
+
+228
+00:09:21.839 --> 00:09:23.440
+Byron Mackay: hackathons where it's very time
+
+229
+00:09:23.440 --> 00:09:25.680
+Byron Mackay: constrained and we're seeing how fast we
+
+230
+00:09:25.680 --> 00:09:28.560
+Byron Mackay: can push the agents. Other times we do
+
+231
+00:09:28.560 --> 00:09:30.959
+Byron Mackay: longer planning sessions so we can talk
+
+232
+00:09:30.959 --> 00:09:34.320
+Byron Mackay: it through. And all of these things are
+
+233
+00:09:34.320 --> 00:09:38.399
+Byron Mackay: ways that you can uh you can stop and
+
+234
+00:09:38.399 --> 00:09:41.040
+Byron Mackay: have different perspective and really
+
+235
+00:09:41.040 --> 00:09:43.120
+Byron Mackay: analyze what we're trying to accomplish
+
+236
+00:09:43.120 --> 00:09:44.640
+Byron Mackay: here. Not just building, not just
+
+237
+00:09:44.640 --> 00:09:46.959
+Byron Mackay: building for building sake. Um but
+
+238
+00:09:46.959 --> 00:09:49.279
+Byron Mackay: rather we're building and we're doing
+
+239
+00:09:49.279 --> 00:09:52.560
+Byron Mackay: these these exercises that get our minds
+
+240
+00:09:52.560 --> 00:09:54.000
+Byron Mackay: thinking again, that get our minds
+
+241
+00:09:54.000 --> 00:09:56.399
+Byron Mackay: really churning and doing. But there's
+
+242
+00:09:56.399 --> 00:09:59.040
+Byron Mackay: an there's even more that we can do.
+
+243
+00:09:59.040 --> 00:10:02.399
+Byron Mackay: There's one better than doing
+
+244
+00:10:02.399 --> 00:10:05.920
+Byron Mackay: and that's doing plus feedback.
+
+245
+00:10:05.920 --> 00:10:08.399
+Byron Mackay: Um, this is one one this is one of those
+
+246
+00:10:08.399 --> 00:10:10.160
+Byron Mackay: cases where you step out of the echo
+
+247
+00:10:10.160 --> 00:10:12.399
+Byron Mackay: chamber and you go in and actually get
+
+248
+00:10:12.399 --> 00:10:15.839
+Byron Mackay: this feedback. It's it's amazing how
+
+249
+00:10:15.839 --> 00:10:17.839
+Byron Mackay: quickly you can learn. And there's
+
+250
+00:10:17.839 --> 00:10:19.839
+Byron Mackay: actually full there's a lot of studies
+
+251
+00:10:19.839 --> 00:10:22.560
+Byron Mackay: around this. In fact, there's one uh
+
+252
+00:10:22.560 --> 00:10:26.000
+Byron Mackay: where they did it uh on violinists
+
+253
+00:10:26.000 --> 00:10:28.959
+Byron Mackay: and they asked they they they kind of
+
+254
+00:10:28.959 --> 00:10:30.640
+Byron Mackay: grouped violinists into groups saying
+
+255
+00:10:30.640 --> 00:10:32.880
+Byron Mackay: these are the top tier violinists. Um
+
+256
+00:10:32.880 --> 00:10:34.880
+Byron Mackay: these are your your mid-tier violinists.
+
+257
+00:10:34.880 --> 00:10:36.000
+Byron Mackay: And then they had the third group they
+
+258
+00:10:36.000 --> 00:10:39.680
+Byron Mackay: called the the violin teachers. And they
+
+259
+00:10:39.680 --> 00:10:44.079
+Byron Mackay: said, "Okay, how much focused time did
+
+260
+00:10:44.079 --> 00:10:48.240
+Byron Mackay: you do growing up uh to become this
+
+261
+00:10:48.240 --> 00:10:50.800
+Byron Mackay: proficient at uh the violin?" Well, how
+
+262
+00:10:50.800 --> 00:10:55.279
+Byron Mackay: many hours did you put in? And uh who
+
+263
+00:10:55.279 --> 00:10:56.720
+Byron Mackay: who would who would want to take a
+
+264
+00:10:56.720 --> 00:10:58.480
+Byron Mackay: guess? The number is quite a popular
+
+265
+00:10:58.480 --> 00:11:00.000
+Byron Mackay: number. I'll just throw that hint out
+
+266
+00:11:00.000 --> 00:11:02.959
+Byron Mackay: there. But who can guess how many hours
+
+267
+00:11:02.959 --> 00:11:11.030
+Byron Mackay: they put in to be an an expert?
+
+268
+00:11:11.040 --> 00:11:14.399
+Byron Mackay: Steven nailed it. Steven nailed it. It's
+
+269
+00:11:14.399 --> 00:11:16.880
+Byron Mackay: 10,000 hours, but not just 10,000 hours
+
+270
+00:11:16.880 --> 00:11:20.320
+Byron Mackay: of practice. 10,000 hours of focused,
+
+271
+00:11:20.320 --> 00:11:23.200
+Byron Mackay: feedbackdriven practice.
+
+272
+00:11:23.200 --> 00:11:24.640
+Byron Mackay: And that was the that was the key
+
+273
+00:11:24.640 --> 00:11:26.720
+Byron Mackay: differentiator. The ones in the middle
+
+274
+00:11:26.720 --> 00:11:28.240
+Byron Mackay: also put in a lot of hours, but they may
+
+275
+00:11:28.240 --> 00:11:30.640
+Byron Mackay: not have had the feedback that the that
+
+276
+00:11:30.640 --> 00:11:35.600
+Byron Mackay: the better group had. Um, it was a that
+
+277
+00:11:35.600 --> 00:11:39.519
+Byron Mackay: feedback loop was was impressively
+
+278
+00:11:39.519 --> 00:11:41.279
+Byron Mackay: impactful
+
+279
+00:11:41.279 --> 00:11:42.880
+Byron Mackay: and that's something that we want to
+
+280
+00:11:42.880 --> 00:11:45.440
+Byron Mackay: make sure that we all get. And so we
+
+281
+00:11:45.440 --> 00:11:47.040
+Byron Mackay: always talk about building in public.
+
+282
+00:11:47.040 --> 00:11:49.120
+Byron Mackay: We've heard that that's a actually a
+
+283
+00:11:49.120 --> 00:11:51.839
+Byron Mackay: really great concept when it comes to
+
+284
+00:11:51.839 --> 00:11:54.800
+Byron Mackay: getting better faster. Now, there is a
+
+285
+00:11:54.800 --> 00:11:57.120
+Byron Mackay: side of side of you that might like if
+
+286
+00:11:57.120 --> 00:11:59.839
+Byron Mackay: you're like me, you might go, "Oh, I'm a
+
+287
+00:11:59.839 --> 00:12:01.920
+Byron Mackay: little nervous about this because I
+
+288
+00:12:01.920 --> 00:12:03.519
+Byron Mackay: don't want people to say my stuff is
+
+289
+00:12:03.519 --> 00:12:06.000
+Byron Mackay: bad." Well,
+
+290
+00:12:06.000 --> 00:12:07.279
+Byron Mackay: we might have to just start getting used
+
+291
+00:12:07.279 --> 00:12:10.160
+Byron Mackay: to it. If we want to get faster, that's
+
+292
+00:12:10.160 --> 00:12:11.920
+Byron Mackay: the only that's one of the few ways
+
+293
+00:12:11.920 --> 00:12:13.120
+Byron Mackay: we're actually going to make sure we get
+
+294
+00:12:13.120 --> 00:12:16.160
+Byron Mackay: out of ourselves and into a a better a
+
+295
+00:12:16.160 --> 00:12:18.240
+Byron Mackay: better workplace is by getting that
+
+296
+00:12:18.240 --> 00:12:21.120
+Byron Mackay: feedback from others. Um, Miriam had a
+
+297
+00:12:21.120 --> 00:12:23.680
+Byron Mackay: question here. She said, "How do I get
+
+298
+00:12:23.680 --> 00:12:25.760
+Byron Mackay: over or not heavily focused on the
+
+299
+00:12:25.760 --> 00:12:28.800
+Byron Mackay: consuming part when learning is a huge
+
+300
+00:12:28.800 --> 00:12:31.760
+Byron Mackay: part of the process?" That's a great
+
+301
+00:12:31.760 --> 00:12:34.560
+Byron Mackay: question and uh one that I've personally
+
+302
+00:12:34.560 --> 00:12:39.920
+Byron Mackay: been kind of mulling over myself. Um
+
+303
+00:12:39.920 --> 00:12:43.200
+Byron Mackay: the the way we we we do it is one way of
+
+304
+00:12:43.200 --> 00:12:44.560
+Byron Mackay: doing is to always make sure we're
+
+305
+00:12:44.560 --> 00:12:47.360
+Byron Mackay: building. We still learn we have we set
+
+306
+00:12:47.360 --> 00:12:50.160
+Byron Mackay: aside time to consume and consuming is
+
+307
+00:12:50.160 --> 00:12:51.680
+Byron Mackay: important. it can expand our thoughts,
+
+308
+00:12:51.680 --> 00:12:54.800
+Byron Mackay: expand our ideas. Um, we really as
+
+309
+00:12:54.800 --> 00:12:56.399
+Byron Mackay: engineers, we need to know the tools
+
+310
+00:12:56.399 --> 00:12:58.240
+Byron Mackay: that are out there. We need to know the
+
+311
+00:12:58.240 --> 00:13:01.360
+Byron Mackay: tools that exist that we can leverage,
+
+312
+00:13:01.360 --> 00:13:03.279
+Byron Mackay: that we can build with. And to do that,
+
+313
+00:13:03.279 --> 00:13:05.680
+Byron Mackay: we have to consume a lot of information,
+
+314
+00:13:05.680 --> 00:13:08.560
+Byron Mackay: right? Um, I'll give you an example.
+
+315
+00:13:08.560 --> 00:13:10.000
+Byron Mackay: This is one of my favorite examples.
+
+316
+00:13:10.000 --> 00:13:12.079
+Byron Mackay: It's it's true every time I I talk about
+
+317
+00:13:12.079 --> 00:13:14.959
+Byron Mackay: it with um
+
+318
+00:13:14.959 --> 00:13:17.040
+Byron Mackay: we have a lot of a lot of engineers know
+
+319
+00:13:17.040 --> 00:13:18.160
+Byron Mackay: Typescript. But I imagine many in our
+
+320
+00:13:18.160 --> 00:13:20.240
+Byron Mackay: audience tonight know TypeScript or have
+
+321
+00:13:20.240 --> 00:13:22.160
+Byron Mackay: worked with TypeScript. And Typescript
+
+322
+00:13:22.160 --> 00:13:24.000
+Byron Mackay: is a great language, very powerful, lot
+
+323
+00:13:24.000 --> 00:13:26.639
+Byron Mackay: of power inside Typescript. There's a
+
+324
+00:13:26.639 --> 00:13:28.720
+Byron Mackay: feature in Typescript called
+
+325
+00:13:28.720 --> 00:13:31.040
+Byron Mackay: discriminated unions.
+
+326
+00:13:31.040 --> 00:13:33.120
+Byron Mackay: And discriminated unions whenever I
+
+327
+00:13:33.120 --> 00:13:35.760
+Byron Mackay: survey a group of TypeScript engineers.
+
+328
+00:13:35.760 --> 00:13:37.600
+Byron Mackay: It's not a topic that that a lot of
+
+329
+00:13:37.600 --> 00:13:40.560
+Byron Mackay: people actually know. Some do, but many
+
+330
+00:13:40.560 --> 00:13:43.200
+Byron Mackay: don't. Now, if you know discriminated
+
+331
+00:13:43.200 --> 00:13:47.040
+Byron Mackay: unions, um they're quite powerful.
+
+332
+00:13:47.040 --> 00:13:48.240
+Byron Mackay: If you don't know what they are, they're
+
+333
+00:13:48.240 --> 00:13:50.720
+Byron Mackay: they're kind of like interfaces
+
+334
+00:13:50.720 --> 00:13:54.160
+Byron Mackay: where you can define a a shape and then
+
+335
+00:13:54.160 --> 00:13:57.360
+Byron Mackay: expand that shape, that data shape. Um,
+
+336
+00:13:57.360 --> 00:13:59.279
+Byron Mackay: but it's in a very JavaScripty way
+
+337
+00:13:59.279 --> 00:14:02.720
+Byron Mackay: that's very great inside of Typescript
+
+338
+00:14:02.720 --> 00:14:04.399
+Byron Mackay: because most people don't know what
+
+339
+00:14:04.399 --> 00:14:05.920
+Byron Mackay: discriminated unions are or they don't
+
+340
+00:14:05.920 --> 00:14:08.959
+Byron Mackay: leverage them. Asking an LLM to build a
+
+341
+00:14:08.959 --> 00:14:10.959
+Byron Mackay: TypeScript app, it's probably not going
+
+342
+00:14:10.959 --> 00:14:14.320
+Byron Mackay: to use discriminated unions. Why?
+
+343
+00:14:14.320 --> 00:14:16.399
+Byron Mackay: Because discriminated unions are not
+
+344
+00:14:16.399 --> 00:14:18.720
+Byron Mackay: part of the mean. They're outside of
+
+345
+00:14:18.720 --> 00:14:22.560
+Byron Mackay: that. And LLMs converge on the mean.
+
+346
+00:14:22.560 --> 00:14:25.120
+Byron Mackay: You're going to get average output,
+
+347
+00:14:25.120 --> 00:14:27.040
+Byron Mackay: which sometimes, most of the time, I'd
+
+348
+00:14:27.040 --> 00:14:29.279
+Byron Mackay: imagine is probably just fine. But if
+
+349
+00:14:29.279 --> 00:14:30.800
+Byron Mackay: there's a case where you're like, "No, a
+
+350
+00:14:30.800 --> 00:14:32.639
+Byron Mackay: discriminated union is exactly what we
+
+351
+00:14:32.639 --> 00:14:34.480
+Byron Mackay: need right here." You have to be
+
+352
+00:14:34.480 --> 00:14:36.959
+Byron Mackay: specific and tell it that, and then
+
+353
+00:14:36.959 --> 00:14:38.480
+Byron Mackay: you'll get your discriminated union and
+
+354
+00:14:38.480 --> 00:14:40.079
+Byron Mackay: be able to leverage that piece of the of
+
+355
+00:14:40.079 --> 00:14:42.320
+Byron Mackay: the of the language.
+
+356
+00:14:42.320 --> 00:14:45.600
+Byron Mackay: So I say all that to say we must consume
+
+357
+00:14:45.600 --> 00:14:48.639
+Byron Mackay: knowledge because we must be able to
+
+358
+00:14:48.639 --> 00:14:50.560
+Byron Mackay: know what tools are available. We must
+
+359
+00:14:50.560 --> 00:14:52.720
+Byron Mackay: have the breath. But at the same time,
+
+360
+00:14:52.720 --> 00:14:54.240
+Byron Mackay: if we're not building with that
+
+361
+00:14:54.240 --> 00:14:56.240
+Byron Mackay: knowledge, it's going to sit dormant and
+
+362
+00:14:56.240 --> 00:14:59.199
+Byron Mackay: we're going to forget it. Our brains
+
+363
+00:14:59.199 --> 00:15:01.440
+Byron Mackay: will retain more if there's more rigor
+
+364
+00:15:01.440 --> 00:15:04.399
+Byron Mackay: to remember and implement and understand
+
+365
+00:15:04.399 --> 00:15:06.320
+Byron Mackay: than if it's just than if there's less
+
+366
+00:15:06.320 --> 00:15:08.880
+Byron Mackay: rigor. I would say reading a book is
+
+367
+00:15:08.880 --> 00:15:11.440
+Byron Mackay: considered less rigor in my opinion than
+
+368
+00:15:11.440 --> 00:15:13.440
+Byron Mackay: trying to implement the thing in real
+
+369
+00:15:13.440 --> 00:15:15.839
+Byron Mackay: life. When we implement it, that's when
+
+370
+00:15:15.839 --> 00:15:17.440
+Byron Mackay: the that's when the rigor sets in and
+
+371
+00:15:17.440 --> 00:15:19.440
+Byron Mackay: our brains are really focused on going,
+
+372
+00:15:19.440 --> 00:15:21.120
+Byron Mackay: "Oh, this is important stuff. I really
+
+373
+00:15:21.120 --> 00:15:23.360
+Byron Mackay: need to remember this." And then when we
+
+374
+00:15:23.360 --> 00:15:24.959
+Byron Mackay: go out into the world and we get
+
+375
+00:15:24.959 --> 00:15:28.320
+Byron Mackay: feedback on top of that, then we really
+
+376
+00:15:28.320 --> 00:15:29.839
+Byron Mackay: get that rigor because that's that's
+
+377
+00:15:29.839 --> 00:15:31.440
+Byron Mackay: emotional. That that can get very
+
+378
+00:15:31.440 --> 00:15:33.600
+Byron Mackay: emotional for some of us. and we get
+
+379
+00:15:33.600 --> 00:15:36.079
+Byron Mackay: that feedback and all of a sudden we're
+
+380
+00:15:36.079 --> 00:15:38.720
+Byron Mackay: going, "Oh, this is this is important.
+
+381
+00:15:38.720 --> 00:15:40.880
+Byron Mackay: Oh, I see what that person said. They
+
+382
+00:15:40.880 --> 00:15:43.360
+Byron Mackay: they criticized me for this over here.
+
+383
+00:15:43.360 --> 00:15:44.480
+Byron Mackay: Maybe it's because I didn't use
+
+384
+00:15:44.480 --> 00:15:46.240
+Byron Mackay: discriminated union when I should have.
+
+385
+00:15:46.240 --> 00:15:47.760
+Byron Mackay: I'm not going to forget that as easily
+
+386
+00:15:47.760 --> 00:15:50.240
+Byron Mackay: next time." And now I've just bumped
+
+387
+00:15:50.240 --> 00:15:53.440
+Byron Mackay: myself out beyond just the mean and I
+
+388
+00:15:53.440 --> 00:15:54.880
+Byron Mackay: can go and I can work a lot better and
+
+389
+00:15:54.880 --> 00:15:58.399
+Byron Mackay: be more effective. So,
+
+390
+00:15:58.399 --> 00:16:00.639
+Byron Mackay: Miriam, to to circle back to your
+
+391
+00:16:00.639 --> 00:16:04.320
+Byron Mackay: question, uh, it's always good to be
+
+392
+00:16:04.320 --> 00:16:07.279
+Byron Mackay: building. Um, always have a project that
+
+393
+00:16:07.279 --> 00:16:09.440
+Byron Mackay: you're trying to implement, uh, that
+
+394
+00:16:09.440 --> 00:16:11.040
+Byron Mackay: you're always working on. And it doesn't
+
+395
+00:16:11.040 --> 00:16:12.560
+Byron Mackay: have to be something that you're reading
+
+396
+00:16:12.560 --> 00:16:15.279
+Byron Mackay: about. I'm not saying you shouldn't you,
+
+397
+00:16:15.279 --> 00:16:16.800
+Byron Mackay: uh, what I you can be reading about
+
+398
+00:16:16.800 --> 00:16:18.800
+Byron Mackay: something totally t you know, totally
+
+399
+00:16:18.800 --> 00:16:20.720
+Byron Mackay: separate from what you're working on.
+
+400
+00:16:20.720 --> 00:16:22.399
+Byron Mackay: It's still going to come into play. Just
+
+401
+00:16:22.399 --> 00:16:24.160
+Byron Mackay: having those thoughts will come into
+
+402
+00:16:24.160 --> 00:16:25.600
+Byron Mackay: play in the building. you'll have a
+
+403
+00:16:25.600 --> 00:16:27.920
+Byron Mackay: chance to kind of push things on and get
+
+404
+00:16:27.920 --> 00:16:31.040
+Byron Mackay: better there. So,
+
+405
+00:16:31.040 --> 00:16:34.399
+Byron Mackay: all right. So, doing feedback big pieces
+
+406
+00:16:34.399 --> 00:16:37.360
+Byron Mackay: and at at Gauntlet, we really push this
+
+407
+00:16:37.360 --> 00:16:39.199
+Byron Mackay: idea a lot. We want you to get lots of
+
+408
+00:16:39.199 --> 00:16:41.440
+Byron Mackay: feedback. And so, we have multiple
+
+409
+00:16:41.440 --> 00:16:44.639
+Byron Mackay: deliverables every week. Uh we're up we
+
+410
+00:16:44.639 --> 00:16:47.040
+Byron Mackay: we have at least three we get up to
+
+411
+00:16:47.040 --> 00:16:49.120
+Byron Mackay: four, sometimes five different
+
+412
+00:16:49.120 --> 00:16:50.560
+Byron Mackay: deliverables every week where we're
+
+413
+00:16:50.560 --> 00:16:52.079
+Byron Mackay: giving you feedback or you're getting
+
+414
+00:16:52.079 --> 00:16:54.800
+Byron Mackay: feedback in one way or another. Um, and
+
+415
+00:16:54.800 --> 00:16:56.639
+Byron Mackay: that's really important so that you can
+
+416
+00:16:56.639 --> 00:16:57.920
+Byron Mackay: see where you're going and what you're
+
+417
+00:16:57.920 --> 00:17:00.880
+Byron Mackay: doing well and what you can improve on.
+
+418
+00:17:00.880 --> 00:17:03.600
+Byron Mackay: Um, and if you can build where someone
+
+419
+00:17:03.600 --> 00:17:06.400
+Byron Mackay: can correct you fast, that is even more
+
+420
+00:17:06.400 --> 00:17:09.439
+Byron Mackay: critical. The sooner the feedback, the
+
+421
+00:17:09.439 --> 00:17:11.199
+Byron Mackay: the more you're likely you're going to
+
+422
+00:17:11.199 --> 00:17:13.039
+Byron Mackay: remember it and implement it and move on
+
+423
+00:17:13.039 --> 00:17:14.880
+Byron Mackay: faster.
+
+424
+00:17:14.880 --> 00:17:16.160
+Byron Mackay: So, you want to create that environment
+
+425
+00:17:16.160 --> 00:17:18.959
+Byron Mackay: for yourself. Um, you can do it here at
+
+426
+00:17:18.959 --> 00:17:20.959
+Byron Mackay: Gauntlet. There's ways of doing it your
+
+427
+00:17:20.959 --> 00:17:22.559
+Byron Mackay: own outside of Gauntlet, but you want to
+
+428
+00:17:22.559 --> 00:17:24.240
+Byron Mackay: make sure you can get that feedback loop
+
+429
+00:17:24.240 --> 00:17:26.799
+Byron Mackay: pretty quick.
+
+430
+00:17:26.799 --> 00:17:29.039
+Byron Mackay: All right,
+
+431
+00:17:29.039 --> 00:17:32.080
+Byron Mackay: next piece. The tribe.
+
+432
+00:17:32.080 --> 00:17:36.480
+Byron Mackay: The tribe is so important. Um, and I
+
+433
+00:17:36.480 --> 00:17:38.320
+Byron Mackay: have a lot of personal experience with
+
+434
+00:17:38.320 --> 00:17:41.280
+Byron Mackay: this one because I've tried both uh both
+
+435
+00:17:41.280 --> 00:17:44.320
+Byron Mackay: learning formats here when it comes to
+
+436
+00:17:44.320 --> 00:17:48.720
+Byron Mackay: um formal trainings. Um,
+
+437
+00:17:48.720 --> 00:17:50.320
+Byron Mackay: so look at these look at these numbers
+
+438
+00:17:50.320 --> 00:17:51.919
+Byron Mackay: here.
+
+439
+00:17:51.919 --> 00:17:54.320
+Byron Mackay: If you are in a cohort-based program,
+
+440
+00:17:54.320 --> 00:17:57.440
+Byron Mackay: you have an 87 to 90% chance of
+
+441
+00:17:57.440 --> 00:18:00.160
+Byron Mackay: completing it as opposed to a
+
+442
+00:18:00.160 --> 00:18:01.840
+Byron Mackay: self-directed
+
+443
+00:18:01.840 --> 00:18:04.559
+Byron Mackay: learning, which is 3 to 15%. By the way,
+
+444
+00:18:04.559 --> 00:18:06.960
+Byron Mackay: that's also true for when I say
+
+445
+00:18:06.960 --> 00:18:09.919
+Byron Mackay: self-directed, I also include in there
+
+446
+00:18:09.919 --> 00:18:12.880
+Byron Mackay: um things like Corsera courses, things
+
+447
+00:18:12.880 --> 00:18:14.720
+Byron Mackay: where you're just doing it by yourself,
+
+448
+00:18:14.720 --> 00:18:16.160
+Byron Mackay: where you're into, you're just learning
+
+449
+00:18:16.160 --> 00:18:20.960
+Byron Mackay: things alone. Um, and I have implemented
+
+450
+00:18:20.960 --> 00:18:22.960
+Byron Mackay: both programs in my career multiple
+
+451
+00:18:22.960 --> 00:18:27.120
+Byron Mackay: times, and this holds this holds very
+
+452
+00:18:27.120 --> 00:18:30.640
+Byron Mackay: accurately to my experience. um that a
+
+453
+00:18:30.640 --> 00:18:32.559
+Byron Mackay: cohort-based program you are far more
+
+454
+00:18:32.559 --> 00:18:35.360
+Byron Mackay: likely to complete it than if you're
+
+455
+00:18:35.360 --> 00:18:38.480
+Byron Mackay: trying to do it by yourself. Um
+
+456
+00:18:38.480 --> 00:18:40.640
+Byron Mackay: and a big part of that is because of the
+
+457
+00:18:40.640 --> 00:18:43.919
+Byron Mackay: people you're around, right? If you are
+
+458
+00:18:43.919 --> 00:18:46.320
+Byron Mackay: sitting in a college class, you're more
+
+459
+00:18:46.320 --> 00:18:48.480
+Byron Mackay: likely to stick through it rather than
+
+460
+00:18:48.480 --> 00:18:51.600
+Byron Mackay: watching a video on your computer. Um
+
+461
+00:18:51.600 --> 00:18:55.919
+Byron Mackay: it's it's also true when you are um
+
+462
+00:18:55.919 --> 00:18:58.080
+Byron Mackay: working at a company, right? you have
+
+463
+00:18:58.080 --> 00:19:00.559
+Byron Mackay: your team. Uh why do people have
+
+464
+00:19:00.559 --> 00:19:04.320
+Byron Mackay: co-founders? Because of this.
+
+465
+00:19:04.320 --> 00:19:06.080
+Byron Mackay: Because if we go try to go in on
+
+466
+00:19:06.080 --> 00:19:07.919
+Byron Mackay: ourselves, we're pro we're far less
+
+467
+00:19:07.919 --> 00:19:09.440
+Byron Mackay: likely to be successful than if we have
+
+468
+00:19:09.440 --> 00:19:11.440
+Byron Mackay: people who are there to help us build
+
+469
+00:19:11.440 --> 00:19:13.600
+Byron Mackay: and grow, right? This line here at the
+
+470
+00:19:13.600 --> 00:19:16.240
+Byron Mackay: bottom is is I think very poignant and
+
+471
+00:19:16.240 --> 00:19:19.039
+Byron Mackay: and and sings a little bit to me. But
+
+472
+00:19:19.039 --> 00:19:22.320
+Byron Mackay: it's struggles to become uh struggles
+
+473
+00:19:22.320 --> 00:19:25.280
+Byron Mackay: become the shared problem instead of a
+
+474
+00:19:25.280 --> 00:19:27.679
+Byron Mackay: reason to quit. And I think that's so
+
+475
+00:19:27.679 --> 00:19:29.840
+Byron Mackay: true in my experience, as I'm sure
+
+476
+00:19:29.840 --> 00:19:31.840
+Byron Mackay: others can relate. But yes, the
+
+477
+00:19:31.840 --> 00:19:33.840
+Byron Mackay: struggles we have when we're learning on
+
+478
+00:19:33.840 --> 00:19:35.520
+Byron Mackay: our own can sometimes stop us and go
+
+479
+00:19:35.520 --> 00:19:38.320
+Byron Mackay: like, I don't even want to do it. Um, I
+
+480
+00:19:38.320 --> 00:19:40.000
+Byron Mackay: can tell you right now, I'm learning all
+
+481
+00:19:40.000 --> 00:19:42.400
+Byron Mackay: about security. All about security. I
+
+482
+00:19:42.400 --> 00:19:44.480
+Byron Mackay: have all these uh I'm learning so much
+
+483
+00:19:44.480 --> 00:19:46.799
+Byron Mackay: as I'm learning about AI and security
+
+484
+00:19:46.799 --> 00:19:48.880
+Byron Mackay: and it's a little bit hard for me to
+
+485
+00:19:48.880 --> 00:19:52.240
+Byron Mackay: kind of like to to want to go and build
+
+486
+00:19:52.240 --> 00:19:55.600
+Byron Mackay: and try to really get into the the weeds
+
+487
+00:19:55.600 --> 00:19:58.080
+Byron Mackay: of security. I need somebody else to
+
+488
+00:19:58.080 --> 00:20:00.320
+Byron Mackay: come with me.
+
+489
+00:20:00.320 --> 00:20:02.160
+Byron Mackay: And so I'm working on that. So I'm
+
+490
+00:20:02.160 --> 00:20:03.760
+Byron Mackay: working on on getting people to come
+
+491
+00:20:03.760 --> 00:20:06.000
+Byron Mackay: with me on that journey so that I can I
+
+492
+00:20:06.000 --> 00:20:07.679
+Byron Mackay: can have I can share these problems and
+
+493
+00:20:07.679 --> 00:20:10.559
+Byron Mackay: we can get over them together. Um, here
+
+494
+00:20:10.559 --> 00:20:14.480
+Byron Mackay: at Gauntlet, we have a tribe of a uh
+
+495
+00:20:14.480 --> 00:20:17.120
+Byron Mackay: that consists of your cohort mates. Uh,
+
+496
+00:20:17.120 --> 00:20:19.360
+Byron Mackay: that's a big part of what we do, a big
+
+497
+00:20:19.360 --> 00:20:22.480
+Byron Mackay: reason why Gauntlet is so impactful, I
+
+498
+00:20:22.480 --> 00:20:23.840
+Byron Mackay: think, for people. It's not just what
+
+499
+00:20:23.840 --> 00:20:25.280
+Byron Mackay: you learn, but the network you're
+
+500
+00:20:25.280 --> 00:20:26.400
+Byron Mackay: building while you're here and your
+
+501
+00:20:26.400 --> 00:20:28.080
+Byron Mackay: cohort, the people that are in there
+
+502
+00:20:28.080 --> 00:20:29.440
+Byron Mackay: with you that are doing the same things
+
+503
+00:20:29.440 --> 00:20:31.440
+Byron Mackay: with you is a big piece of that. You
+
+504
+00:20:31.440 --> 00:20:33.679
+Byron Mackay: have, of course, your instructors that
+
+505
+00:20:33.679 --> 00:20:36.640
+Byron Mackay: are teaching you. Um, every week we have
+
+506
+00:20:36.640 --> 00:20:38.000
+Byron Mackay: a number of lectures and these
+
+507
+00:20:38.000 --> 00:20:39.600
+Byron Mackay: instructors come in and they all have
+
+508
+00:20:39.600 --> 00:20:40.720
+Byron Mackay: their different flavor and different
+
+509
+00:20:40.720 --> 00:20:42.400
+Byron Mackay: style of doing things. Um, but they're
+
+510
+00:20:42.400 --> 00:20:43.760
+Byron Mackay: there to help you and they we hold
+
+511
+00:20:43.760 --> 00:20:46.159
+Byron Mackay: office hours to for those instructors to
+
+512
+00:20:46.159 --> 00:20:48.000
+Byron Mackay: ask to help you with your questions and
+
+513
+00:20:48.000 --> 00:20:50.400
+Byron Mackay: your projects. We have a great team of
+
+514
+00:20:50.400 --> 00:20:53.039
+Byron Mackay: engineering experts. Um, and these
+
+515
+00:20:53.039 --> 00:20:55.440
+Byron Mackay: engineering experts uh are really above
+
+516
+00:20:55.440 --> 00:20:58.080
+Byron Mackay: and beyond. They are building so much
+
+517
+00:20:58.080 --> 00:21:00.880
+Byron Mackay: and they uh they come and teach and they
+
+518
+00:21:00.880 --> 00:21:02.320
+Byron Mackay: will give you their insights on what
+
+519
+00:21:02.320 --> 00:21:04.559
+Byron Mackay: actually is happening in the world. Um,
+
+520
+00:21:04.559 --> 00:21:07.120
+Byron Mackay: and finally, we have hiring partners. We
+
+521
+00:21:07.120 --> 00:21:09.840
+Byron Mackay: have hiring partners, which uh at
+
+522
+00:21:09.840 --> 00:21:11.280
+Byron Mackay: Gauntlet are the cohort doesn't
+
+523
+00:21:11.280 --> 00:21:12.559
+Byron Mackay: interface with the hiring partners as
+
+524
+00:21:12.559 --> 00:21:15.600
+Byron Mackay: much, but I still include them because
+
+525
+00:21:15.600 --> 00:21:17.120
+Byron Mackay: I'll talk to the hiring partners and
+
+526
+00:21:17.120 --> 00:21:18.559
+Byron Mackay: I'll hear what their needs are. I'll
+
+527
+00:21:18.559 --> 00:21:20.720
+Byron Mackay: hear what their concerns are, and then
+
+528
+00:21:20.720 --> 00:21:22.400
+Byron Mackay: that's something I can take back and
+
+529
+00:21:22.400 --> 00:21:24.559
+Byron Mackay: say, "Hey everybody, let's let's work
+
+530
+00:21:24.559 --> 00:21:26.320
+Byron Mackay: this out. Let's figure out this the
+
+531
+00:21:26.320 --> 00:21:27.520
+Byron Mackay: answer to this problem. How do we
+
+532
+00:21:27.520 --> 00:21:30.240
+Byron Mackay: address this in a company?" Um, so we
+
+533
+00:21:30.240 --> 00:21:32.480
+Byron Mackay: kind of get this feedback loop from them
+
+534
+00:21:32.480 --> 00:21:34.720
+Byron Mackay: that then gets incorporated into our
+
+535
+00:21:34.720 --> 00:21:37.120
+Byron Mackay: ecosystem and our learning environment
+
+536
+00:21:37.120 --> 00:21:40.400
+Byron Mackay: and our and and our curriculum. Um, so
+
+537
+00:21:40.400 --> 00:21:43.919
+Byron Mackay: it just makes for a really cohesive uh
+
+538
+00:21:43.919 --> 00:21:47.679
+Byron Mackay: environment where everybody is uh is is
+
+539
+00:21:47.679 --> 00:21:49.200
+Byron Mackay: constantly pushing one another and
+
+540
+00:21:49.200 --> 00:21:51.440
+Byron Mackay: helping one another and expanding what
+
+541
+00:21:51.440 --> 00:21:53.840
+Byron Mackay: we already know um into into other
+
+542
+00:21:53.840 --> 00:21:56.960
+Byron Mackay: areas. So the tribe, the group of people
+
+543
+00:21:56.960 --> 00:21:58.159
+Byron Mackay: you surround yourself with, the
+
+544
+00:21:58.159 --> 00:21:59.679
+Byron Mackay: different resources, the different
+
+545
+00:21:59.679 --> 00:22:02.320
+Byron Mackay: personnel that you can interact with and
+
+546
+00:22:02.320 --> 00:22:03.760
+Byron Mackay: the value that they bring to your
+
+547
+00:22:03.760 --> 00:22:06.159
+Byron Mackay: learning, that can go a long way. This
+
+548
+00:22:06.159 --> 00:22:08.480
+Byron Mackay: can be found also in Slack groups. It
+
+549
+00:22:08.480 --> 00:22:10.159
+Byron Mackay: can be found in, you know, Reddit
+
+550
+00:22:10.159 --> 00:22:13.919
+Byron Mackay: threads, um, meetups in your local area,
+
+551
+00:22:13.919 --> 00:22:15.840
+Byron Mackay: um, of course at your own place of
+
+552
+00:22:15.840 --> 00:22:19.440
+Byron Mackay: employment, friends, um, you know, going
+
+553
+00:22:19.440 --> 00:22:22.000
+Byron Mackay: to networking events even. you can talk
+
+554
+00:22:22.000 --> 00:22:23.520
+Byron Mackay: to some people and get some interesting
+
+555
+00:22:23.520 --> 00:22:27.600
+Byron Mackay: insights there. Um, so the all different
+
+556
+00:22:27.600 --> 00:22:30.240
+Byron Mackay: ways that you can build that tribe
+
+557
+00:22:30.240 --> 00:22:32.960
+Byron Mackay: around you and uh and get some great
+
+558
+00:22:32.960 --> 00:22:34.320
+Byron Mackay: insights and that's going to help you go
+
+559
+00:22:34.320 --> 00:22:37.360
+Byron Mackay: a long way. So remember we talked about
+
+560
+00:22:37.360 --> 00:22:40.159
+Byron Mackay: uh doing um we talked about doing with
+
+561
+00:22:40.159 --> 00:22:41.840
+Byron Mackay: feedback
+
+562
+00:22:41.840 --> 00:22:44.400
+Byron Mackay: um and how this tribe can can help
+
+563
+00:22:44.400 --> 00:22:47.039
+Byron Mackay: provide that feedback in numerous ways
+
+564
+00:22:47.039 --> 00:22:49.360
+Byron Mackay: to really get you going. And I'll just
+
+565
+00:22:49.360 --> 00:22:51.280
+Byron Mackay: highlight one more time the rate of
+
+566
+00:22:51.280 --> 00:22:54.559
+Byron Mackay: success in learning with a good tribe.
+
+567
+00:22:54.559 --> 00:22:58.080
+Byron Mackay: Um it goes it it's significantly more
+
+568
+00:22:58.080 --> 00:23:01.360
+Byron Mackay: successful um than without. And I think
+
+569
+00:23:01.360 --> 00:23:03.280
+Byron Mackay: about all the great engineers I know,
+
+570
+00:23:03.280 --> 00:23:05.600
+Byron Mackay: they all have this kind of mentality of
+
+571
+00:23:05.600 --> 00:23:06.960
+Byron Mackay: building their tribe. It's it's really
+
+572
+00:23:06.960 --> 00:23:09.280
+Byron Mackay: quite impressive. Um and that's one
+
+573
+00:23:09.280 --> 00:23:11.520
+Byron Mackay: thing at Gauntlet that we feel makes us
+
+574
+00:23:11.520 --> 00:23:14.400
+Byron Mackay: very successful is is we provide a lot
+
+575
+00:23:14.400 --> 00:23:17.039
+Byron Mackay: of that environment here for you. Um and
+
+576
+00:23:17.039 --> 00:23:19.200
+Byron Mackay: and we've seen again in my career I've
+
+577
+00:23:19.200 --> 00:23:21.760
+Byron Mackay: done both and uh this is by far the way
+
+578
+00:23:21.760 --> 00:23:22.960
+Byron Mackay: to go and we're going to keep it that
+
+579
+00:23:22.960 --> 00:23:25.520
+Byron Mackay: way.
+
+580
+00:23:25.520 --> 00:23:27.360
+Byron Mackay: Um
+
+581
+00:23:27.360 --> 00:23:31.440
+Byron Mackay: so one of the one of the things that uh
+
+582
+00:23:31.440 --> 00:23:32.960
+Byron Mackay: we do here at Gauntlet, this is one of
+
+583
+00:23:32.960 --> 00:23:35.840
+Byron Mackay: the more recent changes that we have. Um
+
+584
+00:23:35.840 --> 00:23:37.440
+Byron Mackay: but we share ideas constantly here
+
+585
+00:23:37.440 --> 00:23:38.799
+Byron Mackay: because you're with this group of people
+
+586
+00:23:38.799 --> 00:23:42.799
+Byron Mackay: who are all trying to understand this AI
+
+587
+00:23:42.799 --> 00:23:45.120
+Byron Mackay: space and it's changing all the time.
+
+588
+00:23:45.120 --> 00:23:47.679
+Byron Mackay: Um, we want to share ideas. We want to
+
+589
+00:23:47.679 --> 00:23:49.280
+Byron Mackay: share what we're working on, right? We
+
+590
+00:23:49.280 --> 00:23:51.360
+Byron Mackay: want to get that feedback. And that's
+
+591
+00:23:51.360 --> 00:23:52.880
+Byron Mackay: not new to G. That's always been there
+
+592
+00:23:52.880 --> 00:23:54.400
+Byron Mackay: since day one because everyone's always
+
+593
+00:23:54.400 --> 00:23:55.679
+Byron Mackay: talking, always chatting about their
+
+594
+00:23:55.679 --> 00:23:58.400
+Byron Mackay: stuff. But we've actually kind of
+
+595
+00:23:58.400 --> 00:24:00.960
+Byron Mackay: encapsulated that into what we call an
+
+596
+00:24:00.960 --> 00:24:03.840
+Byron Mackay: architecture defense. And what an
+
+597
+00:24:03.840 --> 00:24:07.440
+Byron Mackay: architecture defense consists of is five
+
+598
+00:24:07.440 --> 00:24:10.000
+Byron Mackay: of you, five people will have will be
+
+599
+00:24:10.000 --> 00:24:11.919
+Byron Mackay: given an assignment and it's a case
+
+600
+00:24:11.919 --> 00:24:13.919
+Byron Mackay: study. And these five people will take
+
+601
+00:24:13.919 --> 00:24:15.600
+Byron Mackay: this case study and they'll all come up
+
+602
+00:24:15.600 --> 00:24:17.840
+Byron Mackay: with their own solutions to this case
+
+603
+00:24:17.840 --> 00:24:20.960
+Byron Mackay: study. And then within hours of
+
+604
+00:24:20.960 --> 00:24:22.640
+Byron Mackay: receiving the assignment and creating
+
+605
+00:24:22.640 --> 00:24:25.039
+Byron Mackay: that plan, they will sit in a room
+
+606
+00:24:25.039 --> 00:24:27.120
+Byron Mackay: together and each one takes a turn
+
+607
+00:24:27.120 --> 00:24:30.480
+Byron Mackay: presenting their plan.
+
+608
+00:24:30.480 --> 00:24:33.120
+Byron Mackay: And they get five minutes. And then
+
+609
+00:24:33.120 --> 00:24:34.400
+Byron Mackay: after they get they give their
+
+610
+00:24:34.400 --> 00:24:36.240
+Byron Mackay: five-minute presentation, the rest of
+
+611
+00:24:36.240 --> 00:24:37.840
+Byron Mackay: the group gets five minutes to poke
+
+612
+00:24:37.840 --> 00:24:39.440
+Byron Mackay: holes, critique, ask all the questions
+
+613
+00:24:39.440 --> 00:24:40.960
+Byron Mackay: they want.
+
+614
+00:24:40.960 --> 00:24:45.279
+Byron Mackay: It can be grueling. It can be um it can
+
+615
+00:24:45.279 --> 00:24:47.840
+Byron Mackay: be difficult to stand up there in front
+
+616
+00:24:47.840 --> 00:24:50.799
+Byron Mackay: of peers, but they're giving you very
+
+617
+00:24:50.799 --> 00:24:52.960
+Byron Mackay: valuable feedback in those sessions. And
+
+618
+00:24:52.960 --> 00:24:55.279
+Byron Mackay: something that I'm very proud of to say
+
+619
+00:24:55.279 --> 00:24:57.840
+Byron Mackay: has been um very successful. Sometimes
+
+620
+00:24:57.840 --> 00:24:59.440
+Byron Mackay: it doesn't feel that way cuz it's it's
+
+621
+00:24:59.440 --> 00:25:01.440
+Byron Mackay: it can feel like you're getting put on
+
+622
+00:25:01.440 --> 00:25:04.159
+Byron Mackay: the spot and and rightfully so you are.
+
+623
+00:25:04.159 --> 00:25:08.640
+Byron Mackay: Um but the outputs that we get from it,
+
+624
+00:25:08.640 --> 00:25:11.200
+Byron Mackay: the the changes that are then made and
+
+625
+00:25:11.200 --> 00:25:14.000
+Byron Mackay: the direction that people are going is
+
+626
+00:25:14.000 --> 00:25:17.200
+Byron Mackay: uh has has had a remarkable difference
+
+627
+00:25:17.200 --> 00:25:21.200
+Byron Mackay: since we started doing those. Um so
+
+628
+00:25:21.200 --> 00:25:23.279
+Byron Mackay: that's just one one way that we're kind
+
+629
+00:25:23.279 --> 00:25:25.120
+Byron Mackay: of iterating on these ideas of how we
+
+630
+00:25:25.120 --> 00:25:28.789
+Byron Mackay: get feedback.
+
+631
+00:25:28.799 --> 00:25:30.480
+Byron Mackay: Okay.
+
+632
+00:25:30.480 --> 00:25:34.080
+Byron Mackay: Um I want to talk about uh I want to
+
+633
+00:25:34.080 --> 00:25:36.080
+Byron Mackay: talk about this here with learning with
+
+634
+00:25:36.080 --> 00:25:39.120
+Byron Mackay: LMS because
+
+635
+00:25:39.120 --> 00:25:41.039
+Byron Mackay: it wasn't you know this is a new thing
+
+636
+00:25:41.039 --> 00:25:42.960
+Byron Mackay: that we have and it's it's really
+
+637
+00:25:42.960 --> 00:25:44.880
+Byron Mackay: powerful and I don't know if I'm sure
+
+638
+00:25:44.880 --> 00:25:47.279
+Byron Mackay: many of you have if not all of you have
+
+639
+00:25:47.279 --> 00:25:48.640
+Byron Mackay: sat down with an element said I don't
+
+640
+00:25:48.640 --> 00:25:50.159
+Byron Mackay: know what this is explain to me like I'm
+
+641
+00:25:50.159 --> 00:25:52.080
+Byron Mackay: five and suddenly you get this great
+
+642
+00:25:52.080 --> 00:25:53.760
+Byron Mackay: explanation and you can go back and ask
+
+643
+00:25:53.760 --> 00:25:55.200
+Byron Mackay: questions and be like what about in this
+
+644
+00:25:55.200 --> 00:25:57.600
+Byron Mackay: case or in my life I do this and is this
+
+645
+00:25:57.600 --> 00:26:01.039
+Byron Mackay: you know is this related Um,
+
+646
+00:26:01.039 --> 00:26:03.600
+Byron Mackay: and it's it's it's amazing, right? Like
+
+647
+00:26:03.600 --> 00:26:05.039
+Byron Mackay: you're not reading blog posts. You're
+
+648
+00:26:05.039 --> 00:26:07.200
+Byron Mackay: not trying to find the thing that um
+
+649
+00:26:07.200 --> 00:26:10.799
+Byron Mackay: that works just for you. Uh, and we
+
+650
+00:26:10.799 --> 00:26:12.400
+Byron Mackay: encourage it. We encourage learning with
+
+651
+00:26:12.400 --> 00:26:14.799
+Byron Mackay: LLMs. I will highlight again though that
+
+652
+00:26:14.799 --> 00:26:17.520
+Byron Mackay: it is only a piece of the process and it
+
+653
+00:26:17.520 --> 00:26:21.360
+Byron Mackay: has to be done right. It really does. Um
+
+654
+00:26:21.360 --> 00:26:23.120
+Byron Mackay: there's there are learning strategies
+
+655
+00:26:23.120 --> 00:26:26.720
+Byron Mackay: with LLMs that are being used and
+
+656
+00:26:26.720 --> 00:26:30.960
+Byron Mackay: leveraged that uh accelerate the
+
+657
+00:26:30.960 --> 00:26:33.760
+Byron Mackay: um the comprehension far better than
+
+658
+00:26:33.760 --> 00:26:35.919
+Byron Mackay: we've been able to do it before. U
+
+659
+00:26:35.919 --> 00:26:37.520
+Byron Mackay: Miriam, this kind of comes back to to
+
+660
+00:26:37.520 --> 00:26:39.039
+Byron Mackay: your question a bit on the consuming
+
+661
+00:26:39.039 --> 00:26:41.840
+Byron Mackay: side and how we cannot get too heavily
+
+662
+00:26:41.840 --> 00:26:43.440
+Byron Mackay: focused on it, but I'm going to
+
+663
+00:26:43.440 --> 00:26:44.799
+Byron Mackay: highlight here that it's still very very
+
+664
+00:26:44.799 --> 00:26:47.120
+Byron Mackay: important. Um, I want to talk about a
+
+665
+00:26:47.120 --> 00:26:49.679
+Byron Mackay: Harvard study that happened. Um,
+
+666
+00:26:49.679 --> 00:26:53.840
+Byron Mackay: physical science fall of 2023. ChachiBT
+
+667
+00:26:53.840 --> 00:26:56.240
+Byron Mackay: just came out not too long ago and a
+
+668
+00:26:56.240 --> 00:26:57.760
+Byron Mackay: Harvard professor decided, I'm going to
+
+669
+00:26:57.760 --> 00:26:59.520
+Byron Mackay: use this, but I want to see how
+
+670
+00:26:59.520 --> 00:27:01.440
+Byron Mackay: effective this actually is. So, he built
+
+671
+00:27:01.440 --> 00:27:05.039
+Byron Mackay: a chatbot. He built a chatbot and this
+
+672
+00:27:05.039 --> 00:27:08.799
+Byron Mackay: chatbot had all of his material and he
+
+673
+00:27:08.799 --> 00:27:10.400
+Byron Mackay: made sure he he wanted to make sure that
+
+674
+00:27:10.400 --> 00:27:11.600
+Byron Mackay: there were no hallucinations. So, he
+
+675
+00:27:11.600 --> 00:27:13.600
+Byron Mackay: gave it a lot of context. These were
+
+676
+00:27:13.600 --> 00:27:15.919
+Byron Mackay: older LLMs that were much more highly
+
+677
+00:27:15.919 --> 00:27:20.320
+Byron Mackay: likely to hallucinate. Um, and he put
+
+678
+00:27:20.320 --> 00:27:22.480
+Byron Mackay: these chatbots he put a chatbot up for
+
+679
+00:27:22.480 --> 00:27:24.799
+Byron Mackay: his students to learn from. Now, he had
+
+680
+00:27:24.799 --> 00:27:26.400
+Byron Mackay: he always had a control. So, he always
+
+681
+00:27:26.400 --> 00:27:27.760
+Byron Mackay: had one class that didn't have the
+
+682
+00:27:27.760 --> 00:27:29.360
+Byron Mackay: tutor, the AI tutor, and another class
+
+683
+00:27:29.360 --> 00:27:31.840
+Byron Mackay: that did. Um, and consequently, he would
+
+684
+00:27:31.840 --> 00:27:33.600
+Byron Mackay: actually flip them. So, one week one
+
+685
+00:27:33.600 --> 00:27:34.559
+Byron Mackay: would have him and the next week the
+
+686
+00:27:34.559 --> 00:27:36.799
+Byron Mackay: other one would have him back and forth.
+
+687
+00:27:36.799 --> 00:27:39.440
+Byron Mackay: And what he noticed was that those the
+
+688
+00:27:39.440 --> 00:27:41.840
+Byron Mackay: the weeks that the student had the LLM
+
+689
+00:27:41.840 --> 00:27:44.480
+Byron Mackay: tutor, they reported higher engagement
+
+690
+00:27:44.480 --> 00:27:46.799
+Byron Mackay: in class. He reported higher grades
+
+691
+00:27:46.799 --> 00:27:48.480
+Byron Mackay: overall, better explanations on their
+
+692
+00:27:48.480 --> 00:27:50.960
+Byron Mackay: papers. The students that had the AI
+
+693
+00:27:50.960 --> 00:27:54.159
+Byron Mackay: were doing far better. Now,
+
+694
+00:27:54.159 --> 00:27:56.480
+Byron Mackay: what does that mean for us? Well, it
+
+695
+00:27:56.480 --> 00:27:58.000
+Byron Mackay: means that this works. It means there's
+
+696
+00:27:58.000 --> 00:28:00.080
+Byron Mackay: a way that learning with LMS is actually
+
+697
+00:28:00.080 --> 00:28:02.399
+Byron Mackay: really impactful. It gets us up to
+
+698
+00:28:02.399 --> 00:28:03.760
+Byron Mackay: speed. Remember what I said earlier
+
+699
+00:28:03.760 --> 00:28:06.399
+Byron Mackay: about LLM will give you the average? So,
+
+700
+00:28:06.399 --> 00:28:07.919
+Byron Mackay: we're going to get to the average a lot
+
+701
+00:28:07.919 --> 00:28:10.159
+Byron Mackay: faster if we just can leverage them
+
+702
+00:28:10.159 --> 00:28:12.240
+Byron Mackay: correctly. And then from there, we can
+
+703
+00:28:12.240 --> 00:28:13.600
+Byron Mackay: actually springboard off into different
+
+704
+00:28:13.600 --> 00:28:15.840
+Byron Mackay: directions. And of course, LMS can help
+
+705
+00:28:15.840 --> 00:28:17.520
+Byron Mackay: us do web searches and research papers
+
+706
+00:28:17.520 --> 00:28:18.799
+Byron Mackay: and find other information. And that's
+
+707
+00:28:18.799 --> 00:28:21.279
+Byron Mackay: all great and good. But it can speed up
+
+708
+00:28:21.279 --> 00:28:22.799
+Byron Mackay: our learning quite a bit or at least our
+
+709
+00:28:22.799 --> 00:28:25.760
+Byron Mackay: understanding or our our breath of
+
+710
+00:28:25.760 --> 00:28:27.760
+Byron Mackay: awareness is what I how I like to put
+
+711
+00:28:27.760 --> 00:28:31.120
+Byron Mackay: it. Um, I have something that I can I'm
+
+712
+00:28:31.120 --> 00:28:33.440
+Byron Mackay: happy to share with everybody here. Um,
+
+713
+00:28:33.440 --> 00:28:35.120
+Byron Mackay: it's a resource that I shared in my last
+
+714
+00:28:35.120 --> 00:28:39.679
+Byron Mackay: night's school where it's a it's a um
+
+715
+00:28:39.679 --> 00:28:42.080
+Byron Mackay: it's a skill I've turned into a skill
+
+716
+00:28:42.080 --> 00:28:44.640
+Byron Mackay: now where it'll help you learn system
+
+717
+00:28:44.640 --> 00:28:47.840
+Byron Mackay: design, but it does it in a way where it
+
+718
+00:28:47.840 --> 00:28:50.559
+Byron Mackay: has a structure, but it quizzes you and
+
+719
+00:28:50.559 --> 00:28:52.000
+Byron Mackay: it gives you case studies and does
+
+720
+00:28:52.000 --> 00:28:53.760
+Byron Mackay: different things to help kind of
+
+721
+00:28:53.760 --> 00:28:56.080
+Byron Mackay: scaffold your learning.
+
+722
+00:28:56.080 --> 00:28:58.480
+Byron Mackay: um when we use LMS with some scaffold
+
+723
+00:28:58.480 --> 00:29:00.399
+Byron Mackay: learning that's something that will
+
+724
+00:29:00.399 --> 00:29:03.679
+Byron Mackay: really help us to um accelerate our
+
+725
+00:29:03.679 --> 00:29:06.880
+Byron Mackay: understanding and then we can go and
+
+726
+00:29:06.880 --> 00:29:09.919
+Byron Mackay: implement it. Um I really like the idea
+
+727
+00:29:09.919 --> 00:29:12.000
+Byron Mackay: of a of a college classroom where we go
+
+728
+00:29:12.000 --> 00:29:14.799
+Byron Mackay: home and study with an LLM. Um maybe we
+
+729
+00:29:14.799 --> 00:29:17.120
+Byron Mackay: even read and and reading books as well,
+
+730
+00:29:17.120 --> 00:29:19.120
+Byron Mackay: but we kind of study on our own. We come
+
+731
+00:29:19.120 --> 00:29:20.880
+Byron Mackay: to class, we're ready, we have this
+
+732
+00:29:20.880 --> 00:29:23.760
+Byron Mackay: great discussion. We start to poke holes
+
+733
+00:29:23.760 --> 00:29:25.120
+Byron Mackay: in each other's ideas and see where
+
+734
+00:29:25.120 --> 00:29:26.720
+Byron Mackay: things work and things don't. And then
+
+735
+00:29:26.720 --> 00:29:28.399
+Byron Mackay: we can go build and then we come back
+
+736
+00:29:28.399 --> 00:29:30.480
+Byron Mackay: and get feedback. Um, and then we kind
+
+737
+00:29:30.480 --> 00:29:31.919
+Byron Mackay: of iterate there between the build and
+
+738
+00:29:31.919 --> 00:29:33.760
+Byron Mackay: the feedback and, you know, incorporate
+
+739
+00:29:33.760 --> 00:29:35.840
+Byron Mackay: the element. There you have that whole
+
+740
+00:29:35.840 --> 00:29:38.159
+Byron Mackay: system in place and you're going to go a
+
+741
+00:29:38.159 --> 00:29:39.840
+Byron Mackay: whole lot further. Now, you do that with
+
+742
+00:29:39.840 --> 00:29:41.200
+Byron Mackay: a group of people who are like-minded
+
+743
+00:29:41.200 --> 00:29:42.880
+Byron Mackay: and want to do the same thing. You're
+
+744
+00:29:42.880 --> 00:29:45.120
+Byron Mackay: going to go even further and you see how
+
+745
+00:29:45.120 --> 00:29:48.320
+Byron Mackay: this all kind of builds up together. Um,
+
+746
+00:29:48.320 --> 00:29:50.640
+Byron Mackay: if you have the right balance between
+
+747
+00:29:50.640 --> 00:29:52.960
+Byron Mackay: those, then you can really accelerate
+
+748
+00:29:52.960 --> 00:29:55.360
+Byron Mackay: your learning and really push yourself.
+
+749
+00:29:55.360 --> 00:29:56.799
+Byron Mackay: Um, this is actually a product that
+
+750
+00:29:56.799 --> 00:29:58.640
+Byron Mackay: we're working on internally for our
+
+751
+00:29:58.640 --> 00:30:01.200
+Byron Mackay: students. We have a scaffold AI tutor.
+
+752
+00:30:01.200 --> 00:30:03.919
+Byron Mackay: We call it Traverse and it's a tool that
+
+753
+00:30:03.919 --> 00:30:06.080
+Byron Mackay: does exactly that. We have things that
+
+754
+00:30:06.080 --> 00:30:10.159
+Byron Mackay: we want uh our cohorts to understand. Um
+
+755
+00:30:10.159 --> 00:30:12.159
+Byron Mackay: that expands their breath of of
+
+756
+00:30:12.159 --> 00:30:14.880
+Byron Mackay: awareness and uh it gives them just
+
+757
+00:30:14.880 --> 00:30:17.679
+Byron Mackay: enough to say I can go and articulate
+
+758
+00:30:17.679 --> 00:30:20.000
+Byron Mackay: how to solve a problem. Even if I
+
+759
+00:30:20.000 --> 00:30:21.600
+Byron Mackay: haven't solved that problem before, I'm
+
+760
+00:30:21.600 --> 00:30:23.120
+Byron Mackay: at least aware of the solutions that
+
+761
+00:30:23.120 --> 00:30:25.679
+Byron Mackay: exist and I can start to um iterate on
+
+762
+00:30:25.679 --> 00:30:31.360
+Byron Mackay: those. So um something anyway it's it's
+
+763
+00:30:31.360 --> 00:30:33.440
+Byron Mackay: it's it's something that we're working
+
+764
+00:30:33.440 --> 00:30:35.200
+Byron Mackay: on. we're we're iterating on with our
+
+765
+00:30:35.200 --> 00:30:37.919
+Byron Mackay: with our students as we speak. So, um
+
+766
+00:30:37.919 --> 00:30:40.480
+Byron Mackay: it's a it's a fun fun opportunity to see
+
+767
+00:30:40.480 --> 00:30:42.640
+Byron Mackay: just how far these LMS can can take some
+
+768
+00:30:42.640 --> 00:30:45.520
+Byron Mackay: learning.
+
+769
+00:30:45.520 --> 00:30:47.440
+Byron Mackay: Okay.
+
+770
+00:30:47.440 --> 00:30:50.799
+Byron Mackay: Now, what about curriculum? Now, here's
+
+771
+00:30:50.799 --> 00:30:53.440
+Byron Mackay: here's all the pieces that shape the
+
+772
+00:30:53.440 --> 00:30:56.240
+Byron Mackay: environment, but what about curriculum?
+
+773
+00:30:56.240 --> 00:30:57.679
+Byron Mackay: Curriculum was the smallest piece.
+
+774
+00:30:57.679 --> 00:31:01.039
+Byron Mackay: Remember the formal training, the 10%.
+
+775
+00:31:01.039 --> 00:31:02.399
+Byron Mackay: Is that really needed? Do we actually
+
+776
+00:31:02.399 --> 00:31:05.679
+Byron Mackay: need it? We do. We do need it. Why?
+
+777
+00:31:05.679 --> 00:31:09.279
+Byron Mackay: Because it gives us focus. It gives us a
+
+778
+00:31:09.279 --> 00:31:12.399
+Byron Mackay: path that we can follow. It's there's
+
+779
+00:31:12.399 --> 00:31:13.760
+Byron Mackay: not this stop and going, "Okay, where
+
+780
+00:31:13.760 --> 00:31:14.960
+Byron Mackay: would we go next?" No, we know where
+
+781
+00:31:14.960 --> 00:31:16.880
+Byron Mackay: we're going next. It keeps us moving.
+
+782
+00:31:16.880 --> 00:31:18.640
+Byron Mackay: Keeps us moving in the right direction.
+
+783
+00:31:18.640 --> 00:31:20.159
+Byron Mackay: And we have these checkpoints where we
+
+784
+00:31:20.159 --> 00:31:21.520
+Byron Mackay: can come in and talk about different
+
+785
+00:31:21.520 --> 00:31:23.360
+Byron Mackay: topics and then we move on to the next
+
+786
+00:31:23.360 --> 00:31:24.880
+Byron Mackay: one. That structured learning can go a
+
+787
+00:31:24.880 --> 00:31:27.760
+Byron Mackay: long way. Can really help us um learn
+
+788
+00:31:27.760 --> 00:31:30.240
+Byron Mackay: and do and build things.
+
+789
+00:31:30.240 --> 00:31:33.679
+Byron Mackay: um it's a it's still a very important
+
+790
+00:31:33.679 --> 00:31:36.559
+Byron Mackay: piece, albeit a smaller piece to the to
+
+791
+00:31:36.559 --> 00:31:39.840
+Byron Mackay: the whole, but if we don't have that,
+
+792
+00:31:39.840 --> 00:31:42.960
+Byron Mackay: it's we we we can lose our direction
+
+793
+00:31:42.960 --> 00:31:45.760
+Byron Mackay: real quick. Um and so it's it's still a
+
+794
+00:31:45.760 --> 00:31:47.519
+Byron Mackay: critical critical piece to the whole
+
+795
+00:31:47.519 --> 00:31:49.919
+Byron Mackay: thing. But if we have curriculum, we
+
+796
+00:31:49.919 --> 00:31:52.320
+Byron Mackay: talked about our tribe. Our tribe being
+
+797
+00:31:52.320 --> 00:31:54.399
+Byron Mackay: where the people we surround ourselves
+
+798
+00:31:54.399 --> 00:31:56.320
+Byron Mackay: with, they can give us feedback, they
+
+799
+00:31:56.320 --> 00:31:59.760
+Byron Mackay: can give us new ideas. our our our
+
+800
+00:31:59.760 --> 00:32:02.240
+Byron Mackay: problems be become shared problems and
+
+801
+00:32:02.240 --> 00:32:05.519
+Byron Mackay: we can solve them um together as a team
+
+802
+00:32:05.519 --> 00:32:07.039
+Byron Mackay: because if one person's pro having the
+
+803
+00:32:07.039 --> 00:32:09.440
+Byron Mackay: problem, somebody else uh is likely
+
+804
+00:32:09.440 --> 00:32:13.200
+Byron Mackay: having the same issue. Um we talked
+
+805
+00:32:13.200 --> 00:32:15.200
+Byron Mackay: about building over consuming. We still
+
+806
+00:32:15.200 --> 00:32:17.200
+Byron Mackay: need to consume
+
+807
+00:32:17.200 --> 00:32:19.840
+Byron Mackay: um but we need to build a lot. Remember
+
+808
+00:32:19.840 --> 00:32:21.360
+Byron Mackay: what we talked about on the job training
+
+809
+00:32:21.360 --> 00:32:23.919
+Byron Mackay: was 70%. we need to be doing something
+
+810
+00:32:23.919 --> 00:32:26.240
+Byron Mackay: with what we are learning or it won't
+
+811
+00:32:26.240 --> 00:32:28.799
+Byron Mackay: happen or it just it just won't uh won't
+
+812
+00:32:28.799 --> 00:32:30.799
+Byron Mackay: stick as well and we won't grow and
+
+813
+00:32:30.799 --> 00:32:33.200
+Byron Mackay: expand and find out what we what we
+
+814
+00:32:33.200 --> 00:32:36.080
+Byron Mackay: don't know. Um that's one thing here at
+
+815
+00:32:36.080 --> 00:32:37.679
+Byron Mackay: Glet. We always have projects we're
+
+816
+00:32:37.679 --> 00:32:40.000
+Byron Mackay: working on. Always, always, always. And
+
+817
+00:32:40.000 --> 00:32:43.600
+Byron Mackay: they're hefty. They're big. Um we talk
+
+818
+00:32:43.600 --> 00:32:46.960
+Byron Mackay: about how a Gauntlet cohort there's uh
+
+819
+00:32:46.960 --> 00:32:49.279
+Byron Mackay: it's the amount of time you spend in a
+
+820
+00:32:49.279 --> 00:32:50.720
+Byron Mackay: week is anywhere between 80 to 100
+
+821
+00:32:50.720 --> 00:32:54.080
+Byron Mackay: hours. And that's not just because we
+
+822
+00:32:54.080 --> 00:32:55.840
+Byron Mackay: say stay at your computer for 80 to 100
+
+823
+00:32:55.840 --> 00:32:58.080
+Byron Mackay: hours. We give you really hefty projects
+
+824
+00:32:58.080 --> 00:33:01.200
+Byron Mackay: that take a lot of time. Um, and we want
+
+825
+00:33:01.200 --> 00:33:04.720
+Byron Mackay: you sp we we we probably spend um we
+
+826
+00:33:04.720 --> 00:33:08.159
+Byron Mackay: spend at least 70% of our time building
+
+827
+00:33:08.159 --> 00:33:12.159
+Byron Mackay: and working on on our projects. So we
+
+828
+00:33:12.159 --> 00:33:15.039
+Byron Mackay: have that building side. Uh then we have
+
+829
+00:33:15.039 --> 00:33:17.200
+Byron Mackay: teaching and sharing of ideas that can
+
+830
+00:33:17.200 --> 00:33:20.080
+Byron Mackay: be structured time for feedback. It can
+
+831
+00:33:20.080 --> 00:33:21.679
+Byron Mackay: just be talking to your different cohort
+
+832
+00:33:21.679 --> 00:33:23.360
+Byron Mackay: members. It can be posting something in
+
+833
+00:33:23.360 --> 00:33:26.559
+Byron Mackay: Slack and getting some help. Um, there's
+
+834
+00:33:26.559 --> 00:33:29.919
+Byron Mackay: a lot of opportunities for teaching and
+
+835
+00:33:29.919 --> 00:33:32.000
+Byron Mackay: sharing your own ideas and receiving
+
+836
+00:33:32.000 --> 00:33:34.240
+Byron Mackay: those ideas and teachings from others
+
+837
+00:33:34.240 --> 00:33:36.320
+Byron Mackay: while you're while you're here. And of
+
+838
+00:33:36.320 --> 00:33:38.000
+Byron Mackay: course, you can find that elsewhere as
+
+839
+00:33:38.000 --> 00:33:39.600
+Byron Mackay: well, but I think it's a really critical
+
+840
+00:33:39.600 --> 00:33:42.320
+Byron Mackay: piece uh in any learning environment to
+
+841
+00:33:42.320 --> 00:33:44.480
+Byron Mackay: really accelerate learning. And finally,
+
+842
+00:33:44.480 --> 00:33:49.360
+Byron Mackay: LLMs. They have really influenced and
+
+843
+00:33:49.360 --> 00:33:51.679
+Byron Mackay: impacted how quickly we can learn
+
+844
+00:33:51.679 --> 00:33:55.600
+Byron Mackay: things. And uh I I'll be my personal
+
+845
+00:33:55.600 --> 00:33:57.840
+Byron Mackay: opinion, the world hasn't figured it out
+
+846
+00:33:57.840 --> 00:34:00.960
+Byron Mackay: yet. I I think they're scared. I think a
+
+847
+00:34:00.960 --> 00:34:02.559
+Byron Mackay: lot of people are scared of what these
+
+848
+00:34:02.559 --> 00:34:05.039
+Byron Mackay: what LLMs are capable of. And I think a
+
+849
+00:34:05.039 --> 00:34:07.519
+Byron Mackay: lot of people are, you know, keeping
+
+850
+00:34:07.519 --> 00:34:10.560
+Byron Mackay: keeping their distance, which I think is
+
+851
+00:34:10.560 --> 00:34:11.919
+Byron Mackay: I think I'm talking speaking to the
+
+852
+00:34:11.919 --> 00:34:14.079
+Byron Mackay: choir here quite a bit. That is the
+
+853
+00:34:14.079 --> 00:34:15.679
+Byron Mackay: wrong thing to do.
+
+854
+00:34:15.679 --> 00:34:17.839
+Byron Mackay: Don't stand off and and don't let them
+
+855
+00:34:17.839 --> 00:34:19.520
+Byron Mackay: don't let them scare you. Like leverage
+
+856
+00:34:19.520 --> 00:34:20.800
+Byron Mackay: them. They're great. They're amazing
+
+857
+00:34:20.800 --> 00:34:23.760
+Byron Mackay: tools. Um I have learned so much and
+
+858
+00:34:23.760 --> 00:34:26.320
+Byron Mackay: I've expanded my my own knowledge so
+
+859
+00:34:26.320 --> 00:34:30.560
+Byron Mackay: much because I have um put together a
+
+860
+00:34:30.560 --> 00:34:32.639
+Byron Mackay: structured chatbot inside of inside of
+
+861
+00:34:32.639 --> 00:34:35.040
+Byron Mackay: Claude that I can use to start learning
+
+862
+00:34:35.040 --> 00:34:37.679
+Byron Mackay: and understanding things. Um there's a
+
+863
+00:34:37.679 --> 00:34:41.359
+Byron Mackay: lot of opportunity there to uh um to
+
+864
+00:34:41.359 --> 00:34:43.040
+Byron Mackay: expand what we know and really really
+
+865
+00:34:43.040 --> 00:34:45.599
+Byron Mackay: push ourselves. um beyond what we what
+
+866
+00:34:45.599 --> 00:34:47.520
+Byron Mackay: we've been capable of before and so much
+
+867
+00:34:47.520 --> 00:34:50.879
+Byron Mackay: faster than before. Um it's really it's
+
+868
+00:34:50.879 --> 00:34:54.720
+Byron Mackay: really quite impressive and amazing.
+
+869
+00:34:54.720 --> 00:34:57.040
+Byron Mackay: All right.
+
+870
+00:34:57.040 --> 00:35:02.320
+Byron Mackay: So in summary here, um the lesson plan
+
+871
+00:35:02.320 --> 00:35:05.520
+Byron Mackay: is only 10%.
+
+872
+00:35:05.520 --> 00:35:08.560
+Byron Mackay: The environment you create is the other
+
+873
+00:35:08.560 --> 00:35:10.720
+Byron Mackay: 90%.
+
+874
+00:35:10.720 --> 00:35:13.839
+Byron Mackay: That's how critical the environment is.
+
+875
+00:35:13.839 --> 00:35:17.040
+Byron Mackay: Um, if you have the right environment,
+
+876
+00:35:17.040 --> 00:35:18.720
+Byron Mackay: if you can create that environment for
+
+877
+00:35:18.720 --> 00:35:20.400
+Byron Mackay: yourself or you find a group of
+
+878
+00:35:20.400 --> 00:35:22.640
+Byron Mackay: like-minded individuals,
+
+879
+00:35:22.640 --> 00:35:27.040
+Byron Mackay: this is going to push you more um, and
+
+880
+00:35:27.040 --> 00:35:29.280
+Byron Mackay: get you get you moving faster than ever
+
+881
+00:35:29.280 --> 00:35:31.920
+Byron Mackay: before. A lesson plan is important. It's
+
+882
+00:35:31.920 --> 00:35:33.599
+Byron Mackay: critical to this. It doesn't it doesn't
+
+883
+00:35:33.599 --> 00:35:36.160
+Byron Mackay: work well without one. But if you can
+
+884
+00:35:36.160 --> 00:35:37.920
+Byron Mackay: put these two together and you can have
+
+885
+00:35:37.920 --> 00:35:41.440
+Byron Mackay: that have that environment, there's no
+
+886
+00:35:41.440 --> 00:35:43.760
+Byron Mackay: stopping you. That's one thing about uh
+
+887
+00:35:43.760 --> 00:35:45.119
+Byron Mackay: here at Gauntlet, we're not afraid to
+
+888
+00:35:45.119 --> 00:35:46.560
+Byron Mackay: tell people what we talk about. I can
+
+889
+00:35:46.560 --> 00:35:49.040
+Byron Mackay: give you the syllabus. I can I could sit
+
+890
+00:35:49.040 --> 00:35:50.800
+Byron Mackay: down and say, "Here's a list of
+
+891
+00:35:50.800 --> 00:35:52.880
+Byron Mackay: everything you should go through, but
+
+892
+00:35:52.880 --> 00:35:56.400
+Byron Mackay: it's only 10% of the of of what of of
+
+893
+00:35:56.400 --> 00:35:58.640
+Byron Mackay: how you can really push yourself off and
+
+894
+00:35:58.640 --> 00:36:02.000
+Byron Mackay: become effective." Now, obviously, I'm
+
+895
+00:36:02.000 --> 00:36:06.079
+Byron Mackay: going to encourage this, but I really uh
+
+896
+00:36:06.079 --> 00:36:08.320
+Byron Mackay: really want to tell you that it's a it's
+
+897
+00:36:08.320 --> 00:36:10.560
+Byron Mackay: my honest assessment
+
+898
+00:36:10.560 --> 00:36:12.560
+Byron Mackay: um from the things that I've seen and
+
+899
+00:36:12.560 --> 00:36:14.000
+Byron Mackay: the experiences I've had, the people
+
+900
+00:36:14.000 --> 00:36:16.720
+Byron Mackay: that have gone through the program that
+
+901
+00:36:16.720 --> 00:36:20.160
+Byron Mackay: Gauntlet is a great environment to work
+
+902
+00:36:20.160 --> 00:36:24.240
+Byron Mackay: in and and learn in. It's rigorous. It's
+
+903
+00:36:24.240 --> 00:36:27.760
+Byron Mackay: got a amazing tribe of people. um you
+
+904
+00:36:27.760 --> 00:36:30.640
+Byron Mackay: will consume, you will build far more
+
+905
+00:36:30.640 --> 00:36:33.920
+Byron Mackay: than you have. Um it'll be a chance for
+
+906
+00:36:33.920 --> 00:36:37.920
+Byron Mackay: you to really expand and uh the breadth
+
+907
+00:36:37.920 --> 00:36:39.839
+Byron Mackay: of what you know and how deep you know
+
+908
+00:36:39.839 --> 00:36:42.160
+Byron Mackay: things and it's going to push you in so
+
+909
+00:36:42.160 --> 00:36:44.320
+Byron Mackay: many ways to do that. And it's not just
+
+910
+00:36:44.320 --> 00:36:47.119
+Byron Mackay: what we teach. It's about the people
+
+911
+00:36:47.119 --> 00:36:49.520
+Byron Mackay: that you're around and the people that
+
+912
+00:36:49.520 --> 00:36:51.440
+Byron Mackay: are here to support you. not just
+
+913
+00:36:51.440 --> 00:36:53.440
+Byron Mackay: gauntlet staff but also the other people
+
+914
+00:36:53.440 --> 00:36:54.800
+Byron Mackay: that come in that are trying to achieve
+
+915
+00:36:54.800 --> 00:36:57.839
+Byron Mackay: the same thing you are. You put all that
+
+916
+00:36:57.839 --> 00:37:01.359
+Byron Mackay: together and it's a recipe for success.
+
+917
+00:37:01.359 --> 00:37:05.520
+Byron Mackay: And so I would hope that um that anybody
+
+918
+00:37:05.520 --> 00:37:08.079
+Byron Mackay: who is interested or or thinking how can
+
+919
+00:37:08.079 --> 00:37:11.040
+Byron Mackay: I get myself beyond where I am and and
+
+920
+00:37:11.040 --> 00:37:13.040
+Byron Mackay: going off to you know get myself into a
+
+921
+00:37:13.040 --> 00:37:15.200
+Byron Mackay: better position for my career or how do
+
+922
+00:37:15.200 --> 00:37:18.880
+Byron Mackay: I navigate the AI era that we're in so
+
+923
+00:37:18.880 --> 00:37:21.599
+Byron Mackay: that I make sure my my job is secure or
+
+924
+00:37:21.599 --> 00:37:24.160
+Byron Mackay: I'm still relevant. This is a great
+
+925
+00:37:24.160 --> 00:37:27.280
+Byron Mackay: place to come. We really we have focused
+
+926
+00:37:27.280 --> 00:37:29.520
+Byron Mackay: ourselves on creating an amazing
+
+927
+00:37:29.520 --> 00:37:32.560
+Byron Mackay: environment that you can learn in. Um
+
+928
+00:37:32.560 --> 00:37:35.839
+Byron Mackay: and I hope that uh that if any of you uh
+
+929
+00:37:35.839 --> 00:37:37.920
+Byron Mackay: have a will that all of you will reach
+
+930
+00:37:37.920 --> 00:37:41.040
+Byron Mackay: out um and and see what it takes to get
+
+931
+00:37:41.040 --> 00:37:43.040
+Byron Mackay: in and we can see you in class here at
+
+932
+00:37:43.040 --> 00:37:45.200
+Byron Mackay: Gauntlet.
+
+933
+00:37:45.200 --> 00:37:47.599
+Byron Mackay: Okay,
+
+934
+00:37:47.599 --> 00:37:50.079
+Byron Mackay: that's everything I have today uh for
+
+935
+00:37:50.079 --> 00:37:52.880
+Byron Mackay: you. Uh, I want to pause here for some
+
+936
+00:37:52.880 --> 00:37:56.720
+Byron Mackay: questions um that I can answer. Um, feel
+
+937
+00:37:56.720 --> 00:37:59.040
+Byron Mackay: free to ask anything about Gauntlet,
+
+938
+00:37:59.040 --> 00:38:01.839
+Byron Mackay: anything about learning, um, resources.
+
+939
+00:38:01.839 --> 00:38:04.560
+Byron Mackay: I'm happy to to give you resources for
+
+940
+00:38:04.560 --> 00:38:07.599
+Byron Mackay: your own personal plans, uh, or topics
+
+941
+00:38:07.599 --> 00:38:09.200
+Byron Mackay: that you may want or anything about the
+
+942
+00:38:09.200 --> 00:38:11.119
+Byron Mackay: market that I can shed some light on
+
+943
+00:38:11.119 --> 00:38:14.000
+Byron Mackay: with what I do know about, uh, from from
+
+944
+00:38:14.000 --> 00:38:16.880
+Byron Mackay: talking to our hiring partners or what
+
+945
+00:38:16.880 --> 00:38:19.520
+Byron Mackay: I've seen our graduates go off and do.
+
+946
+00:38:19.520 --> 00:38:23.760
+Byron Mackay: um what I see in the AI uh environment,
+
+947
+00:38:23.760 --> 00:38:25.520
+Byron Mackay: anything under there, anything else
+
+948
+00:38:25.520 --> 00:38:29.280
+Byron Mackay: beyond, happy to take a whack at it. Um
+
+949
+00:38:29.280 --> 00:38:31.359
+Byron Mackay: Unice asked, "What email do we reach out
+
+950
+00:38:31.359 --> 00:38:33.920
+Byron Mackay: to for Gauntlet?" Uh I would reach out,
+
+951
+00:38:33.920 --> 00:38:36.640
+Byron Mackay: well, there's the Gauntlet website. Um
+
+952
+00:38:36.640 --> 00:38:38.400
+Byron Mackay: there's the Gauntlet website that we can
+
+953
+00:38:38.400 --> 00:38:41.680
+Byron Mackay: get you uh pointed to and uh that'll be
+
+954
+00:38:41.680 --> 00:38:43.839
+Byron Mackay: gauntletai.com. That's a great place to
+
+955
+00:38:43.839 --> 00:38:45.839
+Byron Mackay: get to to fill out your application and
+
+956
+00:38:45.839 --> 00:38:48.880
+Byron Mackay: get going. Um, and then we will be
+
+957
+00:38:48.880 --> 00:38:52.320
+Byron Mackay: reaching out to you and get you uh to
+
+958
+00:38:52.320 --> 00:38:53.520
+Byron Mackay: help you get through the application
+
+959
+00:38:53.520 --> 00:38:55.920
+Byron Mackay: process and make sure we can get you uh
+
+960
+00:38:55.920 --> 00:38:59.040
+Byron Mackay: get you going here. Um, another question
+
+961
+00:38:59.040 --> 00:39:00.400
+Byron Mackay: here. I have a quick question on the
+
+962
+00:39:00.400 --> 00:39:01.839
+Byron Mackay: application. I applied on the for the
+
+963
+00:39:01.839 --> 00:39:04.880
+Byron Mackay: July 6 cohort. My application says still
+
+964
+00:39:04.880 --> 00:39:07.760
+Byron Mackay: under review. Okay, that's a that's a
+
+965
+00:39:07.760 --> 00:39:09.760
+Byron Mackay: great call. I'm going to take your name
+
+966
+00:39:09.760 --> 00:39:12.640
+Byron Mackay: back to our admissions guy and make sure
+
+967
+00:39:12.640 --> 00:39:15.680
+Byron Mackay: that uh that he is aware. And so I'm
+
+968
+00:39:15.680 --> 00:39:19.440
+Byron Mackay: gonna take a quick note here and just
+
+969
+00:39:19.440 --> 00:39:22.880
+Byron Mackay: make sure that he's uh
+
+970
+00:39:22.880 --> 00:39:25.520
+Byron Mackay: he is uh make sure he catches your name.
+
+971
+00:39:25.520 --> 00:39:27.280
+Byron Mackay: He we have a lot of applicants that come
+
+972
+00:39:27.280 --> 00:39:32.240
+Byron Mackay: in and so uh it's it's it's uh it's very
+
+973
+00:39:32.240 --> 00:39:34.000
+Byron Mackay: likely I just need a poke prod and poke
+
+974
+00:39:34.000 --> 00:39:37.119
+Byron Mackay: and we'll get you going. Um same
+
+975
+00:39:37.119 --> 00:39:38.480
+Byron Mackay: question regarding application still
+
+976
+00:39:38.480 --> 00:39:39.680
+Byron Mackay: pending. All right, I'll take your name
+
+977
+00:39:39.680 --> 00:39:44.079
+Byron Mackay: down as well. Get yours going there.
+
+978
+00:39:44.079 --> 00:39:46.720
+Byron Mackay: Um Nathan asked what interested in what
+
+979
+00:39:46.720 --> 00:39:48.240
+Byron Mackay: gauntlets our graduates end up doing
+
+980
+00:39:48.240 --> 00:39:50.640
+Byron Mackay: after the cohort. So part of gauntlet I
+
+981
+00:39:50.640 --> 00:39:52.320
+Byron Mackay: didn't mention this earlier but part of
+
+982
+00:39:52.320 --> 00:39:54.960
+Byron Mackay: gauntlet is that we bring in hiring
+
+983
+00:39:54.960 --> 00:39:57.760
+Byron Mackay: partners who are looking for people um
+
+984
+00:39:57.760 --> 00:40:00.160
+Byron Mackay: with the skill sets that we teach and
+
+985
+00:40:00.160 --> 00:40:02.320
+Byron Mackay: who have proven themselves that they can
+
+986
+00:40:02.320 --> 00:40:03.920
+Byron Mackay: learn in a rigorous environment and stay
+
+987
+00:40:03.920 --> 00:40:07.359
+Byron Mackay: up to date with their AI skills. And so
+
+988
+00:40:07.359 --> 00:40:11.760
+Byron Mackay: uh one what uh uh so what our graduates
+
+989
+00:40:11.760 --> 00:40:12.960
+Byron Mackay: I'm doing is getting jobs with these
+
+990
+00:40:12.960 --> 00:40:14.320
+Byron Mackay: with these hiring partners. We actually
+
+991
+00:40:14.320 --> 00:40:16.480
+Byron Mackay: bring them in and they get interviewed
+
+992
+00:40:16.480 --> 00:40:19.280
+Byron Mackay: in person. Um part of Gauntlet is that
+
+993
+00:40:19.280 --> 00:40:21.280
+Byron Mackay: we fly you out to Austin, Austin, Texas,
+
+994
+00:40:21.280 --> 00:40:22.800
+Byron Mackay: and we're all in the office together. We
+
+995
+00:40:22.800 --> 00:40:25.359
+Byron Mackay: have this great office with um all the
+
+996
+00:40:25.359 --> 00:40:28.800
+Byron Mackay: food and snacks and um and desk space
+
+997
+00:40:28.800 --> 00:40:31.520
+Byron Mackay: and monitors um that you can you can ask
+
+998
+00:40:31.520 --> 00:40:33.359
+Byron Mackay: for. We do your laundry, pay for all
+
+999
+00:40:33.359 --> 00:40:34.800
+Byron Mackay: your meals. It's great. And then we
+
+1000
+00:40:34.800 --> 00:40:36.079
+Byron Mackay: bring in hiring partners come interview
+
+1001
+00:40:36.079 --> 00:40:38.160
+Byron Mackay: you. So they all end up getting jobs and
+
+1002
+00:40:38.160 --> 00:40:40.480
+Byron Mackay: moving on from there. Um so it's really
+
+1003
+00:40:40.480 --> 00:40:43.520
+Byron Mackay: a a fun a fun time. Really exciting to
+
+1004
+00:40:43.520 --> 00:40:44.800
+Byron Mackay: see when everybody graduates and where
+
+1005
+00:40:44.800 --> 00:40:48.079
+Byron Mackay: they go off to. Um
+
+1006
+00:40:48.079 --> 00:40:49.599
+Byron Mackay: one asked what's the passing score for
+
+1007
+00:40:49.599 --> 00:40:52.720
+Byron Mackay: the CCAT? Yes, the CCAT is our uh is a
+
+1008
+00:40:52.720 --> 00:40:54.240
+Byron Mackay: cognitive test that we have everybody
+
+1009
+00:40:54.240 --> 00:40:57.839
+Byron Mackay: take. 40. 40 is the number um that we're
+
+1010
+00:40:57.839 --> 00:41:00.960
+Byron Mackay: going for with the with the CCAT. Um,
+
+1011
+00:41:00.960 --> 00:41:02.800
+Byron Mackay: it's uh if you haven't taken the CCAP
+
+1012
+00:41:02.800 --> 00:41:04.319
+Byron Mackay: before, it's I wouldn't say the
+
+1013
+00:41:04.319 --> 00:41:06.640
+Byron Mackay: questions are necessarily difficult, but
+
+1014
+00:41:06.640 --> 00:41:08.160
+Byron Mackay: it is a time test and they don't give
+
+1015
+00:41:08.160 --> 00:41:09.440
+Byron Mackay: you a lot of time. So, it's more about
+
+1016
+00:41:09.440 --> 00:41:12.079
+Byron Mackay: speed and doing your best in that time
+
+1017
+00:41:12.079 --> 00:41:14.560
+Byron Mackay: frame. Um, so just a little hint there
+
+1018
+00:41:14.560 --> 00:41:17.680
+Byron Mackay: that you get about 16, 17, 18 seconds
+
+1019
+00:41:17.680 --> 00:41:20.240
+Byron Mackay: per question. Um, that's about as much
+
+1020
+00:41:20.240 --> 00:41:21.839
+Byron Mackay: time as you want to give yourself on
+
+1021
+00:41:21.839 --> 00:41:24.480
+Byron Mackay: that test. It's a it's a tough one. Uh,
+
+1022
+00:41:24.480 --> 00:41:26.079
+Byron Mackay: just in terms of managing time, not
+
+1023
+00:41:26.079 --> 00:41:28.480
+Byron Mackay: necessarily in terms of questions.
+
+1024
+00:41:28.480 --> 00:41:31.680
+Byron Mackay: Um, all right. Nathan asks specifically,
+
+1025
+00:41:31.680 --> 00:41:34.319
+Byron Mackay: do they typically take uh AI engineering
+
+1026
+00:41:34.319 --> 00:41:35.760
+Byron Mackay: roles or more traditional software
+
+1027
+00:41:35.760 --> 00:41:37.839
+Byron Mackay: engineering roles? They're they're more
+
+1028
+00:41:37.839 --> 00:41:41.280
+Byron Mackay: AI engineering based. Um,
+
+1029
+00:41:41.280 --> 00:41:43.119
+Byron Mackay: they are there there's there's this kind
+
+1030
+00:41:43.119 --> 00:41:46.319
+Byron Mackay: of mix you could say when these roles
+
+1031
+00:41:46.319 --> 00:41:49.440
+Byron Mackay: where it's um part of it is is of course
+
+1032
+00:41:49.440 --> 00:41:51.440
+Byron Mackay: traditional software engineering, but
+
+1033
+00:41:51.440 --> 00:41:53.040
+Byron Mackay: they always want to have that AI
+
+1034
+00:41:53.040 --> 00:41:55.520
+Byron Mackay: component as well. Whether that's your
+
+1035
+00:41:55.520 --> 00:41:58.640
+Byron Mackay: coding workflow is a as a Gentic or your
+
+1036
+00:41:58.640 --> 00:42:01.200
+Byron Mackay: um you can build AI products um or you
+
+1037
+00:42:01.200 --> 00:42:04.560
+Byron Mackay: can be a leader at their company for um
+
+1038
+00:42:04.560 --> 00:42:07.119
+Byron Mackay: for implementing AI. It's it's those
+
+1039
+00:42:07.119 --> 00:42:08.240
+Byron Mackay: kinds of things that they're that
+
+1040
+00:42:08.240 --> 00:42:10.400
+Byron Mackay: they're looking for.
+
+1041
+00:42:10.400 --> 00:42:13.599
+Byron Mackay: All right. Ash asked uh also same thing
+
+1042
+00:42:13.599 --> 00:42:16.560
+Byron Mackay: for me. Okay. Yep. I'll put your name in
+
+1043
+00:42:16.560 --> 00:42:19.040
+Byron Mackay: um and we'll get you uh get that over to
+
+1044
+00:42:19.040 --> 00:42:22.800
+Byron Mackay: our uh to our applications.
+
+1045
+00:42:22.800 --> 00:42:24.720
+Byron Mackay: Um,
+
+1046
+00:42:24.720 --> 00:42:27.359
+Byron Mackay: perfect. Um, Unice asked, "Can somebody
+
+1047
+00:42:27.359 --> 00:42:29.520
+Byron Mackay: apply outside the can someone outside
+
+1048
+00:42:29.520 --> 00:42:32.560
+Byron Mackay: the US apply?" Um, right now we
+
+1049
+00:42:32.560 --> 00:42:35.680
+Byron Mackay: everybody needs to be a US citizen. Um,
+
+1050
+00:42:35.680 --> 00:42:37.200
+Byron Mackay: they need to be able to work in the US
+
+1051
+00:42:37.200 --> 00:42:41.359
+Byron Mackay: without um a visa. And so, uh, so for if
+
+1052
+00:42:41.359 --> 00:42:44.160
+Byron Mackay: you're not a US citizen, then Gauntlet
+
+1053
+00:42:44.160 --> 00:42:45.680
+Byron Mackay: might not be the best fit for you.
+
+1054
+00:42:45.680 --> 00:42:47.119
+Byron Mackay: Whereas, if you are a US citizen, you're
+
+1055
+00:42:47.119 --> 00:42:48.480
+Byron Mackay: just living outside the US, that's
+
+1056
+00:42:48.480 --> 00:42:50.400
+Byron Mackay: perfectly fine as long as you're okay
+
+1057
+00:42:50.400 --> 00:42:54.240
+Byron Mackay: coming back to the US. Um,
+
+1058
+00:42:54.240 --> 00:42:56.560
+Byron Mackay: all right. Uh, Stephen asked, "I would
+
+1059
+00:42:56.560 --> 00:42:57.920
+Byron Mackay: like to join the next Gauntlet cohort. I
+
+1060
+00:42:57.920 --> 00:42:59.200
+Byron Mackay: applied in the past but didn't pursue
+
+1061
+00:42:59.200 --> 00:43:01.200
+Byron Mackay: strongly enough. I spent the past few
+
+1062
+00:43:01.200 --> 00:43:02.240
+Byron Mackay: months building new software and
+
+1063
+00:43:02.240 --> 00:43:03.920
+Byron Mackay: programs and really enjoy it." Awesome.
+
+1064
+00:43:03.920 --> 00:43:05.520
+Byron Mackay: Stephen, you're the kind of guy I like
+
+1065
+00:43:05.520 --> 00:43:08.160
+Byron Mackay: to talk to. Um, I would fill out the
+
+1066
+00:43:08.160 --> 00:43:09.359
+Byron Mackay: application, start the application
+
+1067
+00:43:09.359 --> 00:43:12.000
+Byron Mackay: again, uh, or if it lets you continue
+
+1068
+00:43:12.000 --> 00:43:13.359
+Byron Mackay: it. Not sure you might have to apply for
+
+1069
+00:43:13.359 --> 00:43:15.440
+Byron Mackay: a new one if it's been long enough, but
+
+1070
+00:43:15.440 --> 00:43:17.760
+Byron Mackay: uh, get to the website, see what you can
+
+1071
+00:43:17.760 --> 00:43:21.280
+Byron Mackay: do, and we'll get you going.
+
+1072
+00:43:21.280 --> 00:43:22.880
+Byron Mackay: Um,
+
+1073
+00:43:22.880 --> 00:43:25.040
+Byron Mackay: all right. Uh,
+
+1074
+00:43:25.040 --> 00:43:27.280
+Byron Mackay: Alexandra asks, "I'm early in my career
+
+1075
+00:43:27.280 --> 00:43:28.800
+Byron Mackay: and still in school, but I'm really
+
+1076
+00:43:28.800 --> 00:43:30.640
+Byron Mackay: interested in attending. What skills,
+
+1077
+00:43:30.640 --> 00:43:32.640
+Byron Mackay: experiences, and projects should I focus
+
+1078
+00:43:32.640 --> 00:43:34.640
+Byron Mackay: on to maximize my chances of being a
+
+1079
+00:43:34.640 --> 00:43:37.200
+Byron Mackay: strong candidate?" Uh, Alexander, that's
+
+1080
+00:43:37.200 --> 00:43:41.280
+Byron Mackay: a great question. I would focus on
+
+1081
+00:43:41.280 --> 00:43:44.640
+Byron Mackay: um building building something really
+
+1082
+00:43:44.640 --> 00:43:46.640
+Byron Mackay: challenging. I think because you're
+
+1083
+00:43:46.640 --> 00:43:48.240
+Byron Mackay: doing already in school, I know you're
+
+1084
+00:43:48.240 --> 00:43:49.680
+Byron Mackay: going to get the all the all the other
+
+1085
+00:43:49.680 --> 00:43:51.599
+Byron Mackay: things figured out, but what really sets
+
+1086
+00:43:51.599 --> 00:43:54.560
+Byron Mackay: people apart is
+
+1087
+00:43:54.560 --> 00:43:58.160
+Byron Mackay: um is digging into a hard problem and
+
+1088
+00:43:58.160 --> 00:44:00.960
+Byron Mackay: and then figuring it out. Um it doesn't
+
+1089
+00:44:00.960 --> 00:44:03.920
+Byron Mackay: have to be something so large or so big,
+
+1090
+00:44:03.920 --> 00:44:05.440
+Byron Mackay: but there are enough hard problems out
+
+1091
+00:44:05.440 --> 00:44:07.920
+Byron Mackay: there that you can find where it's
+
+1092
+00:44:07.920 --> 00:44:09.440
+Byron Mackay: building it and building it well and
+
+1093
+00:44:09.440 --> 00:44:10.880
+Byron Mackay: building it right. You're going to find
+
+1094
+00:44:10.880 --> 00:44:13.119
+Byron Mackay: hurdles that you have to overcome. And
+
+1095
+00:44:13.119 --> 00:44:14.800
+Byron Mackay: just that process of overcoming those
+
+1096
+00:44:14.800 --> 00:44:18.000
+Byron Mackay: hurdles and learning um what hurdles
+
+1097
+00:44:18.000 --> 00:44:21.200
+Byron Mackay: exist that goes a long long way for
+
+1098
+00:44:21.200 --> 00:44:23.760
+Byron Mackay: people especially in your in in your uh
+
+1099
+00:44:23.760 --> 00:44:25.680
+Byron Mackay: scenario at school where you get that
+
+1100
+00:44:25.680 --> 00:44:27.680
+Byron Mackay: exposure, get that experience and you
+
+1101
+00:44:27.680 --> 00:44:29.440
+Byron Mackay: can push yourself on. Where do you get
+
+1102
+00:44:29.440 --> 00:44:32.319
+Byron Mackay: the where do you get that uh where are
+
+1103
+00:44:32.319 --> 00:44:33.680
+Byron Mackay: you going to go and find those kinds of
+
+1104
+00:44:33.680 --> 00:44:35.920
+Byron Mackay: problems? Go find some people to talk to
+
+1105
+00:44:35.920 --> 00:44:37.359
+Byron Mackay: who are a little bit further along in
+
+1106
+00:44:37.359 --> 00:44:39.359
+Byron Mackay: their careers. Go talk to them. Go see
+
+1107
+00:44:39.359 --> 00:44:41.839
+Byron Mackay: what they're working on. um show
+
+1108
+00:44:41.839 --> 00:44:44.160
+Byron Mackay: interest in what they're working on and
+
+1109
+00:44:44.160 --> 00:44:46.319
+Byron Mackay: build those relationships with them.
+
+1110
+00:44:46.319 --> 00:44:48.160
+Byron Mackay: Help them become part of your tribe
+
+1111
+00:44:48.160 --> 00:44:49.520
+Byron Mackay: where they can become the people that
+
+1112
+00:44:49.520 --> 00:44:52.800
+Byron Mackay: you can go to to chat with uh to throw
+
+1113
+00:44:52.800 --> 00:44:56.319
+Byron Mackay: ideas uh to to toss your ideas over the
+
+1114
+00:44:56.319 --> 00:44:58.480
+Byron Mackay: wall and see what they think to get that
+
+1115
+00:44:58.480 --> 00:45:01.119
+Byron Mackay: feedback. Um big part, right, are all
+
+1116
+00:45:01.119 --> 00:45:03.440
+Byron Mackay: that learning uh learning environment
+
+1117
+00:45:03.440 --> 00:45:05.440
+Byron Mackay: that we talked about. finding those
+
+1118
+00:45:05.440 --> 00:45:07.119
+Byron Mackay: people that would really help you push
+
+1119
+00:45:07.119 --> 00:45:09.440
+Byron Mackay: along um your abilities and get you
+
+1120
+00:45:09.440 --> 00:45:11.599
+Byron Mackay: ready um to join and and when you're
+
+1121
+00:45:11.599 --> 00:45:15.040
+Byron Mackay: ready, we'd love to have you.
+
+1122
+00:45:15.040 --> 00:45:17.040
+Byron Mackay: Um Stephen said, "I don't think the
+
+1123
+00:45:17.040 --> 00:45:18.480
+Byron Mackay: website will let me reapply. I'd like
+
+1124
+00:45:18.480 --> 00:45:20.160
+Byron Mackay: you to recheck out." Stephen, I'll take
+
+1125
+00:45:20.160 --> 00:45:22.720
+Byron Mackay: your name down, get you in with our
+
+1126
+00:45:22.720 --> 00:45:26.240
+Byron Mackay: admissions guy. Um and we'll see what we
+
+1127
+00:45:26.240 --> 00:45:28.480
+Byron Mackay: can do.
+
+1128
+00:45:28.480 --> 00:45:30.000
+Byron Mackay: All right.
+
+1129
+00:45:30.000 --> 00:45:32.240
+Byron Mackay: Um, Ash, is there any repos, frameworks,
+
+1130
+00:45:32.240 --> 00:45:33.599
+Byron Mackay: tooling that you would recommend in
+
+1131
+00:45:33.599 --> 00:45:37.280
+Byron Mackay: general for agentic workflows uh that uh
+
+1132
+00:45:37.280 --> 00:45:39.200
+Byron Mackay: that we've all used or lean on at
+
+1133
+00:45:39.200 --> 00:45:40.400
+Byron Mackay: Gauntlet through the through the
+
+1134
+00:45:40.400 --> 00:45:42.400
+Byron Mackay: syllabus or have it have you uh just
+
+1135
+00:45:42.400 --> 00:45:44.480
+Byron Mackay: found through the cohorts kind of rings
+
+1136
+00:45:44.480 --> 00:45:46.720
+Byron Mackay: true? That's a really interesting
+
+1137
+00:45:46.720 --> 00:45:49.440
+Byron Mackay: question. Um
+
+1138
+00:45:49.440 --> 00:45:53.119
+Byron Mackay: because it it evolves so much. But
+
+1139
+00:45:53.119 --> 00:45:54.880
+Byron Mackay: what's so interesting is it actually
+
+1140
+00:45:54.880 --> 00:45:57.920
+Byron Mackay: always comes back to like the basic
+
+1141
+00:45:57.920 --> 00:46:00.640
+Byron Mackay: principles that we picked up on early
+
+1142
+00:46:00.640 --> 00:46:04.240
+Byron Mackay: early on of of how to build agents.
+
+1143
+00:46:04.240 --> 00:46:08.400
+Byron Mackay: Um spectrum development is effective.
+
+1144
+00:46:08.400 --> 00:46:11.040
+Byron Mackay: Um,
+
+1145
+00:46:11.040 --> 00:46:12.800
+Byron Mackay: knowing the tools, knowing the breadth
+
+1146
+00:46:12.800 --> 00:46:14.640
+Byron Mackay: of tools is really important that you
+
+1147
+00:46:14.640 --> 00:46:17.440
+Byron Mackay: have available to you. Um, also really
+
+1148
+00:46:17.440 --> 00:46:19.040
+Byron Mackay: important.
+
+1149
+00:46:19.040 --> 00:46:20.720
+Byron Mackay: Uh,
+
+1150
+00:46:20.720 --> 00:46:22.800
+Byron Mackay: but as far as specific frameworks or
+
+1151
+00:46:22.800 --> 00:46:30.150
+Byron Mackay: tooling, let me put it this way. Um,
+
+1152
+00:46:30.160 --> 00:46:33.040
+Byron Mackay: the goal of engineering
+
+1153
+00:46:33.040 --> 00:46:37.599
+Byron Mackay: is to become a manager of agents.
+
+1154
+00:46:37.599 --> 00:46:39.680
+Byron Mackay: And so
+
+1155
+00:46:39.680 --> 00:46:44.880
+Byron Mackay: the um your ability to
+
+1156
+00:46:44.880 --> 00:46:48.160
+Byron Mackay: take a codebase and
+
+1157
+00:46:48.160 --> 00:46:51.119
+Byron Mackay: instruct it or or add enough context
+
+1158
+00:46:51.119 --> 00:46:52.800
+Byron Mackay: throughout your codebase that an agent
+
+1159
+00:46:52.800 --> 00:46:55.280
+Byron Mackay: can go through and follow along is
+
+1160
+00:46:55.280 --> 00:46:57.839
+Byron Mackay: really critical. Despite the framework
+
+1161
+00:46:57.839 --> 00:46:59.839
+Byron Mackay: that you use,
+
+1162
+00:46:59.839 --> 00:47:02.560
+Byron Mackay: the context is context is still king.
+
+1163
+00:47:02.560 --> 00:47:06.240
+Byron Mackay: Always probably will be. And so when
+
+1164
+00:47:06.240 --> 00:47:10.000
+Byron Mackay: you're able to um take cla files for
+
+1165
+00:47:10.000 --> 00:47:12.480
+Byron Mackay: example, I'm a claude person. So cloudmd
+
+1166
+00:47:12.480 --> 00:47:15.440
+Byron Mackay: files I agent MD files are the ones I
+
+1167
+00:47:15.440 --> 00:47:18.800
+Byron Mackay: believe for um for other frameworks. But
+
+1168
+00:47:18.800 --> 00:47:20.720
+Byron Mackay: cloudmd files are basically context you
+
+1169
+00:47:20.720 --> 00:47:24.160
+Byron Mackay: can drop in different folders in your um
+
+1170
+00:47:24.160 --> 00:47:28.319
+Byron Mackay: in your codebase. That is the crux of
+
+1171
+00:47:28.319 --> 00:47:30.000
+Byron Mackay: getting your agent to perform well in
+
+1172
+00:47:30.000 --> 00:47:32.560
+Byron Mackay: your codebase. You can give it the right
+
+1173
+00:47:32.560 --> 00:47:34.640
+Byron Mackay: instructions. you can split it up
+
+1174
+00:47:34.640 --> 00:47:36.960
+Byron Mackay: amongst many cloudmd files across many
+
+1175
+00:47:36.960 --> 00:47:38.400
+Byron Mackay: different directories so that it's not
+
+1176
+00:47:38.400 --> 00:47:42.400
+Byron Mackay: just all in one big context dump that
+
+1177
+00:47:42.400 --> 00:47:44.720
+Byron Mackay: it's very specific and it allows the LM
+
+1178
+00:47:44.720 --> 00:47:47.920
+Byron Mackay: to focus more on that context and when
+
+1179
+00:47:47.920 --> 00:47:49.599
+Byron Mackay: you get to a point where you feel like
+
+1180
+00:47:49.599 --> 00:47:51.920
+Byron Mackay: you've got that down where you've got
+
+1181
+00:47:51.920 --> 00:47:54.880
+Byron Mackay: that context down where you want it then
+
+1182
+00:47:54.880 --> 00:47:57.760
+Byron Mackay: you have an agent that just builds that
+
+1183
+00:47:57.760 --> 00:47:59.839
+Byron Mackay: piece of your application. So, maybe you
+
+1184
+00:47:59.839 --> 00:48:03.839
+Byron Mackay: have a a backend or database agent or um
+
+1185
+00:48:03.839 --> 00:48:05.920
+Byron Mackay: a front-end agent and you say, "Okay,
+
+1186
+00:48:05.920 --> 00:48:07.200
+Byron Mackay: now you're going to go and just build
+
+1187
+00:48:07.200 --> 00:48:09.040
+Byron Mackay: whatever I tell you." And then you can
+
+1188
+00:48:09.040 --> 00:48:12.560
+Byron Mackay: tweak that agent a little bit to uh to
+
+1189
+00:48:12.560 --> 00:48:14.400
+Byron Mackay: your liking until that agent can really
+
+1190
+00:48:14.400 --> 00:48:16.560
+Byron Mackay: run it autonomously, you know, most of
+
+1191
+00:48:16.560 --> 00:48:19.280
+Byron Mackay: generally all the time. And then you do
+
+1192
+00:48:19.280 --> 00:48:20.400
+Byron Mackay: that across the board. You build
+
+1193
+00:48:20.400 --> 00:48:21.839
+Byron Mackay: different agents for doing different
+
+1194
+00:48:21.839 --> 00:48:23.680
+Byron Mackay: tasks.
+
+1195
+00:48:23.680 --> 00:48:25.520
+Byron Mackay: And once you get to the point where you
+
+1196
+00:48:25.520 --> 00:48:27.040
+Byron Mackay: have all these agents that can run
+
+1197
+00:48:27.040 --> 00:48:30.160
+Byron Mackay: asynchronously and run autonomously
+
+1198
+00:48:30.160 --> 00:48:32.240
+Byron Mackay: um and you're not managing them anymore,
+
+1199
+00:48:32.240 --> 00:48:33.760
+Byron Mackay: you're just kind of giving them tasks.
+
+1200
+00:48:33.760 --> 00:48:36.000
+Byron Mackay: There's too much task giving for you to
+
+1201
+00:48:36.000 --> 00:48:38.000
+Byron Mackay: do. That's when you build your
+
+1202
+00:48:38.000 --> 00:48:40.960
+Byron Mackay: orchestrator above all of them
+
+1203
+00:48:40.960 --> 00:48:42.400
+Byron Mackay: and then you just talk to the
+
+1204
+00:48:42.400 --> 00:48:44.480
+Byron Mackay: orchestrator and he distributes the
+
+1205
+00:48:44.480 --> 00:48:46.000
+Byron Mackay: tasks.
+
+1206
+00:48:46.000 --> 00:48:47.599
+Byron Mackay: That's where it's all going. That's
+
+1207
+00:48:47.599 --> 00:48:50.240
+Byron Mackay: where I see everything heading. however
+
+1208
+00:48:50.240 --> 00:48:52.640
+Byron Mackay: way you look at it, whether it's through
+
+1209
+00:48:52.640 --> 00:48:55.760
+Byron Mackay: um you know, Ralph loop or whether it's
+
+1210
+00:48:55.760 --> 00:48:59.440
+Byron Mackay: through um um there's there's there's
+
+1211
+00:48:59.440 --> 00:49:00.960
+Byron Mackay: other there's other loops that I' that
+
+1212
+00:49:00.960 --> 00:49:03.119
+Byron Mackay: I've seen or spectrum developments or
+
+1213
+00:49:03.119 --> 00:49:04.960
+Byron Mackay: all these other things. It all comes
+
+1214
+00:49:04.960 --> 00:49:07.359
+Byron Mackay: back to can you provide the best context
+
+1215
+00:49:07.359 --> 00:49:09.599
+Byron Mackay: possible. So, I'm just going to stick
+
+1216
+00:49:09.599 --> 00:49:11.200
+Byron Mackay: with that principle for now and not give
+
+1217
+00:49:11.200 --> 00:49:12.960
+Byron Mackay: like a specific framework tooling or
+
+1218
+00:49:12.960 --> 00:49:15.599
+Byron Mackay: repo. Um
+
+1219
+00:49:15.599 --> 00:49:18.960
+Byron Mackay: okay, I will give you one repo.
+
+1220
+00:49:18.960 --> 00:49:21.839
+Byron Mackay: Awesome Skills. Um, that one is great.
+
+1221
+00:49:21.839 --> 00:49:23.920
+Byron Mackay: Uh, Awesome Skills has a bunch of skills
+
+1222
+00:49:23.920 --> 00:49:25.359
+Byron Mackay: that you can go through, read through.
+
+1223
+00:49:25.359 --> 00:49:28.240
+Byron Mackay: It gives you great, um, exposure to what
+
+1224
+00:49:28.240 --> 00:49:29.599
+Byron Mackay: a good skill looks like and also
+
+1225
+00:49:29.599 --> 00:49:31.359
+Byron Mackay: probably what some bad skills look like.
+
+1226
+00:49:31.359 --> 00:49:34.079
+Byron Mackay: U,, but you can leverage those. Um, a
+
+1227
+00:49:34.079 --> 00:49:35.680
+Byron Mackay: favorite one that keeps coming up is
+
+1228
+00:49:35.680 --> 00:49:39.440
+Byron Mackay: Grill Me, the Grill Me skill. Um, that
+
+1229
+00:49:39.440 --> 00:49:41.440
+Byron Mackay: one's excellent because it will really
+
+1230
+00:49:41.440 --> 00:49:43.760
+Byron Mackay: push you to think through your ideas,
+
+1231
+00:49:43.760 --> 00:49:44.960
+Byron Mackay: especially if you're doing spectrum
+
+1232
+00:49:44.960 --> 00:49:46.720
+Byron Mackay: development or you're building a you're
+
+1233
+00:49:46.720 --> 00:49:48.640
+Byron Mackay: trying to, you know, build an app or or
+
+1234
+00:49:48.640 --> 00:49:50.480
+Byron Mackay: you have a PR you want to do. The grill
+
+1235
+00:49:50.480 --> 00:49:53.200
+Byron Mackay: me PR is or the grill me skill is really
+
+1236
+00:49:53.200 --> 00:49:54.480
+Byron Mackay: good at pointing out things that you
+
+1237
+00:49:54.480 --> 00:49:56.720
+Byron Mackay: maybe didn't notice before. All right,
+
+1238
+00:49:56.720 --> 00:49:59.760
+Byron Mackay: long answer. Uh, but there you go. All
+
+1239
+00:49:59.760 --> 00:50:03.119
+Byron Mackay: right. Um, let's see. Coleman, is this
+
+1240
+00:50:03.119 --> 00:50:04.640
+Byron Mackay: boot camp a good fit for someone with 10
+
+1241
+00:50:04.640 --> 00:50:07.359
+Byron Mackay: years of system admin roles but no
+
+1242
+00:50:07.359 --> 00:50:09.200
+Byron Mackay: traditional dev background building
+
+1243
+00:50:09.200 --> 00:50:11.920
+Byron Mackay: custom applications with AI um for work
+
+1244
+00:50:11.920 --> 00:50:14.880
+Byron Mackay: and personally? Um that is a great
+
+1245
+00:50:14.880 --> 00:50:16.640
+Byron Mackay: question. It depends on what these last
+
+1246
+00:50:16.640 --> 00:50:18.319
+Byron Mackay: few years you've been able to build I
+
+1247
+00:50:18.319 --> 00:50:22.319
+Byron Mackay: would say. Um CIS admin roles do not
+
+1248
+00:50:22.319 --> 00:50:26.000
+Byron Mackay: usually fit well with the um with most
+
+1249
+00:50:26.000 --> 00:50:28.559
+Byron Mackay: of our hiring partners. Um, but
+
+1250
+00:50:28.559 --> 00:50:29.920
+Byron Mackay: depending on what you've built, it might
+
+1251
+00:50:29.920 --> 00:50:32.720
+Byron Mackay: expand to other uh hire partners as
+
+1252
+00:50:32.720 --> 00:50:35.280
+Byron Mackay: well. So, um, something to look into.
+
+1253
+00:50:35.280 --> 00:50:37.760
+Byron Mackay: Happy to look at your LinkedIn and have
+
+1254
+00:50:37.760 --> 00:50:40.079
+Byron Mackay: a conversation or you should just apply.
+
+1255
+00:50:40.079 --> 00:50:42.800
+Byron Mackay: Um, our our applications guy is great at
+
+1256
+00:50:42.800 --> 00:50:44.240
+Byron Mackay: helping you kind of navigate that and
+
+1257
+00:50:44.240 --> 00:50:46.880
+Byron Mackay: make that decision as well.
+
+1258
+00:50:46.880 --> 00:50:49.119
+Byron Mackay: Um, Derek, how does gauntlet screening
+
+1259
+00:50:49.119 --> 00:50:51.040
+Byron Mackay: process compare to say IBM's? Is that a
+
+1260
+00:50:51.040 --> 00:50:52.640
+Byron Mackay: comparison the team has ever made? I
+
+1261
+00:50:52.640 --> 00:50:54.800
+Byron Mackay: have never made that comparison. That's
+
+1262
+00:50:54.800 --> 00:50:57.200
+Byron Mackay: a great idea. Um, I'd have to look into
+
+1263
+00:50:57.200 --> 00:51:01.359
+Byron Mackay: it and see. Um, but very interesting. I
+
+1264
+00:51:01.359 --> 00:51:03.680
+Byron Mackay: will say that at Gauntlet, we do kind of
+
+1265
+00:51:03.680 --> 00:51:04.960
+Byron Mackay: see ourselves as like a 10-week
+
+1266
+00:51:04.960 --> 00:51:08.319
+Byron Mackay: interview. And so, it's a lot of rigor,
+
+1267
+00:51:08.319 --> 00:51:09.920
+Byron Mackay: um, a lot of learning, a lot of
+
+1268
+00:51:09.920 --> 00:51:13.680
+Byron Mackay: building, um, a lot of, um, soft skills,
+
+1269
+00:51:13.680 --> 00:51:16.240
+Byron Mackay: checking, how well do you communicate,
+
+1270
+00:51:16.240 --> 00:51:18.880
+Byron Mackay: um, how well do you, uh, present ideas,
+
+1271
+00:51:18.880 --> 00:51:20.559
+Byron Mackay: how well do you give feedback, that sort
+
+1272
+00:51:20.559 --> 00:51:24.160
+Byron Mackay: of thing. Um, a lot of, uh, a lot of
+
+1273
+00:51:24.160 --> 00:51:25.680
+Byron Mackay: things that we do there. And then by the
+
+1274
+00:51:25.680 --> 00:51:27.520
+Byron Mackay: end of that you get hired on by these
+
+1275
+00:51:27.520 --> 00:51:31.119
+Byron Mackay: companies. So um but like I said you
+
+1276
+00:51:31.119 --> 00:51:34.079
+Byron Mackay: also get your you get room and board and
+
+1277
+00:51:34.079 --> 00:51:36.720
+Byron Mackay: meals and a great network and even your
+
+1278
+00:51:36.720 --> 00:51:39.200
+Byron Mackay: laundry paid for uh while you do it all.
+
+1279
+00:51:39.200 --> 00:51:41.520
+Byron Mackay: So a lot of fun.
+
+1280
+00:51:41.520 --> 00:51:43.839
+Byron Mackay: Um
+
+1281
+00:51:43.839 --> 00:51:46.000
+Byron Mackay: Stephen asks uh question regarding the
+
+1282
+00:51:46.000 --> 00:51:48.640
+Byron Mackay: projects that uh sponsors or companies
+
+1283
+00:51:48.640 --> 00:51:50.079
+Byron Mackay: bring to you. Do you have flexibility
+
+1284
+00:51:50.079 --> 00:51:51.920
+Byron Mackay: for which projects we would like to work
+
+1285
+00:51:51.920 --> 00:51:53.280
+Byron Mackay: on? I'm particularly interested in
+
+1286
+00:51:53.280 --> 00:51:55.440
+Byron Mackay: healthcare or chemical engineering. Love
+
+1287
+00:51:55.440 --> 00:51:58.559
+Byron Mackay: it. Yes, absolutely. We have um we have
+
+1288
+00:51:58.559 --> 00:52:00.800
+Byron Mackay: partners in both of those and so you'll
+
+1289
+00:52:00.800 --> 00:52:02.640
+Byron Mackay: have opportunities to work or you could
+
+1290
+00:52:02.640 --> 00:52:03.599
+Byron Mackay: you would have an opportunity to
+
+1291
+00:52:03.599 --> 00:52:05.440
+Byron Mackay: interface with them and do projects for
+
+1292
+00:52:05.440 --> 00:52:08.160
+Byron Mackay: them and talk to them. Um there's a we
+
+1293
+00:52:08.160 --> 00:52:10.559
+Byron Mackay: have a quite a quite a good range I
+
+1294
+00:52:10.559 --> 00:52:13.040
+Byron Mackay: would say um of industries that we
+
+1295
+00:52:13.040 --> 00:52:14.720
+Byron Mackay: cover. Um healthcare and chemical
+
+1296
+00:52:14.720 --> 00:52:17.200
+Byron Mackay: engineering being two of them.
+
+1297
+00:52:17.200 --> 00:52:18.800
+Byron Mackay: Um
+
+1298
+00:52:18.800 --> 00:52:22.079
+Byron Mackay: ah uh Uriel I see you sorry you missed
+
+1299
+00:52:22.079 --> 00:52:24.400
+Byron Mackay: the session but this is all recorded uh
+
+1300
+00:52:24.400 --> 00:52:26.880
+Byron Mackay: so you have a chance to go back u which
+
+1301
+00:52:26.880 --> 00:52:28.800
+Byron Mackay: is your question I just realized is your
+
+1302
+00:52:28.800 --> 00:52:31.359
+Byron Mackay: question well is it recorded yes it is
+
+1303
+00:52:31.359 --> 00:52:33.760
+Byron Mackay: um and so you'll be able to get that and
+
+1304
+00:52:33.760 --> 00:52:35.760
+Byron Mackay: watch it and I believe there will be a
+
+1305
+00:52:35.760 --> 00:52:36.960
+Byron Mackay: transcript if there's not at least you
+
+1306
+00:52:36.960 --> 00:52:38.240
+Byron Mackay: get the recording and you'll be able to
+
+1307
+00:52:38.240 --> 00:52:44.240
+Byron Mackay: watch it there. Um let's see. Um
+
+1308
+00:52:44.240 --> 00:52:46.559
+Byron Mackay: Ash kind of coming back to my comment
+
+1309
+00:52:46.559 --> 00:52:49.839
+Byron Mackay: earlier about agentic modularization.
+
+1310
+00:52:49.839 --> 00:52:55.839
+Byron Mackay: Yes. uh that that is the way it's going
+
+1311
+00:52:55.839 --> 00:52:58.800
+Byron Mackay: I believe and and I what I see companies
+
+1312
+00:52:58.800 --> 00:53:00.400
+Byron Mackay: doing
+
+1313
+00:53:00.400 --> 00:53:02.240
+Byron Mackay: what I see some of the better companies
+
+1314
+00:53:02.240 --> 00:53:06.640
+Byron Mackay: doing I should say is I see them um I
+
+1315
+00:53:06.640 --> 00:53:09.359
+Byron Mackay: seeing engineers who have figure who are
+
+1316
+00:53:09.359 --> 00:53:11.200
+Byron Mackay: figuring that out in the engineering
+
+1317
+00:53:11.200 --> 00:53:13.520
+Byron Mackay: space and then the engineering team
+
+1318
+00:53:13.520 --> 00:53:15.839
+Byron Mackay: that's in charge of that the the number
+
+1319
+00:53:15.839 --> 00:53:18.720
+Byron Mackay: of people gets smaller
+
+1320
+00:53:18.720 --> 00:53:21.680
+Byron Mackay: because the people they they take some
+
+1321
+00:53:21.680 --> 00:53:22.800
+Byron Mackay: of those people and start putting them
+
+1322
+00:53:22.800 --> 00:53:25.359
+Byron Mackay: elsewhere and saying do that again over
+
+1323
+00:53:25.359 --> 00:53:28.400
+Byron Mackay: here with these people
+
+1324
+00:53:28.400 --> 00:53:30.319
+Byron Mackay: um because you don't need as many
+
+1325
+00:53:30.319 --> 00:53:32.160
+Byron Mackay: engineers to maintain it once you get it
+
+1326
+00:53:32.160 --> 00:53:35.280
+Byron Mackay: set up. But I will say fair warning
+
+1327
+00:53:35.280 --> 00:53:37.359
+Byron Mackay: getting it set up is not as easy as it
+
+1328
+00:53:37.359 --> 00:53:38.880
+Byron Mackay: sounds.
+
+1329
+00:53:38.880 --> 00:53:42.160
+Byron Mackay: It takes a lot of work, a lot of review,
+
+1330
+00:53:42.160 --> 00:53:44.720
+Byron Mackay: a lot of knowing what good looks like
+
+1331
+00:53:44.720 --> 00:53:46.319
+Byron Mackay: and
+
+1332
+00:53:46.319 --> 00:53:48.640
+Byron Mackay: knowing what quality is. Knowing what
+
+1333
+00:53:48.640 --> 00:53:52.880
+Byron Mackay: quality looks like is going to um
+
+1334
+00:53:52.880 --> 00:53:56.480
+Byron Mackay: determine how effective the full
+
+1335
+00:53:56.480 --> 00:53:59.920
+Byron Mackay: orchestration actually is. So, it's a
+
+1336
+00:53:59.920 --> 00:54:02.240
+Byron Mackay: lot of work, takes takes takes time. Be
+
+1337
+00:54:02.240 --> 00:54:05.359
+Byron Mackay: patient with it. Um but it will it can
+
+1338
+00:54:05.359 --> 00:54:07.680
+Byron Mackay: come to fruition. I've I've seen it
+
+1339
+00:54:07.680 --> 00:54:10.400
+Byron Mackay: myself from different um from different
+
+1340
+00:54:10.400 --> 00:54:13.520
+Byron Mackay: individuals and within our our group. Um
+
+1341
+00:54:13.520 --> 00:54:15.839
+Byron Mackay: and it's it's it is possible. It is very
+
+1342
+00:54:15.839 --> 00:54:18.800
+Byron Mackay: successful and it works. Um, just know
+
+1343
+00:54:18.800 --> 00:54:20.960
+Byron Mackay: that you are the quality bar. You're the
+
+1344
+00:54:20.960 --> 00:54:24.960
+Byron Mackay: one measuring the output. So,
+
+1345
+00:54:24.960 --> 00:54:27.520
+Byron Mackay: awesome. Okay,
+
+1346
+00:54:27.520 --> 00:54:29.680
+Byron Mackay: that looks like all the questions. Thank
+
+1347
+00:54:29.680 --> 00:54:32.319
+Byron Mackay: you everybody for coming tonight. Um,
+
+1348
+00:54:32.319 --> 00:54:33.920
+Byron Mackay: and thank you anybody who's watching
+
+1349
+00:54:33.920 --> 00:54:36.960
+Byron Mackay: this after the fact. really appreciate
+
+1350
+00:54:36.960 --> 00:54:40.079
+Byron Mackay: uh you coming and uh I hope that this
+
+1351
+00:54:40.079 --> 00:54:43.920
+Byron Mackay: has been useful to kind of take into uh
+
+1352
+00:54:43.920 --> 00:54:47.040
+Byron Mackay: taking in some perspective of what is
+
+1353
+00:54:47.040 --> 00:54:48.960
+Byron Mackay: required in the learning process.
+
+1354
+00:54:48.960 --> 00:54:50.800
+Byron Mackay: Remember it's the environment, it's the
+
+1355
+00:54:50.800 --> 00:54:52.880
+Byron Mackay: people you surround yourself by. It's
+
+1356
+00:54:52.880 --> 00:54:55.680
+Byron Mackay: how you leverage these tools. Um it's
+
+1357
+00:54:55.680 --> 00:54:57.520
+Byron Mackay: something that we've found works really,
+
+1358
+00:54:57.520 --> 00:54:59.760
+Byron Mackay: really well at Gauntlet and I've seen it
+
+1359
+00:54:59.760 --> 00:55:02.000
+Byron Mackay: work really well throughout my career.
+
+1360
+00:55:02.000 --> 00:55:06.640
+Byron Mackay: So go out there um build your tribe and
+
+1361
+00:55:06.640 --> 00:55:09.200
+Byron Mackay: uh and please consider coming to
+
+1362
+00:55:09.200 --> 00:55:10.800
+Byron Mackay: Gauntlet where we have a great group of
+
+1363
+00:55:10.800 --> 00:55:12.400
+Byron Mackay: individuals who want to learn just like
+
+1364
+00:55:12.400 --> 00:55:14.480
+Byron Mackay: you do and we can help jumpst start your
+
+1365
+00:55:14.480 --> 00:55:17.760
+Byron Mackay: career um with our 10-week program. It's
+
+1366
+00:55:17.760 --> 00:55:19.280
+Byron Mackay: a it's a lot of fun and I hope to hear
+
+1367
+00:55:19.280 --> 00:55:21.200
+Byron Mackay: from you all soon. Have a great night
+
+1368
+00:55:21.200 --> 00:55:23.359
+Byron Mackay: everybody.
+

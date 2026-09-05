@@ -1,0 +1,1482 @@
+WEBVTT
+
+1
+00:00:05.020 --> 00:00:08.129
+Bryon Mackay: Well, welcome everybody who's coming in right now.
+
+2
+00:00:08.550 --> 00:00:12.070
+Bryon Mackay: We're gonna have a few more trickling in here in a second.
+
+3
+00:00:12.190 --> 00:00:14.930
+Bryon Mackay: Welcome to Night School, we've got a special one tonight.
+
+4
+00:00:15.030 --> 00:00:17.940
+Bryon Mackay: Usually at night school, we're doing a lot of…
+
+5
+00:00:18.040 --> 00:00:35.629
+Bryon Mackay: a lot of talk about specific topics, where one of us has come up with a project to show you, or some discussions that we want to have, and tonight we're doing a very special one where we actually have two recently graduated Gauntlet Champions.
+
+6
+00:00:35.630 --> 00:00:51.750
+Bryon Mackay: and one who's in the midst of it right now in Week 2, and we're gonna have some Q&A. Gonna get to learn a little bit about what it is like to be a part of Gauntlet, what is it like after Gauntlet, what do you learn, what was your…
+
+7
+00:00:51.870 --> 00:01:05.729
+Bryon Mackay: greatest, you know, success? What were some of the failures? What were some of the assumptions? And we're just gonna talk about a lot of those things here. We're gonna start off by, going around the room and introducing everybody.
+
+8
+00:01:05.760 --> 00:01:19.310
+Bryon Mackay: On this panel here. And on top of that, if you have any questions, please feel free to drop them in the chat, and we will get to them. We'll have a… we'll take questions and do a Q&A at the end with your questions, so that we can get those answered as well.
+
+9
+00:01:19.350 --> 00:01:39.339
+Bryon Mackay: So I'll kick it off. My name is Byron, I'm the, I'm the Director of Curriculum and Learning here at Gauntlet, so everything that we try to… we do here, everything we learn, the topics we cover, all that is something that I do my very best to keep up on, which can be a challenge if you've ever tried to keep up with AI and the news of AI and all the changes.
+
+10
+00:01:39.340 --> 00:01:46.139
+Bryon Mackay: I do feel like it's… it's… I don't know if it's slowing down or accelerating. Every other week, it always seems like…
+
+11
+00:01:46.140 --> 00:01:57.799
+Bryon Mackay: something new just hits really hard, and suddenly we're all learning again, something new. But it's, it's an exciting time, it's a great opportunity, for us as engineers.
+
+12
+00:01:57.920 --> 00:02:06.440
+Bryon Mackay: to really grow and flex in this new and still uncharted territory, I would say, of AI. It's been a… it's a lot, a lot of fun.
+
+13
+00:02:06.570 --> 00:02:19.539
+Bryon Mackay: But I'm gonna pass it over to my friend Mega, to introduce herself. She just graduated from the last cohort only a week and a half ago, so it's very, very recent. So, Mega, go ahead, take it away.
+
+14
+00:02:19.710 --> 00:02:32.830
+Megha: Hi everyone, I'm Megha. I've spent close to 20 years in software engineering across finance, trading, enterprise systems, and ed tech, mostly building large-scale backend and distributed systems.
+
+15
+00:02:32.920 --> 00:02:51.690
+Megha: Coming into Gauntlet, I thought AI would mostly accelerate implementation speed. What surprised me was that, the biggest shift wasn't just coding faster, it was changing how I think about the entire software development lifecycle.
+
+16
+00:02:51.690 --> 00:02:53.999
+Megha: Gauntlet was the best thing that happened to me.
+
+17
+00:02:54.000 --> 00:03:01.289
+Megha: I had to rethink planning, architecture, debugging, collaboration, prototyping,
+
+18
+00:03:01.730 --> 00:03:05.349
+Megha: Even how much code should exist in the first place.
+
+19
+00:03:05.670 --> 00:03:15.299
+Megha: I'm currently working at Nerdy, and I'm just taking the gauntlet energy and vibe and my learning to Nerdy, and then implementing it there, and…
+
+20
+00:03:15.610 --> 00:03:19.829
+Megha: continuing the, truly AI-native environment.
+
+21
+00:03:20.460 --> 00:03:31.009
+Bryon Mackay: There you go. That's awesome. And congratulations on the job, by the way. I don't know if I formally actually ever said that to you, but congratulations on the job. All right, Henry, we're gonna go over to you. Go ahead.
+
+22
+00:03:31.010 --> 00:03:48.430
+Henry: Sweet. Yeah, thanks. Hi, everyone. My name is Henry. I was part of the last cohort at Gauntlet as well. I graduated, whatever it was, a week and a half ago. Before Gauntlet, I was a software engineer for a few years, just under 5, I want to say, about 4 years. I was at Chewy, the dog food company, if you guys know that one.
+
+23
+00:03:48.470 --> 00:03:51.699
+Henry: And so, you know, they weren't as fast on the AI,
+
+24
+00:03:51.700 --> 00:04:15.709
+Henry: kind of wave as Gauntlet was, so I ended up coming to Gauntlet, it was a great time, would highly recommend it if any of you guys are thinking about it. And I graduated, the Cohort 4, and I started my job this last Monday at some, like, private equity adjacent company here. It's in Austin, it's a remote job, that's why I'm not in a city, as you see in the background. But, yeah, really enjoyed my time there, really got up to speed.
+
+25
+00:04:15.710 --> 00:04:29.189
+Henry: I would say, to Byron's point of, like, have things been slowing down, have they been speeding up? I think AI is probably, like, the fastest-moving field that is out there right now, but I think we've kind of just gotten used to it. So the pace is starting to feel slower, but it's the same as it's always been. But yeah, that's all from me.
+
+26
+00:04:29.440 --> 00:04:41.779
+Bryon Mackay: That's a great point, Hendra. Never thought about that, but maybe I am just becoming a little more used to it. Huh, go figure. Alright, and then we have Adam, who is in the gauntlet as we speak. Adam, go ahead and introduce yourself.
+
+27
+00:04:42.670 --> 00:04:56.290
+Adam: Hey everybody, I'm Adam. I am in the gauntlet, and I'm still living, so that's a good thing. Yeah, so I spent 5 years doing my own startup until about…
+
+28
+00:04:56.380 --> 00:05:12.080
+Adam: A couple of years ago, when I ended up taking a job at Stripe, where I was working on their experimental projects team. So, I was on one of the fastest-moving teams in the company, and the company, Stripe, is pretty fast moving when it comes to AI, but…
+
+29
+00:05:12.470 --> 00:05:18.319
+Adam: especially after these coding agents got really big, Claude Code and Codex,
+
+30
+00:05:18.330 --> 00:05:37.100
+Adam: I just felt like it wasn't moving fast enough, even at Stripe. And so, I left, a little over a month ago. I originally was like, I'm just gonna work on my own projects and see what sticks, but I got referred to Gauntlet by a friend who saw one of Austin's, one of the founder's tweets on
+
+31
+00:05:37.100 --> 00:05:41.709
+Adam: on Twitter about the program, and I applied, and here I am, and loving it so far.
+
+32
+00:05:42.510 --> 00:05:51.689
+Bryon Mackay: Awesome, thanks, Adam. Yeah, it's a… it's quite a program, I would say, one that really pushes us to build under pressure.
+
+33
+00:05:51.790 --> 00:06:06.420
+Bryon Mackay: Which is actually kind of where we're going to start here a little bit. So, the first thing I want to talk about is kind of before Gauntlet, what was your workflow? What was your software development workflow in terms of how you leveraged AI?
+
+34
+00:06:06.420 --> 00:06:23.580
+Bryon Mackay: And how… what did that mean? What did that workflow, you know, what were you trying to accomplish with AI? How'd you leverage the tools before you came to Gauntlet? Maybe we had more time, you were just trying to meet deliverables. I'll pass it off to whoever wants to start with that question.
+
+35
+00:06:25.680 --> 00:06:38.320
+Megha: I can go. Like, before Gauntlet, the traditional software development lifecycle was, like, requirement collection, designing, implementation, QA, and deployment, the standard linear process.
+
+36
+00:06:38.510 --> 00:06:39.450
+Megha: But…
+
+37
+00:06:39.550 --> 00:06:47.990
+Megha: and AI… I never used AI before coming to Gauntlet, so I was kind of of the assumption that,
+
+38
+00:06:48.010 --> 00:07:00.350
+Megha: it's just used… prompt engineering is everything. I was quite comfortable at… uncomfortable at times, because many assumptions from traditional engineering don't survive in a truly AI-native environment.
+
+39
+00:07:00.350 --> 00:07:09.260
+Megha: But that's not true. One thing that surprised me is that strong engineering fundamentals actually became more important in AI-first environment, not less.
+
+40
+00:07:09.260 --> 00:07:16.430
+Megha: So AI Native SDLC after Gauntlet is, like, more rapid exploration, parallel experimentation.
+
+41
+00:07:16.450 --> 00:07:27.479
+Megha: And iteration, fast delivery, but at the same time, iteration and then evaluation loops, then maybe human in the group, refinement.
+
+42
+00:07:27.910 --> 00:07:29.260
+Megha: Thinking faster.
+
+43
+00:07:29.510 --> 00:07:37.530
+Bryon Mackay: Yeah, yeah, very, very good. Henry, how about you? What was it like before… before Gauntlet? What was your life… what was your development life cycle like?
+
+44
+00:07:37.970 --> 00:07:54.220
+Henry: Yeah, I would say it was a kind of a traditional software engineering thing, where once again, like, you're kind of, you know, I was, you know, more of a junior engineer, so I'm picking up tickets that we had groomed and whatnot, following typical Agile methodologies, and scoping them out, and working through them, doing the whole code review loop. And so it would take,
+
+45
+00:07:54.540 --> 00:08:01.149
+Henry: you know, however long it might take, a day or two, depending on the ticket, or even longer, if it's a longer ticket, but, Chewy, they were semi, like…
+
+46
+00:08:01.260 --> 00:08:20.109
+Henry: I would say they were the corporate, like, AI forward, where it's like, oh, here's a cursor account, like, go ahead and use this, you know, but you're heavily limited on the amount of usage, a ChatGPT account as well, but they weren't really on top of, I guess, AI and really embracing, kind of, the speed that you can iterate with at AI, so… so I would… I didn't come in
+
+47
+00:08:20.340 --> 00:08:45.270
+Henry: unfamiliar with AI, which I think helped me probably the first week or two of the remote phase. It was definitely a higher pace environment, and so knowing, kind of, how to prompt and talk to a cursor agent helped a bit. But the… I don't know if it's still the same structure of Gauntlet, but the way they have it set up was, you know, you had a budget of what you can spend, kind of, on different AI tools, and so what I really enjoyed about Gauntlet was I was able to explore Cloud code. I'd never used that before Gauntlet. I was able to explore, you know, a chat
+
+48
+00:08:45.270 --> 00:08:54.979
+Henry: 50 Pro account, and so I ended up using a completely different, like, a smaller, more minimal coating harness. It's called Pi. You could go pi.dev, I think, is the website.
+
+49
+00:08:55.030 --> 00:09:03.230
+Henry: It talks about it, and so from there, I built up my own extension where I essentially just, like, automated the flow that I ended up becoming
+
+50
+00:09:03.560 --> 00:09:28.149
+Henry: kind of what gauntlet pushes, and it just is the standard currently for AI engineering of spec-driven development, and kind of fleshing out a PRD. And so, you know, manually, you're essentially talking to an AI chatbot, either Claude, you know, ideally Opus, and then maybe ChatGPT Pro are thinking, coming up with specs that you want to build, and thinking out the architecture decisions with it. And I would go back and forth, because oftentimes ChatGPT catches Claude's blind spots, and Claude catches ChatGPT's blind spots.
+
+51
+00:09:28.150 --> 00:09:31.209
+Henry: So I just found myself pacing back and forth, and so…
+
+52
+00:09:31.210 --> 00:09:39.800
+Henry: I ended up building my own kind of extension that would do that automatically, and so that was one of the bigger unlocks for me, and I think the freedom that Gallant gives you to explore these different tools, because they are
+
+53
+00:09:39.840 --> 00:09:56.009
+Henry: Like, two weeks ago, Claude was the best. The last two weeks, Codex, and there's been some argument that people are loving Codex, so I really like the freedom that they give, because the space is changing so rapidly, that we have to explore different tools, and then, you know, stay up to date with kind of the best workflow. That works for you, at least. So, yeah.
+
+54
+00:09:56.010 --> 00:10:13.990
+Bryon Mackay: Yeah, I really like that take there, Henry. The more I use different LLMs, the more I'm realizing it's really not one, right? It's like, there's actually… it's really better to just have more, for different tasks, and, you know, even the amount of context you provide one model versus the other will give you
+
+55
+00:10:14.070 --> 00:10:28.319
+Bryon Mackay: some unique answers that are helpful as you build out. And I just want to highlight, too, that when you come to Gauntlet, you know, there's… we provide a stipend for all of these tools to give you that freedom to go and explore that Henry was talking about.
+
+56
+00:10:28.320 --> 00:10:42.310
+Bryon Mackay: Adam, you have a bit of an interesting background as an entrepreneur, so, that's not… I'm sure you were leveraging LLMs to do a lot of different things, but how is… what was that like before Gauntlet, and what have you learned so far in the cohort?
+
+57
+00:10:42.870 --> 00:10:45.290
+Adam: Yeah, I mean, look, I'll say this. I…
+
+58
+00:10:45.670 --> 00:10:56.479
+Adam: definitely, like, keep up a lot with the tools, but I've already unlocked a lot in the first week and a half that I've been here in terms of, like, how to use them most effectively.
+
+59
+00:10:56.590 --> 00:11:11.819
+Adam: I would candidly say, like, especially when you're in a startup mindset, you can get really caught up in, like, pure vibe coding, just prompting your way from start to finish until you have something that at least appears to work.
+
+60
+00:11:13.410 --> 00:11:27.129
+Adam: in terms of, like, how that's changed already in the first week and a half, there's so much structured, like, research, planning, strategizing that goes into, like, really, you know.
+
+61
+00:11:27.540 --> 00:11:42.479
+Adam: getting something production-ready, not just, like, a cool toy demo that works, but, like, enterprise-grade, production-ready. I mean, we're working on something in the healthcare space right now, so, like, there's a lot of, like.
+
+62
+00:11:42.820 --> 00:11:49.729
+Adam: You know, production quality constraints on the project, and it takes a lot of…
+
+63
+00:11:49.840 --> 00:12:03.429
+Adam: you know, really thinking and reasoning your way through, and not just, you know, handing something off to the LLM and letting it cook while you go watch Netflix in the background or something, right? And so…
+
+64
+00:12:03.530 --> 00:12:12.679
+Adam: I think that's been really the biggest thing for me. Like, I was already comfortable using, like, the harnesses out there, like Claude Code, Codex, etc, but…
+
+65
+00:12:12.870 --> 00:12:19.220
+Adam: I didn't really have much of a strategy in terms of…
+
+66
+00:12:19.480 --> 00:12:27.590
+Adam: Like, really being the, like, mastermind project manager and engineering manager, you know, at the helm.
+
+67
+00:12:29.140 --> 00:12:36.270
+Bryon Mackay: Nice. This next question's gonna be, a bit of a piggyback, you could say, when you first
+
+68
+00:12:36.270 --> 00:12:49.869
+Bryon Mackay: came to Gauntlet, I want to know about the first assumption that you had about coding with AI that did not survive. What was one of those things that you came in going, I know how I'm going to do this, and then you realized, hey, this isn't going to work.
+
+69
+00:12:49.980 --> 00:13:05.179
+Bryon Mackay: I already kind of shared mine a little bit, but I'll share it again. Mine was the fact that you could just rely on one thing, on one harness, right? I can't just rely on Claude. In fact, I've seen over time and time again, from my own experience, and also from reading about others.
+
+70
+00:13:05.260 --> 00:13:19.260
+Bryon Mackay: this immense value of even finding different models to compete, the opportunity to… if you want to ask a question, but you don't want it to be in the… there's op… there's actually an opportunity to not be in the context of your project.
+
+71
+00:13:19.260 --> 00:13:28.369
+Bryon Mackay: But maybe ask that question outside of the context of your project, so you get this, like, unfiltered answer. So just not working in the harness entirely.
+
+72
+00:13:28.400 --> 00:13:38.669
+Bryon Mackay: in your codebase was one of the assumptions that, for me, I've since crushed, and I'm going, okay, like, it's actually… there's actually a lot of value to kind of approach this problem differently.
+
+73
+00:13:38.740 --> 00:13:51.639
+Bryon Mackay: So, I will again toss this one up to whoever wants to answer it first, but what was the first assumption of coding with AI that did not survive when you came to Gauntlet?
+
+74
+00:13:52.350 --> 00:13:53.010
+Bryon Mackay: Good.
+
+75
+00:13:55.630 --> 00:14:03.190
+Adam: We'll go first, on this one. I have one that's fresh, obviously, because I'm right in the middle of it right now.
+
+76
+00:14:04.840 --> 00:14:13.460
+Adam: I think that I thought… that you could… Essentially get away with…
+
+77
+00:14:13.980 --> 00:14:18.020
+Adam: Managing these tools, and having them know more than you.
+
+78
+00:14:18.420 --> 00:14:23.289
+Adam: And the real learning that I've had is to…
+
+79
+00:14:23.810 --> 00:14:38.509
+Adam: really make something of the highest quality, you need to spend the time… like, if, you know, one of these coding agents goes and starts implementing something that you've never done before, that you don't understand, like, you need to take the time to, like, probe it, research it.
+
+80
+00:14:38.510 --> 00:14:44.750
+Adam: Understand it as if you were the one doing it, and that it's just a tool that's speeding you up.
+
+81
+00:14:44.800 --> 00:14:49.100
+Adam: Not a tool that's going into a knowledge area that
+
+82
+00:14:49.310 --> 00:14:55.740
+Adam: you don't actually know. If it does that, that's okay, but then take the time to, like, catch up to it, if that makes sense.
+
+83
+00:14:56.530 --> 00:15:03.279
+Bryon Mackay: Yeah, I like that. I like that approach. I can totally relate to that. It's, it's something that I feel like…
+
+84
+00:15:03.350 --> 00:15:10.640
+Bryon Mackay: kind of to Mega's point earlier, like, software development, like, good software development skills, good practices are still super relevant.
+
+85
+00:15:10.700 --> 00:15:28.969
+Bryon Mackay: And it kind of leans into that thing, what you're saying there, Adam, like, if I had something… it's trying to set up something that I've never done before, I'm gonna have a really hard time guiding it. And so just taking that moment to just sit and just… just learn. And the nice thing about this kind of learning, I feel like, is… and maybe this is an assumption that I have to break, too.
+
+86
+00:15:29.050 --> 00:15:45.340
+Bryon Mackay: is that you don't have to learn it to the point of, like, I can implement this, I know it inside and out, but you need to know enough of it that you can be like, talk about it intelligently to the LLM so that you can at least guide it in a good way, and so that it doesn't get away from you.
+
+87
+00:15:45.340 --> 00:15:47.759
+Adam: I was just gonna say, you have to know enough
+
+88
+00:15:48.110 --> 00:15:50.580
+Adam: To be able to rein it in.
+
+89
+00:15:50.800 --> 00:15:51.160
+Bryon Mackay: Yeah.
+
+90
+00:15:51.160 --> 00:15:55.620
+Adam: it inevitably goes rogue on you, because it will happen, it always happens, right?
+
+91
+00:15:55.620 --> 00:15:56.270
+Bryon Mackay: Always does.
+
+92
+00:15:56.420 --> 00:16:00.560
+Adam: And so, if you don't know the subject matter well enough.
+
+93
+00:16:00.670 --> 00:16:15.360
+Adam: at the level that Byron is talking about, at least, then it will get away from you, and you won't know that, because you'll be like, oh, it's smart, it knows what it's doing. But in a lot of cases, it really doesn't. Like, it's not as far along as the hype
+
+94
+00:16:16.040 --> 00:16:27.789
+Adam: you know, on, like, Twitter makes it seem like it is. But, I mean, it's incredible, and it's an incredible force multiplier, but yeah, that's really been the biggest learning for me, is, like, you just… you have to know what you're doing.
+
+95
+00:16:28.190 --> 00:16:28.550
+Bryon Mackay: Yeah.
+
+96
+00:16:28.550 --> 00:16:38.050
+Megha: Yeah, I think that's the biggest mindset shift also for me, that the value is no longer in writing, every line of code manually.
+
+97
+00:16:38.050 --> 00:16:52.019
+Megha: the value mode higher up the stack, problem framing, architectural decisions, decomposition, validation, and having observability, and then the iteration speed, so that…
+
+98
+00:16:52.210 --> 00:17:13.899
+Megha: changed the… that was the huge mindset shift. I realized, like, many of my old workflows were optimized for human typing speed, instead of decision, velocity. That's the, change after coming to Gauntlet. I saw, like, to make the faster decision, and then iteration. You just go with that, what you understand, but plan, and then…
+
+99
+00:17:14.010 --> 00:17:18.400
+Megha: Iterate over it, and make the decisions faster.
+
+100
+00:17:20.220 --> 00:17:22.450
+Bryon Mackay: Isn't that interesting? Yeah, Henry, go ahead.
+
+101
+00:17:22.720 --> 00:17:44.000
+Henry: Yeah, yeah, I would say, for me, a lot of my shift came from… I wasn't even really aware of, kind of, spectrum development or PRD kind of creation for a larger ticket, something that I was trying to scope out in the moment. And so, before, I was trying to just, like, kind of jam in as much context as I can into a prompt, which is obviously a nice way to approach it, but I'm realizing now that, you know, the best…
+
+102
+00:17:44.500 --> 00:17:51.330
+Henry: way for me to kind of handle a project is to… to plan out longer and longer, like, almost… I probably spend about, like.
+
+103
+00:17:51.490 --> 00:18:09.099
+Henry: 50-60% of my actual time on a project, planning it out. Like, at least my mental energy, fully focused on, like, okay, these are the decisions I'm making, this is, you know, I want to understand, kind of, how we're doing it, why we're doing it, before even starting to flesh out the build. And so it just feels weird, because a lot of the time,
+
+104
+00:18:09.460 --> 00:18:18.189
+Henry: like, now you can almost sit back while it's doing a lot of, like, the coding thousands of lines of code. Meanwhile, you know, previously that would take a whole day or two, and so just kind of understanding that
+
+105
+00:18:18.350 --> 00:18:34.869
+Henry: if you plan it out nice enough, it should hopefully follow those to a T. It doesn't always, as kind of Adam touched on before, and Megan, anyone who kind of does agent-driven development will figure it out after a little bit, and so that's kind of where your manual testing still has to come in. Unfortunately, software factories aren't complete yet.
+
+106
+00:18:34.870 --> 00:18:40.460
+Henry: But yeah, I would say that'd be, like, my biggest shift was away from kind of just simple prompt engineering to just
+
+107
+00:18:40.460 --> 00:18:43.439
+Henry: Taking a whole spectrum and development kind of orientation to coding.
+
+108
+00:18:44.050 --> 00:19:02.969
+Bryon Mackay: Very cool. Yeah, that's… it takes a lot more thought and foresight than it did before. I feel like sometimes I could have just enough, like, oh, I built a data model, oh, I built a system sequence diagram, like, I can go from here. And now it's like, no, I mean, that's a great start, and we should still do some of those things, but…
+
+109
+00:19:03.040 --> 00:19:18.199
+Bryon Mackay: there's a lot more, I think what Mega said, higher level, we've moved up in terms of our thinking, and we have to be really intentional with what we do. Otherwise, it starts to run us, and that's not a good place to be, so…
+
+110
+00:19:18.290 --> 00:19:20.040
+Bryon Mackay: Alright.
+
+111
+00:19:20.180 --> 00:19:27.819
+Bryon Mackay: So, let's, let's go up to, this, this next question where,
+
+112
+00:19:28.340 --> 00:19:41.099
+Bryon Mackay: Let's talk about a little bit of the hype. I think somebody mentioned the hype earlier. What, in your opinion, is the most overhyped part of AI-native development? And then, on the other side, what's the most
+
+113
+00:19:41.110 --> 00:19:50.300
+Bryon Mackay: under-hyped part. Let's hear about what… what did you prove to be, like, wow, that really wasn't great, and what was the one thing where you're like, we did not talk about this enough?
+
+114
+00:19:50.350 --> 00:19:52.970
+Bryon Mackay: So, toss it up again. Who wants to go?
+
+115
+00:19:54.440 --> 00:20:03.680
+Henry: I would say, for me, the one thing that… I mean, maybe this will change, and I'm sure it will, actually, it's already kind of changing a bit more, but for me, in Gauntlet, like, the big new fad was, like.
+
+116
+00:20:03.680 --> 00:20:15.520
+Henry: you gotta have 10 agents working in parallel, you have to have this agent orchestration system, and to an extent, that works, and it's fun to experiment. Like, I wouldn't… I wouldn't tell anybody to not experiment with it, I think it's a valuable experience to learn and feel.
+
+117
+00:20:16.360 --> 00:20:37.599
+Henry: But it is, to me, just a little bit unsustainable to manage. It's like, you know, you end up having a couple clods that are… it ends up either going off course, if you have a full, you know, I don't know if you're using Gastown or Gas City, whatever it might be, it'll just veer off course a bit from what you intended it to, or if you are manually trying to swap between 8 windows at once, like, the last 4 are really…
+
+118
+00:20:37.600 --> 00:20:43.050
+Henry: sitting for a lot of the time as you're managing the main four. So I would say a bit of the…
+
+119
+00:20:43.200 --> 00:20:59.559
+Henry: the agent orchestration systems, to me, were a bit overhyped of my purity gauntlet, so I ended up kind of switching back down to… I'm only really only having one, two, three sessions in parallel, now personally, just because I think the quality, is higher when I manage it like that. And then one… one thing that I think was…
+
+120
+00:20:59.910 --> 00:21:11.580
+Henry: under… maybe appreciated was also, at the same time, people were starting to have the conversation, like, oh, our RAG system's dead. And so that's… that's still a talking point. Honestly, I feel like it resurfaces every two weeks. It's like, RAG's dead, like…
+
+121
+00:21:11.730 --> 00:21:23.399
+Henry: RLMs killed it, recursive language models killed it, and it's like, alright, like, everybody keeps saying RAG is dead, but it ends up just becoming more and more of a specific use case. It's like, obviously RAG still exists for these,
+
+122
+00:21:23.400 --> 00:21:33.850
+Henry: certain use cases versus others, and I think, at least for my cohort, a lot of the hiring partners were coming in, and a lot of their projects, like, if you knew RAG systems well, and you were able to implement it with
+
+123
+00:21:34.040 --> 00:21:50.440
+Henry: a lot of their data, because essentially, many of the companies who are looking to implement AI have a corpus of this data that they kind of want to have AI not just be a general chatbot and use the information that they have, essentially their moat, and so a lot of their solutions are around rack systems, and so that was something that,
+
+124
+00:21:50.440 --> 00:22:06.320
+Henry: you know, I feel like I dug deep on that kind of section, and it ended up coming up in almost all my interviews, and it was very… I was very glad that I was pretty well versed in it, I'll say that, and so I think… I think that was… people keep trying to hate on RAC, but it's… it's like a cockroach, it hasn't died yet, so…
+
+125
+00:22:06.430 --> 00:22:16.379
+Bryon Mackay: It's like the rag cockroach. Never gonna go away, always gonna be there. We'll talk about it in 20 years from now. We'll still be saying rag is dead.
+
+126
+00:22:16.380 --> 00:22:16.960
+Henry: Yeah.
+
+127
+00:22:17.260 --> 00:22:17.880
+Bryon Mackay: Awesome.
+
+128
+00:22:17.880 --> 00:22:20.780
+Megha: I think same with the MCP server. MCP is…
+
+129
+00:22:21.050 --> 00:22:26.569
+Megha: is not required, but I think we will still continue to use it, although CLI is doing better.
+
+130
+00:22:27.570 --> 00:22:45.260
+Bryon Mackay: Yeah, yeah, MCP's in an interesting spot. I… I have a feeling that it's going to find its spot, and it's gonna become a really big deal again, but in a specific spot. I don't know what it's gonna be exactly. I… I just think about some of the things that Apple resurrected with the iPhone.
+
+131
+00:22:45.260 --> 00:22:50.929
+Bryon Mackay: And I just think, you know what? It might just happen again. It might just happen again. So,
+
+132
+00:22:51.060 --> 00:22:51.850
+Bryon Mackay: Yeah.
+
+133
+00:22:52.470 --> 00:23:02.010
+Bryon Mackay: Adam, anything come to mind for you of anything that's… that you've seen so far that you're like, that was way overhyped in the industry, or maybe something that's been underappreciated?
+
+134
+00:23:03.030 --> 00:23:19.750
+Adam: I don't think there's much that's underappreciated or underpiked right now. I think the biggest thing is, like, again, I'm, like, a little bit too terminally online with Twitter, so I, like, see the discourse and the way it changes day to day, and…
+
+135
+00:23:20.400 --> 00:23:23.699
+Adam: I just think this entire, like…
+
+136
+00:23:23.950 --> 00:23:33.050
+Adam: Dario, Anthropic, like, software jobs are gonna be dead in the next 5 years thing is, like, completely overhyped.
+
+137
+00:23:33.170 --> 00:23:38.529
+Adam: I think, if anything, The combination of, like…
+
+138
+00:23:40.600 --> 00:23:45.380
+Adam: So, so if you view AI basically as a force multiplier, it's able to just…
+
+139
+00:23:46.080 --> 00:23:54.229
+Adam: create and produce code at a rate that, like, no human can. 10x. More, right?
+
+140
+00:23:54.860 --> 00:23:55.660
+Adam: It…
+
+141
+00:23:55.820 --> 00:24:06.540
+Adam: only increases the demand for that production, and somebody's gonna need to continue to drive it forever, in my opinion. And so…
+
+142
+00:24:06.690 --> 00:24:15.130
+Adam: I think, if anything, there might be a chance that it increases jobs. I think that's a strong possibility.
+
+143
+00:24:15.940 --> 00:24:29.839
+Adam: But either way, like, I do not think we're anywhere close to being replaced as software engineers, because, like, as we talked about earlier, like, the knowledge to understand, you know, the material that you're working with
+
+144
+00:24:29.960 --> 00:24:42.380
+Adam: like, you can't reasonably have AI implement RAG for you if you don't know anything about RAG. Like, you'll have no idea if it's working well or not, and the AI is certainly not gonna one-shot it every time. So…
+
+145
+00:24:42.750 --> 00:24:46.250
+Adam: That's my two cents on that.
+
+146
+00:24:47.190 --> 00:24:57.540
+Bryon Mackay: I think that's great. I think there's a lot to be said about the job market that we're in, and I would agree that there's going to be this,
+
+147
+00:24:57.650 --> 00:25:05.950
+Bryon Mackay: this kind of moment where suddenly software engineers come back, and everyone goes, oh, we need these people again, and it's gonna just shoot back up, because right now, it feels like…
+
+148
+00:25:06.060 --> 00:25:07.899
+Bryon Mackay: The need is going down.
+
+149
+00:25:08.110 --> 00:25:19.259
+Bryon Mackay: But in any… in every case, when we've had these technological advancements in the past, it's gone… it's kind of gone through this phase where it's like, oh, we don't need them anymore, because we have…
+
+150
+00:25:19.390 --> 00:25:23.059
+Bryon Mackay: Yeah, so we have that, and all of a sudden, it just creates more, more opportunities.
+
+151
+00:25:23.280 --> 00:25:33.399
+Bryon Mackay: My, my one opinion on, one opinion on that I've had for quite a while, and so if I'm repeating myself, sorry, but it's that…
+
+152
+00:25:34.030 --> 00:25:42.539
+Bryon Mackay: We are in a spot right now where engineers are mostly impacted by agents, and by coating… and by these harnesses. But the thing is, is…
+
+153
+00:25:42.720 --> 00:25:58.640
+Bryon Mackay: every other industry has not been disrupted nearly as much as we have, as engineers. Nobody else has their own cloud code for healthcare, finance. There may be companies trying to start those, but then it keeps going on, what about small businesses? What about this? What about that?
+
+154
+00:25:58.700 --> 00:26:11.300
+Bryon Mackay: And I feel like… I feel like there's going to be some very entrepreneurial-minded people, much like Adam, who are going to come up with these great ideas and say, hey, I'm going to build a harness for this.
+
+155
+00:26:11.510 --> 00:26:13.930
+Bryon Mackay: And when somebody figures it out.
+
+156
+00:26:13.940 --> 00:26:19.690
+Bryon Mackay: Whatever that thing is, whenever somebody figures that out, suddenly everyone's gonna be like, oh.
+
+157
+00:26:19.690 --> 00:26:35.079
+Bryon Mackay: now I see how this works, I want to go do that, right? It's kind of like the whole, I want to build the X of, you know, the Uber for X, or the Amazon for Y. It's those things we've always said. We just haven't quite nailed it yet on a consumer standpoint, but as soon as somebody does.
+
+158
+00:26:35.310 --> 00:26:43.700
+Bryon Mackay: I think that it's just going to flourish, it's gonna start growing like wildfire, and then suddenly, all these engineering jobs are gonna start up again, because people need people to build the harnesses.
+
+159
+00:26:43.740 --> 00:26:59.629
+Bryon Mackay: And who's going to be ready for that? It's the ones who have worked on the harnesses the longest, the engineers, because we know how they work, we've been dealing with them for that long. That's my take. I'll leave it there for anybody else to say otherwise, but that's where I think I'm going. It might go.
+
+160
+00:26:59.960 --> 00:27:08.839
+Bryon Mackay: Alright, I have a question I'm gonna pose… got two separate questions here. I'm gonna pose the first one to Mega and Henry.
+
+161
+00:27:09.100 --> 00:27:13.129
+Bryon Mackay: What do you see now, being on the other side of Gauntlet.
+
+162
+00:27:13.250 --> 00:27:24.520
+Bryon Mackay: that you couldn't see 100 hours in, where Adam is right now. He's 100 hours in to Gauntlet, but what do you see now, being at the tail end of it all, that you couldn't see then?
+
+163
+00:27:26.900 --> 00:27:28.530
+Adam: Yes, please give me free…
+
+164
+00:27:28.530 --> 00:27:32.160
+Bryon Mackay: Right, more asking for Adam. For asking for a friend.
+
+165
+00:27:32.160 --> 00:27:32.770
+Henry: Yeah.
+
+166
+00:27:32.770 --> 00:27:33.380
+Bryon Mackay: Do you…
+
+167
+00:27:33.380 --> 00:27:45.319
+Henry: Do you mean in the sense of, like, in terms of the AI engineering world in general, or kind of, like, my experience at Gauntlet? Like, if I were to give Adam tips to how to do well in Gauntlet versus, you know, the software development lifecycle?
+
+168
+00:27:45.320 --> 00:27:53.880
+Bryon Mackay: I'll… let's go with… let's go with some tips, let's go with some tips, like, what… now that you're on this side of it, what would you… what are the things you wish you knew?
+
+169
+00:27:53.990 --> 00:27:55.380
+Bryon Mackay: to do differently.
+
+170
+00:27:55.380 --> 00:27:55.700
+Megha: Aye.
+
+171
+00:27:55.700 --> 00:27:56.119
+Bryon Mackay: There we go.
+
+172
+00:27:56.120 --> 00:27:56.969
+Megha: Out of bedroom.
+
+173
+00:27:56.970 --> 00:28:01.449
+Bryon Mackay: Megan was like, oh man, can I tell you what? I was looking.
+
+174
+00:28:01.450 --> 00:28:17.449
+Megha: obsessed over tools and, perfectionism on over-engineering. Like, kind of when I started Gauntlet first week, we were working on Collab Canvas, and I was so surprised to see, like, I can do anything. I can just keep the prompt, and then it
+
+175
+00:28:17.510 --> 00:28:28.379
+Megha: it builds the code, and then my app is ready. And then in second week, I shifted my mindset, like, no, I need to plan thoroughly, and then I did over-engineering in my second week, and then ended up
+
+176
+00:28:28.380 --> 00:28:39.419
+Megha: not building a very good app, which I could have. Like, I tried to understand, way too much. So I think kind of finding a perfect balance between…
+
+177
+00:28:39.420 --> 00:28:42.460
+Megha: Understanding the code, and
+
+178
+00:28:42.490 --> 00:28:50.830
+Megha: engineering is required, but not over-engineering. And then, don't obsess over tools. That's another thing which I really did, like…
+
+179
+00:28:50.830 --> 00:29:14.820
+Megha: the, Gauntlet gave us enough money, and then we were able to test multiple tools, which I kind of obsessed over that. Build real projects, don't think that it's just for the submission purpose, build it, try to learn, and, build real-world projects and production ready, and then think from that perspective. That really helps a long way. Now, if I'm, now when I'm nerdy working at
+
+180
+00:29:14.820 --> 00:29:23.989
+Megha: real project, it's existing application, I see how, the native workflows, which I learned during Gauntlet.
+
+181
+00:29:24.000 --> 00:29:35.839
+Megha: is helping me understand the existing project and how I can take it forward. Focus on system thinking, that is definitely… which will take you a long way. Evaluations and observability is something
+
+182
+00:29:36.590 --> 00:29:49.440
+Megha: very important, which is, focus very less. We focus more on building the application, have the app ready and deploy it, but make sure that… learn about evaluation and observability from the beginning.
+
+183
+00:29:50.630 --> 00:30:01.760
+Bryon Mackay: Yeah, I like that. I like that take a lot. Like, just… just… that's something that I… that, personally, I see sometimes happen with some… some of the challenges we have come through, where it's like.
+
+184
+00:30:01.760 --> 00:30:10.710
+Bryon Mackay: It's… they're meeting the requirement, and then it's like, I made it, I'm done, I'm good. But you're right, Mika, there's this opportunity to go further, there's opportunities to…
+
+185
+00:30:10.710 --> 00:30:29.730
+Bryon Mackay: go deeper on a certain topic, and it's always… I always appreciate those… those that go that… that extra mile, because I think it pays huge dividends, right? It shows… it shows the initiative, it shows the thought, and of course, you're very good at that. We've talked about your career and the things that you've done before that have always impressed me.
+
+186
+00:30:29.730 --> 00:30:47.749
+Bryon Mackay: But you always take that second… that extra step, and it goes a long way when it comes to working in the business world, because when… how often are you actually given this nice sheet of requirements, and you just have to fulfill that? It never happens. It never happens. Henry, I'll pass it over to you. What do you…
+
+187
+00:30:48.140 --> 00:30:50.569
+Bryon Mackay: What do you wish you knew at 100 hours in?
+
+188
+00:30:51.400 --> 00:31:04.299
+Henry: Yeah, I would say you can build the most beautiful and technically advanced app in the background, but if somebody asks you about it and you stutter over your words and don't really know how to explain what you built and why you built, it's, like.
+
+189
+00:31:04.590 --> 00:31:10.800
+Henry: It's difficult to kind of show off the work of your quality if you're not able to discuss, like.
+
+190
+00:31:10.800 --> 00:31:31.270
+Henry: I don't know, maybe there's some of the technical choices that you made with the agent, or some of the features, how they work a little bit behind the scenes. To me, I think the way I approached it was there were… on every project, there was something that, you know, you had the assignment, and you would complete those requirements, and then there was always something that, to me, I thought was an interesting concept that I had never explored before as an engineer, and so I got really…
+
+191
+00:31:31.440 --> 00:31:48.249
+Henry: kind of embellished in how to solve it, and all the different options, and choosing one or the other, and so there was kind of one main thing in each project that I really focused on, like, if I want to bring up RAG again. Like, even RAG, I loved, you know, some of the projects digging into that, and so when a hiring partner, or even just, like, talking about my project in general, it's like I…
+
+192
+00:31:48.360 --> 00:31:49.770
+Henry: I, I'm…
+
+193
+00:31:50.110 --> 00:32:14.940
+Henry: I'm able to talk about my project in something that, like, I don't know if you'd say passionate about, or something that got really interested in, and so that was able to get across, kind of, what I did in my project, and it comes across as authentic, because it was something that I was genuinely interested in learning, and so I took it a little bit of a self-directed path on some of the learning topics that we have here. And so that would be kind of my tip, is just, if there's something that you find interesting at all, go super deep in that, learn a ton about it, and then when somebody asks you about your project, you explain overarching.
+
+194
+00:32:15.080 --> 00:32:27.999
+Henry: And then, you know, it's hard to hide the excitement when you talk to somebody about something that you find, you know, fascinating, or that you just spent a long time on. You know, it's easy to talk for a long time about something that you spent a long time working on, so that's kind of my tip.
+
+195
+00:32:28.630 --> 00:32:44.020
+Bryon Mackay: That's a good one, and I like that. It shows. It shows a lot, like, and I've seen it, because I've interviewed lots of people through the cohorts, and I… you can definitely tell, when somebody really took the time to understand something, it shows…
+
+196
+00:32:44.020 --> 00:32:56.090
+Bryon Mackay: within minutes. Like, it really does not take a long time to realize how deep somebody went. It's just… it's in their energy, it's in the details that they share. It really does show and can come through.
+
+197
+00:32:56.200 --> 00:33:04.180
+Bryon Mackay: Alright, Adam, I'm gonna ask you the other question, where you are 100 hours in. So I wanna know…
+
+198
+00:33:04.230 --> 00:33:19.380
+Bryon Mackay: what is… what is clicking for you right now? Where is your str… like, how are you hitting your stride, or are you hitting your stride? Are you feeling a little bit… But anyway, so what's… what is it that's, for you right now, is… you're going, this… this is the…
+
+199
+00:33:19.380 --> 00:33:25.909
+Bryon Mackay: This is a thing I wish I knew, which I knew a couple weeks ago before even joining Gauntlet. Anything that stand out to you?
+
+200
+00:33:26.750 --> 00:33:44.169
+Adam: Yeah, no, I think it's the advice that Henry just gave. I mean, I think that I'm doing well in terms of, like, keeping up the pace on the projects, having everything feature-complete by the end, even setting up, like, some baseline-level observability early on, which is great, but…
+
+201
+00:33:44.470 --> 00:33:57.520
+Adam: if you were to, like, really sort of, like, probe at the pressure points in, like, an interview, I do think I would probably struggle. Like, I think it does feel like I'm drinking out of a fire hose right now.
+
+202
+00:33:57.790 --> 00:34:12.239
+Adam: So, if anything, I'm thinking, like, instead of, you know, perfecting X, Y, or Z in the UI, because I tend to be a little bit of a perfectionist, like, maybe just take a little bit of extra time to make sure I understand with, like, my project.
+
+203
+00:34:12.659 --> 00:34:16.020
+Adam: I do think that could potentially be, like, a shift.
+
+204
+00:34:16.150 --> 00:34:17.100
+Adam: For me.
+
+205
+00:34:17.449 --> 00:34:32.679
+Bryon Mackay: Yeah. No, that's great. Yeah, there's, I think… I would agree with that sentiment. I think that's where a lot of engineers get in trouble, is when they do not take the time to really understand the solution that was built. And…
+
+206
+00:34:32.829 --> 00:34:44.179
+Bryon Mackay: it's one of the things that we really… that we've kind of adopted here at Gauntlet, where we have some projects that will span multiple weeks.
+
+207
+00:34:44.309 --> 00:34:53.919
+Bryon Mackay: And one of the things, there's lots of reasons why we do that, but one of the things that we gain from that is that now you have to live with your decisions for a little bit longer.
+
+208
+00:34:53.929 --> 00:35:07.049
+Bryon Mackay: And you may come back and go, that wasn't… this is acting weird, like, why is this… I have to go back and understand what's actually going on to make this work. Now, I will be the first to say, I am totally guilty of vibecoding something and being like, hey.
+
+209
+00:35:07.059 --> 00:35:13.939
+Bryon Mackay: Works on the front end, I'm not gonna worry about it, let's move on. But if we're… if… to be a really…
+
+210
+00:35:13.999 --> 00:35:31.969
+Bryon Mackay: a valuable engineer these days, it's gonna take that time to really dig in and understand a lot of your system and a lot of the details so that you can, you can talk to the LLM well… correctly, and get the right… give it the right guidance, and also explain it to coworkers, or maybe in an interview.
+
+211
+00:35:32.049 --> 00:35:41.949
+Bryon Mackay: how something works. So, all good there, all good questions there. I'm gonna transition a little bit, do some live Q&A questions here. I've got a list here in front of me of
+
+212
+00:35:42.289 --> 00:35:56.009
+Bryon Mackay: many of the questions that… all the questions, I should say. Looks like there's a long list of them, so we're gonna start going through these, and get to them. So, first one, I think I'll answer this first one. Is there a non-tech version of Gauntlet coming up?
+
+213
+00:35:56.309 --> 00:36:15.209
+Bryon Mackay: Not in the… we do have some programs that are in the works, I will say… I will say that much. I cannot give a definitive date, but there are non-tech versions of our curriculum that we are actively working on, and doing some pilots with some… with some business partners. So, yes.
+
+214
+00:36:15.399 --> 00:36:30.569
+Bryon Mackay: not in… not on a calendar quite yet, but it is coming. We see the value there, and an immense amount of value there to add to the community. Second half of that question, what can beginner software engineers work
+
+215
+00:36:30.709 --> 00:36:42.139
+Bryon Mackay: or what can beginner software engineers work, to… in a gauntlet way? Any resources we can share? So I think the question here is, if you're a beginner engineer, how do you work the gauntlet way?
+
+216
+00:36:42.559 --> 00:36:53.439
+Bryon Mackay: Actually, that's a… I'm gonna kind of throw that back to this panel here. That's kind of an interesting… how would you try to implement, especially for a beginner, that's a tough spot to be in, I feel like, sometimes.
+
+217
+00:36:53.479 --> 00:37:06.099
+Bryon Mackay: But what are some of the things that a beginner could do to really push themselves, that you can… that you can share about? Maybe something from Gauntlet that you did that you feel like would be beneficial for them?
+
+218
+00:37:07.510 --> 00:37:09.760
+Adam: I'll gladly take this one.
+
+219
+00:37:09.940 --> 00:37:18.300
+Adam: because I… there's a pattern I see, because I'm early on enough where I think that, like, the gauntlet way hasn't necessarily…
+
+220
+00:37:20.010 --> 00:37:28.519
+Adam: hit everybody fully, yet, at least. And I think one of the patterns I see in the people in the cohort who are…
+
+221
+00:37:29.390 --> 00:37:38.890
+Adam: maybe having, like, the tougher time so far is, you know, we have a Slack channel, and it's great, like, we collaborate, and there's a lot of good stuff that happens in there.
+
+222
+00:37:39.050 --> 00:37:46.909
+Adam: But I do see sometimes some people asking questions of, like, how did people do X? And it's, like, a very general question.
+
+223
+00:37:47.070 --> 00:37:50.319
+Adam: And if I could say there's, like, a gauntlet way…
+
+224
+00:37:50.680 --> 00:37:55.690
+Adam: It's… try and… like, it's one thing if, like, there's something in the assignment that's not…
+
+225
+00:37:56.810 --> 00:38:00.280
+Adam: Spelled out super well or not, but it's another…
+
+226
+00:38:01.090 --> 00:38:06.940
+Adam: To not know how to implement something, which is totally okay, because we're all learning new stuff every day.
+
+227
+00:38:07.220 --> 00:38:09.970
+Adam: But to just, like, have the agency.
+
+228
+00:38:10.090 --> 00:38:16.000
+Adam: to go and figure it out. We have all the tools at our disposal right now to, like, learn.
+
+229
+00:38:16.290 --> 00:38:19.270
+Adam: And figure things out, and…
+
+230
+00:38:19.510 --> 00:38:23.840
+Adam: My take is, and maybe the other folks here can…
+
+231
+00:38:24.440 --> 00:38:33.149
+Adam: you know, vouch for this, but I'm guessing by the time you make it through the gauntlet, like, you have to be elite at being able to just…
+
+232
+00:38:33.410 --> 00:38:36.610
+Adam: You know, autonomously go
+
+233
+00:38:36.780 --> 00:38:42.190
+Adam: And use the tools available to just figure out your way forward when you don't… when it's not super clear.
+
+234
+00:38:42.410 --> 00:38:54.420
+Adam: So, I think that's, like, a thing that you can practice now, is try and build something that you don't know how to build, and use AI to do it, and instead of just vibe coding it.
+
+235
+00:38:54.550 --> 00:39:06.459
+Adam: And, you know, maybe it works, and you're like, wow, it works, but I have no idea what happened. Like, take the time as you're going through it and guiding, you know, whatever harness it is that you're guiding.
+
+236
+00:39:06.750 --> 00:39:08.520
+Adam: to actually learn
+
+237
+00:39:09.060 --> 00:39:21.300
+Adam: what you're building, how it works. Like Henry said, be able to speak to it, if somebody were to ask you. That's something you could practice now, whatever project it is that you want to work on or take on in your free time.
+
+238
+00:39:22.960 --> 00:39:23.550
+Bryon Mackay: I love that.
+
+239
+00:39:23.550 --> 00:39:37.190
+Megha: I agree with Adam on that. The first thing you would do is what problem you are solving. Knowing that is very important, just because you have agents which will, write code for you doesn't mean that you just give some prompt engineering and then
+
+240
+00:39:37.190 --> 00:39:45.130
+Megha: It will generate thousands of lines of code, but just know what problem are you solving? Is that the prob… is how you want to solve that?
+
+241
+00:39:45.130 --> 00:39:50.070
+Megha: Knowing that upfront, and then plan around that is, the key.
+
+242
+00:39:52.560 --> 00:40:05.719
+Bryon Mackay: Very good. I love that answer. Now, this… I'm gonna have… I have another one here. It's a little bit of a… of a doozy, so I'm gonna do my best here to… I'll say it, and then I'll say what I think it's saying, and then you can all take it from there, but…
+
+243
+00:40:06.130 --> 00:40:15.969
+Bryon Mackay: What is your take on the software development lifecycle when it comes to AI authorship and documentation of projects from concept to production?
+
+244
+00:40:16.130 --> 00:40:26.639
+Bryon Mackay: Okay, so first half there. We have this life cycle, right, that we all go through, maybe it's Agile or Waterfall, but now AI is doing so much of the work.
+
+245
+00:40:26.750 --> 00:40:27.680
+Bryon Mackay: Right?
+
+246
+00:40:27.990 --> 00:40:33.280
+Bryon Mackay: It's kind of almost makes you stop and go, huh, do we really need this life cycle the way we
+
+247
+00:40:33.440 --> 00:40:45.320
+Bryon Mackay: originally planned it. And then following that, there's, do you think that some concepts that you design and bring to your company, couldn't you just publish that and then become a consultant?
+
+248
+00:40:45.610 --> 00:40:51.219
+Bryon Mackay: So again, it's, it's kind of like this idea of,
+
+249
+00:40:51.520 --> 00:40:55.989
+Bryon Mackay: In a world where AI is doing more of the work.
+
+250
+00:40:56.180 --> 00:41:09.930
+Bryon Mackay: Perhaps the question is, how do you protect your professional value? I think we've kind of alluded to this a little bit, but there's a lot to unpack there. So, does anybody want to try to take that on? Any thoughts on that question?
+
+251
+00:41:12.150 --> 00:41:18.280
+Henry: It is… I would say, in terms of AI authorship and documentation of the projects, I'm…
+
+252
+00:41:18.490 --> 00:41:38.299
+Henry: I guess if you're talking about, like, you know, sometimes I'll build out a project with AI, and I'm realizing that, like, the code documentation hasn't been updated, like the README or whatever other docs I might have, that's a classic in AI development, you know, that… that… there are some tricks that you can have, to have your AI always update documentation when you kind of change how the system works, but then, you know, in terms of
+
+253
+00:41:38.620 --> 00:41:42.360
+Henry: the authorship when you take a concept, to reduction, you know, I…
+
+254
+00:41:42.770 --> 00:41:59.189
+Henry: You know, you built it with AI, I think it's… you're the author of the code at the end of the day. And then I read ahead, Byron, a little bit on the second half of the question. I'll quickly share my thoughts, I guess, on that, of the, some of the concepts that you bring to the… that you design and bring to your company that you can publish and then become a consultant. I mean, typically, if
+
+255
+00:41:59.340 --> 00:42:16.480
+Henry: if you're designing it for, like, a partner, like, a company that you're working at, it's usually their intellectual property. But I mean, some of the ideas, for sure, it's yourself. You can, you know, if it's a novel idea, totally share it. You know, the… I think AI world's pretty open source, that's one of the cooler things about it. But yeah, that's kind of the two… my two thoughts on it.
+
+256
+00:42:17.000 --> 00:42:22.029
+Henry: Hopefully I got the spirit of the question. Definitely hard to pinpoint exactly what he's looking for.
+
+257
+00:42:22.030 --> 00:42:26.880
+Bryon Mackay: Yeah, yeah, there's a lot, there's a lot there, but I think you did, I think you did a good job there.
+
+258
+00:42:27.500 --> 00:42:40.280
+Bryon Mackay: Another question here, and I'll take this one. Is there an age limit or preferred age range for applicants? There is not a preferred age range or age limit. I think experience goes a lot longer, a longer way.
+
+259
+00:42:40.450 --> 00:42:43.700
+Bryon Mackay: And then what makes an applicant stand out aside from the CCAT score?
+
+260
+00:42:44.240 --> 00:42:46.370
+Bryon Mackay: Experience. Same answer, so…
+
+261
+00:42:46.490 --> 00:42:59.890
+Bryon Mackay: I think what… what you bring to the table really, can do a lot now. You know, we have Mega over here, who has 20 years, and she's incredible, and we have Henry down here, who has…
+
+262
+00:43:00.390 --> 00:43:08.430
+Bryon Mackay: 5, not 5 quite, but you've… you've really set yourself apart from others, I would say. And so, there's…
+
+263
+00:43:08.560 --> 00:43:22.199
+Bryon Mackay: you know, it doesn't necessarily mean that more years and less years, that it's gonna affect you. It's really just the kind of engineer that you are, and what you've been able to, and kind of your drive and your passion behind it.
+
+264
+00:43:22.590 --> 00:43:29.100
+Bryon Mackay: Any recommendations for taking the gauntlet CCAT?
+
+265
+00:43:29.320 --> 00:43:36.520
+Bryon Mackay: I think this is probably talking about tips for the CCAT. I'll toss it back to the group here.
+
+266
+00:43:37.050 --> 00:43:45.410
+Bryon Mackay: My only tip is take 16 seconds per question and move on. But any tips from this group on the CCAT?
+
+267
+00:43:45.910 --> 00:44:00.360
+Megha: I think time management is the key. If you don't get obsessed over solving the questions, all questions are easy, it's just that time, time is against you, so if you see, like, the question is long, even if it is easy and longer, just skip.
+
+268
+00:44:01.720 --> 00:44:02.789
+Bryon Mackay: There you go.
+
+269
+00:44:02.790 --> 00:44:17.389
+Henry: Yeah, yeah, I would say I took a practice one, I noticed I didn't finish in time, and then, you know, I took the real one, and I finished a little early, so I definitely over-calibrated there. But yeah, time's definitely the crunch. Your question is ethical recommendations, I don't know if you mean, like.
+
+270
+00:44:17.390 --> 00:44:25.569
+Henry: Yeah, I guess I don't know what you mean by the ethical aspect of that. If you mean, like, cheating on it, I wouldn't do that. They do proctored CCATs once you're here, so you'd be wasting your time.
+
+271
+00:44:25.800 --> 00:44:33.050
+Henry: at least certain hiring companies do that as well, I don't know the current state of Gauntlet as well. But yeah, there's some… I think there's some study resources…
+
+272
+00:44:33.050 --> 00:44:35.840
+Adam: It's the same, still. We're doing them this week, I think.
+
+273
+00:44:36.200 --> 00:44:52.910
+Henry: Yeah, yeah. Yeah, and then I would say there's some study resources online that once I got here, I know people who spent, you know, a couple weeks studying kind of the material, because there are a bunch of tricks to the test itself. So I would just, you know, you could totally study beforehand for it. I don't think that would be considered cheating. I think. That's just preparing, you know, so do that.
+
+274
+00:44:53.190 --> 00:44:54.619
+Bryon Mackay: Yep, for sure.
+
+275
+00:44:54.980 --> 00:45:11.010
+Bryon Mackay: Here's one from a recently, or almost to a graduate, of college, I will assume, but I'm graduating soon. For new graduates, what should be our initial focus when looking for junior software roles?
+
+276
+00:45:11.500 --> 00:45:26.480
+Bryon Mackay: And then there's a second half that says, how can Gauntlet help me look for future roles? So I'll pass the first half over to everybody else. I feel like we've talked about this a bit, just the learning and the digging in. Actually, I'll start off by sharing a little bit
+
+277
+00:45:26.780 --> 00:45:40.209
+Bryon Mackay: little fun thing that I've been doing lately. There are some topics that I do not know extremely well. I have a mobile developer background, is what I've done. For about a decade, I built apps, and it was great.
+
+278
+00:45:40.270 --> 00:45:49.820
+Bryon Mackay: But I don't know, there's certain things I just don't know as well, like, I don't know, backend security all that great. So, what I would do is I would have Claude just…
+
+279
+00:45:50.150 --> 00:45:56.040
+Bryon Mackay: create a list of topics on security. And I would go through them, and then I'd say, okay, give me one.
+
+280
+00:45:56.080 --> 00:46:15.060
+Bryon Mackay: And explain it to me. And then I say, okay, now quiz me on it. Okay, now give me a case study so I can apply this. Okay, let's… let's… I don't get these concepts, put that into one document, put the rest of the ones I got into that document, we'll review, we'll review these later. And then go to the next one. It's been a really great experience for me, learning-wise.
+
+281
+00:46:15.130 --> 00:46:30.540
+Bryon Mackay: I can now conceptualize so much more things that I never had before, and anytime I get something wrong, it's not a… not a problem. All I say is, hey, I didn't get this concept, or I'll review it a couple days later. I'll say, hey, let's go to all those topics I missed before. Let's try to remember what those were.
+
+282
+00:46:30.550 --> 00:46:40.630
+Bryon Mackay: It's been a really great experience, and all I needed was a Claude subscription. You can probably do with the $20 one just fine. So that's what I would… that's, that's one thing
+
+283
+00:46:40.630 --> 00:46:58.050
+Bryon Mackay: that I would do if you're getting into it, and you want to look for certain roles, I would go look at the roles, and then make sure that you understand all those concepts, and kind of use a system like that to help you get up to speed really fast, so you can be impressive and talk to all those things in those junior roles. All right.
+
+284
+00:46:58.080 --> 00:47:05.810
+Bryon Mackay: I'm gonna pass over the panel here. So, for new graduates, what should be the initial focus when looking for junior software roles? What do you all think?
+
+285
+00:47:06.450 --> 00:47:20.269
+Henry: Yeah, so I'm probably the most recent graduate here. I would say things are becoming more and more, I don't know if abstracted, but like, for example, you probably don't know intimately how a compiler works as a new graduate. You probably took a systems-level course if you were a software engineer. But I would say that
+
+286
+00:47:20.900 --> 00:47:24.850
+Henry: If, especially, you're trying to head into more AI engineering thing, you don't…
+
+287
+00:47:24.850 --> 00:47:49.440
+Henry: have to know the syntax completely of every language that you're working in now. Like, obviously you should… you know the gist of the computer science fundamentals, so you can essentially read any language and more or less understand it, but you don't have to worry about line by line, how to code now. I would say the system design fundamentals and some of those aspects are probably the more important thing to focus on. So, like, obviously, once again, like, system design, like I mentioned, like, maybe knowing auth and these more common things that apply to every… almost every domain that you'll be working in.
+
+288
+00:47:49.440 --> 00:47:59.679
+Henry: I would focus on kind of learning those, and like Byron said, AI is an excellent tutor. It'll meet you exactly at your skill level, so it's great to use that to learn. And then Gauntlet will help you for future roles, I mean, that's the whole…
+
+289
+00:47:59.680 --> 00:48:18.140
+Henry: kind of point a gauntlet as you go through it, and they put you in front of these hiring partners, so as long as you know your stuff, and you do well in the interviews, I mean, you'll leave with a great job that you'll be happy with, and it'll be an AI-forward company, so you won't have to worry about the syntax. Some of these other companies you might hire at, they might still be stuck in kind of the late code era, or something like that, yeah.
+
+290
+00:48:19.510 --> 00:48:29.530
+Megha: I would say system design, something, which is very way more important now with the AI, doing all the coding.
+
+291
+00:48:29.920 --> 00:48:35.869
+Megha: brush up on the system design skills. Not like you don't need to understand that,
+
+292
+00:48:36.390 --> 00:48:51.060
+Megha: the algorithms and everything, at least what's there, what are the trade-offs? If you're developing any app, like, break it into, what interactions exist, what services are needed, what state persists, what's the auth mechanism, security.
+
+293
+00:48:51.060 --> 00:48:57.479
+Megha: Or, where is intelligence needed? How do you want to structure your code? So, how do you want to debug it?
+
+294
+00:48:58.080 --> 00:49:03.400
+Megha: Or, what happens under stress, the failure mode, so…
+
+295
+00:49:03.520 --> 00:49:09.339
+Megha: thinking from that perspective also helps in, starting with the AI-first approach.
+
+296
+00:49:10.750 --> 00:49:20.280
+Bryon Mackay: Awesome. We're gonna… we're running a little short time. I'm gonna… I'm gonna try to find some questions here that, that I'm gonna feel like we're… are most…
+
+297
+00:49:20.540 --> 00:49:30.099
+Bryon Mackay: I won't say most impactful, because I don't want to make other people feel like their questions aren't, but that might apply to more of the broader audience here. Let me just take a quick look here.
+
+298
+00:49:30.900 --> 00:49:32.330
+Bryon Mackay: Let's see…
+
+299
+00:49:32.720 --> 00:49:51.510
+Bryon Mackay: How… okay, so here's… here's one here. How is AI native engineers handle and accept… or expect… that's actually… I'm trying to figure out what this one's asking. How is AI-native engineering handled or expect AI product tech debt… tech debt?
+
+300
+00:49:51.600 --> 00:49:53.820
+Bryon Mackay: I think this one's kind of asking.
+
+301
+00:49:54.060 --> 00:49:59.840
+Bryon Mackay: How do you… how do you handle the tech debt that an AI produces.
+
+302
+00:50:01.290 --> 00:50:16.629
+Bryon Mackay: Yeah, that's a good one. That's gonna be a bigger and bigger problem as time goes on, right? So, how do we handle that? How do we mitigate it? How do we respond to tech debt that our wonderful AI overlords produce for us?
+
+303
+00:50:17.130 --> 00:50:21.840
+Megha: One of the most important and least discussed topics in AI native engineering.
+
+304
+00:50:21.840 --> 00:50:25.919
+Bryon Mackay: Maybe this is the under-hyped one. Maybe this one seems to be more hyped. Alright, go ahead.
+
+305
+00:50:26.370 --> 00:50:36.169
+Megha: AI can accelerate delivery, but, it can, also accelerate tech debt, creation at terrifying speed.
+
+306
+00:50:38.770 --> 00:50:40.159
+Megha: Prevent all debt.
+
+307
+00:50:40.360 --> 00:50:49.679
+Megha: Continuously manage and constrain debt, because you're developing speed, so make sure that there are, if there are any tech debts,
+
+308
+00:50:50.380 --> 00:51:13.399
+Megha: biggest, or the biggest shift would be from traditional engineering is minimizing code changes to minimizing bad decisions. So if you're making bad decisions in the beginning is when you are acquiring more tech debts, in AI-first development. Like, in case of traditional engineering, if you're making bad code changes is when you're getting the tech debts, so…
+
+309
+00:51:13.850 --> 00:51:30.979
+Megha: minimize the bad decisions. Plan ahead, have a proper research document, PRD, what you are developing, what you want, what are the trade-offs, think upfront. I think that's one of the, biggest ways. There are different kinds of, tech stats here. One is context debt,
+
+310
+00:51:32.040 --> 00:51:35.270
+Megha: Or the workflow, or prompt that, so…
+
+311
+00:51:35.440 --> 00:51:43.560
+Megha: Try to plan that ahead, what you want to develop, and then that's one of the best ways to avoid, tech tights.
+
+312
+00:51:45.620 --> 00:51:48.339
+Adam: I have a super hot take on this one, so…
+
+313
+00:51:48.340 --> 00:51:49.070
+Bryon Mackay: Alright, let's hear.
+
+314
+00:51:49.070 --> 00:51:56.679
+Adam: Feel free to… feel free to mute me. Cut me off if it's, like, anti-gauntlet agenda here, but I'm gonna go for it.
+
+315
+00:51:59.430 --> 00:52:19.259
+Adam: I will say there's two different kinds of tech debt. The one that I think is super important are, like, the one-way doors. So, like, if you make a decision that's, like, very difficult, actually very difficult to ever reverse, such as, like, something, like, in an early database schema, or something like that.
+
+316
+00:52:19.420 --> 00:52:29.579
+Adam: That's the stuff you want to stay always, like, super accountable to. However, I do think that all the other type of tech debt
+
+317
+00:52:29.900 --> 00:52:39.450
+Adam: does not matter. And the reason that I think that it doesn't matter is because, yes, with AI, you're producing code so fast that
+
+318
+00:52:39.560 --> 00:52:52.309
+Adam: you know, it's very easy for that kind of technical debt to pile up. However, I think it is also equally fast to go back and fix it if it is truly a two-way door level
+
+319
+00:52:52.450 --> 00:53:05.700
+Adam: technical data. Two-way door, meaning if you make the decision, you could just walk it back and make the change. That's the beauty of AI, in my opinion, is that because it is so fast at producing and generating code.
+
+320
+00:53:05.880 --> 00:53:18.179
+Adam: as long as you know what the technical debt is that you're accumulating. So that's both the one-way doors and the two-way doors. I think it's okay to let it pile up, the two-way door stuff, at least.
+
+321
+00:53:18.560 --> 00:53:35.689
+Adam: you know, as long as, again, you know what it is, you have it logged somewhere, and then later on, you can prioritize, okay, I'm gonna go fix some of this stuff now. Because it should be fast to do it still, later. That's the beauty of AI. That's sort of my hot take on that. But again, like.
+
+322
+00:53:36.910 --> 00:53:56.350
+Adam: I think database migrations are, like, a perfect example. Like, if you really don't spend time on, like, a database schema early, and you get… and you scale, and the schema can't scale with it, and you have production data or something like that, you could get really stuck with something like that. So that's the type of thing you want to spend a lot of time on.
+
+323
+00:53:57.250 --> 00:54:00.689
+Adam: But anyone, feel free to disagree with me, but that is my hot take.
+
+324
+00:54:00.690 --> 00:54:11.010
+Megha: I think continuous refactoring and, having evals, as part of your SDLC also avoids, or accumulating more tech debt, so…
+
+325
+00:54:12.220 --> 00:54:12.600
+Adam: True.
+
+326
+00:54:12.600 --> 00:54:13.360
+Bryon Mackay: I love it.
+
+327
+00:54:13.780 --> 00:54:19.319
+Bryon Mackay: Love that. That's a… that's a good take there. I agree with that. There's… there's definitely times where…
+
+328
+00:54:19.350 --> 00:54:33.860
+Bryon Mackay: There are some things where I could definitely care less in terms of, like, making sure it's just right, just so. But there are things, like, I think database migrations is a great example, because you really have to live with those choices.
+
+329
+00:54:33.930 --> 00:54:38.990
+Bryon Mackay: And if you have to go back and change it, like, there's so many things that could go wrong.
+
+330
+00:54:39.140 --> 00:54:48.749
+Bryon Mackay: Right? That blast area, someone mentioned in the comments about blast areas, yes, that has a huge radius to affect your application.
+
+331
+00:54:48.800 --> 00:55:02.269
+Bryon Mackay: So you have to be more mindful. So knowing what those are, I think going in and knowing what those are and where the planning really needs to be, more precise is… is good. Alright.
+
+332
+00:55:02.400 --> 00:55:12.649
+Bryon Mackay: For… this is gonna be more for Omega and Henry, was the remote portion or the in person portion more challenging?
+
+333
+00:55:12.760 --> 00:55:19.579
+Bryon Mackay: And, were there time commitments that were really 80 to 100 hours per week?
+
+334
+00:55:20.490 --> 00:55:25.770
+Henry: I'll answer this, because I did answer it in the chat quickly. More or less, like, you are for sure
+
+335
+00:55:25.770 --> 00:55:40.499
+Henry: For me, the remote phase, okay, the way it went is I was scared of essentially failing out, so every waking hour I was working, I probably, like, maybe could have dialed it back a little bit if I really wanted to, but I would not recommend it. I mean, you're signing up for this program to really go all in and learn everything. So for the remote phase.
+
+336
+00:55:40.660 --> 00:55:47.929
+Henry: I don't know if I was doing more than 100 hours, but literally, I was in this room every waking minute. And then once you get to the in-person phase.
+
+337
+00:55:48.160 --> 00:55:58.010
+Henry: kind of the same deal. I mean, I was able to… even here, in the remote phase, I was taking care of my body, doing all that, spending an hour or two on… you gotta take care of your health. That's number one priority.
+
+338
+00:55:58.010 --> 00:56:00.369
+Henry: And then in the in-person phase.
+
+339
+00:56:00.370 --> 00:56:23.010
+Henry: essentially every waking hour, I was in the office, but it was so much fun. I mean, you're surrounded… I was with Mega, and I was with, you know, 80 other engineers who had just gone through the remote phase, and were all, like, you know, drowned of social interaction. So, you're in the office, you're probably working a little bit less in terms of, like, actual focus, because you are doing the socializing, but because of that, it's a lot more sustainable, so it's not anything that, like, you feel like you're gonna necessarily
+
+340
+00:56:23.500 --> 00:56:30.699
+Henry: you're not, you're not, not looking forward to going to the office. I looked forward to it every morning, so… but it was, it was definitely 80, 100 hours.
+
+341
+00:56:31.830 --> 00:56:43.620
+Megha: Yeah, I think for me, the remote phase was a little more challenging, because I was just starting with AI, and I was sitting alone there, and I didn't know anyone. I didn't know whether I was doing the right thing, and I had to do more research.
+
+342
+00:56:43.620 --> 00:56:54.739
+Megha: But when I came to Austin, I was surrounded with, like, 80-plus smart, engineers. I was discussing with them, exploring different ideas. Nobody forces you for 80 or 100. You would…
+
+343
+00:56:54.740 --> 00:57:00.249
+Megha: You would do by yourself, like, you want to learn more, you are in that mode, and…
+
+344
+00:57:00.300 --> 00:57:09.749
+Megha: I was at least… many days I slept, like, 1 hour or two hours. It's not because somebody asked me to do that, it's because I wanted to learn. I was in that… the energy was there.
+
+345
+00:57:10.500 --> 00:57:27.119
+Bryon Mackay: Yeah, that's a… that's… it is one of these… I always say it's, like, just one of these once-in-a-lifetime, once-in-a-career opportunities, right? When else do you get 10 weeks to just focus on your craft? And we try to remove as many distractions as possible so that you can do that. It's really kind of unreal when you think about it that way.
+
+346
+00:57:27.250 --> 00:57:43.070
+Bryon Mackay: Alright. I think this might be the last question of the night here. So, what recommendations would you give to somebody who was accepted to the next cohort, to prepare before the 10-week start?
+
+347
+00:57:47.080 --> 00:57:54.240
+Henry: I would say kind of the things that we touched on, even just, like, with the beginners, is I would review your system's design information, I would
+
+348
+00:57:54.650 --> 00:58:05.770
+Henry: start doing AI engineering on your own. I would kind of follow the prominent voices in the AI sphere. I don't know if you're personally on, like, Twitter, it's a dangerous place, you could definitely spend too much time there, but you get some valuable information.
+
+349
+00:58:05.770 --> 00:58:06.350
+Adam: Yo, yeah.
+
+350
+00:58:06.350 --> 00:58:07.690
+Henry: out. Yeah.
+
+351
+00:58:07.690 --> 00:58:10.180
+Bryon Mackay: guilty.
+
+352
+00:58:10.330 --> 00:58:20.510
+Henry: Yeah, if you could sniff out kind of the right people to follow, and kind of learn what they're talking about, I would say that's the best way to prepare for it. That way, when you actually do the remote phase, you basically hit the ground running.
+
+353
+00:58:22.910 --> 00:58:23.950
+Adam: Get rest.
+
+354
+00:58:24.370 --> 00:58:30.540
+Bryon Mackay: Get rest. Because you're not gonna have it. Oh, no.
+
+355
+00:58:31.380 --> 00:58:36.759
+Bryon Mackay: There we go. Megan, any last… any suggestions for somebody coming in?
+
+356
+00:58:37.270 --> 00:58:38.240
+Megha: So…
+
+357
+00:58:39.110 --> 00:58:58.679
+Megha: you are getting 10 weeks of, focused learning, you make most of it, learn as much as you can, even if somebody… you are learning from, projects, do more, go deep and learn system design, trade-offs you are making, but even not just that, AI is changing every day.
+
+358
+00:58:58.830 --> 00:59:07.660
+Megha: be up to date with the latest news, go to X, go to, articles, and then learn as much as possible what is changing in the real world.
+
+359
+00:59:08.050 --> 00:59:12.680
+Megha: Know that, and try to be, proactive.
+
+360
+00:59:13.780 --> 00:59:19.310
+Bryon Mackay: That's awesome. I love it. It is an awesome learning opportunity. It's unlike anything
+
+361
+00:59:19.600 --> 00:59:32.739
+Bryon Mackay: that I've seen in my career. I've never heard of something like this before. One thing I'll add is, it's been… it's been mentioned, I just want to point it… I just want to point it out very clearly. When you come to the in-person side.
+
+362
+00:59:32.760 --> 00:59:43.209
+Bryon Mackay: you're with this group of people, like-minded individuals, who are all there to learn, and there's just an energy that permeates in the building. I know 80 to 100 hours sounds like a lot.
+
+363
+00:59:43.270 --> 00:59:55.569
+Bryon Mackay: And it… quite frankly, it is, but when you're with those people, when you're with that energy, you just feed off each other. There's just something about it that makes it… makes it go. It's an incredible experience that,
+
+364
+00:59:55.570 --> 01:00:04.029
+Bryon Mackay: that Megan and Henry have had, that Adam is about to have, and it's gonna… it's really quite an amazing, amazing ride.
+
+365
+01:00:04.070 --> 01:00:17.120
+Bryon Mackay: Well, thank you all for coming. I really appreciate everybody coming in and listening to this great panel we have here. I want to thank them all for coming and taking an hour out of their day to come in here and
+
+366
+01:00:17.120 --> 01:00:24.770
+Bryon Mackay: Adam, I know you've got a project you gotta get back to, so we won't hold you anymore, but we appreciate you taking the time nevertheless. I'll tweak.
+
+367
+01:00:24.770 --> 01:00:25.169
+Adam: What's your point.
+
+368
+01:00:25.170 --> 01:00:31.730
+Bryon Mackay: Just a little bit. I'll give you two extra points this week. No, I'll… I'll definitely make it worth your effort.
+
+369
+01:00:31.730 --> 01:00:33.279
+Adam: Happy to… Happy to be here.
+
+370
+01:00:33.280 --> 01:00:39.149
+Bryon Mackay: Appreciate that. Good, good. Alright, everybody, have a great night. We'll see you next week at Night School.
+

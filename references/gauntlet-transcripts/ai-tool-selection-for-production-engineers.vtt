@@ -1,0 +1,1858 @@
+WEBVTT
+
+1
+00:00:07.130 --> 00:00:08.560
+Byron Mackay: Alright.
+
+2
+00:00:09.540 --> 00:00:11.810
+Byron Mackay: Hello, everybody!
+
+3
+00:00:12.250 --> 00:00:13.830
+Byron Mackay: How are we doing tonight?
+
+4
+00:00:15.160 --> 00:00:20.840
+Byron Mackay: My name's Byron, I'm gonna be… Your speaker tonight.
+
+5
+00:00:20.960 --> 00:00:22.910
+Byron Mackay: Got a good topic here.
+
+6
+00:00:23.060 --> 00:00:37.650
+Byron Mackay: Lots of information, it's gonna be… a lot, but we're gonna get through it all, and I'm excited to share all this with you. There's a lot of insights here from, from Gauntlet and from outside of Gauntlet.
+
+7
+00:00:37.670 --> 00:00:55.679
+Byron Mackay: We're in a real interesting spot right now, as we see things developing and evolving. So, really, I'm honestly kind of stoked to just be talking to y'all tonight. This is… this is fun stuff. Love to hear where everybody's from. If you want to just throw in the chat where you're from.
+
+8
+00:00:55.830 --> 00:01:01.170
+Byron Mackay: We'll see who we've got, and what we're covering, and… Where everyone's at, so…
+
+9
+00:01:03.780 --> 00:01:05.969
+Byron Mackay: I'll just… I should kick it off.
+
+10
+00:01:06.160 --> 00:01:15.780
+Byron Mackay: I'm from Utah. I live about 30 minutes south of Salt Lake. Let's see, we've got Atlanta, a couple from Austin, we've got DC…
+
+11
+00:01:16.200 --> 00:01:19.580
+Byron Mackay: Memphis, but for Boston, nice. Montreal, nice!
+
+12
+00:01:20.850 --> 00:01:30.589
+Byron Mackay: Kyle from California, I'm originally from San Diego myself. Love that. We got… oh, we got Australia? Nice! Hey, I got a fellow Utahn there, far west.
+
+13
+00:01:31.160 --> 00:01:33.530
+Byron Mackay: Greece? No kidding.
+
+14
+00:01:33.860 --> 00:01:41.270
+Byron Mackay: Shannon Carlsbad. Love it. I worked at a movie theater in Carlsbad growing up.
+
+15
+00:01:41.440 --> 00:01:51.479
+Byron Mackay: That was a lot of fun. We got someone… wow, you guys, we are all over the world! This is awesome! Oh my goodness, this is gonna be fun.
+
+16
+00:01:51.730 --> 00:01:53.670
+Byron Mackay: This is gonna be fun.
+
+17
+00:01:54.650 --> 00:02:06.189
+Byron Mackay: All right, I'm gonna give just a minute more to, to let everybody in. Thanks for putting that out there. This is gonna be great, realizing
+
+18
+00:02:06.210 --> 00:02:20.999
+Byron Mackay: Now that everybody's in so many time zones, I just want to start by saying thank you for joining. I am sure there are lots of you. It might be not the most opportune time, but you've made time to be here, and I'm really, really glad you did.
+
+19
+00:02:21.370 --> 00:02:27.959
+Byron Mackay: We're gonna have, like I said earlier, a great conversation here. I am just so excited to get to talk to you all.
+
+20
+00:02:28.210 --> 00:02:32.889
+Byron Mackay: We have, Sean from Hawaii. Sean?
+
+21
+00:02:33.120 --> 00:02:35.800
+Byron Mackay: You win.
+
+22
+00:02:36.010 --> 00:02:41.099
+Byron Mackay: That's awesome. My wife and I just visited a few months ago and had a great, great time.
+
+23
+00:02:41.280 --> 00:02:43.990
+Byron Mackay: Love it, love it.
+
+24
+00:02:44.510 --> 00:02:51.000
+Byron Mackay: All right. Man, we've got a lot of people here tonight. We've got a good group. Okay, let's go ahead and get started. Alright.
+
+25
+00:02:51.570 --> 00:03:10.760
+Byron Mackay: Like I said, my name is Byron. I work here at Gauntlet. I'm Director of Learning, which means my job is to keep up with all the advancements and try to decide what we should teach, and what we should consider hype, and how we approach all that here at Gauntlet. It's not an easy job, as you can imagine. If you've tried to keep up with all the AI trends, it's very hard.
+
+26
+00:03:10.760 --> 00:03:22.270
+Byron Mackay: And… but, you know what? We've… we have a lot of great… we do a pretty good job, I feel like, of identifying what those… those needs are, and have a lot of great people to…
+
+27
+00:03:22.560 --> 00:03:30.420
+Byron Mackay: To help us identify what's really working in the industry and what's not. We're gonna talk a lot of… about a lot of those things tonight.
+
+28
+00:03:30.600 --> 00:03:47.480
+Byron Mackay: So, without further ado, let's start talking about the modern development stack. This has changed, obviously, and it's changing, I think, for the better. I'm really, really excited. We're gonna talk about 3 things tonight. We're gonna talk about paradigm.
+
+29
+00:03:47.560 --> 00:04:02.180
+Byron Mackay: What do I mean by paradigm? I mean that there are, some variety of ways to think about how we use coding agents. And how we think about it, or maybe at what stage we're at, will determine what tool we should use.
+
+30
+00:04:02.810 --> 00:04:07.980
+Byron Mackay: Then we're going to talk about models. Now, there's a lot of information out there about models.
+
+31
+00:04:08.000 --> 00:04:27.970
+Byron Mackay: And there's a lot of models out there to use. You might be one who's constantly changing the model based on what you need, trying to find, perhaps, something cheaper, but still has good quality for varying tasks. Or you might just be one who says, look, Opus is the way, I'm going to use it forever. We're going to talk about that, and how we should think about those.
+
+32
+00:04:28.110 --> 00:04:41.909
+Byron Mackay: And then we have infrastructure. What holds it all together when it fails? And this is where it gets really interesting. I feel like this is the shift that has been talked about for the last 2 years, in theory.
+
+33
+00:04:42.040 --> 00:04:46.309
+Byron Mackay: But we're starting to realize how it works in practice now.
+
+34
+00:04:46.870 --> 00:04:53.710
+Byron Mackay: And it's starting to become the regular trend, and there's an opportunity in there for the taking for all of us engineers.
+
+35
+00:04:53.800 --> 00:05:10.759
+Byron Mackay: So, we're gonna talk about all three tonight. Let's jump into it and get started. By the way, I said that there's a… I mentioned this, that there's so much out there to consume. I hope… my goal here tonight is to distill all of that down for you.
+
+36
+00:05:11.040 --> 00:05:24.199
+Byron Mackay: So that it's not so overwhelming, you have some good things to go off of, when you take it back to your work, your jobs, your projects, that you have a better idea and mental model of how to navigate a lot of the things that we're doing here. So…
+
+37
+00:05:24.420 --> 00:05:25.330
+Byron Mackay: Alright.
+
+38
+00:05:25.900 --> 00:05:44.150
+Byron Mackay: First and foremost, let's start with the paradigm. So, I'm gonna pick two coding agents here to talk about two different paradigms, and what, and what kind of things, they each do for us. So, I'm going to pick cursor, and I'm gonna pick Claude Code. I'm gonna make this a little bigger, too, so you can all see it a little better.
+
+39
+00:05:45.130 --> 00:05:48.820
+Byron Mackay: Alright, right there's probably a lot better. Okay.
+
+40
+00:05:49.100 --> 00:06:03.689
+Byron Mackay: So let's talk about this a little bit. So Cursor. In Cursor, you are the programmer, right? You're still in the IDE, you still have agents, you still have that nice chat window, you have a lot of things you can do. AI is there to accelerate you, you're still very much in the code.
+
+41
+00:06:04.060 --> 00:06:15.420
+Byron Mackay: So you stay in the editor, you see it all, and it's your co-pilot, right? You're directing, you're seeing, you're guiding, and… but you are flying the plane. It's helping you.
+
+42
+00:06:15.820 --> 00:06:23.120
+Byron Mackay: Cloud Code, on the other hand, takes a little bit of a different approach. It feels very similar, but when you think about it, it's actually quite different.
+
+43
+00:06:23.360 --> 00:06:29.359
+Byron Mackay: You don't do a lot of the execution. In fact, you probably do none of the execution. You might not even look at your code.
+
+44
+00:06:29.660 --> 00:06:34.979
+Byron Mackay: If you're like me, you type in dash dash skip permissions dangerously.
+
+45
+00:06:35.100 --> 00:06:41.890
+Byron Mackay: I can't remember if that's the whole thing, I autocomplete it now, but anyway. And you just don't even… you don't even think twice. You're like, does the feature work or not?
+
+46
+00:06:43.530 --> 00:06:50.230
+Byron Mackay: you're… you will have to specify in Cloud Code in great detail about what it is you want to have happen.
+
+47
+00:06:50.490 --> 00:07:05.650
+Byron Mackay: And then the agent will have access to the whole repo, it'll go through it all. And you review diffs. You don't necessarily have to look at the code, right? Now, you always could, right? You could actually do either in each of these, but they're more tailored.
+
+48
+00:07:05.930 --> 00:07:12.839
+Byron Mackay: to, to kind of that paradigm, right? To that thought process of what you want to do.
+
+49
+00:07:13.530 --> 00:07:26.709
+Byron Mackay: And so there's… there's a kind of a give and take there, and you have to kind of ask yourself, which one am I more comfortable with? And that actually might change based on at what point of the project you're in. So, not one answer for everything, even when it comes to us individually.
+
+50
+00:07:27.720 --> 00:07:35.189
+Byron Mackay: Alright, so again, the two different relationships, cursor, you're driving the car. Claude Code, you are dispatching the driver.
+
+51
+00:07:35.430 --> 00:07:36.380
+Byron Mackay: Right?
+
+52
+00:07:36.570 --> 00:07:42.120
+Byron Mackay: So, you… one, you're more of the high-level architect, the other one, you're the senior dev.
+
+53
+00:07:42.530 --> 00:07:43.350
+Byron Mackay: Okay.
+
+54
+00:07:43.500 --> 00:07:46.619
+Byron Mackay: So again, neither are wrong, they're just different.
+
+55
+00:07:47.710 --> 00:08:01.890
+Byron Mackay: And this is true across many different coding agents, right? But generally speaking, I feel like there's this general sentiment of which way they lean. So you can see here, there's a whole bunch that you can look at, so if you could use Codex, or if you used
+
+56
+00:08:01.890 --> 00:08:12.040
+Byron Mackay: Devin, or Windsurf, or any of these other ones, you can kind of see that they all, get into these, they kind of fit into these paradigms, the ways of thinking about it.
+
+57
+00:08:13.050 --> 00:08:19.370
+Byron Mackay: So, the question you might want to ask yourself is, does this put me in the code or above it, and where do I want to be at this stage?
+
+58
+00:08:20.480 --> 00:08:34.359
+Byron Mackay: Okay? So any feature you have, maybe it's a high-level architecture feature, maybe you're in a large code base, and it's all… all the patterns are well-established. You may not necessarily need to have to be the one in the code defining it all, right?
+
+59
+00:08:34.460 --> 00:08:38.840
+Byron Mackay: You say, look at this file, look how this API called it, look how this service is done.
+
+60
+00:08:39.059 --> 00:08:46.990
+Byron Mackay: Go. This is the service I want you to make now. You go make it. Make sure you follow the patterns. And you can go and do it. And it does generally a pretty good job.
+
+61
+00:08:47.440 --> 00:08:57.600
+Byron Mackay: But, if you're still defining those things, or you just want to have more, a higher touchpoint with the code, Cursor might be a better option for you there.
+
+62
+00:08:57.950 --> 00:09:12.539
+Byron Mackay: Right? By the way, I have seen many developers who stick to clawed code, and they're like, I don't even look at the code. And I've seen many developers who are like, I don't even trust the coding agent at all. I'm just writing my own code, and they'll have it write tests for me, or something like that.
+
+63
+00:09:12.790 --> 00:09:20.279
+Byron Mackay: So there's… it really does vary, like, there's that whole spectrum, right, of engineering. Which one are you? Decide… helps you decide which one to use.
+
+64
+00:09:21.820 --> 00:09:22.720
+Byron Mackay: Alright.
+
+65
+00:09:23.540 --> 00:09:35.139
+Byron Mackay: Codebase size changes everything. I mentioned this a little bit earlier, just a moment ago, but the smaller ones, typically, that's where you want to have higher touchpoints. You want to be defining these things
+
+66
+00:09:35.220 --> 00:09:49.859
+Byron Mackay: Claude Code, that is where you already have it all set up, it's ready to go, you can go for it. I find a lot of success there. In large codebases that I've worked in, Cloud Code does fantastic. And there's also a lot of ways to define, specific
+
+67
+00:09:50.060 --> 00:09:55.070
+Byron Mackay: like, architectural asks inside of your code using the cloud.md file.
+
+68
+00:09:55.210 --> 00:10:01.960
+Byron Mackay: And that's really useful, too, to define those rules that you want. Now, I will say cursor has rules as well, but they work a little differently.
+
+69
+00:10:03.030 --> 00:10:14.690
+Byron Mackay: So, Cloud Code will ingest those MD files when it's in the directory, whereas the rules tend to be more agnically decided upon, so the agent gets to decide when to use one or not.
+
+70
+00:10:15.070 --> 00:10:27.720
+Byron Mackay: So it's… it's… you've kind of, again, you've got to kind of play with these tools to figure out which one works best for your scenario. And quite frankly, my recommendation, if you're not sure which one it is, use both for a week, you'll know by the end of the week.
+
+71
+00:10:28.460 --> 00:10:36.250
+Byron Mackay: So… Alright, but what is Claude's real weakness here? Okay, there's a couple of things.
+
+72
+00:10:36.970 --> 00:10:40.760
+Byron Mackay: Your model lock-in, okay, you can only use Anthropic.
+
+73
+00:10:40.770 --> 00:10:55.770
+Byron Mackay: your cost unpredictability, it's gonna run at higher rates, and Opus is one of the most expensive models out there. It's very, very good. It's also very expensive. By the way, just… I have friends at a company I worked at before.
+
+74
+00:10:55.770 --> 00:11:02.689
+Byron Mackay: And one of them, they get API token access, when we talk about cost and predictability.
+
+75
+00:11:02.810 --> 00:11:14.529
+Byron Mackay: There's one who's a data engineer, and she's extremely smart and really does a lot of great work. Spent $1,600 last month in Cloud Code API usage.
+
+76
+00:11:14.820 --> 00:11:19.299
+Byron Mackay: That was nothing compared to my other friend, who spent $30K.
+
+77
+00:11:19.990 --> 00:11:30.010
+Byron Mackay: So, it can balloon pretty quick. If you're not… if you're not… if either you're not careful, you're just building a whole lot. I still can't believe you spent 30K.
+
+78
+00:11:30.140 --> 00:11:43.309
+Byron Mackay: Anyway, spec quality versus output quality, so, or no, equals your output quality. So, this is… this is an interesting one. I'll give a little caveat here. Not a caveat, but some insight here.
+
+79
+00:11:43.540 --> 00:11:54.920
+Byron Mackay: Spec quality equals output quality. So what are we talking about there? This is more of a spec-driven development kind of frame of mind that you would want to adopt when you're using Cloud.
+
+80
+00:11:56.330 --> 00:11:59.990
+Byron Mackay: This is really important because I see a lot more companies
+
+81
+00:12:00.480 --> 00:12:06.420
+Byron Mackay: Building out their own spec-driven development architecture. We'll get more into this a little bit later in the presentation.
+
+82
+00:12:07.200 --> 00:12:09.920
+Byron Mackay: But I'm seeing it all across the board now.
+
+83
+00:12:10.020 --> 00:12:14.850
+Byron Mackay: Dev teams are seeing, are saying, we gotta define what works for our company.
+
+84
+00:12:14.970 --> 00:12:17.480
+Byron Mackay: And we gotta make our own spec-driven development.
+
+85
+00:12:18.130 --> 00:12:26.879
+Byron Mackay: And so, and because we want… because we want to get faster, we want to do things better, but we need to still control it the way we feel like we're most comfortable controlling it.
+
+86
+00:12:27.050 --> 00:12:30.500
+Byron Mackay: Okay? That comes with some…
+
+87
+00:12:30.730 --> 00:12:48.299
+Byron Mackay: some, processes. It also comes with some harnessing that you have to do with these AI agents, and we'll get more into that later. But I just want to point that out, that that seems to be a strong trend that we're seeing right now across companies, is spec-driven development, and how to do all that. So…
+
+88
+00:12:49.310 --> 00:12:57.900
+Byron Mackay: And then finally, I just threw this one in there because I love this feature of cursors. There's no tab completion in Cloud Code.
+
+89
+00:12:58.000 --> 00:13:02.340
+Byron Mackay: Of course there's not. You just say, skip… skip permissions, and you let it fly, right?
+
+90
+00:13:02.580 --> 00:13:21.159
+Byron Mackay: I just want to point out that I think that Tab2Complete is one of the greatest UXs that we've had so far in the AI revolution. I just think they absolutely nailed it across the board. And I've said that 2 years ago when it came out, and I still say it today. I just think it's such… I don't know what it is about that I love so much.
+
+91
+00:13:21.160 --> 00:13:28.980
+Byron Mackay: Maybe it's just the ease of just being in the middle of a thought, and it gives you something, and you just keep tabbing to finish.
+
+92
+00:13:29.110 --> 00:13:32.720
+Byron Mackay: There's just something about it that's amazing. Incredible. Incredible.
+
+93
+00:13:33.850 --> 00:13:39.629
+Byron Mackay: Alright, I want to pause for a question here from Pierce. It says, how should I go about optimizing my CloudMD and prompt?
+
+94
+00:13:39.900 --> 00:13:46.230
+Byron Mackay: That's a really interesting question, and a good one. You want to keep your CloudMD files small.
+
+95
+00:13:46.710 --> 00:13:55.439
+Byron Mackay: you want to also use them in each of the directories. Not… you don't have to use them in all the directories, but you want to make them directory-specific.
+
+96
+00:13:56.050 --> 00:13:59.950
+Byron Mackay: The reason for that is because you're going to want to identify
+
+97
+00:14:00.130 --> 00:14:09.819
+Byron Mackay: Say you have, like, a service file, right? You want to make sure that you're using templates whenever you make a SQL query so that there's no injection there.
+
+98
+00:14:09.970 --> 00:14:15.990
+Byron Mackay: So that's something you might want to… you would want to specify. Now, you might say that models are good enough that they'll know how to do that.
+
+99
+00:14:16.210 --> 00:14:23.590
+Byron Mackay: But it's such a big risk that you probably don't want to leave it up to the LLM. So in your services files.
+
+100
+00:14:23.780 --> 00:14:27.650
+Byron Mackay: Whether doing the business logic and making calls to the database, you want to put that in there.
+
+101
+00:14:27.830 --> 00:14:31.090
+Byron Mackay: And you don't… you don't want to put that at the root level.
+
+102
+00:14:31.450 --> 00:14:40.120
+Byron Mackay: Because then everybody's getting that information, and they don't really need it, right? So you want to use those CloudMD files strategically, keep them small.
+
+103
+00:14:40.370 --> 00:14:42.539
+Byron Mackay: You don't want to bloat the contacts with them.
+
+104
+00:14:42.780 --> 00:14:47.400
+Byron Mackay: And, and just make some, some good rules around it that,
+
+105
+00:14:47.610 --> 00:14:51.939
+Byron Mackay: that help it… that help guide the LLM to build you the appropriate file.
+
+106
+00:14:52.160 --> 00:14:54.579
+Byron Mackay: Or to write the appropriate code, rather.
+
+107
+00:14:55.660 --> 00:15:14.329
+Byron Mackay: That's how I would go about it. Anthropic has a whole article on how to leverage them, but that's been, in my opinion, the number one thing that I remember whenever I write my CloudMD files. Keep them short, and distribute them into their directories where they are most appropriate.
+
+108
+00:15:15.410 --> 00:15:21.339
+Byron Mackay: Because those will get ingested every time. So, you want to make sure that they don't bloat your context too much there.
+
+109
+00:15:22.560 --> 00:15:23.280
+Byron Mackay: Alright.
+
+110
+00:15:24.450 --> 00:15:26.180
+Byron Mackay: Oh.
+
+111
+00:15:26.610 --> 00:15:33.750
+Byron Mackay: And here's my slide that says everything I just said about tap to complete. I just absolutely love it. I think it's great.
+
+112
+00:15:33.960 --> 00:15:34.869
+Byron Mackay: There you go.
+
+113
+00:15:35.310 --> 00:15:37.889
+Byron Mackay: Okay, this is interesting.
+
+114
+00:15:38.070 --> 00:15:43.550
+Byron Mackay: found this, and I really wanted to share it with you. Of course, neither tool makes you faster by default.
+
+115
+00:15:43.690 --> 00:15:52.499
+Byron Mackay: Okay? It's all about your workflow. It's about how you build with the tool. Okay, that's a lot on us as engineers.
+
+116
+00:15:52.690 --> 00:16:09.240
+Byron Mackay: But here's an interesting study here. So Meter did a study in 2025 and 2026. They predicted in 2025, this was a year ago, right? That, and it's about… it's… I can't remember the exact month, but it's been… it's been about a year.
+
+117
+00:16:09.410 --> 00:16:10.630
+Byron Mackay: And…
+
+118
+00:16:10.760 --> 00:16:16.199
+Byron Mackay: they said that they predicted that engineers would say they're going to be faster. Now, the engineers, they were…
+
+119
+00:16:16.740 --> 00:16:19.589
+Byron Mackay: Querying here, the ones that were in the study.
+
+120
+00:16:19.720 --> 00:16:26.190
+Byron Mackay: Were people that had 5 years or more in an open source project.
+
+121
+00:16:27.060 --> 00:16:28.360
+Byron Mackay: And…
+
+122
+00:16:28.770 --> 00:16:37.469
+Byron Mackay: That was an interesting audience, or a group of people, to be part of this survey, because those people are very familiar with the code.
+
+123
+00:16:37.640 --> 00:16:44.789
+Byron Mackay: And… And they felt like the LLMs and the coding agents made them slower.
+
+124
+00:16:45.760 --> 00:16:51.639
+Byron Mackay: Now, you can look at this a couple of ways. You can either say, well, L engineers are slower. I don't think that's the case.
+
+125
+00:16:52.040 --> 00:17:02.450
+Byron Mackay: I think when you look at who they had selected, is that when you understand a codebase that deeply, you are very particular about how you want code to be done.
+
+126
+00:17:02.960 --> 00:17:13.959
+Byron Mackay: And that's why they were slower, because the LLM would do things that they didn't want. Now, that can be resolved. That can be resolved with CloudMD files, or agent.nd files. That can be done with better prompting.
+
+127
+00:17:14.089 --> 00:17:21.909
+Byron Mackay: spectrum development, which wasn't exactly quite a thing at the time when they did that study, so there's a lot of things that have changed since then. And what are the results?
+
+128
+00:17:22.240 --> 00:17:27.109
+Byron Mackay: Well, now you can see that this, this year, it flipped. Now we're 18% faster.
+
+129
+00:17:27.730 --> 00:17:34.670
+Byron Mackay: Now, that's not the 10x engineer that we all thought would happen, right, that we've all been pushing, which is fine.
+
+130
+00:17:35.200 --> 00:17:53.399
+Byron Mackay: But it is interesting to see that people feel like they're faster now. In fact, what's interesting about this year's study is that they would give them a task and say, have the AI do it, and then have yourself do it. And people would actually refuse to do it by hand, which I thought was actually quite interesting. I don't know what that means.
+
+131
+00:17:53.700 --> 00:17:55.660
+Byron Mackay: But, interesting little point anyway.
+
+132
+00:17:56.170 --> 00:18:01.390
+Byron Mackay: But the whole point here is it's not about the tool that you use, it's about how you use it, okay?
+
+133
+00:18:01.920 --> 00:18:16.459
+Byron Mackay: So, people are starting to figure out different methodologies, different ways of they like to do things, but it is more about leveraging the tool and making a workflow that works for you, rather than the actual tool.
+
+134
+00:18:17.130 --> 00:18:23.749
+Byron Mackay: That is gonna become very interesting in the future, when we start trying to do these kinds of
+
+135
+00:18:23.960 --> 00:18:27.279
+Byron Mackay: Products in non-engineers' hands.
+
+136
+00:18:28.310 --> 00:18:35.800
+Byron Mackay: I'll talk about that a little bit more later, but something to think about, because we know it works well for us as engineers.
+
+137
+00:18:36.050 --> 00:18:41.249
+Byron Mackay: And so, how do we put this into the hands of non-engineers to do their work effectively?
+
+138
+00:18:41.790 --> 00:18:57.660
+Byron Mackay: That, I think, is the greatest opportunity we have in front of us. This is our app store moment, if you will, where we can all build these apps, because we're now becoming more familiar with how we can leverage LLMs and register these agents to make it better for other people outside of just engineering.
+
+139
+00:18:58.550 --> 00:19:08.749
+Byron Mackay: And of course, we're seeing those projects as we… as we go. Okay, we talked about this already, so I'm just gonna… I'm gonna skip through this one and just move to the next one.
+
+140
+00:19:09.420 --> 00:19:10.390
+Byron Mackay: Okay.
+
+141
+00:19:10.610 --> 00:19:12.250
+Byron Mackay: So…
+
+142
+00:19:12.410 --> 00:19:31.630
+Byron Mackay: Again, this is… I said this before, but if you're not sure which one you want to use, or you're trying to get into one of these, just use them both for a month. You'll know what to do. You'll know what to do, and it'll cost you 40 bucks, and you'll know real quick where you lie. But again, sometimes you might want to use cursor for
+
+143
+00:19:31.790 --> 00:19:40.779
+Byron Mackay: For certain tasks, while ClockClip for others. Personally, I only have a Clock Looking subscription, that's all I'm using these days, but you might feel differently. So…
+
+144
+00:19:42.820 --> 00:19:43.890
+Byron Mackay: Alright.
+
+145
+00:19:45.530 --> 00:19:47.499
+Byron Mackay: I'll leave this here first for a moment.
+
+146
+00:19:48.370 --> 00:19:52.809
+Byron Mackay: The paradigm you choose reflects what you believe your highest value contribution is.
+
+147
+00:19:54.040 --> 00:20:09.960
+Byron Mackay: So, this, I actually feel, is very reflective of two engineers that I know, one who writes all the code himself still, because that's where he feels like he provides the most value, and the other one who orchestrates. And to be fair, they're both very, very good engineers.
+
+148
+00:20:10.050 --> 00:20:20.439
+Byron Mackay: And they both provide extremely, high value, they just do it differently. So, kind of, this is a little bit up to you on which way it goes.
+
+149
+00:20:21.120 --> 00:20:27.799
+Byron Mackay: Alright, let's get to the next part. Let's get to models. This is an interesting one, because,
+
+150
+00:20:28.700 --> 00:20:34.999
+Byron Mackay: we… I… I feel like we're under this guise, at least a lot of us are, that…
+
+151
+00:20:35.560 --> 00:20:51.340
+Byron Mackay: Sonnet or GPT or, you know, any cloud or GPT models are the way to go, and that's the end of the story. And it's not the case. In fact, those open source models are so good that if leveraged correctly, that you're actually going to get better performance and a lot lower cost.
+
+152
+00:20:51.460 --> 00:20:57.270
+Byron Mackay: So let's go… let's go into this. What do we… what do we see today? One model for everything.
+
+153
+00:20:59.590 --> 00:21:18.449
+Byron Mackay: it's… it's what we see… I see it all the time, right? Opus comes out, and that's all we can see on, it's all we can see on… on X, right? Everyone's Opus 4.6, it's the greatest thing ever made, and it codes so well, and all that… all that jazz. I'm sure we'll hear it again in about a month or two when this happens again.
+
+154
+00:21:18.780 --> 00:21:20.690
+Byron Mackay: So,
+
+155
+00:21:21.450 --> 00:21:31.920
+Byron Mackay: Ezekiel, you mentioned Grok and Kimi, that, yeah, super, super helpful, right? Like, there are other models out there that can do so much more, and we just don't always give them the opportunity.
+
+156
+00:21:34.210 --> 00:21:48.920
+Byron Mackay: Here's… there's something about models that was really… I want to point out here, though, with this slide. And that is that, depending on the task, we should use a different model. And this is one of those where I feel like it hits really hard for… for us.
+
+157
+00:21:49.260 --> 00:21:55.199
+Byron Mackay: If you have an LLM you're using to code, it should not be the same LLM you used to review the code.
+
+158
+00:21:55.350 --> 00:22:09.850
+Byron Mackay: Why? Because they're both trained on the same things. They're going to see the same stuff and agree on a lot of the same things. So instead, use a different model. Throw something else at it. See what it comes up with. You will find way more errors that way, than…
+
+159
+00:22:10.050 --> 00:22:24.659
+Byron Mackay: then having the same one, the same model, review the code. In fact, I've even… we've had… I've had it where I had, let's see, I had GitHub use a model to review, and then I had Graphite that I was using.
+
+160
+00:22:24.810 --> 00:22:32.899
+Byron Mackay: to… to also review, so we'd have basically multiple reviewers, and it was amazing what they would come up with. What's interesting, too, is…
+
+161
+00:22:34.100 --> 00:22:39.659
+Byron Mackay: I'm gonna say this too, is that it is worth building your own reviewer.
+
+162
+00:22:39.940 --> 00:22:56.820
+Byron Mackay: And the reason why I say that is because when you go to, like, a GitHub co-pilot, or you go to a Graphite, and you have them do the reviews for you, they will limit how much the work they actually do, because they're trying to save money, they're trying to make money, right? It's a product, and that's fine.
+
+163
+00:22:57.780 --> 00:22:59.450
+Byron Mackay: But they don't always tell you that.
+
+164
+00:23:00.150 --> 00:23:02.699
+Byron Mackay: And so by doing this locally.
+
+165
+00:23:02.810 --> 00:23:11.780
+Byron Mackay: Alright, setting up your own system, you get it, you allow more flexibility to how much they're gonna review, and how much more feedback you're gonna get.
+
+166
+00:23:12.230 --> 00:23:18.370
+Byron Mackay: So, something else to… to think about there, and to,
+
+167
+00:23:18.960 --> 00:23:23.069
+Byron Mackay: As you, as you go through, like, this review process of, like, well, what L am I going to use to review?
+
+168
+00:23:23.700 --> 00:23:32.519
+Byron Mackay: But again, those services are great. Not saying they're not. They're totally, totally worth it. Just saying if you want even more granular control, best to go make your own.
+
+169
+00:23:33.930 --> 00:23:35.350
+Byron Mackay: Okay.
+
+170
+00:23:38.730 --> 00:23:40.590
+Byron Mackay: So, here's another interesting one.
+
+171
+00:23:40.870 --> 00:23:51.099
+Byron Mackay: So, there is, there is a framework of building a coding agent called Crispy.
+
+172
+00:23:51.360 --> 00:24:07.999
+Byron Mackay: that DEX from Human Layer has made pretty popular, and others have been iterating on. And quite frankly, other industries and other companies that I've seen have evolved into similar frameworks. So there seems to be some buy-in there. But one of the things that they point out is when you do research.
+
+173
+00:24:08.460 --> 00:24:14.299
+Byron Mackay: that you… Remove the context from the research question.
+
+174
+00:24:14.970 --> 00:24:19.300
+Byron Mackay: So what's an example of that? Say I want to…
+
+175
+00:24:19.620 --> 00:24:24.169
+Byron Mackay: decide how to optimize a query, a SQL query.
+
+176
+00:24:24.560 --> 00:24:43.770
+Byron Mackay: instead of having it… if you… well, I was just… I'll start with, if you're in your code base and you're going cloud code, tell me how I can improve this query to make it more performant, because we're having some issues. It's going to take in the context of your project, and start to find patterns, and be like, well, in your project, you do it this way, so you should do it that way, or you can do this or that. And that's fine.
+
+177
+00:24:43.830 --> 00:24:47.689
+Byron Mackay: But I… the context is going to guide it.
+
+178
+00:24:47.990 --> 00:24:50.110
+Byron Mackay: And that's not necessarily what you want.
+
+179
+00:24:50.810 --> 00:25:01.879
+Byron Mackay: But what if you had a separate research agent that was given no context? And all you said was, here's the SQL query, and I want to optimize it. Help me understand ways that I could do that.
+
+180
+00:25:01.920 --> 00:25:20.359
+Byron Mackay: That's a very different type of question, because now that query only… that LLM has so limited information that it's gonna go out and try to find best practices, it's gonna go do web search for different other concepts, or maybe other system design ideas that maybe you hadn't considered.
+
+181
+00:25:20.600 --> 00:25:26.439
+Byron Mackay: And it's gonna do it very differently than if it had all the context to guide it.
+
+182
+00:25:26.630 --> 00:25:43.430
+Byron Mackay: Okay, so that's… that's something worth thinking about when it comes to reviewing, and I don't know, if you're like me, I often will pull things out into just, like, another chat, like, separate from my codebase, and do that a lot of times, but you could also do that automa-
+
+183
+00:25:43.530 --> 00:25:52.799
+Byron Mackay: autonomously, I guess I should say, or automatically, when, when you're in the moment, you can just set off an agent to go do it. You could even… well, let me think…
+
+184
+00:25:53.190 --> 00:26:00.610
+Byron Mackay: Anyway, we'll get into this a little bit more when we talk about harnesses, but I just want to point that out, that there is this…
+
+185
+00:26:01.060 --> 00:26:07.230
+Byron Mackay: This problem with offering too much context that can actually be adverse to what we're trying to accomplish.
+
+186
+00:26:07.880 --> 00:26:10.879
+Byron Mackay: So, that seems to work pretty well. Alright.
+
+187
+00:26:13.460 --> 00:26:16.570
+Byron Mackay: So, code generation is a commodity.
+
+188
+00:26:16.910 --> 00:26:26.949
+Byron Mackay: Alright, look at this model here for a second. This is the SWE bench, benchmark here. Look how close these are. They're so close. Like…
+
+189
+00:26:27.370 --> 00:26:33.980
+Byron Mackay: Who cares what you use, right? Like, it really, like, there could be some personal preference, but you really can't go wrong.
+
+190
+00:26:34.330 --> 00:26:39.710
+Byron Mackay: But the point here is that you don't need to use the price, the most expensive model.
+
+191
+00:26:39.910 --> 00:26:44.999
+Byron Mackay: I'm gonna go to the next one, actually. Here's an example, right here.
+
+192
+00:26:45.290 --> 00:26:46.520
+Byron Mackay: Minimax.
+
+193
+00:26:46.630 --> 00:26:47.540
+Byron Mackay: Right?
+
+194
+00:26:47.860 --> 00:26:50.569
+Byron Mackay: 80.2% on that same benchmark.
+
+195
+00:26:52.140 --> 00:26:53.260
+Byron Mackay: Okay.
+
+196
+00:26:53.500 --> 00:27:00.239
+Byron Mackay: So… what are we doing here? Like, why aren't we just using this guy? Because it's going to be a lot less.
+
+197
+00:27:00.510 --> 00:27:04.320
+Byron Mackay: Here's a, here's, here's some price comparisons here.
+
+198
+00:27:04.630 --> 00:27:08.220
+Byron Mackay: So, mini-max, 30 cents per million.
+
+199
+00:27:08.460 --> 00:27:12.940
+Byron Mackay: Right, on the input, $1.20 per million. Look at Opus.
+
+200
+00:27:13.090 --> 00:27:16.879
+Byron Mackay: 5 million? 5 per million? Sorry, not 5 million.
+
+201
+00:27:17.130 --> 00:27:20.480
+Byron Mackay: 25 per million on the output.
+
+202
+00:27:20.760 --> 00:27:22.589
+Byron Mackay: And what are we getting for it?
+
+203
+00:27:23.100 --> 00:27:35.369
+Byron Mackay: Not to mention that, Claude, so nicely… one of the guys even pointed this out, that they reduced the quality intentionally.
+
+204
+00:27:35.940 --> 00:27:44.120
+Byron Mackay: Recently for Cloud Code. And there's more nuance in all of that, but the thing is here is that you don't get to control that. They do.
+
+205
+00:27:44.750 --> 00:27:46.589
+Byron Mackay: And so, it's like, well…
+
+206
+00:27:46.830 --> 00:27:56.340
+Byron Mackay: Now you're kind of… what are we doing here? Like, why am I giving… they are un… I am unknowingly getting worse output for the same price.
+
+207
+00:27:56.690 --> 00:28:11.240
+Byron Mackay: when we could be controlling it ourselves. You kind of see the theme I'm going here a little bit, I think, where I'm just… but I'm really just trying to make a point here. I'm not trying to tell you to go one way or the other, because I still use cloud code, but there is opportunity here to do more
+
+208
+00:28:11.300 --> 00:28:26.770
+Byron Mackay: with… and I… not more with less, but more for less, I should say. So, a well-designed multi-agent system can replace the $200 a month subscription with a $45 a month workflow, have the same or better output quality.
+
+209
+00:28:27.640 --> 00:28:31.170
+Byron Mackay: There is a big asterisk there.
+
+210
+00:28:31.360 --> 00:28:38.499
+Byron Mackay: That says it's… that is basically saying it's about how you set up the workflow. It's not about the model you use, it's about the workflow.
+
+211
+00:28:39.010 --> 00:28:41.960
+Byron Mackay: And we'll get into that here in just a little bit, in a moment here.
+
+212
+00:28:43.640 --> 00:28:44.610
+Byron Mackay: Okay.
+
+213
+00:28:45.080 --> 00:28:48.319
+Byron Mackay: When you're choosing models, be diverse.
+
+214
+00:28:48.580 --> 00:28:50.189
+Byron Mackay: Use different models.
+
+215
+00:28:50.300 --> 00:29:04.880
+Byron Mackay: don't use the same one for everything. I think I've talked about that a little bit already as, already, but, you know, if you're gonna use… if you're gonna have different stages here, where you are building, different parts of your app at different times.
+
+216
+00:29:04.880 --> 00:29:20.409
+Byron Mackay: Use different models for each of these based on what you want to do. So, code generation? Well, you might want to use something that's higher in that… that certain benchmark, right? And we just talked about minimax being one of those that you could use over Opus, and you'd probably get the… you would get some sort of
+
+217
+00:29:20.410 --> 00:29:38.410
+Byron Mackay: comparability, comparability in the output, some parity there. But the thing is, you don't have to rely on that alone, right? Because you might also have a code review step, and that's going to review the code that's been written, and then give you feedback, and if you set it up in a loop, then you can have it just iterate on its own.
+
+218
+00:29:38.720 --> 00:29:40.829
+Byron Mackay: For a much, much cheaper cost.
+
+219
+00:29:41.250 --> 00:29:45.339
+Byron Mackay: Same with research, going out and, and,
+
+220
+00:29:45.650 --> 00:30:01.360
+Byron Mackay: you know, something really cheap. You just needed to go out, do a web search, and come back and pull stuff in. You don't need Opus for that, right? There's lots of other things you can use that can do that just as well, because you're not actually trying to generate as much as you are just trying to call the right tool calls and make some Google queries and get some information.
+
+221
+00:30:01.980 --> 00:30:04.920
+Byron Mackay: That already exists out there. It doesn't need to be generated, per se.
+
+222
+00:30:05.400 --> 00:30:12.449
+Byron Mackay: So, using models at different stages catches bugs, no single model finds it in itself, okay?
+
+223
+00:30:12.630 --> 00:30:17.800
+Byron Mackay: And it takes those expensive tokens that you want and uses them strategically.
+
+224
+00:30:17.980 --> 00:30:18.830
+Byron Mackay: Okay.
+
+225
+00:30:22.270 --> 00:30:23.100
+Byron Mackay: Alright.
+
+226
+00:30:23.500 --> 00:30:27.569
+Byron Mackay: Building a great LM workflow is less about the model you choose.
+
+227
+00:30:27.890 --> 00:30:41.550
+Byron Mackay: And more about which model you choose for which task. So something very… something to keep in mind for you when you're going through, is this the right model I should be using for this task? Particularly when it comes to building your own dev workflow or building a product.
+
+228
+00:30:42.280 --> 00:30:47.240
+Byron Mackay: I'll… little story here. We had a product where there were…
+
+229
+00:30:47.410 --> 00:30:53.180
+Byron Mackay: 6 LLM calls in one workflow, and at one point, we were just using Sonic for all of it.
+
+230
+00:30:53.710 --> 00:30:58.210
+Byron Mackay: And we were eat getting our lunch money stolen from us.
+
+231
+00:30:58.530 --> 00:31:09.479
+Byron Mackay: And so we went back and we said, okay, what's the most important here? So we said, okay, well, here's some tool calling, here's some, instruction consolidating that we were doing.
+
+232
+00:31:09.960 --> 00:31:11.900
+Byron Mackay: Here's some intent.
+
+233
+00:31:12.070 --> 00:31:16.549
+Byron Mackay: Mapping that we were doing, and then here's what the user sees at the end.
+
+234
+00:31:17.380 --> 00:31:27.540
+Byron Mackay: And I can't actually tell… I can't remember all the models we used for each of those tasks, but they were different… there was a variety of models that we used across the board for that workflow.
+
+235
+00:31:27.890 --> 00:31:44.350
+Byron Mackay: And, when it came to what the user saw, that was the one we were most concerned with, right? Because that's what the user ultimately sees. We wanted to make sure it was coherent, we wanted to make sure it worked well, that it looked right, you know?
+
+236
+00:31:44.680 --> 00:31:48.379
+Byron Mackay: But we found that it didn't have to be sought it.
+
+237
+00:31:48.650 --> 00:31:49.490
+Byron Mackay: Right?
+
+238
+00:31:50.520 --> 00:32:00.250
+Byron Mackay: But we did feel… we did find… I will say, we didn't find many open source models, though, that fit that bill for us. Open source models could be used before getting to that point.
+
+239
+00:32:00.590 --> 00:32:02.739
+Byron Mackay: But when I got for that last one,
+
+240
+00:32:03.460 --> 00:32:05.940
+Byron Mackay: I think we actually ended up using a GPT model.
+
+241
+00:32:06.460 --> 00:32:24.339
+Byron Mackay: Not the greatest one, but one that we felt was hitting the marker with a high quality output. So, anyway, just a little story there to tell you, you know, give you an idea of what we were looking at in terms of choosing models for different tasks.
+
+242
+00:32:28.030 --> 00:32:38.230
+Byron Mackay: Okay. Now let's talk about infrastructure. So… the model…
+
+243
+00:32:38.490 --> 00:32:47.930
+Byron Mackay: is commodity. Everybody has the same models, right? The model is not going to, is not going to sell your product, right?
+
+244
+00:32:48.630 --> 00:33:07.369
+Byron Mackay: In fact, it'd almost be laughable if someone said, here's our product, come buy us, because we use Sonnet 4.7. You'd be like, meh. Like, I don't know how I feel about that as a marketing boy, right? But what would be interesting is, tell me about what your harness does.
+
+245
+00:33:07.620 --> 00:33:15.270
+Byron Mackay: Tell me all about how you orchestrated this thing, and why that's more valuable than somebody else. The model is the commodity.
+
+246
+00:33:15.390 --> 00:33:17.970
+Byron Mackay: The harness is the moat.
+
+247
+00:33:18.580 --> 00:33:24.490
+Byron Mackay: Right? That is what's going to differentiate your product, or your workflow, from someone else.
+
+248
+00:33:27.050 --> 00:33:30.840
+Byron Mackay: So, I want to talk about these two words real quick, agent and harness.
+
+249
+00:33:31.090 --> 00:33:37.180
+Byron Mackay: Because they're actually… they feel very closely related. I just want to be… set kind of a clear…
+
+250
+00:33:37.740 --> 00:33:43.249
+Byron Mackay: Kind of expectation of, like… or not expectation, but just definitions that we'll use in this presentation.
+
+251
+00:33:43.920 --> 00:33:50.729
+Byron Mackay: So, agent. The AI doing the work. Model, instructions, tools. Most oxidation effort goes here.
+
+252
+00:33:51.070 --> 00:34:00.110
+Byron Mackay: And then the harness is the environment around the agent, okay? It's the controls, it's the constraints, verification.
+
+253
+00:34:00.270 --> 00:34:11.000
+Byron Mackay: This is where reliability lives. Now, we have seen a lot of interesting agents in the last year, and what happened? We saw a lot of failures as a result of that.
+
+254
+00:34:12.360 --> 00:34:27.299
+Byron Mackay: So, this year, and it's been said, that this year is the year of the harness. This is where we actually go in and put all of these checks and balances into place, and put a higher focus on that than maybe on what the AI is doing.
+
+255
+00:34:28.409 --> 00:34:30.850
+Byron Mackay: So, I have this little,
+
+256
+00:34:31.130 --> 00:34:39.230
+Byron Mackay: this… these… this comparison here, so your models, like the CPU, the context window is your RAM, and the harness is the operating system.
+
+257
+00:34:39.889 --> 00:34:45.050
+Byron Mackay: So, everything lives inside that operating system, right? You can do whatever you want in that operating system.
+
+258
+00:34:45.650 --> 00:34:48.069
+Byron Mackay: Just like the harness does for the agent.
+
+259
+00:34:48.630 --> 00:34:51.590
+Byron Mackay: I'm gonna pause here real quick for a quick question here.
+
+260
+00:34:52.199 --> 00:34:58.600
+Byron Mackay: Brent asks, all models generate similar quality code, but is the same true for code review?
+
+261
+00:35:03.670 --> 00:35:13.420
+Byron Mackay: Well, first, I'll push back a little bit and say not all models generate similar quality code. There are definitely ones that produce far less, we just don't use them very often, because they don't produce very good code.
+
+262
+00:35:13.730 --> 00:35:22.250
+Byron Mackay: But let's say, for the sake of this argument here, that we had a group of models that were like, hey, all of these produce similar quality code.
+
+263
+00:35:22.730 --> 00:35:25.190
+Byron Mackay: But is the same true for code review?
+
+264
+00:35:26.530 --> 00:35:27.730
+Byron Mackay: It is not.
+
+265
+00:35:29.070 --> 00:35:49.039
+Byron Mackay: Well, let me sit back. For that group of models that produces code, the quality of code review is not the same across the board. There would be a separate that might include some of those models that would be the same for code review. You have to kind of play with it and see which ones work best for you. There's a benchmark out there for that.
+
+266
+00:35:49.230 --> 00:35:58.310
+Byron Mackay: So I would recommend go checking that out. But there are specific open source models that are just good at code review, not necessarily generating code, which is interesting to me.
+
+267
+00:35:59.440 --> 00:36:03.270
+Byron Mackay: But they… but that's what they specialized in, and that's what they're good for, so…
+
+268
+00:36:03.950 --> 00:36:17.260
+Byron Mackay: that's the… I guess the short answer is maybe. If you have that group of models that are good at code quality, maybe they're good at code review, but there are also others that are not good at code generation that are good at code… are more superior at code review, so…
+
+269
+00:36:19.760 --> 00:36:27.260
+Byron Mackay: There you go. They take that and go… you'll have to do some research to find exactly which one you would want to use for that code review.
+
+270
+00:36:29.650 --> 00:36:43.479
+Byron Mackay: Alright, so what's a harness's job? I really want to make sure this is clear, because again, this term is being thrown around a lot, and I want to kind of give you some framework here, like a frame of mind. This is not exhaustive.
+
+271
+00:36:43.690 --> 00:36:54.459
+Byron Mackay: Right? Harnesses can do a lot, and we're going to talk about some examples here in a second, and just show you all the things that people have of thoughts and procedures that people have put into harnesses to make them better.
+
+272
+00:36:54.810 --> 00:36:58.410
+Byron Mackay: This is very high level, but it's a good place to start.
+
+273
+00:36:58.890 --> 00:37:00.430
+Byron Mackay: So, first.
+
+274
+00:37:00.680 --> 00:37:15.419
+Byron Mackay: It constrains, alright? What is the… what is the agent allowed to do, right? We have guardrails, we have boundaries, so that's job one. Job two is it informs. What should the agent know? What context does it have? What access to documentation does it have?
+
+275
+00:37:15.540 --> 00:37:20.489
+Byron Mackay: There's some very interesting, use cases there that we'll talk about here in a second.
+
+276
+00:37:20.830 --> 00:37:25.539
+Byron Mackay: It also verifies. Did it get it correct? We have our validations, our checks. And finally.
+
+277
+00:37:26.240 --> 00:37:30.600
+Byron Mackay: Does it… it should connect, connect. It should correct.
+
+278
+00:37:30.800 --> 00:37:33.829
+Byron Mackay: So, after the verification process, can it feed it back?
+
+279
+00:37:34.140 --> 00:37:42.370
+Byron Mackay: through a loop, can it self-repair? These are all very, like, again, very high level, but very important things when it comes to a harness.
+
+280
+00:37:43.380 --> 00:37:56.000
+Byron Mackay: And I feel like what we're going to see by the end of this year, and we probably, or probably already exist, but, I wouldn't be surprised if somebody releases, either open source or some… maybe Anthropic does it.
+
+281
+00:37:57.080 --> 00:37:59.729
+Byron Mackay: Where it's like, and here is the…
+
+282
+00:37:59.880 --> 00:38:08.700
+Byron Mackay: the interface guidelines for dealing with harnesses, or something like that, where it's like, here's the guide of the rules that have become… are agreed upon by
+
+283
+00:38:08.890 --> 00:38:17.720
+Byron Mackay: so many engineers of how hard this should be, because this is a bit of a… a bit of an important definition to make, I feel. And of course.
+
+284
+00:38:18.510 --> 00:38:25.240
+Byron Mackay: Business people, non-engineers, are going to want to know what the harness does for them, and somebody will distill it down for that, too, for them, too.
+
+285
+00:38:25.770 --> 00:38:26.950
+Byron Mackay: Okay.
+
+286
+00:38:28.880 --> 00:38:33.670
+Byron Mackay: Let's move on. Case study. Alright, so here's a simple case study that Anthropic did.
+
+287
+00:38:34.450 --> 00:38:43.809
+Byron Mackay: They have this contract pattern, okay? You have a planner, you have a generator, you have an evaluator, right? Pretty straightforward in terms of what this is gonna do.
+
+288
+00:38:44.480 --> 00:38:47.120
+Byron Mackay: So,
+
+289
+00:38:47.520 --> 00:38:52.229
+Byron Mackay: What you'll notice here, what I want you to take away, is that there's no mention here of a model.
+
+290
+00:38:52.400 --> 00:38:53.540
+Byron Mackay: Doesn't matter.
+
+291
+00:38:53.780 --> 00:38:57.589
+Byron Mackay: It's, it's, it's an implementation detail, you might say.
+
+292
+00:38:58.010 --> 00:39:05.959
+Byron Mackay: What's really important is this workflow. The planner defines the scope, the generator writes the code, the evaluator will test it.
+
+293
+00:39:06.430 --> 00:39:09.740
+Byron Mackay: So…
+
+294
+00:39:09.870 --> 00:39:21.060
+Byron Mackay: Quality is defined up front, the planner defines all of that. It's not something at the end, right? And the, the evaluator will use Playwright to test the application.
+
+295
+00:39:21.390 --> 00:39:32.340
+Byron Mackay: Now, this is all very straightforward, like, this is… this is a pretty typical example that you can even go back a couple years and see examples similar like this. But again, this is a harness, right? This is what a harness looks like.
+
+296
+00:39:32.350 --> 00:39:52.900
+Byron Mackay: It's defining these steps and defining this workflow that then the agents, wherever they're placed in here, I imagine 3 separate agents given 3 separate harnesses within the planner, generator, and evaluator phases to say, this is what you're going to do at this phase. You're defining their jobs, you're defining their tasks, and you're defining what they have access to to do their job.
+
+297
+00:39:52.930 --> 00:40:06.029
+Byron Mackay: And then you keep those loops in, you keep those connectors in place so that they can self-correct, and they can pass things back and forth and make things, you know, generally work.
+
+298
+00:40:06.490 --> 00:40:09.240
+Byron Mackay: It sounds really simple when I put it that way, perhaps.
+
+299
+00:40:09.820 --> 00:40:18.659
+Byron Mackay: But try building something like this, and it starts to get pretty hairy when you get into it. But I just want to highlight this example, because I thought it was a really good high-level one.
+
+300
+00:40:20.470 --> 00:40:28.330
+Byron Mackay: Okay, this one is from Cognition, and they fixed what they call the context anxiety.
+
+301
+00:40:28.810 --> 00:40:33.140
+Byron Mackay: So the symptom was Devin was wrapping up tasks prematurely.
+
+302
+00:40:33.340 --> 00:40:35.880
+Byron Mackay: This is… this is actually kind of interesting.
+
+303
+00:40:36.320 --> 00:40:46.110
+Byron Mackay: They found out that's because the agent was aware of the context window limit, and so the model experienced anxiety.
+
+304
+00:40:46.290 --> 00:40:48.700
+Byron Mackay: And decided to just wrap up the task and be done.
+
+305
+00:40:49.540 --> 00:41:08.860
+Byron Mackay: Which is a little funny to me, because it's a very human thing to do, right? You're, like, rushing at the end, it's like, the end of the week, I gotta get this thing out, and just click deploy on a Friday at 4.59 PM, and… that's essentially what we see here, is it's all the context window going away. So what do they do?
+
+306
+00:41:09.800 --> 00:41:20.320
+Byron Mackay: This is… again, this makes me laugh. They enabled 1 million token context, but then they capped the actual usage at 200K and didn't tell the model.
+
+307
+00:41:20.580 --> 00:41:27.560
+Byron Mackay: Oh, man, I just think that's so funny. I don't know why, I just thought that that's hilarious.
+
+308
+00:41:27.890 --> 00:41:28.930
+Byron Mackay: Okay.
+
+309
+00:41:29.030 --> 00:41:35.680
+Byron Mackay: So, this is not the first time I've seen us lie to the model to get something out of it.
+
+310
+00:41:36.280 --> 00:41:40.020
+Byron Mackay: But, you know, this is… again, this is kind of…
+
+311
+00:41:40.410 --> 00:41:51.910
+Byron Mackay: showing how these models can react inside of these harnesses, and these are the kinds of problems that we have to solve now. These are problems that we didn't have to deal with, right, a long time ago, but now we do.
+
+312
+00:41:52.160 --> 00:41:56.710
+Byron Mackay: This is just part of the issues that we have when we start developing these harnesses.
+
+313
+00:41:56.960 --> 00:42:02.370
+Byron Mackay: The… the model was not the problem.
+
+314
+00:42:03.890 --> 00:42:06.070
+Byron Mackay: Every model would have had this problem.
+
+315
+00:42:06.340 --> 00:42:08.160
+Byron Mackay: The problem was in the harness.
+
+316
+00:42:08.660 --> 00:42:13.329
+Byron Mackay: And so, a good harness engineer… New job role.
+
+317
+00:42:13.540 --> 00:42:16.630
+Byron Mackay: Would have identified this and fixed it.
+
+318
+00:42:16.860 --> 00:42:17.800
+Byron Mackay: So…
+
+319
+00:42:21.310 --> 00:42:23.500
+Byron Mackay: Alright.
+
+320
+00:42:23.660 --> 00:42:28.659
+Byron Mackay: this… it's… a lot of this is, from what Lang Chain has found.
+
+321
+00:42:29.290 --> 00:42:36.820
+Byron Mackay: We were really good last year at watching agents fail, now we need to prevent it. So it's all about building these harnesses and getting them to work.
+
+322
+00:42:38.750 --> 00:42:48.000
+Byron Mackay: So, Langchain did a study. They had, 50… they had 1,300, companies that they surveyed. 57% of them
+
+323
+00:42:48.040 --> 00:43:00.030
+Byron Mackay: Can't… maybe you can't see that very well, but the number's right there. Realize it's gray on black, but I'll read them out loud. 57% have agents in production, 32% site quality.
+
+324
+00:43:00.110 --> 00:43:02.139
+Byron Mackay: As the number one production killer.
+
+325
+00:43:02.870 --> 00:43:03.950
+Byron Mackay: So…
+
+326
+00:43:04.250 --> 00:43:15.169
+Byron Mackay: We have a… we… I'm not… I'm not telling you anything new, if you've been in this space for any sort of time, that the output from agents is the hardest thing to get right.
+
+327
+00:43:15.510 --> 00:43:19.929
+Byron Mackay: Because it can be so all over the place.
+
+328
+00:43:21.290 --> 00:43:29.789
+Byron Mackay: Now, all of them, nearly, 89% of them have observability. I don't know what the other 11% were doing, living under a rock.
+
+329
+00:43:30.190 --> 00:43:38.559
+Byron Mackay: But they all have observability, so everybody has it, generally speaking. That's great, we can all see it failing, but what do we do about it?
+
+330
+00:43:39.140 --> 00:43:46.339
+Byron Mackay: Some have even gone a little further to have step-level tracing, which most observability platforms will have.
+
+331
+00:43:46.800 --> 00:43:53.240
+Byron Mackay: But what do we do about it? That is the hardest problem we have right now facing us, in…
+
+332
+00:43:53.370 --> 00:44:02.689
+Byron Mackay: in our industry, is how do we resolve this issue? Now, there's a lot out there, and I'm a proponent of evals, and I can talk about that.
+
+333
+00:44:02.940 --> 00:44:18.640
+Byron Mackay: forever, I feel like, but it's still a really hard problem to solve, and I've tried to solve that problem multiple times, and I get some good results, and I've learned a lot from it, but it's still a really critical, hard thing to do.
+
+334
+00:44:19.000 --> 00:44:30.889
+Byron Mackay: I will say that Notion is one of my favorite agents to use, and they actually have roles that are specifically for
+
+335
+00:44:31.210 --> 00:44:37.160
+Byron Mackay: identifying where the harness and the AI in general is drifting the wrong way.
+
+336
+00:44:37.480 --> 00:44:41.679
+Byron Mackay: And their whole job is to make benchmarks, internal benchmarks that they use.
+
+337
+00:44:41.730 --> 00:45:00.620
+Byron Mackay: And then identify when those benchmarks are becoming obsolete, because the agent is getting so good at it, and then developing new ones. And they read output, and they define the quality of the output, and then they make new evals to go with it. That is some… that is a team's… maybe multiple teams' roles at Notion.
+
+338
+00:45:01.400 --> 00:45:03.500
+Byron Mackay: And you can tell that it's working.
+
+339
+00:45:03.780 --> 00:45:07.390
+Byron Mackay: Because their agent is fire. It is so good.
+
+340
+00:45:07.910 --> 00:45:09.130
+Byron Mackay: It is so good.
+
+341
+00:45:11.060 --> 00:45:12.030
+Byron Mackay: Alright.
+
+342
+00:45:12.320 --> 00:45:19.030
+Byron Mackay: There, I'll get off my… Cheering for them, but alright.
+
+343
+00:45:20.240 --> 00:45:26.770
+Byron Mackay: This is… here's another just interesting stat that, to kind of highlight how hard this problem is.
+
+344
+00:45:27.470 --> 00:45:31.460
+Byron Mackay: So, imagine your steps are 95% reliable.
+
+345
+00:45:31.970 --> 00:45:40.219
+Byron Mackay: What does that really mean? If you took 20 steps, which is not uncommon, it's a very fair number for any Agentic workflow that you have.
+
+346
+00:45:40.450 --> 00:45:50.599
+Byron Mackay: It takes 20 calls, or 20 steps, or, to get something done. I think that's pretty reasonable in larger applications. If 95% are correct.
+
+347
+00:45:51.010 --> 00:45:55.449
+Byron Mackay: That means 36% of the time, you'll have a success at the end.
+
+348
+00:45:58.020 --> 00:46:00.019
+Byron Mackay: That's pretty… lame.
+
+349
+00:46:01.160 --> 00:46:05.840
+Byron Mackay: This is the… again, this is the problem we're trying to solve. How do we make these harnesses
+
+350
+00:46:05.960 --> 00:46:11.690
+Byron Mackay: alleviate this number, and help us figure out the right solutions.
+
+351
+00:46:12.710 --> 00:46:15.429
+Byron Mackay: Alright, so let's talk about what we can do about it.
+
+352
+00:46:15.550 --> 00:46:24.349
+Byron Mackay: Here is your practical harness checklist. This is the things that you should be thinking about as you build your harness. There will be more as you get into it, but here are the things to think about.
+
+353
+00:46:24.930 --> 00:46:25.970
+Byron Mackay: Number 1.
+
+354
+00:46:26.340 --> 00:46:28.210
+Byron Mackay: Limit execution steps.
+
+355
+00:46:28.580 --> 00:46:29.780
+Byron Mackay: That's a big one.
+
+356
+00:46:30.040 --> 00:46:34.589
+Byron Mackay: You don't want it to go in for an infinite loop. You want to say, we're going to cap you at 40.
+
+357
+00:46:35.320 --> 00:46:42.509
+Byron Mackay: Now, you might think, this coming back, you might say, oh, well, what about that anxiety we were talking about earlier? If they knew they're getting to close, they're just gonna wrap it up and go.
+
+358
+00:46:42.720 --> 00:46:53.940
+Byron Mackay: feedback loops. So they get to 40, and they're like, oh, this is it, this is what I've got. They'll hand it off to the next guy. And the next agent's gonna review that and say, try again. And it'll go back, and it gets a fresh 40.
+
+359
+00:46:54.120 --> 00:47:06.270
+Byron Mackay: Okay? But this iterative loop, if you don't set the cap, or you put it too high, it's just gonna churn and churn and churn, and you're gonna have to… you're not gonna be able to control it.
+
+360
+00:47:06.690 --> 00:47:08.700
+Byron Mackay: My,
+
+361
+00:47:09.600 --> 00:47:22.450
+Byron Mackay: My favorite example of this, and my own, was when I had 3 steps, I had 3 different steps that were in a loop, a bit of a feedback loop, that were supposed to ultimately say, once it's done, kick out of the loop.
+
+362
+00:47:22.800 --> 00:47:40.169
+Byron Mackay: And it was… what happened was they got into this conversation with themselves, where one goes, hey, this looks great, I'm all done, I'm gonna pass it to the next person, and the next person… the next agent goes, oh, yeah, that looks great to me too, I don't have anything else to say, I'll pass it to the next one. And he goes, I don't have anything to say either, this looks good, I'll pass it to the next one.
+
+363
+00:47:40.170 --> 00:47:58.269
+Byron Mackay: And it got into this loop where they were, like, complimenting each other, and talking about the weather, and it was just like, what is going on? I had no limit on the execution steps, and it just got totally off the rails. Like, literally off the rails. So I just… I had to stop it, but…
+
+364
+00:47:58.300 --> 00:48:03.880
+Byron Mackay: Anyway, limit execution steps, really important. What else? Evaluate the trajectory.
+
+365
+00:48:04.330 --> 00:48:21.310
+Byron Mackay: How are you going to evaluate the trajectory of each agent? You want to know what was going in, what the goal should have been, what the output should have been, and be mindful of this. This is not something where you need to write… you can write evals around it, but I almost prefer to just pull in a sample of examples and read them myself.
+
+366
+00:48:21.500 --> 00:48:29.849
+Byron Mackay: I feel like I get a lot more quality output from that, just reading it myself, and deciding how did it get to this point, and is this what I would have expected it to do?
+
+367
+00:48:31.550 --> 00:48:41.120
+Byron Mackay: This one's very similar. Write a progress state file. This is extremely helpful, where you can…
+
+368
+00:48:41.480 --> 00:48:57.850
+Byron Mackay: basically get a state at every step, so that you can replay that step over and over again, and see what, see what's happening, and it gives you a chance to also just get the whole picture. Now, this is… you can do this with observability platforms,
+
+369
+00:48:57.870 --> 00:49:08.919
+Byron Mackay: But there are other methods that seem to be… that people have seen that work better, too, where you can just… it's much easier to read or consume for an LLM to consume, and again, you can just…
+
+370
+00:49:09.100 --> 00:49:15.300
+Byron Mackay: replay, right? You can replay at a certain point and see if anything changes.
+
+371
+00:49:17.850 --> 00:49:24.930
+Byron Mackay: Alright, use different models for different steps, I think we've talked about that quite a bit. Mock everything, so when you're testing your agent.
+
+372
+00:49:25.090 --> 00:49:28.489
+Byron Mackay: Don't let it touch production data.
+
+373
+00:49:28.640 --> 00:49:33.330
+Byron Mackay: So, obviously, like, I think that's a pretty typical thing, I don't think we have to talk about it too much.
+
+374
+00:49:33.650 --> 00:49:45.470
+Byron Mackay: And then finally, during testing, set the temperature to zero so that you can get more or less variance, and you can get more deterministic outputs to know,
+
+375
+00:49:45.680 --> 00:50:04.030
+Byron Mackay: to kind of know what's going on. The challenge there, right, is that… I think we usually use, like, 0.3 in production, sometimes 0.6, but when it came to testing, it was a lot better to just say, hey, let's just throw this to zero, and let's just see, like, let's just start identifying these patterns here.
+
+376
+00:50:04.220 --> 00:50:08.569
+Byron Mackay: So… There are some thoughts, there are some ideas there for ya.
+
+377
+00:50:09.160 --> 00:50:24.679
+Byron Mackay: Here are some other thoughts of what works at scale. So, we have model routing by role, so different models for orchestrators versus executor agents. Again, never default to the same model, we talked about that a lot.
+
+378
+00:50:24.810 --> 00:50:31.160
+Byron Mackay: The out-of-band watchdog is interesting. So…
+
+379
+00:50:33.070 --> 00:50:44.460
+Byron Mackay: This is the one where… this is similar to the execution step, where the tokens… you start getting so many tokens thrown in that you start… you have somebody go, hey, hey, hey,
+
+380
+00:50:44.680 --> 00:50:48.869
+Byron Mackay: And if we get this too big, we're not going to be able to follow what's going on.
+
+381
+00:50:49.130 --> 00:50:54.000
+Byron Mackay: So instead of letting it just run and get this huge context window opened up.
+
+382
+00:50:54.220 --> 00:51:00.620
+Byron Mackay: By the way, about 100,000 tokens is about where I've seen that degradation start to really hit.
+
+383
+00:51:01.170 --> 00:51:03.260
+Byron Mackay: Then…
+
+384
+00:51:03.580 --> 00:51:17.439
+Byron Mackay: you know, you say, hey, let's reset, let's try this again. Let's take what we have, consolidate it, try it again, or maybe there's an opportunity where we just say, hey, let's just start over, and let's change the parameters a bit and see if we can get this going a little faster.
+
+385
+00:51:18.070 --> 00:51:29.339
+Byron Mackay: So you have to kind of play with, you know, how we want to solve that, but it is good to know to have something watching you being like, we have hit this limit, and we need to make a change, because we're going to see worse performance at this point.
+
+386
+00:51:30.610 --> 00:51:32.480
+Byron Mackay: Alright.
+
+387
+00:51:32.740 --> 00:51:43.289
+Byron Mackay: This is… this is an interesting one, too. So, this is something we do, actually, here at Gauntlet, if you're familiar with the Kelly agent that we have that's built a lot of iOS applications.
+
+388
+00:51:43.460 --> 00:51:48.320
+Byron Mackay: We will have resources that are local.
+
+389
+00:51:48.540 --> 00:51:52.680
+Byron Mackay: That we wanted to use, instead of going and doing, like, an API call.
+
+390
+00:51:53.170 --> 00:51:55.369
+Byron Mackay: For things.
+
+391
+00:51:55.920 --> 00:52:06.940
+Byron Mackay: And that's because, well, it might be some, like, you know, maybe some articles that we like, or some instructions, you know, different things that we just have already pulled down. Reason being is because…
+
+392
+00:52:07.260 --> 00:52:13.920
+Byron Mackay: If an API call breaks, that ruins your harness, right? Or it potentially could.
+
+393
+00:52:14.340 --> 00:52:20.310
+Byron Mackay: it can break your harness if that breaks. So just have… if you can leverage local things, you don't have to worry about that.
+
+394
+00:52:20.810 --> 00:52:25.969
+Byron Mackay: The harness can continue, it doesn't have to stop and ask you for questions, I can just keep going.
+
+395
+00:52:26.650 --> 00:52:34.199
+Byron Mackay: So, interesting things. Of course, you can have fallbacks if the search doesn't work, but, if you can just avoid it entirely, why wouldn't you?
+
+396
+00:52:35.370 --> 00:52:44.319
+Byron Mackay: Okay, here's another interesting one that we do a lot here with Kelly, and that is we standardize our wrapper scripts. So,
+
+397
+00:52:44.840 --> 00:52:48.500
+Byron Mackay: Instead of letting… when we have, like, defined
+
+398
+00:52:49.400 --> 00:52:56.449
+Byron Mackay: paths that we want the agent to take at certain moments. We actually just define a script and say, just call this script and just let it do this.
+
+399
+00:52:57.070 --> 00:53:06.909
+Byron Mackay: That completely takes the non-deterministic nature out of the equation once it enters the script, right? So, if there's something like your deployments, or,
+
+400
+00:53:07.610 --> 00:53:18.659
+Byron Mackay: If you want to load secrets, there are many opportunities where you can say, I know exactly what I want this to do at this point, I will just write the script and say, execute this, and then go.
+
+401
+00:53:18.770 --> 00:53:30.060
+Byron Mackay: Again, takes out that, that non-deterministic part of it, and lets you, have a much more consistent experience, a consistent environment that you build for these agents.
+
+402
+00:53:33.320 --> 00:53:34.260
+Byron Mackay: Alright.
+
+403
+00:53:35.920 --> 00:53:42.790
+Byron Mackay: Let's just really quickly come back and… and talk about it all, about all of these… these three things, where we started, the paradigm.
+
+404
+00:53:43.190 --> 00:53:51.820
+Byron Mackay: How do you think about your code? What stage is your code at? Do you want to be more involved in the code, or do you want to be more of the architect and let Claude do the work for you?
+
+405
+00:53:52.240 --> 00:54:04.449
+Byron Mackay: You might even go off and build your own. HumanLayer does this, many others have been doing this. HumanLayer has a product around it, but many others are taking this opportunity to go build their own.
+
+406
+00:54:04.450 --> 00:54:16.950
+Byron Mackay: Sometimes it's for cost reasons, sometimes it's just for experimental reasons. I have a good friend, she runs all… she will buy very expensive GPUs so that she can run LLMs and run it all locally.
+
+407
+00:54:17.520 --> 00:54:22.350
+Byron Mackay: And it's really, really impressive that… and she loves it. She thinks the quality's great.
+
+408
+00:54:23.040 --> 00:54:34.789
+Byron Mackay: So paradigm. So consider that. That's how you can determine which tool you want to use. It's not necessarily one tool's better than the other, it just depends on what tool works for the way that you want to work.
+
+409
+00:54:36.050 --> 00:54:39.630
+Byron Mackay: Alright, models. Diversify on the models.
+
+410
+00:54:39.940 --> 00:54:47.490
+Byron Mackay: Get to know your open source models, leverage them, use different models for different tasks in the workflow.
+
+411
+00:54:47.700 --> 00:54:53.659
+Byron Mackay: And, my… I'll just say this one more time, don't get… don't feel like you have to be locked into any products.
+
+412
+00:54:53.760 --> 00:54:59.239
+Byron Mackay: workflow. Someone's like, I got a great review agent, come pay me, you know, $20 a month to use it.
+
+413
+00:54:59.500 --> 00:55:11.660
+Byron Mackay: great, but you've just lost a lot of control by giving them that $20, when you could have run something that's much more efficient. Now, granted, you'd have to build it, but code is cheap these days anyway.
+
+414
+00:55:11.760 --> 00:55:20.600
+Byron Mackay: And you can control it a lot more, in terms of how much feedback you get, what models you're using, creating that harness for that… for that particular environment.
+
+415
+00:55:20.960 --> 00:55:26.490
+Byron Mackay: And finally, infrastructure. The harness is the product, the harness is the moat.
+
+416
+00:55:26.620 --> 00:55:34.379
+Byron Mackay: If somebody came to me today and said, I want to become an AI engineer, what should I learn how to do? I would say, go build harnesses, it's the new CRUD app.
+
+417
+00:55:35.090 --> 00:55:39.339
+Byron Mackay: I do feel that strongly about harnesses, that that is the kind of… that is the new CRUD app.
+
+418
+00:55:40.340 --> 00:55:44.960
+Byron Mackay: Here's the thing. Let me just see if this last one has this. Nope.
+
+419
+00:55:45.740 --> 00:55:50.710
+Byron Mackay: Alright, I want to talk about an opportunity that I see in the market. Take it for what it's worth, this is the…
+
+420
+00:55:51.050 --> 00:55:54.950
+Byron Mackay: My opinion, only my opinion, but,
+
+421
+00:55:56.300 --> 00:56:12.749
+Byron Mackay: we as engineers are becoming very used to these environments that we're working in. We have Cloud Code, we have these, we have codecs, we have cursor, we have these things that we can leverage, and things that we can work in, and we feel very… we can feel very comfortable, very confident in the output.
+
+422
+00:56:13.450 --> 00:56:15.979
+Byron Mackay: Not every industry has this.
+
+423
+00:56:16.210 --> 00:56:20.660
+Byron Mackay: I'll give you my wife as an example. My wife is a speech pathologist. She does speech therapy.
+
+424
+00:56:21.360 --> 00:56:38.629
+Byron Mackay: And so, people will come in, they want to work on… they can't say they're ours, or something to that effect. And she needs a system to help her do that. Well, nobody's made that yet. Now, she could learn Claude Code, she's not going to. She could learn Claude Code, and learn how to make MD files, and maybe make some file structure that she could…
+
+425
+00:56:38.790 --> 00:56:41.200
+Byron Mackay: build this process. She's not gonna do it.
+
+426
+00:56:41.950 --> 00:56:44.179
+Byron Mackay: Right? There's an opportunity.
+
+427
+00:56:44.540 --> 00:56:47.440
+Byron Mackay: Create the harness for X industry.
+
+428
+00:56:48.650 --> 00:56:56.070
+Byron Mackay: Right? And then, you can make that, you can make that industry more powerful, more productive because of that.
+
+429
+00:56:56.460 --> 00:57:01.310
+Byron Mackay: I want to say one more thing on that. When you do do that.
+
+430
+00:57:02.320 --> 00:57:05.440
+Byron Mackay: it's not as easy as being like, I'm a developer, I can build a harness.
+
+431
+00:57:05.970 --> 00:57:08.280
+Byron Mackay: You have to have 3 things to really make this work.
+
+432
+00:57:08.690 --> 00:57:10.639
+Byron Mackay: You need the right context.
+
+433
+00:57:11.040 --> 00:57:13.420
+Byron Mackay: You need the right evals.
+
+434
+00:57:13.870 --> 00:57:30.849
+Byron Mackay: I'm not… it doesn't have to be coded evals, could be human evaluation, and you need the expert, and that's the one I want to key on here. So, if you want to do something for a certain industry, find the expert in that industry, help them… have them explain to you the task and how it works, and then go build a harness for that person, and it'll work.
+
+435
+00:57:33.610 --> 00:57:49.630
+Byron Mackay: Alright, I'll… I'm gonna wrap it up here. That's my last little bit. If you want to learn how to do this, if you want to learn how to build these harnesses, and you want to learn how to have these opportunities to go out and build these great tools.
+
+436
+00:57:50.340 --> 00:57:54.460
+Byron Mackay: For any industry that you can, you know, that you want to go into.
+
+437
+00:57:55.090 --> 00:58:00.590
+Byron Mackay: Gauntlet is here to help you learn those skills, and do exactly that, and then find jobs
+
+438
+00:58:00.920 --> 00:58:04.149
+Byron Mackay: High-paying jobs in those industries that you want.
+
+439
+00:58:04.520 --> 00:58:07.849
+Byron Mackay: So I'm gonna put a little plug for us here to…
+
+440
+00:58:07.960 --> 00:58:12.210
+Byron Mackay: reach out, go to gauntlet. Gauntletai.com.
+
+441
+00:58:12.850 --> 00:58:16.100
+Byron Mackay: Go… here we go. We're gonna post it right now.
+
+442
+00:58:16.220 --> 00:58:26.310
+Byron Mackay: We have gauntletai.com, and that's gonna be where you can go and apply, and you can, be a part of one of our cohorts where we teach you how to do all this.
+
+443
+00:58:26.470 --> 00:58:28.580
+Byron Mackay: It's an amazing opportunity.
+
+444
+00:58:28.800 --> 00:58:31.600
+Byron Mackay: You get 10 weeks uninterrupted time.
+
+445
+00:58:31.800 --> 00:58:36.980
+Byron Mackay: We will fly you out to Austin, Texas. We will give you office, we will give you room and board.
+
+446
+00:58:37.430 --> 00:58:39.080
+Byron Mackay: We will even do your laundry.
+
+447
+00:58:39.560 --> 00:58:44.479
+Byron Mackay: So that you can focus on these skills and building incredible products.
+
+448
+00:58:44.760 --> 00:58:54.059
+Byron Mackay: So that you can sharpen that saw. I mean, what point in your career do you get 10 weeks like that? 10 weeks to just focus on you and become a better builder?
+
+449
+00:58:54.240 --> 00:58:59.389
+Byron Mackay: And at a time like this, when so much is changing and moving on, you can really set yourself apart with that time.
+
+450
+00:58:59.790 --> 00:59:10.179
+Byron Mackay: We're here to help you, we're here to support you in any way to help you get the… to help you level up your skills, and also influence how this AI revolution is impacting all of us.
+
+451
+00:59:15.300 --> 00:59:16.980
+Byron Mackay: Last slide here.
+
+452
+00:59:17.540 --> 00:59:21.529
+Byron Mackay: The model you pick matters less than the system you build around it.
+
+453
+00:59:23.180 --> 00:59:28.959
+Byron Mackay: So, pick your paradigm, diversify your models, and invest in the harness.
+
+454
+00:59:32.140 --> 00:59:33.369
+Byron Mackay: Well, that's it.
+
+455
+00:59:33.680 --> 00:59:48.720
+Byron Mackay: That's everything I've got for you tonight. I hope this was insightful, I hope you take away some new thoughts and ways of thinking about this. We've been working… I've seen a lot of companies, I've seen us working internally as well, we're all following the same
+
+456
+00:59:48.720 --> 01:00:01.999
+Byron Mackay: kind of threads and veins here that, that harnesses are really where we're going to be focusing a lot of our time moving forward. Again, we've seen the value as engineers. It's now time to take that out more and more into the world.
+
+457
+01:00:02.020 --> 01:00:10.199
+Byron Mackay: And we're just gonna… we're all gonna be the engineers building it. So, it's a really exciting time. What a fun, fun place to be.
+
+458
+01:00:10.270 --> 01:00:20.370
+Byron Mackay: Really excited for… for all of you, and for the opportunities that you have coming forward, to go and build these amazing tools, and to really
+
+459
+01:00:20.450 --> 01:00:29.330
+Byron Mackay: change the way that we work in this world. It's super exciting. It's just as exciting as when the iPhone came out, and smartphones became what they are today.
+
+460
+01:00:29.530 --> 01:00:39.259
+Byron Mackay: We're at that early phase now, and I'm just so excited to get to work next to great people like yourselves to make that world a reality.
+
+461
+01:00:40.430 --> 01:00:41.390
+Byron Mackay: Alright.
+
+462
+01:00:41.890 --> 01:00:43.190
+Byron Mackay: Thanks, everyone.
+
+463
+01:00:43.630 --> 01:00:49.650
+Byron Mackay: Appreciate y'all for coming out tonight. Again, if you want to apply, there's a link in the chat.
+
+464
+01:00:50.890 --> 01:00:52.249
+Byron Mackay: And have a great night.
+

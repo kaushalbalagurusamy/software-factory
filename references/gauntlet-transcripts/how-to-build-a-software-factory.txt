@@ -1,0 +1,1095 @@
+How to Build a Software Factory
+Ash Tilawat — Gauntlet Night School
+https://www.youtube.com/watch?v=0o3gxcT-eZQ
+
+[00:00] Welcome to Gauntlet HQ here in Austin Texas. We're here in the atrium. This is the exact location where we have real
+
+[00:07] classes for Gauntlet AI and we wanted to make night school so you can see what it feels like to be a challenger.
+
+[00:14] The topic I'm going to be covering today is software factories and the reason why we're covering software factories is because they're becoming more and more
+
+[00:21] commonplace across multiple companies. Today we're going to be talking about minimum viable factory, what it takes to build a factory that generates an app
+
+[00:32] end to end for you. The way this is going to work is we'll do about 30 to 45 minutes of the
+
+[00:38] lecture. Halfway through the lecture I'll stop for Q&A and then at the end I'll also stop for Q&A.
+
+[00:44] I've also prepared a repository for you guys so you can actually take what you learn in the lecture and then go apply
+
+[00:51] it yourselves hands-on keyboard and actually try this thing out.
+
+[00:57] Are we good to go? All right. So we're going to start with some slides here.
+
+[01:06] What if you stopped writing software and started managing the things that write it for you?
+
+[01:11] We predict in the future, within the next decade, a software engineer is no longer the actor in a movie. They're the
+
+[01:18] director of multiple agents that are writing software.
+
+[01:22] That means a software engineer gets to manage these AI co-workers, these AI software engineers are going to go about build software, come back together and
+
+[01:31] then compile the entire thing. We're preparing for a future where this is the case.
+
+[01:36] A software factory is exactly that. Let's say that we no longer had to do the day-to-day rigmarole of trying to type in code or trying to check every
+
+[01:47] single aspect of what we're building. What if we could build a harness? What if we could build an entire factory that
+
+[01:53] would take everything step by step, build it based on our criteria, and as a result, launch that forest directly.
+
+[02:02] First, what we used to do is, "Hey, here's that manual line of code. Here's that one single Cloud Code session." What we want to go now and do now is
+
+[02:11] take multiple sessions over time and see if we can conduct them. See if we can orchestrate them. See if we have a layer
+
+[02:18] on top that lets us actually see what is happening with the code.
+
+[02:23] Why does this matter? The reason this matters is because the bottleneck is changing.
+
+[02:29] The bottleneck before was, "Hey, dev um developers have limited amount of time. And because they have a limited amount of time, we need, hey, a Kanban
+
+[02:38] board, tickets, a product manager. We need to come together as a team and prioritize what we're building." But, as a result, now with Cloud Code,
+
+[02:48] Codex, and all these coding agents, it is no longer bottlenecked by the time to generate code. Rather, it's rather the bottleneck
+
+[02:56] of making sure things are deployed correctly, that there's testing in place, that there's verification, and that we have clear specs for the coding
+
+[03:03] agents to actually go out and build something.
+
+[03:06] The patterns are already showing up. There's multiples apps in the market right now that let you conduct multiple Cloud Code instances, multiple Codex instances.
+
+[03:16] We're seeing end-to-end pipelines, even the Replit agent running for more than 3 hours. These are deep agents that are doing work without human interaction.
+
+[03:25] And because they're doing work without human interaction, the thing that we need to focus in on is what work are we
+
+[03:30] actually giving them? How are they prioritizing work? And how are we verifying the actual output on the other side?
+
+[03:38] Now, what I'm going to show you today is an experiment. This is not the perfect software factory. In fact, nobody has
+
+[03:45] actually created the perfect software factory yet. Right? You still need engineers to go in and take that final product from 80% all the way to 100%.
+
+[03:56] So, what we're going to show now is if we took every single step of that software factory that includes creating a spec, that includes creating tickets,
+
+[04:05] that includes creating subtasks, that includes adding tests, that includes deploying it to your deployment pipeline.
+
+[04:13] All of these steps, if they were managed by agents, how would you build it?
+
+[04:18] This is a thought exercise that I gave the Gauntlet students last week. It was a case study that they were asked to
+
+[04:24] build their own software factory. A factory where they can give an idea and then the app would be outputted on the
+
+[04:30] other side. Now, there's four questions that we want to answer as a result of this exercise.
+
+[04:38] Can you actually take a ticket and turn it into a deployed web app?
+
+[04:43] Is that web app actually even good? Like, is this actual usable code that multiple engineers can work on and would be considered production grade, whatever
+
+[04:53] that term means? Does each agent fall apart under pressure? Is there a lot of context to manage? Do they tend to forget things
+
+[05:02] that they're working on? Or can they go end-to-end for the creation of the software?
+
+[05:07] And what is the smallest thing that this build can do for us? Does that mean that we can build a web app? Does that mean
+
+[05:13] we can build multiple web apps? How much can we add in terms of load to the system? And that was the goal of
+
+[05:20] building minimal factory. You're going to take away four things from this lesson.
+
+[05:25] The 11 building blocks that I think every software factory needs.
+
+[05:30] We're going to showcase how each of these agents coordinate and wire together. We're going to show how they talk to each other and where the record
+
+[05:37] is stored. And then we're going to show the actual code for how this factory works.
+
+[05:41] The thought process here is you can take my minimal viable factory and go build your own.
+
+[05:46] Go to your company, take your tech stack, and start to build out the actual factory for you and your engineers.
+
+[05:53] Now, what is a software factory? Imagine if you had a ticket, and the ticket was deployed to an agent. Now, I want us to
+
+[06:02] go 20, 30 years in the future, where we have multiple coding agents that are available to us. We have a contract
+
+[06:10] between us, the engineer, and the coding agent, which we call a spec. That spec is then handed off, and then the coding
+
+[06:17] agent is able to do something on top of a code base, or actually generate code from scratch.
+
+[06:22] If this is the future, a software factory is you put in a contract, that contract outlines what you're actually going to be doing on top of the
+
+[06:32] software, and as a result, it builds that out for you end-to-end without human interaction.
+
+[06:38] Our thought process for this software factory, the minimal viable factory, was that we'd have one orchestrator on top.
+
+[06:45] That orchestrator would be managing which agent was running. It would also deploy agents in parallel, and as a result, have its own cloud code instance
+
+[06:53] for each parallel agent. Afterward, we'd have review, we'd have testing, and then we deploy the entire thing to production.
+
+[07:02] Now, if you were to look at the smallest set of pieces that would make this work, this is what I really want you guys to
+
+[07:08] focus in on. Because in the world of AI, tools matter less. Tools can change, but the framework or the toolkit that you
+
+[07:16] use, that pins all these tools together, is what results in an outcome. So, this is the framework. If there's nothing you
+
+[07:23] take away from this class, but you take away this, then it will be worth it.
+
+[07:28] First thing is, you need a record. What are all of these agents going to to make sure that they're working on the
+
+[07:33] right thing? If there's multiple tasks being done in parallel, how is each agent deciding that, "Hey, I'm working on this file, or I'm working on this
+
+[07:42] other file. That record is the source of truth to ensure that there's multiple people working on this directly.
+
+[07:49] We need some sort of memory because the memory is going to stay intact for every agent doing a task.
+
+[07:55] Whether that's an MD file, whether that's a memory graph, whether that's memory being stored in the cloud on a database somewhere. We need memory which
+
+[08:03] associates, "Hey, I've done this task, I've done this task. This is the next task I'm going to work on. This is what
+
+[08:09] I've learned so far." You need the orchestrator because the orchestrator is actually what's putting up multiple instances of Claude code.
+
+[08:17] It's the thing that is actually moving the factory forward. Similar to a manager on top of an assembly line, if you don't have an orchestrator, then all
+
+[08:26] you're really doing is people working disconnected without a true goal or mission.
+
+[08:31] You need some sort of execution environment. So, in the case of what we're building today, we're going to be using Docker
+
+[08:37] containers, but they could be sandboxes, they could be they could be their own APIs, they could be different things that we use so that the agent can
+
+[08:44] perform actions on top of the code base.
+
+[08:46] If the agent is unable to perform actions in a safe environment with the right keys, then there's no point into actually
+
+[08:53] building the factory. An agent runtime is the actual generator of code. So, in this case, we're going to take Claude max plans, we'll take
+
+[09:02] different instances of Codex, and that's actually going to be what's generating code on top.
+
+[09:06] The integration layer is essentially, "Hey, these are all the things that we're going to connect to for our software factory." That might be our
+
+[09:13] Kanban board, that might be our deployment pipeline, that might be our testing strategy, that might be our database. Whatever it is, we need to
+
+[09:21] integrate across all of those tools to make sure that we can talk to those tools directly.
+
+[09:26] Now, quality gates. This means that I've built this factory similar to the way if toothpaste was going down an assembly line, there'd be one person to check the
+
+[09:35] actual carton of toothpaste, we need quality gates for our software. Meaning, as soon as the spec is created, we'll have a gate to ensure that a human is
+
+[09:44] checking that spec. As soon as the testing strategy is created, we'll have a gate to make sure that there's a human
+
+[09:50] checking that uh test created, the test we created itself.
+
+[09:54] The goal here is add the human gates wherever you think your software is vulnerable. Meaning, if you need it for testing, add it there. Meaning, if you
+
+[10:02] need it for something else, add it there.
+
+[10:04] A delivery target is essentially the location where we're going to deploy everything.
+
+[10:08] This could be Vercel, AWS, GCP, whatever you want. It could be whatever your company is currently working with.
+
+[10:14] And that delivery target is essentially going to be the thing that we uh connect to and deploy to directly.
+
+[10:19] Observability. Now, there's a lot of solutions in the market right now, but none of them have observability or visibility on what the software factory
+
+[10:27] is actually doing. Because the software factory is doing so many things in containers, in the cloud, on your computer, as a result, there's less
+
+[10:34] visibility into what's going on. So, observability on top of the orchestrator, observability on everything that each of the code generators are doing through something
+
+[10:43] like LangChain. Finally, I'm going to have skills. Each of the skills represent a portion of domain knowledge that might be specific
+
+[10:52] to the factory that I'm creating. In this case, I've made this factory for the tech stack that we usually use here
+
+[10:57] at Gauntlet. That means I have a skill for code review. I have a skill for deployment. I have a skill for generating code. I have
+
+[11:04] a skill for our testing strategy. But, this is the domain knowledge of your engineering team, so that you can capture that domain knowledge within
+
+[11:11] your factory itself. Finally, identity and secrets. We're going to have to connect to a lot of things, hit a lot of APIs, access
+
+[11:19] information wherever and we need to, so we need some way to manage those secrets.
+
+[11:23] Now, the awesome part about these primitives, you can swap them out for anything.
+
+[11:29] If your company decides to use GCP, swap it out. If your If you decide that, "Hey, Codex is better than Claude code,"
+
+[11:36] swap it out. But, if you have this framework, if you have these 11 things in place, connecting them is what results in the
+
+[11:43] software factory. Okay, so for this example, for class today, I'm going to be using Linear, our Kanban board, as our record of truth.
+
+[11:53] Our memory is going to be MD files within the actual project directory.
+
+[11:57] And we're going to have LangGraph as our orchestrator. So, a graph-based agent that's actually executing things on top.
+
+[12:04] Our execution environment is going to be Docker containers hosted locally.
+
+[12:08] We're going to have Claude code within each of those containers that is actually deploying all of these agents.
+
+[12:13] We're going to have five MCP connections, Linear, GitHub, Vercel, Superbase, and Slack. We're going to have interrupts, which are essentially a
+
+[12:21] message sent to Slack for me to go out and review a spec, code that is being generated, or a testing strategy. And
+
+[12:29] we're going to have our delivery target, which is going to be Vercel for our front end, and our database on top of
+
+[12:33] Superbase. Lastly, I've connected everything on top of the orchestrator, and each of the agents to LangSmith for traces. That means I can actually see each of the
+
+[12:44] devs working in parallel. I can see the spec being generated, and I can see the context in versus the output coming out.
+
+[12:51] Lastly, I'm using skills on top of a dot Claude a dot Claude directory, which means that there's six markdown files which represent the domain knowledge of
+
+[12:59] what we're building. Finally, for this minimum viable factory, all of my ENVs are just stored locally, so I can run the entire factory
+
+[13:07] on my computer. Okay, before I continue, I'm going to take a step back, and we're going to do some Q&A.
+
+[13:14] So, let's see any questions that are coming.
+
+[13:17] The first question, which I I think everybody tends to ask even in a gauntlet class, is, "Will this be recorded, and if so, where can I find
+
+[13:24] it?" This is 100% being recorded, and it will be emailed to you directly afterwards.
+
+[13:30] What questions do we have on top of the software factory?
+
+[13:49] Nothing yet, that's okay. It's totally fine. I might ask our live audience here, which is the cohort, if anything.
+
+[13:56] Someone said is Meek Mill going to join?
+
+[13:58] Ah, someone just asked if Meek Mill is going to join. The answer is no, not yet, but you never know. If we're doing
+
+[14:05] night school, Meek Mill might show up at any time, so it's up to you to pay attention.
+
+[14:12] I'll keep going if anything. Okay. All right, we're going to talk about the pipeline. So, this pipeline is going to walk you through how we built the
+
+[14:21] minimum viable factory. Again, I want you to grasp the thought process behind what I'm trying to do. The thought process on how I set up the entire
+
+[14:30] pipeline, how different aspects of the factory work together, and what each agent is doing for different areas.
+
+[14:38] It all starts with a ticket inside of Linear. So, what I did is I created a project, and that project was called
+
+[14:44] software factory. Inside of that project, each issue is a different app that my software factory is currently building.
+
+[14:53] Inside of that issue, the software factory can put updates, it can create subtasks, it can as a result use that ticket as a form of record or truth with
+
+[15:02] a human being. So, inside of this Linear ticket, I'm putting a simple um one-liner on what I want to build.
+
+[15:10] Let's say it's a Trello clone. I'm also adding any necessary information on top that corresponds with the clone I'm trying to build, or the application
+
+[15:19] itself. This could be information on the UX/UI, this could be information on the front end, this could be information on the back end, this could be information
+
+[15:27] on how data travels across the board. This ticket is going to be essentially in spec engineering our request command.
+
+[15:34] So, if you've heard of spec engineering, the request command takes all of the knowledge across the board for UX-UI, product engineering, and that knowledge
+
+[15:43] is then put into the ticket to create specs.
+
+[15:46] Once I've created this ticket, it fires off a webhook to my factory. The factory gets all of the information when I put
+
+[15:54] that ticket from backlog to inspect. Then the agent runs. And when the agent runs, it initializes a pipeline. The pipeline creates its own GitHub
+
+[16:05] repository. That GitHub repository becomes the area in which we will create this application. We add our skills, our memory, our audit layer, so we can
+
+[16:14] actually see what's going on directly, and we make sure that everything is actually set up to add code on top.
+
+[16:22] This initialization is just to make sure that we have the the stomping grounds for creating code, we have the area to add code, we're
+
+[16:30] generating PRs on top, and as a result, that is what's going to be used for the code itself.
+
+[16:36] The repo gets created, the Vercel project gets created, we have a Postgres database that's created, we add a memory file, we have sub-tasks on Linear, and
+
+[16:45] all of a sudden, we start creating our actual spec.
+
+[16:49] So, this goes to a PM agent, and there's a specific skill associated with the PM agent on what to do and what to write.
+
+[16:57] It uses the skill to basically say, "Hey, every spec should be formatted this way. This is the information it should include. This is how that
+
+[17:05] information should transfer from one section to the next." And that agent is then going to write that spec, and then write it to the ticket on top of Linear.
+
+[17:13] Once the spec is written, there's a gate that hits right away. And that gate is for human approval. So, what I'm going
+
+[17:20] to do is I'm going to get a message on Slack, which basically says, "Hey, go review the spec that was just
+
+[17:26] generated." The spec is going to be layout exactly what is being built. I'm going to confirm that everything is correct, and then I'm going to move that
+
+[17:33] to in architecture. The architecture step is going to take the spec, the information I've initially given it, and actually map out the
+
+[17:41] entire system design. That could be client-server interactions. That could be how the database is set up. That could be how each of the architect uh
+
+[17:49] designs the pieces or the components for the software that we're making. It also makes the tech stack decisions, just in case we need any extra libraries that
+
+[17:57] are outside the regular libraries that we're already using. It creates the component tree, meaning the entire file structure of what's happening. And this
+
+[18:06] file structure actually uh tells you, "Hey, these are the files that are going to be built, and what code needs to go
+
+[18:11] inside each one of them." After that, there's the numbered subtask, meaning we're going to create a spec, the architecture, the dev task,
+
+[18:19] the dev task in parallel. We're adding everything to the linear ticket, because that's our record of truth. That's where everything is being stored.
+
+[18:27] Once we create that, there's another gate. And the reason I put a gate here is because research and system design is
+
+[18:34] probably one of the most important steps when it comes to creating a software factory. You want to make sure that it
+
+[18:39] follows the same terminology, the same method, the same framework that you would normally follow for creating a web-based application. So, in this
+
+[18:48] scenario, what we're going to do is I'm going to walk through the architecture.
+
+[18:52] I'm going to see the system design diagram. I'm going to confirm all the decisions that are being made. And once I've confirmed all the decisions, I'm
+
+[18:59] going to then transfer the ticket in dev.
+
+[19:03] Once we've transferred the ticket in dev, we're actually decomposing all of the task.
+
+[19:09] All of the task then become, "Hey, these are all the tasks I can run in parallel for our software factory, and these are
+
+[19:16] all of the tickets associated on top of linear." Each subtask can essentially be done without being interfered by another agent or a human being. So, what we're
+
+[19:26] going to do is we're going to spawn different Docker containers. Each Docker container is going to have a Claude code instance inside, and we're actually
+
+[19:33] going to give it the information it needs through memory to actually start coding on top.
+
+[19:37] It'll actually write the prompt as well for each of those Claude code instances.
+
+[19:43] Now, each dev will focus on different subtasks, and all of those subtasks will come together in a single PR.
+
+[19:50] What I'm having the system do is create a draft PR, and as it's adding code and committing code to that branch, you can
+
+[19:57] actually see inside of the draft PR all the changes being made.
+
+[20:01] All of these agents are running in parallel, and there could be an unlimited number of agents that are being created. Now,
+
+[20:08] the orchestrator decides, "Hey, I'm going to create three. I'm going to create four. I'm going to create two." And if you don't need to actually create
+
+[20:15] an agent for each subtask, then it decides to just do it with a single agent.
+
+[20:20] Now, we are going to then swarm on top for all of these dev agents to actually come in and actually code what we're
+
+[20:27] trying to make. Once we've coded it, there's two verification steps that we've added.
+
+[20:32] This is before human verification. The verification steps are a review agent and a testing agent. Now, we've generated a test suite already using one
+
+[20:43] of our dev agents. So, in this scenario, what we're doing is we're actually running that test suite, we're making sure that that test suite passes, and
+
+[20:50] then as a result, we're then resolving different things on top.
+
+[20:54] Each of these two agents are before a human being, but have a skill associated with them. So, the review agent actually
+
+[21:01] knows exactly what I'm usually looking for when I'm reviewing code. The testing agent is actually going to walk through the entire setup and as a result see if
+
+[21:10] everything is passing. Once everything is done and I know that those edits have been made, then it goes to a different gate.
+
+[21:18] And that gate is final human approval after testing and review. In this scenario, I can totally block this ticket. I can have it redo something. I
+
+[21:27] can go check the deployed URL and make sure that it's actually building the thing that I want it to build.
+
+[21:33] But you review it, you test it using skills that have already corresponding to the domain expertise of your team, and then you have the human gate. And
+
+[21:42] the human gate is what results in um whether or not the code passes.
+
+[21:47] Now, let's say the code does pass. What happens next? What we're doing is we're merging that PR into main, so the main
+
+[21:54] branch becomes our primary branch in which we have our code that is working.
+
+[21:58] We push that front end to Vercel. We have a database connection with Supabase, which already are tying well together. I've also added the Railway
+
+[22:07] MCP. I've added the Supabase MCP. I've added the Vercel MCP. So I have a backup just in case something goes wrong or
+
+[22:15] doesn't work. I then wait for that deployed URL, and I make sure that the deploy agent is able to use different commands to actually
+
+[22:21] take that application all the way through. Okay. So this is the pipeline through the architecture. We'll start with the linear webhook, which is going to have
+
+[22:32] the overview of the application that we're building. We're going to initialize the entire project. That means creating a repository. That means
+
+[22:39] creating a Vercel project. That means creating a database associated with it.
+
+[22:43] We're going to decide on what that schema is and start working on the architecture. The architecture is going to define the actual system, the client,
+
+[22:50] the server, what how those systems are interacting, and it's then going to go to a PM agent to make sure that we
+
+[22:56] highlight all the functionality required for this job. We're We're to have two gates, one checking the functionality and the spec that is generated, another
+
+[23:05] checking the architecture and the plan that is generated, and those two gates are making sure that research planning is done properly before we start
+
+[23:14] swarming with different agents. Now, once we start swarming, what we're doing is having the orchestrator decompose all of our tasks, make sure all the tasks are
+
+[23:24] divided into small subtasks, then we're creating new dev agents based on the complexity of what we're building. These dev agents are essentially trying to
+
+[23:34] build different things in parallel that don't hit each other. Then they're coming back and adding code to a draft PR. That draft PR is slowly being built
+
+[23:42] up until it's ready to be reviewed, and then once it's ready to be reviewed, it's going from draft to live, and then
+
+[23:48] a review agent and a testing agent is coming back and then making sure that all of the information is accurate.
+
+[23:55] As a result, it finally gets to a human gate. That human gate is me, checking to make sure all the code is running
+
+[24:01] properly. It's It looks like the thing that I want to build, and then we're deploying it to our deployment pipeline.
+
+[24:07] I've taken every step of the software development life cycle and tried to map it through our orchestrator. So, the orchestrator has different nodes on what
+
+[24:16] to do, where to hit things, on what agents to create, and this orchestrator is actually pushing the information all the way through the software factory.
+
+[24:25] Next, we're going to talk about memory, but before I talk about memory, I am going to check on some questions.
+
+[24:34] We have one question coming in, which is, "I'm noticing it mirrors a lot of established practices. Is there anything that might be missing from this
+
+[24:40] framework?" There's 100% probably one or two things missing from this framework.
+
+[24:45] Um when we gave this as a case study last week to the Gauntlet cohort four, they had so many different ways of
+
+[24:52] building their software factory. The reason I I I to call this minimum viable factory it's because it's a starting point. It's sort of where we're going to
+
+[25:00] have a foundation or a base layer, and we're going to build on top of that base layer. Um, that base layer is going to
+
+[25:06] get bigger and bigger and bigger, so you can actually optimize this to exactly what you're looking for. If you have a
+
+[25:12] specific deployment pipeline, a specific testing strategy, if you have a specific way you like to write code, you can actually change this factory to match.
+
+[25:21] The next question is, what is the best to use agent as a team and not stepping on each other's toes? So, the best way
+
+[25:27] to make sure that the agent is not stepping on each other's toes is coordination. Agent coordination is probably one of the biggest unsolved
+
+[25:34] problems in the market right now, because what tends to happen is if two agents start working on the same file, then they're always going to come
+
+[25:42] together cuz one is eventually going to compress memory and forget that it was actually even working on this file.
+
+[25:47] So, the way I like to do it is if you put a JSON object in the root directory for each agent and what files they're
+
+[25:53] allowed to touch. And if one agent is already currently working on a file, you can actually lock that file.
+
+[25:59] So, you lock that file until that agent is complete, so it can come back and then add more to the file later on.
+
+[26:05] As a result, it'll always end up in merge conflicts if we don't do this. You need some sort of locking strategy, some
+
+[26:12] sort of delineation strategy to say one agent, one file, one at a time.
+
+[26:17] The next follow-up question is, do you update memory as each agent works and send them off with bounded task with verifiable exit conditions? 100%. So,
+
+[26:27] what we're doing is when we spin up a Docker container and we put a cloud code instance inside, we decide what memory
+
+[26:34] that agent has. We're saying, "Hey, this is the memory you're coming in with.
+
+[26:38] This is the task you have. These are the files you're going to work in, and this is exactly where you're supposed to
+
+[26:43] execute." The orchestrator is actually writing the prompt for that agent in the Docker container.
+
+[26:50] So, as a result, what we're trying to do is use the orchestrator to figure out what parallel task can be done,
+
+[26:56] uh what task cannot be done in parallel, and then deploy those different containers as a result.
+
+[27:03] Question number four I'm getting here is do Gauntlet Challengers learn this in the curriculum?
+
+[27:09] The answer is yes. In fact, they presented their software factories to Austin just on Saturday. He hasn't decided a winner or he hasn't told me
+
+[27:16] who the winner is. But, what happens is in Gauntlet we are presented with a case study. So, on Tuesday they were
+
+[27:22] presented with the software factory case study. They got into groups. They decided on an architecture. They tried to figure out how they would actually
+
+[27:28] build the system. And then they presented it that around the entire cohort and as a result the entire staff.
+
+[27:35] The goal here is we're trying to think about how to build things from a system design perspective. It's not about the
+
+[27:42] tools. It's not about the code anymore. You can generate really good code really fast. It's about how you design the system. It's about systems thinking.
+
+[27:50] It's about how to make sure that your architecture is scalable, secure, and reliable. And so, that is what they were tasked with building just last week.
+
+[28:00] Um so, someone's asking about the credentials layer. So, what you're saying with the credentials layer is that we should be able to swap out
+
+[28:05] between major providers with little headache. That is correct. That is the goal. So, if you decide to swap out between major providers, all you're
+
+[28:13] doing is you're eliminating an MCP. So, the MCP associated with Railway, for example, then you're adding a new MCP, maybe the MCP associated with Superbase,
+
+[28:23] and then you're updating the deploy skill for whatever is required for that deployment pipeline. So, there's a three-step process to changing the credential
+
+[28:32] layer. One is updating the MCP connected. Two is updating the skill connected, so we know exactly what's happening. And then three is changing
+
+[28:40] the API key. Domain knowledge would effectively be the limiter regarding the expanding the software factory framework to outside building web application.
+
+[28:50] So, this is interesting question. So, the question inherently is saying, is the only thing stopping this software factory from being applicable across the
+
+[28:58] board domain knowledge? I would argue that currently the software factory that I've built can greenfield web applications pretty well. I think we can
+
+[29:08] make it better, we can optimize it, we can make it cheaper and faster.
+
+[29:11] The next step would be brownfielding. Meaning, you take a really duct tape, terrible repository, and then we try to make sure that even in a brownfielding
+
+[29:21] task, it's still able to generate really good code.
+
+[29:24] Once we get down there, then what we're really doing is just changing the MCPs for the type of app we're building.
+
+[29:30] So, if it's a desktop app, you might need Electron. If it's um uh iOS app, maybe you have a a connection out to another UI library for
+
+[29:41] Apple. Long story short is you're just changing the MCPs and skills. And so, domain knowledge is definitely one of the things you have to focus on, but I
+
+[29:48] also think that if you're trying to build an application in a different realm, you have to think about the tech stack really well.
+
+[29:54] What are the most common failure modes observed in the software factories, and what governance mechanisms have been essential to prevent drift, duplication,
+
+[30:02] or system decay? This is an amazing question. The first thing that you need to have is visibility.
+
+[30:10] Every time somebody makes a software factory or something like it, the thing that's always missing is every single decision that the agent took. Whether it
+
+[30:18] was an agent running in parallel, whether it was an architecture agent, whether it was a another agent on top, we need visibility and traces into
+
+[30:26] everything. One of the big reasons I have an orchestrator in LangGraph on top of the entire system is because I want
+
+[30:33] visibility and traces on top of everything. I want to see why was this agent called? What was this agent doing?
+
+[30:39] What prompt was this agent given? What context was this agent given? And as a result, how did the software factory update that state model from one agent
+
+[30:48] to the next, so I can see what's happening. In terms of governance, telemetry is the first step. You need to have all of the traces. You need to make
+
+[30:55] sure that the factory is actually doing uh the right thing. The second step is evals. So, let's say you have visibility
+
+[31:03] into how that factory is functioning, then what you're going to do is you're going to go into each of the different
+
+[31:08] agents and establish evals. Hey, these are the evals for system design. The system design should always have X, Y, and Z components, and then maybe have
+
+[31:16] LLM as a judge come in and score things.
+
+[31:18] Or even have a human come in and score it based on a rubric. But the goal would be that if you want to get to proper
+
+[31:23] governance, step one is visibility, step two is evals, and then as a result, those evals can become actual governance checks on top.
+
+[31:32] All right. Next question we had is what are the most common failure modes that have been observed? The most common failure modes are essentially memory
+
+[31:42] decaying, meaning that it's been given a task, but it tends to forget what it's actually trying to do. So, it does a
+
+[31:47] random task or it does it incorrectly. The second thing is uh it's agents not being able to coordinate with with each
+
+[31:54] other. This is still an unsolved problem. There's many things out there in the open source space that are trying to solve this, but essentially, agents
+
+[32:01] need a way to make sure that they're not stepping on each other's toes. What happens is you'll update a line, then
+
+[32:07] the same line will be updated again, and then you don't know what is actually supposed to happen. So, memory decay, agent coordination problems, and then
+
+[32:15] finally evals. As a result, some agents might be getting better prompts, some agents might need more context, so you need to have a nice eval set to make
+
+[32:25] sure you decide what to do when. Um Okay, next question is what percentage of the factory output is built from reusable components uh versus net new
+
+[32:37] code. And what systems enforce reuse before creation. I wish I used reusable components.
+
+[32:43] Uh all of the things being created are net new code. So, sometimes it uses a component library, but often times the
+
+[32:49] the minimal viable factory right now generates that code on top. Now, you could 100% use reusable components where you had a component library already
+
+[32:59] established or maybe you had a pattern for your endpoints already established.
+
+[33:03] So, as a result, all you would be doing is making sure that it followed those patterns.
+
+[33:10] So, the answer to your question for minimal viable factory is very little, probably 10%.
+
+[33:16] Okay, I'm going to keep going. I'm going to talk about memory for a little bit.
+
+[33:20] So, there are six agents involved in the most basic version of minimal viable factory and none of them remember anything. That is an assumption you have
+
+[33:31] to make. When you're considering deep agents, so deep agents is anything that runs for longer than 10 minutes without human interaction, there are three ways to
+
+[33:40] manage context. Context compression, context isolation, and context offload.
+
+[33:45] Context compression is what we see in the chat window all the time. The our chat window starts to get summarized, our chat window becomes less and less,
+
+[33:54] more and more summaries, loses key information. That's because it's being compressed.
+
+[33:59] The second thing is context isolation. We're going to make a sub agent and that sub agent is going to have very specific
+
+[34:05] context and that specific context is going to highlight exactly what that sub agent is doing. And then context offloading is taking all of the
+
+[34:13] information that we have or we are sort of gathering and putting it in a memory graph or a file.
+
+[34:19] Why do I say this? The reason I say this is because when you're building a factory, you have to understand how you
+
+[34:25] can manipulate context because each agent is going to have a fresh slate.
+
+[34:30] That means every time a Docker container is up and every time there's a cloud code instance inside, there's not enough context there.
+
+[34:38] There's zero virtually zero context except the memory that you have saved.
+
+[34:42] So, what we're doing is we're creating a simple memory system inside of the root directory of our project. That system essentially tells us, "Hey, this is the
+
+[34:51] linear ticket that's being worked on. These are the updates on it." And then we've even added an audit log. That audit log basically says, "These are all
+
+[34:58] the actions being done step-by-step." So, this is an example of what that file might look like. You might have LIN-23 or linear ticket 23, what you're working
+
+[35:09] on, the actual spec, the architecture, the implementation plan, and that memory is a way for all of the agents to then
+
+[35:17] access that information as necessary. Some people always like to talk about memory graphs in this scenario, meaning like, "Hey, if you had a memory graph on
+
+[35:25] top of this, you wouldn't need all of these files." I actually think a file system is a better solution to memory
+
+[35:31] than a memory graph because maintaining that ontology layer on top of a memory graph is very difficult. Making sure that all the connections are correct,
+
+[35:40] that they're not drifting or decaying. As a result, having a really nice skill, and that skill teaches the agent how to
+
+[35:47] go into its memory file system, go into the right files, traverse those files, I think is a really nice solution. And
+
+[35:54] that's the same solution that Anthropic came out with when they launched skills.
+
+[35:59] Skills is essentially just file system memory that is being progressively disclosed on top of context windows. So, what we're trying to do with our memory
+
+[36:06] solution is keep it simple. We're making files for every decision that's being made, tracking all the steps that the agent is taking, and as a result of
+
+[36:14] those steps, moving forward. And then the agents can come back to that memory whenever they need to to track any other
+
+[36:20] information. We also have references inside of our memory files. That means if a ticket references another ticket, then the agent knows to traverse to that
+
+[36:28] file to get more information. Okay, there's three rules that make our memory model work. You never overwrite.
+
+[36:36] So, the big coordination problem between agents is, "Hey, one agent does this, the other agent does this, and then they update the memory, and then it's
+
+[36:44] completely wrong." In this scenario, if an agent does this, that is now solidified.
+
+[36:50] The agent can come in and then update the previous agent, but they have to make a new log inside of memory. So, you
+
+[36:56] have the full history on all of the things that were changed.
+
+[37:00] You want to make sure that you're reading everything per section. So, that means if there's a memory or a ticket associated with a certain part of the
+
+[37:07] code base, I am making sure that my agent that's about to work in that part of the code base has read through the
+
+[37:14] memories that is necessary for it to code on top of them.
+
+[37:18] There's also no coordination when it comes to the creation of a memory. You don't want agents going back and forth and deciding what the memory should be.
+
+[37:26] You want one agent to add the memory, that memory becomes solidified, and then the second agent coming in adding a memory on top.
+
+[37:35] So, this is how it all connects. We have our linear ticket. That linear ticket then is being stored all the contents of
+
+[37:41] what's happening inside of AVA memory directory. That memory directory is labeled with a ticket number {dot} md.
+
+[37:49] And what we're doing is we're using that memory to send events to Slack for approval, to linear for updates as a
+
+[37:57] single source of truth. And each of our agents are just reading and appending, reading and appending, reading and appending. As a result, this file system
+
+[38:05] automatically becomes the memory you need to move forward.
+
+[38:10] Next thing is the orchestrator. The orchestrator is just not a regular skip, uh excuse me, a regular script, but rather it has a stop, a start, it
+
+[38:21] has an orchestration, it has everything it needs to actually uh move all the dockerized agents as it needs to.
+
+[38:28] The goal here is this orchestrator can actually pause work. Meaning if our factory is building six apps at once, one of the apps is
+
+[38:37] blocked, well, it can pause work there, and then once we fix that blocker, then it can continue work on the same
+
+[38:43] application. Similarly, if you were to build a factory and you knew that it could only do one thing at a time, and
+
+[38:50] if it got blocked and then it was over, you'd have to restart, then it would not be a real factory. The reason we have an
+
+[38:56] orchestrator is because the orchestrator manages the memory, the ticket, the spec, the architecture, and as a result, it even keeps track of the blockers.
+
+[39:05] When the blocker is resolved, then you can actually just move forward and continue building what you're building.
+
+[39:10] The orchestrator also lets us fan out. That means if we need 18 agents, if we need three agents, if we need two
+
+[39:17] agents, then we can fan out all the work across each of the containers.
+
+[39:22] Finally, if an agent times out, or if that agent is blocked, or if the agent makes a mistake, or if it loses the work
+
+[39:28] it's doing, the orchestrator still has the information. So, it can retry without needing to actually restart the entire cycle. That's why you need an
+
+[39:38] orchestrator, not just a simple script, because it gives you the opportunity to handle all the edge cases.
+
+[39:45] Now, one of the key things when you're building a factory is actually the state. And the state represents what is all of the information that is being
+
+[39:53] tracked in my factory. In my factory right now, I have the repo, the slug, the ticket ID, the branch, the memory path, the subtask,
+
+[40:02] the errors, the state map, all of the different things that are being written down by each of the different agents.
+
+[40:08] I'm actually maintaining this so that my orchestrator knows, "Hey, this is the agent to call. This agent messed up. I need to retry this agent. Hey, move this
+
+[40:18] down the same deployment pipeline. The each gate is an interrupt, meaning it stops the orchestrator, it sends the message to a human being, where the
+
+[40:27] human being has to do an action to make sure that the factory continues. And what I'm doing is within that interrupt,
+
+[40:34] I'm saving all my state. And then once I get approval or I need to redo something, I can update state and then I continue down the line.
+
+[40:43] How does it actually restart? The graph is being invoked again with the same state object at the different part of the factory. Meaning, I can interrupt an
+
+[40:52] entire graph, restart it at a different part, and it shouldn't matter. There's multiple entry points to the same orchestrator.
+
+[41:00] So, if I were to show you what the graph looks like from start to decompose, we have the start node, which goes into our
+
+[41:06] PM agent, we have our interrupt, which has the gate. We then resume it based on what I say as the human being should
+
+[41:12] happen next, then it goes to the architect agent, another gate, and then decompose. The goal here is you're moving from agent to agent with the
+
+[41:20] edges and the nodes and the gates you need to make sure things are going right.
+
+[41:24] This is the same graph running in parallel for all of our dev agents. So, once we know exactly what we're building
+
+[41:31] and we've already decided the architecture, we're just fanning out and creating multiple containers, resolving all those containers, and then as a result, checking to see if our
+
+[41:40] review and our test pass. Okay, before I get into integration, I'm going to go back to questions for a second.
+
+[41:48] When looking for an agent, if running a local model, what is a good parameter number to be looking for in a model?
+
+[41:54] This is actually a very good question. Um interestingly enough, the parameter number often doesn't directly correlate with how well the model does. So, I'm
+
+[42:05] not sure if it's like a specific parameter number, but rather what I would do is if you have like open router, you can try Kimmy K 2.5, you can
+
+[42:13] try MiniMax, you can try um Deep Sea Coder.
+
+[42:17] You would I would rather you try multiple open source models without even considering the parameter. So, then for your specific type of code that you're
+
+[42:25] trying to generate, you can actually compare and see which one's working better.
+
+[42:30] How do you make stack decisions for projects or for this project? This is a great question. We have a skill that is
+
+[42:36] making a majority of the decisions on the stack that I've already predefined.
+
+[42:40] But, if there's any other libraries, it can add it to the spec. And when I review the spec and the architecture, I
+
+[42:46] can approve those new libraries. So, most of the time what I'm doing is I'm taking the stack out stack tech stack of
+
+[42:52] my company. I'm taking the tech stack of this client. And that tech stack is then being turned into a skill, and then that
+
+[42:59] skill is then being used to decide what to build. But, if that tech stack has any changes to it or might need to be
+
+[43:05] changed to optimize something else, then the agent can add that to the spec or the architecture There seems to be heavy reliance on
+
+[43:13] external paid products. Has there really been an examination of the cost running a factory? Historically, we have stayed from hyper-efficient memory usage and
+
+[43:21] performer code as hardware has increased in capacity and performance. Great question. So, I ran my factory yesterday to build a Trello and Asana clone. It
+
+[43:30] took about 39 minutes and $21. And then for the Asana clone, it took about the same, which was about 47 minutes and
+
+[43:39] $27. But again, this was low fidelity, right? The UI wasn't like completely there. There was definitely multiple things that we could have done to make
+
+[43:47] the UI better. But in terms of like functionality, things were already working with Superbase and Vercel.
+
+[43:53] Now, the reason why I'm using Claude Max plans inside of Claude code via the SDK is because it's cheaper and you get way
+
+[44:02] more tokens when you actually stitch those together versus trying to hit the API directly. Now, LangSmith is also showcasing how many tokens we're using
+
+[44:13] on top. And what we've noticed is that even from switching from Opus to Sonnet, there was like an 80% reduction in cost.
+
+[44:20] What we're probably going to add to minimal viable factory next is an adapter for open-source models. So, you can use Kimmy, you can use whatever
+
+[44:27] model you want on top of Open Router, and then maybe the orchestrator decides what model to use when. Now, there's a
+
+[44:34] really nice uh little framework I like to keep in mind. Have the dumber model generate the code, but have the smarter model review
+
+[44:42] the code. The dumber dumber model will generate the code and generate all of these tokens, and there will 100% be mistakes.
+
+[44:50] But, when Opus comes in and reviews the code, it will easily identify those mistakes and you can correct them directly. So, those are the two things
+
+[44:57] that we're going to be introducing as a way to fix cost.
+
+[45:00] To do a parallel run, we need shared memory to track, right? That is correct.
+
+[45:04] Great question here. If if the runs are happening in parallel, the reason why I have a single issue on linear with sub-issues on top
+
+[45:12] is because I need to see all of the different things happening. It is also a single MD file that often tracks
+
+[45:17] multiple tickets depending on whatever grouping you want to do.
+
+[45:22] Um so, you're So, what you're saying with the credentials there is that we should be able to swap out between major
+
+[45:27] providers with little headache. It should Okay, little headache is a relative term. So, what I'll say is there's probably going to be some
+
+[45:34] headache based on what you're trying to do. Like, if you're trying to connect AWS or GCP, it's going to take a second.
+
+[45:39] But, if you're doing something simple, a done-for-you deployment service, it should be straightforward. It should just be an API key and MCP and a skill.
+
+[45:47] At what point is there regression testing? This is a good question. There is not regression testing yet. There's integration tests and unit tests that
+
+[45:54] are being created by the agent itself. But, from a regression testing perspective, there's two thoughts I have.
+
+[46:01] Each agent would need evals and each of those evals would need test on top. So, we would do regression testing on top of
+
+[46:07] that to see if they were performing well.
+
+[46:09] Um but in this version of the factory, we haven't thought through the actual regression testing strategy, but that could be something we add.
+
+[46:18] Where is the orchestrator hosted and universal? The orchestrator is currently just running locally. Everything is local to for my minimal viable factory.
+
+[46:26] The orchestrator is running through a LangGraph instance on my computer. All the dev agents are Docker containers that are being spun up. And on top of
+
+[46:35] that, all the different connections that are happening, I'm using ngrok to get all the webhook events. But as a result of what we've built now, everything is
+
+[46:43] local. Is it possible to do this entire workflow remotely with local open-source models?
+
+[46:51] Is there a required amount of compute you need or estimation on how many tokens you save in per week per development?
+
+[46:57] You could 100% do this with open-source models. That's actually what we're going to add next. What I would do is take
+
+[47:02] open router. I'd create an adapter on top of open router and that adapter could be connected to our minimal viable factory. You can change the models that
+
+[47:10] you're using directly. In terms of token usage and how many per week, uh you can assume uh based on the number of apps you're
+
+[47:18] building, you can get upwards of hundreds of thousands of tokens per week. So, it's important to understand how much you're going to be giving off
+
+[47:25] to an open-source model, how you're going to get the better model to review it, and then how many apps you can try
+
+[47:30] to generate in conjunction. But it is possible.
+
+[47:37] In our setup, when agent A writes to shared memory and agent B reads it, who's responsible validating that handoff?
+
+[47:44] This is a good question. Agent B is responsible for making sure that it's reading the memory correctly of what's written inside of the file. So, agent B
+
+[47:53] has to make sure that it's not editing any file only reading on top of it. If it to append, then it can only append on
+
+[47:59] the bottom. Which I've been considering could be something that we add an outside objective tech check to, but right now, we've just had agent B be
+
+[48:13] the thing that make sure that the thing is working.
+
+[48:17] Okay, I'm going to finish this up really quickly here. I'm going to talk about the integration layer. I've chosen a tech stack that is familiar to
+
+[48:26] Gauntlet, but again, you can switch this out wherever you'd like. I have a linear MCP, GitHub MCP, Vercel MCP, Superbase MCP, Slack MCP.
+
+[48:35] You can also use CLIs if you don't like MCP.
+
+[48:39] We have six skills, spec writing, architecture, coding, test writing, code review, and deploy checklists. Each of these skills are based on how I like to
+
+[48:50] do each of the different aspects of this. If you're working in an engineering organization, you might come together as an organization to decide
+
+[48:57] when and how to deploy each skill and how to create it.
+
+[49:01] The skill was by far one of the most important parts of this because if you're trying to build this for, let's
+
+[49:06] say, an actual stage, an actual production environment, then the goal should be that it matches what you do normally in your domain. So, take some
+
+[49:14] time to actually develop these skills well. I want to talk about observability really quickly. What I've done is I've created a parallel job called pipeline
+
+[49:24] start, which actually maps every single thing that's happening within the pipeline. So, I can see using the ad traceable on LangSmith what each of the
+
+[49:32] different areas is doing. Whether it's a tool call, whether it's an agent, whether it's um a cloud query, whatever it is, I want to make sure that I'm
+
+[49:40] seeing it on top of LangSmith. So, when you think about observability, I like to think about it this way with all the steps that are being taken.
+
+[49:49] We have the pipeline starting, the pipeline initializing, the agent starting, the gate um waiting on me for approval, the subtask being done, an
+
+[49:59] error or a time line time out, or my pipeline being done completely. I also have all of the different stages on top
+
+[50:05] of linear. So, the agents are actually upgrading the stages on top of their sub-issues. So, actually I can see the entire factory running across multiple
+
+[50:13] projects. If I were to go inside of the code, this is the code. I tried to keep it as simple as possible. Uh what tends to
+
+[50:20] happen with open-source code is there's like hundreds of files, there's random code everywhere. It's really hard to understand. In this case, I tried to
+
+[50:29] make sure that this was really easy to understand. You can actually walk through each of the files and kind of understand what everything's doing. So,
+
+[50:36] we have an orchestrator, and it has a config, which is just for our ENV variables. We have a state.py, which is
+
+[50:42] essentially the state object that we have on top of our orchestrator. We have an audit, which is essentially just logging all the different actions our
+
+[50:49] factory's doing. We have a memory, which is handling the append and the read for each of our agents. We have a linear
+
+[50:56] connection, which is essentially hitting the API, uh doing all the updates. We have a Slack connection, which is sending me messages for approval. We
+
+[51:03] have our basic agent runner, which establishes the Docker container, adds cloud code via the SDK, and actually imports all the memory and all the
+
+[51:11] information. Then we just have graph.py as my langgraph orchestrator, and then the pipeline itself.
+
+[51:19] Each of the nodes, each of the memory, are just empty directories in the same project.
+
+[51:24] And what I'm trying to do is separate out how each of these things is working, so you can actually add more
+
+[51:30] complexity on top later on. So, in this scenario, this code is essentially six skills, five MCPs, and about seven lines of code. Seven files
+
+[51:42] of code. Now, the awesome part about this is one function runs the entire agent and then the skills help the agent decide
+
+[51:52] what to do. So, there there was a big paradigm in the past where we were like, "Hey, we need to create an agent for all
+
+[51:59] different tasks. Here's our review agent. Here's our writing agent. Here's our proofreading agent." People were creating 18 different agents for and
+
+[52:07] then creating teams. The awesome part about what Anthropic built is you have one orchestrator, multiple skills, multiple MCPs, and you can pretty much run anything you would
+
+[52:18] like with the specific context that you need for that task. This is built on that same paradigm. The orchestrator is using the same agent file with different
+
+[52:28] skills and different MCPs to build whatever it needs to.
+
+[52:33] We are also splitting the work, right? I remember when I had one agent just building all the code step by step, it
+
+[52:40] took 63 minutes for it to actually generate even just a front end. The goal here is if you're building a real
+
+[52:46] factory, you need to have multiple assembly lines.
+
+[52:49] Multiple assembly lines means you can run multiple tasks across the board and you can actually walk through each of them.
+
+[52:56] We are at the hour, but I'm going to keep going because I'm in like the groove right now. Uh so, we'll
+
+[53:01] definitely answer all your questions and as well.
+
+[53:05] So, if you want to try this for yourself, there's four steps. You're going to clone my repository. That repository is called Minimal Viable
+
+[53:13] Factory. We're going to link it for you here in just a second.
+
+[53:17] And you're going to set up linear, you're going to set up Slack or whatever tool that you want to use. You're going
+
+[53:22] to have Docker running, the Docker daemon running inside of your computer.
+
+[53:26] You're going to add the keys, the setup, uh pick your tool tools, write a ticket, move it into spec, and actually run your factory.
+
+[53:34] What you need is the infrastructure, ngrok, LangChain, Smith, Docker. You need the six API keys whatever you decide to use, and then follow the guide
+
+[53:42] on top of the read me. Now, this is my minimal minimum viable factory. This doesn't include everything, all the bells and whistles.
+
+[53:50] It also sometimes clocks out, it has an error here and there.
+
+[53:55] But, this is the foundation. We want to work on existing code bases next. We want to have smarter gates, meaning it's not just like a basic gate
+
+[54:03] for spec and architecture. We want to have specialized agents, meaning what if I had an agent that was using a different model, different MCP,
+
+[54:11] different skill, and I could then rotate those agents out as I need. And I want to run on top of my linear instance
+
+[54:18] multiple projects to see where the factory starts to break.
+
+[54:21] So, I'm excited for you to take this code yourself. I'm excited for you to take this code and make it your own, and
+
+[54:28] actually try to see if you can create your own factories.
+
+[54:31] Now, before I go to Q&A, I want to mention one thing and one thing only, which is this is just a software
+
+[54:37] factory. We could create an SEO factory. We could create a Facebook ads factory.
+
+[54:43] We could create a operations factory. The concept of a factory is really important because in the future, we're going to have AI digital co-workers.
+
+[54:54] These AI digital co-workers are going to be able to take work off our plate.
+
+[54:58] We're going to have different contracts with them, whether that is in marketing, that is in sales, or engineering.
+
+[55:04] This thought process, this experiment, the goal of it was I wanted to open your eyes to the possibility of running all
+
+[55:12] of these functions in parallel. The possibility of being able to actually run all of these tasks and complete something end-to-end. Because if you
+
+[55:21] could do it for software, you can do it for everything. If we could do it for everything, we're actually moving towards what the future looks like with
+
+[55:27] AI. All right, time for some Q&A. Where is the Git repo? That is the perfect question. So, I'm going to share
+
+[55:36] the Git repo really quickly. Good? Try now.
+
+[55:48] All right, sharing. Do you get it? Producer Ariel, cool. Everybody thank producer Ariel and producer Adam. Okay, this is our Git repository. It's called
+
+[55:57] Minimum Viable Factory. Uh it's on my GitHub account at Ash Tellowat, but we're going to be putting this link uh to you directly inside of each of the
+
+[56:08] chats. Okay. What heuristics do you use to define thresholds for when an error warrants human review? I've noticed as the context window gets larger, it tends to
+
+[56:28] go down the rabbit hole and suffer context drift and in the fix they apply.
+
+[56:33] This is 100% something that happens over and over and over again.
+
+[56:39] The way I like to do it is I think that you should structure every coding task into maybe 50 to 100 lines
+
+[56:48] of code. Right, that is a general heuristic to say this agent should be only doing a task that is maybe medium difficulty. Maybe it's like
+
+[56:58] uh if you guys have done story points or something like that before, it's something like a like a four, five, six,
+
+[57:04] seven, something like that. Somewhere in the middle.
+
+[57:06] The thought process there is I want to make sure that the agent is able to complete that task quickly enough that
+
+[57:12] I'm able to port in all the memory and the context, and so that that context does not have to be compressed. The
+
+[57:18] thing that we are fighting is context compression. And because we are fighting context compression, we have to make sure that every task given is medium,
+
+[57:27] it's not too large, it has all the information in one place, and that all of our agents can actually execute on
+
+[57:33] top of it. How does your software factory ensure it produces measurable outcomes rather than high high volumes of code, commits, or
+
+[57:41] tools? How do you detect and correct when the factory is busy but not effective? Great question.
+
+[57:46] LangSmith is my primary tool for this. LangSmith actually walks me through everything going wrong. It actually shows me when it's using too many
+
+[57:53] tokens. It actually even shows me all the different prompts that are being inputted. At the same time, if this is at the deployment level, then I have the
+
+[58:02] logs on top of Vercel and Supabase, which I'm porting back to my factory itself. I'm also making sure that on top
+
+[58:08] of Linear, I'm making it a point to actually put an update, showcase what what's happening, so I can go down the
+
+[58:16] Linear ticket and see what's going on. Someone is asking, "This is great info.
+
+[58:21] Is this going to be a series?" 100%. Um I teach all the time for Gauntlet AI either way. Uh we have some of our
+
+[58:28] Gauntlet cohort four participants in the audience. So, what we're trying to do is make this a series, have a weekly class
+
+[58:35] where people can actually talk about things that are useful, prominent, and at the frontier of AI. What I find is knowledge or topics or content in uh in
+
+[58:49] the AI space is kind of hand-wavy, it's kind of random, it kind of doesn't have a way for you to apply things.
+
+[58:56] First and foremost, when we're talking about these different aspects, everybody has their own way of doing things, and the goal should be that we
+
+[59:05] are taking all of these concepts, all of these frameworks, all of these different aspects of what we're doing, and trying that out ourselves. So, that's why I
+
+[59:14] also want to make sure that we had this repository available for you to try out.
+
+[59:19] And if you love what we're doing here, then you can also consider being a participant of Gauntlet cohort five. So, that's apply.gauntletai.com,
+
+[59:29] where you can go out and go become a Gauntlet Challenger. We have some of the most cracked engineers in the world.
+
+[59:35] We're building together non-stop for 1,000 hours over 10 weeks, and our goal is to be at the frontier of AI and to
+
+[59:43] try new things, to break things, and actually discover different aspects of what's possible when it comes to AI.
+
+[59:49] Okay. Next question. How does the orchestrator monitor if an agent critically wanders off task and when to terminate and retry? In this case, it
+
+[59:58] doesn't monitor, but rather just has a simple timeout. So, basically says that if it's been more than 10 minutes, go check in on what's happening. If it's
+
+[1:00:05] not actually updating code in the right area, then terminate that task. So, it does not have a specific monitor functionality, rather it just times out
+
+[1:00:14] directly. For the software factory to be truly self-improving, what telemetry are you capturing from a deployed application to inform the next iteration of the
+
+[1:00:22] template or blueprint in the factory there? Great question. In this scenario, we're just porting all the logs from Vercel and Supabase directly. So, we
+
+[1:00:31] haven't captured, let's say um we can have Playwright go on to the actual deployed website and actually run things and click things, but we haven't done
+
+[1:00:39] that yet. In this scenario, what's happening is um everything that we're using is just being ported in as logs from the two
+
+[1:00:46] deployment pipelines. Next question is when does the next cohort of Gauntlet start? That is April 27th. April 27th, right after Cohort
+
+[1:00:56] ends, we're starting the remote section of the next Gauntlet. The amazing part about Gauntlet is the environment. You will never find in your life being the
+
+[1:01:05] opportunity to be surrounded by 100, 200 cracked engineers all working on AI together. So, if you feel like your company's not focusing on AI, you're
+
+[1:01:15] about to be left behind, or you want to sort of immerse yourselves completely in Gauntlet, then please come join us.
+
+[1:01:23] Has this design been used since cohort one? If so, has it evolved to be more efficient? Is your company is using this
+
+[1:01:28] type of model? Great question. In cohort one, we were mostly using a single cloud code or single cursor. Over time, we've
+
+[1:01:36] tried using conductor, different things like B mad. We've come to the software factory model, especially because of Kelly Cloud AI, which if on X you
+
+[1:01:44] haven't heard is our open cloud instance also building a software factory.
+
+[1:01:48] And the thought process here is if you can understand how to build a software factory, if you understand how to architect a software factory, then
+
+[1:01:55] you're sort of preparing yourself for the next stage of this.
+
+[1:01:58] Uh long story short is has it become more efficient? I think we've become more and more efficient at at using a
+
+[1:02:04] single cloud code instance or a single code X instance. I think in terms of the factory, there is a lot to be uh figured
+
+[1:02:10] out. The way companies are doing this now is through spec-driven development.
+
+[1:02:15] Meaning you have all the steps of the factory, but everything is sort of human-gated. You create a spec using a product manager. The product manager has
+
+[1:02:22] to approve. The spec is then brought to the local environment. The spec is then used to create tickets and PRs and so on and so
+
+[1:02:28] forth. So, there is Excuse me, there is a manual way to do this, which is through spec-driven development, but it has not been completely automated end to
+
+[1:02:38] end. Are you baking policy as code into the generation page phase or is there a separate automated audit factory that validates the output before it hits
+
+[1:02:46] production? I have a separate agent entirely uh that is my testing agent that is auditing everything. It's using the audit log, running test and
+
+[1:02:54] integration test on top as a result to actually decide and see if things are working correctly. Now, the thing I need
+
+[1:03:00] to add is a way to sort of click inside of the browser and actually do things on top. We have not added that yet. Um but
+
+[1:03:07] in this scenario, the testing agent is doing it, not uh separate there.
+
+[1:03:13] All right. What are you going to do next? So, we did this class, we talked about a lot of things.
+
+[1:03:20] I think that each of you should take my minimum viable factory and try to make it your own. Go out, fork it, change the
+
+[1:03:28] code, map it to exactly where you're using inside of your tech stack, and as a result, try to build your own software
+
+[1:03:35] factory. This exercise that I'm putting each one of you through is actually going to make your system design, your ability to work
+
+[1:03:42] with cloud code, to orchestrate agents on top 10 times better. This is the thing that we need to do, get our hands
+
+[1:03:49] on a keyboard, actually try things out, even if they don't work perfectly all the way through, and then see what happens on the other side.
+
+[1:03:59] Okay. Last call for questions. Again, if you're interested in joining Gauntlet cohort five, it starts April 27th.
+
+[1:04:10] It is three weeks remote, seven weeks on-site. You're going to be surrounded by some of the most cracked engineers in America, and we're going to be all
+
+[1:04:18] focused on creating at the frontier of AI, different applications, different factories, and orchestrating agents at the next level.
+
+[1:04:29] Hm? apply.gauntletai.com apply.gauntletai.com Any more questions? Are we good?
+
+[1:04:40] All right. I want to thank everybody for joining me. We'll be back again next week for another edition of night school. If there's more questions, feel
+
+[1:04:47] free to add them on top of the GitHub repo. Feel free to do what you would like with the GitHub repo itself. And if
+
+[1:04:53] you want to access the GitHub repo, it is ashtellawat/minimum viable factory.
+
+[1:05:00] Thank you again. We'll talk to you soon.
+
+[1:05:02] See you.
