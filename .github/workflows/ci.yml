@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Validate Skills & Templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Validate Skill Frontmatters
+        run: |
+          python -c "
+          import os, glob, yaml
+
+          skills = glob.glob('skills/**/SKILL.md', recursive=True)
+          assert len(skills) >= 5, f'Expected at least 5 skills, found {len(skills)}'
+
+          for skill_path in skills:
+              print(f'Checking {skill_path}...')
+              with open(skill_path, 'r') as f:
+                  content = f.read()
+              assert content.startswith('---'), f'{skill_path} missing frontmatter start ---'
+              parts = content.split('---', 2)
+              assert len(parts) >= 3, f'{skill_path} invalid frontmatter formatting'
+              data = yaml.safe_load(parts[1])
+              assert 'name' in data, f'{skill_path} missing name'
+              assert 'description' in data, f'{skill_path} missing description'
+              print(f'  ✓ Valid skill: {data[\"name\"]}')
+          print('All skill frontmatters are valid!')
+          "
+
+      - name: Run Deterministic Eval Template Tests
+        run: |
+          python3 templates/deterministic-eval-template.py
