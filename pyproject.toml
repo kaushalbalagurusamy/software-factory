@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "software-factory"
+version = "0.1.0"
+description = "Autonomous Software Factory with Intrinsic Semantic Parity and Epistemic Zero-Trust Verification"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Kaushal Balagurusamy & Project Unity Working Group" }
+]
+dependencies = [
+    "pyyaml>=6.0",
+    "z3-solver>=5.1.0",
+    "networkx>=3.4",
+    "deal>=4.24.0",
+    "crosshair-tool>=0.0.110",
+    "unity-ir @ file:///Users/kaushal/Documents/Github/unity",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "hypothesis>=6.100",
+]
+
+[project.scripts]
+factory = "factory.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["factory*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
