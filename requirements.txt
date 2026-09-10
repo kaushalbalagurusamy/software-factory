@@ -3,3 +3,5 @@ z3-solver>=5.1.0
 networkx>=3.4
 hypothesis>=6.100
 pytest>=8.0
+deal>=4.24.0
+crosshair-tool>=0.0.110
