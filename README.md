@@ -3,7 +3,7 @@
 [![CI](https://github.com/kaushalbalagurusamy/software-factory/actions/workflows/ci.yml/badge.svg)](https://github.com/kaushalbalagurusamy/software-factory/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[**Research Manifesto & Theoretical Foundations**](RESEARCH_MANIFESTO.md) | [**Skills Catalog**](#skills-catalog) | [**Templates**](#reusable-templates) | [**Gauntlet References**](references/README.md)
+[**Research Manifesto & Theoretical Foundations**](RESEARCH_MANIFESTO.md) | [**Skills Catalog**](#skills-catalog) | [**Dependencies**](#core-dependencies--theoretical-substrate) | [**Templates**](#reusable-templates) | [**Gauntlet References**](references/README.md)
 
 A robust, modular framework of **Antigravity Skills, Architecture Decision Protocols, and Deterministic Testing Standards** engineered to transform AI coding assistants from ungrounded "vibe-coders" into high-judgment software co-architects.
 
@@ -62,6 +62,35 @@ In the modern AI development loop, code velocity is no longer the bottleneck. Wh
 * [`templates/adr-template.md`](templates/adr-template.md): Standardized format for recording Architecture Decision Records in `docs/adr/`.
 * [`templates/system-design-rfc-template.md`](templates/system-design-rfc-template.md): High-level system design RFC template for complex systems.
 * [`templates/deterministic-eval-template.py`](templates/deterministic-eval-template.py): Deterministic Pytest eval harness for structured LLM outputs.
+
+---
+
+## Core Dependencies & Theoretical Substrate
+
+The Software Factory rejects superficial "vibe-check" testing and tautological LLM-generated mocks. Its verification engine is grounded in deterministic formal methods, SMT solvers, and symbolic execution:
+
+| Package | Purpose | Theoretical Role in Software Factory |
+| :--- | :--- | :--- |
+| **`z3-solver`** | Microsoft Z3 SMT Prover | Proves invariant preservation ($P \implies Q$) and synthesizes counterexamples for edge-case contract failures. |
+| **`crosshair-tool`** | Symbolic Execution Engine | Uses Z3 to explore all execution paths symbolically without manual tests, catching boundary violations automatically. |
+| **`deal`** | Design-by-Contract (DbC) | Formal function contracts (`@deal.pre`, `@deal.ensure`, `@deal.pure`, `@deal.raises`), mapping 1-to-1 with Unity-IR Layers 1 & 2. |
+| **`networkx`** | Causal Topology & DAGs | Computes topological sorting, cycle detection, and cross-file causal dependency graphs. |
+| **`hypothesis`** | Property-Based Fuzzer | Generates adversarial edge-case distributions to attempt to falsify invariant assumptions. |
+| **`pyyaml`** | Schema Serialization | Parses Antigravity skill frontmatters, ADR metadata, and configuration schemas. |
+| **`pytest`** | Deterministic Test Runner | Executes the local and CI verification test suites. |
+
+### Environment Setup
+
+We recommend managing dependencies using `uv` or Python's built-in `venv`:
+
+```bash
+# Create virtual environment with Python 3.12+
+uv venv --python 3.12 .venv
+source .venv/bin/activate
+
+# Install locked dependencies
+uv pip install -r requirements.txt
+```
 
 ---
 

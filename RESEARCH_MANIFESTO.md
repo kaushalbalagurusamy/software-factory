@@ -143,16 +143,19 @@ All high-level reasoning, cross-file impact analysis, dependency mapping, and ar
 - **Algebraic Invariant Reasoning:** Agents reason over preconditions, postconditions, and purity transitions rather than attempting to mentally simulate raw pointers and syntax quirks.
 
 ### Plane 2: The Execution & Substrate Plane (Concrete Syntaxes)
-The Execution Plane manages the actual physical artifacts:
+The Execution Plane manages the actual physical artifacts and deterministic verification engines:
 - Compilers (`rustc`, `go build`, `tsc`, `python -m py_compile`).
 - Static type checkers (`mypy`, `pyright`, `clippy`, `golangci-lint`).
+- Formal contract frameworks (`deal` Design-by-Contract).
+- SMT solvers and symbolic execution engines (`z3-solver`, `crosshair-tool`).
 - Deterministic test runners and property fuzzers (`hypothesis`, `cargo-fuzz`).
 
 ### The Epistemic Zero-Trust Gate
 To eliminate tautological test debt, the factory enforces an **Epistemic Zero-Trust Protocol**:
 1. **Separation of Concerns:** The agent authoring the implementation delta $\Delta \mathcal{R}$ is strictly forbidden from authoring the verification criteria $\mathcal{K}$.
 2. **Immutable Test Baselines:** Existing test suites and invariant contracts are cryptographically locked; any patch that modifies an existing test assertion without an explicit Architecture Decision Record (ADR) triggers an automatic gate rejection.
-3. **Semantic Delta Auditing ($\Delta \mathcal{S}$):** Code reviews (both automated and human) inspect the semantic delta rather than the text diff:
+3. **Symbolic Verification & Property Fuzzing:** The gate executes SMT solvers (`z3-solver`), symbolic path explorers (`crosshair-tool`), and property-based fuzzers (`hypothesis`) against formal `@deal` contracts to synthesize counterexamples rather than relying on mocked LLM unit tests.
+4. **Semantic Delta Auditing ($\Delta \mathcal{S}$):** Code reviews (both automated and human) inspect the semantic delta rather than the text diff:
    $$\Delta \mathcal{S} = \mathcal{S}_{\text{post}} \ominus \mathcal{S}_{\text{pre}}$$
    Did a pure function become state-mutating? Was a lock released prematurely? Did a loop invariant fail to hold?
 
