@@ -3,6 +3,8 @@
 [![CI](https://github.com/kaushalbalagurusamy/software-factory/actions/workflows/ci.yml/badge.svg)](https://github.com/kaushalbalagurusamy/software-factory/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[**Research Manifesto & Theoretical Foundations**](RESEARCH_MANIFESTO.md) | [**Skills Catalog**](#skills-catalog) | [**Templates**](#reusable-templates) | [**Gauntlet References**](references/README.md)
+
 A robust, modular framework of **Antigravity Skills, Architecture Decision Protocols, and Deterministic Testing Standards** engineered to transform AI coding assistants from ungrounded "vibe-coders" into high-judgment software co-architects.
 
 ---
