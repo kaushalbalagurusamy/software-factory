@@ -49,11 +49,52 @@ In the modern AI development loop, code velocity is no longer the bottleneck. Wh
 
 | Skill Name | Path | Primary Purpose |
 | :--- | :--- | :--- |
-| **`architectural-debate-and-decision-records`** | [`skills/architectural-debate-and-decision-records/SKILL.md`](skills/architectural-debate-and-decision-records/SKILL.md) | Socratic trade-off debate on one-way doors; authors formal Architecture Decision Records (ADRs). |
-| **`spec-driven-tractability-testing`** | [`skills/spec-driven-tractability-testing/SKILL.md`](skills/spec-driven-tractability-testing/SKILL.md) | Contract-first schema design, failure-mode injection, and deterministic eval harnesses. |
-| **`scaling-and-io-bottleneck-analyzer`** | [`skills/scaling-and-io-bottleneck-analyzer/SKILL.md`](skills/scaling-and-io-bottleneck-analyzer/SKILL.md) | Audits $O(N)$ query loops, unindexed scans, connection pooling, and payload bloat. |
-| **`one-way-door-guard`** | [`skills/one-way-door-guard/SKILL.md`](skills/one-way-door-guard/SKILL.md) | Pre-flight safety check, blast-radius calculation, and rollback strategy design. |
-| **`comprehension-debt-and-interface-auditor`** | [`skills/comprehension-debt-and-interface-auditor/SKILL.md`](skills/comprehension-debt-and-interface-auditor/SKILL.md) | Enforces discriminated unions, minimal public surface area, and prunes PR bloat. |
+| **`sf-adr-debate`** | [`skills/sf-adr-debate/SKILL.md`](skills/sf-adr-debate/SKILL.md) | Socratic trade-off debate on one-way doors; authors formal Architecture Decision Records (ADRs). |
+| **`sf-spec-testing`** | [`skills/sf-spec-testing/SKILL.md`](skills/sf-spec-testing/SKILL.md) | Contract-first schema design, failure-mode injection, and deterministic eval harnesses. |
+| **`sf-io-analyzer`** | [`skills/sf-io-analyzer/SKILL.md`](skills/sf-io-analyzer/SKILL.md) | Audits $O(N)$ query loops, unindexed scans, connection pooling, and payload bloat. |
+| **`sf-door-guard`** | [`skills/sf-door-guard/SKILL.md`](skills/sf-door-guard/SKILL.md) | Pre-flight safety check, blast-radius calculation, and rollback strategy design. |
+| **`sf-interface-auditor`** | [`skills/sf-interface-auditor/SKILL.md`](skills/sf-interface-auditor/SKILL.md) | Enforces discriminated unions, minimal public surface area, and prunes PR bloat. |
+
+---
+
+## The Bare-Metal CLI Runner (`sf`)
+
+The software factory provides an ultra-low-latency CLI runner (`sf`, with `factory` as a backwards-compatible alias) executing formal invariant checks in $<70\text{ms}$:
+
+```bash
+# 1. Audit Semantic Delta (ΔS) and classify architectural One-Way vs. Two-Way Doors
+sf audit --pre path/to/pre.py --post path/to/post.py [--strict]
+
+# 2. Verify Epistemic Zero-Trust Gate against baseline test manifest
+sf verify --repo . [--record]
+
+# 3. Execute Autonomous Synthesis Cycle with Test-Time Compute (Gemini)
+sf run --spec feature.md --repo . [--model gemini-2.5-flash] [--dry-run]
+
+# 4. Transpile Cross-Lingual Anchor and formally prove Zero Semantic Delta (ΔS = ∅)
+sf transpile --source path/to/source.py --target-lang go --out path/to/target.go
+```
+
+---
+
+## Core Engine Architecture (`factory/`)
+
+The autonomous engine is organized into four neurosymbolic modules:
+
+1. **Invariant Governance Engine ([`factory/governance.py`](factory/governance.py)):**
+   - Audits source modifications using Project Unity's Semantic Delta ($\Delta \mathcal{S}$).
+   - Detects synchronization mutations (lock removals/bypasses), purity degradations, SMT contract falsifications, and destructive SQL patterns (`DROP TABLE`).
+   - Automatically scaffolds MADR-compliant Architecture Decision Records.
+2. **Epistemic Zero-Trust Substrate ([`factory/zero_trust.py`](factory/zero_trust.py)):**
+   - Locks pre-existing test suites via SHA-256 baseline manifests (`BaselineHashGuard`).
+   - Parses the AST to detect reward-hacking: assertion count dropping, injected `@pytest.mark.skip`, `@xfail`, and trivial assertions (`assert True`).
+3. **Autonomous Synthesis Engine ([`factory/synthesis.py`](factory/synthesis.py)):**
+   - Ingests specifications, extracts target source files, and compiles them to Canonical Unity-IR.
+   - Prompts Gemini models with test-time compute (`thinking_budget`).
+   - Enforces atomic file staging, three sequential verification gates, and multi-turn self-repair reflection.
+4. **Polyglot Dual-Anchor Transpiler ([`factory/transpiler.py`](factory/transpiler.py)):**
+   - Synthesizes cross-lingual implementation anchors (e.g. Python $\to$ Go).
+   - Formally proves $\Delta \mathcal{S}(\text{Source}, \text{Target}) = \emptyset$ and issues cryptographic equivalence certificates.
 
 ---
 
@@ -71,25 +112,27 @@ The Software Factory rejects superficial "vibe-check" testing and tautological L
 
 | Package | Purpose | Theoretical Role in Software Factory |
 | :--- | :--- | :--- |
+| **`unity-ir`** | Project Unity Semantic IR | In-memory 3-Layer UAST lowering, Canonical Unity-IR emitter, and Semantic Delta ($\Delta \mathcal{S}$) engine. |
 | **`z3-solver`** | Microsoft Z3 SMT Prover | Proves invariant preservation ($P \implies Q$) and synthesizes counterexamples for edge-case contract failures. |
 | **`crosshair-tool`** | Symbolic Execution Engine | Uses Z3 to explore all execution paths symbolically without manual tests, catching boundary violations automatically. |
 | **`deal`** | Design-by-Contract (DbC) | Formal function contracts (`@deal.pre`, `@deal.ensure`, `@deal.pure`, `@deal.raises`), mapping 1-to-1 with Unity-IR Layers 1 & 2. |
 | **`networkx`** | Causal Topology & DAGs | Computes topological sorting, cycle detection, and cross-file causal dependency graphs. |
 | **`hypothesis`** | Property-Based Fuzzer | Generates adversarial edge-case distributions to attempt to falsify invariant assumptions. |
-| **`pyyaml`** | Schema Serialization | Parses Antigravity skill frontmatters, ADR metadata, and configuration schemas. |
-| **`pytest`** | Deterministic Test Runner | Executes the local and CI verification test suites. |
+| **`google-genai`** | Official Google GenAI SDK | Deep test-time compute synthesis engine with thinking budget support. |
+| **`pytest`** | Deterministic Test Runner | Executes the local and CI verification test suites (25/25 passing). |
 
 ### Environment Setup
 
-We recommend managing dependencies using `uv` or Python's built-in `venv`:
+We recommend managing dependencies using `uv`:
 
 ```bash
 # Create virtual environment with Python 3.12+
 uv venv --python 3.12 .venv
 source .venv/bin/activate
 
-# Install locked dependencies
-uv pip install -r requirements.txt
+# Install unity and software-factory in editable mode
+uv pip install -e ../unity
+uv pip install -e .
 ```
 
 ---
