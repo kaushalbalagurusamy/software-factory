@@ -305,3 +305,7 @@ class GovernanceEngine:
         rendered = rendered.replace("{drivers}", driver_block)
         return rendered
 
+    # API alias for clarity
+    evaluate_delta = audit_source_pair
+
+

@@ -15,6 +15,12 @@ from .zero_trust import (
     BaselineHashGuard,
     BaselineVerificationResult,
 )
+from .synthesis import (
+    SynthesisEngine,
+    SynthesisRequest,
+    SynthesisResult,
+    PatchParser,
+)
 from .cli import main
 
 __all__ = [
@@ -27,5 +33,9 @@ __all__ = [
     "ZeroTrustReport",
     "BaselineHashGuard",
     "BaselineVerificationResult",
+    "SynthesisEngine",
+    "SynthesisRequest",
+    "SynthesisResult",
+    "PatchParser",
     "main",
 ]

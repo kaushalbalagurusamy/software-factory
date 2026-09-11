@@ -15,6 +15,7 @@ from typing import List, Optional
 
 from .governance import GovernanceEngine, DoorType, RiskCategory
 from .zero_trust import ZeroTrustGate, BaselineHashGuard
+from .synthesis import SynthesisEngine, SynthesisRequest
 
 # Terminal ANSI color constants
 RESET = "\033[0m"
@@ -182,6 +183,35 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(f"{GREEN}{BOLD}TWO-WAY DOOR DETECTED{RESET}")
         print(f"  {GREEN}[✓] Localized scope; proceeding with autonomous test-driven synthesis.{RESET}")
 
+        repo_path = Path(args.repo)
+        engine = SynthesisEngine()
+        request = SynthesisRequest(
+            spec_text=spec_text,
+            spec_path=spec_path,
+            repo_dir=repo_path,
+            target_files=args.targets,
+            model_name=args.model,
+            thinking_budget=args.thinking_budget,
+            max_retries=args.max_retries,
+            dry_run=args.dry_run,
+        )
+
+        print(f"\n{CYAN}Executing Autonomous Synthesis Cycle (model={args.model}, thinking_budget={args.thinking_budget})...{RESET}")
+        result = engine.execute_cycle(request)
+
+        if result.success:
+            print(f"\n{GREEN}{BOLD}SYNTHESIS CYCLE COMPLETE :: CERTIFIED{RESET}")
+            print(f"  Iterations: {result.iterations}")
+            print(f"  Modified Files: {', '.join(result.modified_files) if result.modified_files else 'None (dry-run)'}")
+            if result.receipt:
+                print(f"\n{CYAN}Cryptographic Verification Receipt:{RESET}")
+                print(json.dumps(result.receipt, indent=2))
+            return 0
+        else:
+            print(f"\n{RED}{BOLD}SYNTHESIS CYCLE FAILED{RESET}")
+            print(f"  Diagnostics: {result.error_message}")
+            return 1
+
     return 0
 
 
@@ -208,6 +238,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_run = subparsers.add_parser("run", help="Ingest specification and execute autonomous engineering cycle")
     p_run.add_argument("--spec", required=True, help="Path to specification markdown file")
     p_run.add_argument("--repo", default=".", help="Target repository directory")
+    p_run.add_argument("--model", default="gemini-2.5-flash", help="Model to use for autonomous synthesis (e.g. gemini-2.5-flash, gemini-3.8-flash)")
+    p_run.add_argument("--thinking-budget", type=int, default=2048, help="Thinking budget token limit for test-time compute")
+    p_run.add_argument("--max-retries", type=int, default=3, help="Maximum self-repair reflection iterations")
+    p_run.add_argument("--dry-run", action="store_true", help="Simulate synthesis cycle without making live API calls")
+    p_run.add_argument("--targets", nargs="*", help="Optional target source files to focus on")
 
     return parser
 
