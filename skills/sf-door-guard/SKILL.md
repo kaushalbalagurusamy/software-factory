@@ -1,5 +1,5 @@
 ---
-name: one-way-door-guard
+name: sf-door-guard
 description: >-
   Pre-flight safety inspection for operations with irreversible consequences (schema drops,
   vector re-indexing, public API contract breakage, cloud resource destruction).

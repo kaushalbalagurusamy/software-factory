@@ -1,5 +1,5 @@
 ---
-name: scaling-and-io-bottleneck-analyzer
+name: sf-io-analyzer
 description: >-
   Audits and eliminates I/O bottlenecks, N+1 query cascades, unindexed database scans,
   unbounded list endpoints, memory leaks, and serialization overhead before code is merged.

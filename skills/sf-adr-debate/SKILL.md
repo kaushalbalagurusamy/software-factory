@@ -1,5 +1,5 @@
 ---
-name: architectural-debate-and-decision-records
+name: sf-adr-debate
 description: >-
   Facilitates a collaborative, Socratic architectural debate between the agent and the human
   for one-way doors (database schemas, auth models, API contracts, vector store dimensions).

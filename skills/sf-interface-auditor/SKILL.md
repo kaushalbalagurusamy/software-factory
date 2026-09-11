@@ -1,5 +1,5 @@
 ---
-name: comprehension-debt-and-interface-auditor
+name: sf-interface-auditor
 description: >-
   Audits codebase modularity, enforces strict interface encapsulation (discriminated unions,
   abstract contracts), and prunes AI-generated PR bloat to ensure code remains human-auditable.

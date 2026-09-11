@@ -1,9 +1,9 @@
 """
 Bare-Metal CLI Runner for Software Factory.
 Commands:
-  factory audit   --pre <pre_file> --post <post_file> (or git diff)
-  factory verify  --repo <repo_dir> [--manifest <manifest.json>]
-  factory run     --spec <spec.md> --repo <repo_dir>
+  sf audit   --pre <pre_file> --post <post_file> (or git diff)
+  sf verify  --repo <repo_dir> [--manifest <manifest.json>]
+  sf run     --spec <spec.md> --repo <repo_dir>
 """
 
 from __future__ import annotations
@@ -187,8 +187,8 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="factory",
-        description="Software Factory: Autonomous Engineering Substrate with Intrinsic Semantic Parity.",
+        prog="sf",
+        description="Software Factory (sf): Autonomous Engineering Substrate with Intrinsic Semantic Parity.",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available factory commands")
 

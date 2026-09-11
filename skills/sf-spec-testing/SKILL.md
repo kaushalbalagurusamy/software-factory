@@ -1,5 +1,5 @@
 ---
-name: spec-driven-tractability-testing
+name: sf-spec-testing
 description: >-
   Designs contract-first, feature-oriented test suites emphasizing tractability, boundary
   verification, failure mode injection, and deterministic eval metrics before feature coding.

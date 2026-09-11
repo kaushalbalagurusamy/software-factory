@@ -27,6 +27,7 @@ dev = [
 ]
 
 [project.scripts]
+sf = "factory.cli:main"
 factory = "factory.cli:main"
 
 [tool.setuptools.packages.find]
