@@ -1,9 +1,10 @@
 """
 Bare-Metal CLI Runner for Software Factory.
 Commands:
-  sf audit   --pre <pre_file> --post <post_file> (or git diff)
-  sf verify  --repo <repo_dir> [--manifest <manifest.json>]
-  sf run     --spec <spec.md> --repo <repo_dir>
+  sf audit     --pre <pre_file> --post <post_file> (or git diff)
+  sf verify    --repo <repo_dir> [--manifest <manifest.json>]
+  sf run       --spec <spec.md> --repo <repo_dir>
+  sf transpile --source <source_file> --target-lang <go|python> [--out <out_file>]
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from typing import List, Optional
 from .governance import GovernanceEngine, DoorType, RiskCategory
 from .zero_trust import ZeroTrustGate, BaselineHashGuard
 from .synthesis import SynthesisEngine, SynthesisRequest
+from .transpiler import PolyglotTranspiler
 
 # Terminal ANSI color constants
 RESET = "\033[0m"
@@ -215,6 +217,24 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_transpile(args: argparse.Namespace) -> int:
+    """Synthesize cross-lingual anchor and formally verify zero semantic delta."""
+    print(format_header("SOFTWARE FACTORY :: POLYGLOT DUAL-ANCHOR TRANSPILER"))
+    source_path = Path(args.source)
+    target_lang = args.target_lang
+    out_path = Path(args.out) if args.out else None
+
+    transpiler = PolyglotTranspiler()
+    res = transpiler.synthesize(
+        source_path=source_path,
+        target_lang=target_lang,
+        out_path=out_path,
+        model_name=args.model,
+    )
+    print(res.summary())
+    return 0 if res.success else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sf",
@@ -244,6 +264,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--dry-run", action="store_true", help="Simulate synthesis cycle without making live API calls")
     p_run.add_argument("--targets", nargs="*", help="Optional target source files to focus on")
 
+    # transpile
+    p_trans = subparsers.add_parser("transpile", help="Synthesize cross-lingual anchor (e.g. Python -> Go) with certified ΔS = ∅")
+    p_trans.add_argument("--source", required=True, help="Path to source language file (e.g. ledger.py)")
+    p_trans.add_argument("--target-lang", default="go", help="Target language (e.g. go, python)")
+    p_trans.add_argument("--out", help="Optional output file path")
+    p_trans.add_argument("--model", default="gemini-2.5-flash", help="Model to use for synthesis")
+
     return parser
 
 
@@ -257,6 +284,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return cmd_verify(args)
     elif args.command == "run":
         return cmd_run(args)
+    elif args.command == "transpile":
+        return cmd_transpile(args)
     else:
         parser.print_help()
         return 0

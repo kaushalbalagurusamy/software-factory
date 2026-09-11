@@ -21,6 +21,10 @@ from .synthesis import (
     SynthesisResult,
     PatchParser,
 )
+from .transpiler import (
+    PolyglotTranspiler,
+    TranspilationResult,
+)
 from .cli import main
 
 __all__ = [
@@ -37,5 +41,7 @@ __all__ = [
     "SynthesisRequest",
     "SynthesisResult",
     "PatchParser",
+    "PolyglotTranspiler",
+    "TranspilationResult",
     "main",
 ]
