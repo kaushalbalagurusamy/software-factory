@@ -17,7 +17,7 @@ dependencies = [
     "networkx>=3.4",
     "deal>=4.24.0",
     "crosshair-tool>=0.0.110",
-    "unity-ir @ file:///Users/kaushal/Documents/Github/unity",
+    "unity-ir @ file:///Users/kaushal/Projects/unity",
 ]
 
 [project.optional-dependencies]
