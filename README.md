@@ -5,7 +5,7 @@
 
 [**Research Manifesto & Theoretical Foundations**](RESEARCH_MANIFESTO.md) | [**Skills Catalog**](#skills-catalog) | [**Dependencies**](#core-dependencies--theoretical-substrate) | [**Templates**](#reusable-templates) | [**Gauntlet References**](references/README.md)
 
-A robust, modular framework of **Antigravity Skills, Architecture Decision Protocols, and Deterministic Testing Standards** engineered to transform AI coding assistants from ungrounded "vibe-coders" into high-judgment software co-architects.
+A robust, modular framework of **Claude Code Skills, Architecture Decision Protocols, and Deterministic Testing Standards** engineered to transform AI coding assistants from ungrounded "vibe-coders" into high-judgment software co-architects.
 
 ---
 
@@ -68,8 +68,8 @@ sf audit --pre path/to/pre.py --post path/to/post.py [--strict]
 # 2. Verify Epistemic Zero-Trust Gate against baseline test manifest
 sf verify --repo . [--record]
 
-# 3. Execute Autonomous Synthesis Cycle with Test-Time Compute (Gemini)
-sf run --spec feature.md --repo . [--model gemini-2.5-flash] [--dry-run]
+# 3. Execute Autonomous Synthesis Cycle with Test-Time Compute (Claude Code CLI)
+sf run --spec feature.md --repo . [--model sonnet] [--dry-run]
 
 # 4. Transpile Cross-Lingual Anchor and formally prove Zero Semantic Delta (ΔS = ∅)
 sf transpile --source path/to/source.py --target-lang go --out path/to/target.go
@@ -90,7 +90,7 @@ The autonomous engine is organized into four neurosymbolic modules:
    - Parses the AST to detect reward-hacking: assertion count dropping, injected `@pytest.mark.skip`, `@xfail`, and trivial assertions (`assert True`).
 3. **Autonomous Synthesis Engine ([`factory/synthesis.py`](factory/synthesis.py)):**
    - Ingests specifications, extracts target source files, and compiles them to Canonical Unity-IR.
-   - Prompts Gemini models with test-time compute (`thinking_budget`).
+   - Prompts the local Claude Code CLI (`claude -p`) for candidate patches.
    - Enforces atomic file staging, three sequential verification gates, and multi-turn self-repair reflection.
 4. **Polyglot Dual-Anchor Transpiler ([`factory/transpiler.py`](factory/transpiler.py)):**
    - Synthesizes cross-lingual implementation anchors (e.g. Python $\to$ Go).
@@ -118,8 +118,9 @@ The Software Factory rejects superficial "vibe-check" testing and tautological L
 | **`deal`** | Design-by-Contract (DbC) | Formal function contracts (`@deal.pre`, `@deal.ensure`, `@deal.pure`, `@deal.raises`), mapping 1-to-1 with Unity-IR Layers 1 & 2. |
 | **`networkx`** | Causal Topology & DAGs | Computes topological sorting, cycle detection, and cross-file causal dependency graphs. |
 | **`hypothesis`** | Property-Based Fuzzer | Generates adversarial edge-case distributions to attempt to falsify invariant assumptions. |
-| **`google-genai`** | Official Google GenAI SDK | Deep test-time compute synthesis engine with thinking budget support. |
 | **`pytest`** | Deterministic Test Runner | Executes the local and CI verification test suites (25/25 passing). |
+
+The synthesis and transpiler engines call the `claude` CLI directly (no SDK dependency); Claude Code must be installed and on `PATH`.
 
 ### Environment Setup
 
@@ -149,21 +150,21 @@ Full transcript index and summaries available in [`references/README.md`](refere
 
 ---
 
-## How to Mount in Antigravity CLI (AGY)
+## How to Mount in Claude Code
 
-To mount these skills into your Antigravity environment:
+Skills here are plain `SKILL.md` files, Claude Code's native skill format — no conversion needed, just place them where Claude Code looks for skills.
 
 ### Option A: Global Installation
-Copy the skills directory into your global Antigravity config:
+Available to every project on this machine:
 ```bash
-cp -r skills/* ~/.gemini/config/skills/
+cp -r skills/* ~/.claude/skills/
 ```
 
 ### Option B: Project-Specific Installation
-Symlink or copy the skills folder into your project's `.agents/skills/` directory:
+Scoped to a single project:
 ```bash
-mkdir -p .agents/skills
-cp -r /path/to/software-factory/skills/* .agents/skills/
+mkdir -p .claude/skills
+cp -r /path/to/software-factory/skills/* .claude/skills/
 ```
 
 ---
