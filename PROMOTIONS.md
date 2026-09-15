@@ -10,6 +10,7 @@ A **harness** entry, per the promotion rule, is not just instructions — it's t
 | :--- | :--- | :--- | :--- |
 | `axiomatic-spec` | Skill | `~/.claude/skills/axiomatic-spec` | PRD/change → axioms, contracts, ADR stubs, spec-derived tests, telemetry plan. Iteration/eval history in `~/Projects/axiomatic-spec-workspace`. |
 | `grounded-research` | Skill | `~/.claude/skills/grounded-research` | Verifies a specific tool/API/library claim via ground-truth check → source triage → experiment. Iteration/eval history in `~/Projects/grounded-research-workspace`. |
+| `deep-research` | Skill | `~/.claude/skills/deep-research` | Synthesizes a whole topic/landscape (regulatory, competitive, best-practices) across many sources into one saved `research/<topic-slug>.md` report; distinguished from `grounded-research` by scope — one verifiable claim goes to `grounded-research`, a whole subject area needing multi-source synthesis goes here, and this skill hands off to `grounded-research` mid-research if a narrow claim surfaces. Iteration/eval history in `~/Projects/deep-research-workspace`. |
 | `sf-adr-debate` | Skill | `~/.claude/skills/sf-adr-debate` | Installed 2026-09-15 from this repo's `skills/`; not yet run through the skill-creator eval/benchmark loop the way `axiomatic-spec` and `grounded-research` were. |
 | `sf-door-guard` | Skill | `~/.claude/skills/sf-door-guard` | Same status as above — installed, not yet benchmarked. |
 | `sf-interface-auditor` | Skill | `~/.claude/skills/sf-interface-auditor` | Same status as above. |
@@ -27,7 +28,6 @@ A **harness** entry, per the promotion rule, is not just instructions — it's t
 | `prd-designer` | Skill | Nothing today turns a vague idea/ask into a structured PRD; `axiomatic-spec` assumes one already exists. |
 | `brownfield-explorer` | Skill | Repo orientation and blast-radius mapping currently lives only inside `axiomatic-spec` Mode B; needs to be its own reusable capability for onboarding/triage tasks that don't want a full axiom spec afterward. |
 | `eval-designer` | Skill | Generalizes `sf-spec-testing`'s "deterministic eval harness, not vibe checks" intent, and formalizes the eval/benchmark/iterate loop already hand-run twice (`axiomatic-spec-workspace`, `grounded-research-workspace`). |
-| `deep-research` | Skill | Broad multi-source topic synthesis (e.g. regulatory/competitive landscape reports), distinct from `grounded-research`'s narrow single-claim verification. |
 
 ## How to update this ledger
 
