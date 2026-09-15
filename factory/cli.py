@@ -267,7 +267,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_trans.add_argument("--source", required=True, help="Path to source language file (e.g. ledger.py)")
     p_trans.add_argument("--target-lang", default="go", help="Target language (e.g. go, python)")
     p_trans.add_argument("--out", help="Optional output file path")
-    p_trans.add_argument("--model", default="gemini-2.5-flash", help="Model to use for synthesis")
+    p_trans.add_argument("--model", default="sonnet", help="Claude Code model alias or full name to use for synthesis")
 
     return parser
 
