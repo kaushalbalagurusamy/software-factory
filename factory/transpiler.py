@@ -9,9 +9,10 @@ from dataclasses import dataclass, field
 import datetime
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
+import shutil
+import subprocess
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 try:
@@ -25,13 +26,6 @@ try:
     UNITY_AVAILABLE = True
 except ImportError:
     UNITY_AVAILABLE = False
-
-try:
-    from google import genai
-    from google.genai import types
-    GENAI_AVAILABLE = True
-except ImportError:
-    GENAI_AVAILABLE = False
 
 
 @dataclass
@@ -75,20 +69,29 @@ class PolyglotTranspiler:
     an in-memory UAST and Canonical Unity-IR identical to Language A.
     """
 
-    def __init__(self, api_key: Optional[str] = None) -> None:
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
+    def _call_claude_cli(self, prompt: str, model_name: str) -> str:
+        """Invoke the local Claude Code CLI as a one-shot text completion.
 
-    def _get_genai_client(self) -> Optional[Any]:
-        if not GENAI_AVAILABLE or not self.api_key:
-            return None
-        return genai.Client(api_key=self.api_key)
+        --restricted strips Bash/code-execution tools since this call only
+        needs a text response (the full source + Unity-IR context is already
+        inlined in the prompt); it must not take actions on its own.
+        """
+        result = subprocess.run(
+            ["claude", "-p", prompt, "--model", model_name, "--output-format", "text", "--restricted"],
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or f"claude CLI exited with code {result.returncode}")
+        return result.stdout
 
     def synthesize(
         self,
         source_path: Path,
         target_lang: str,
         out_path: Optional[Path] = None,
-        model_name: str = "gemini-2.5-flash",
+        model_name: str = "sonnet",
         mock_generator: Optional[Callable[[str], str]] = None,
     ) -> TranspilationResult:
         """
@@ -148,44 +151,37 @@ class PolyglotTranspiler:
         candidate_code: str
         if mock_generator is not None:
             candidate_code = self._extract_code(mock_generator(prompt), target_lang)
-        else:
-            client = self._get_genai_client()
-            if client is None:
-                # If neither API key nor mock generator is available, fallback to golden anchor if present
-                # or return descriptive diagnostic
-                golden_go = source_path.with_suffix(".go")
-                golden_py = source_path.with_suffix(".py")
-                fallback_target = golden_go if target_ext == ".go" else golden_py
+        elif shutil.which("claude") is None:
+            # No CLI and no mock generator available; fall back to a golden anchor if present
+            golden_go = source_path.with_suffix(".go")
+            golden_py = source_path.with_suffix(".py")
+            fallback_target = golden_go if target_ext == ".go" else golden_py
 
-                if fallback_target.exists() and fallback_target != source_path:
-                    candidate_code = fallback_target.read_text(encoding="utf-8")
-                else:
-                    return TranspilationResult(
-                        success=False,
-                        source_path=source_path,
-                        target_path=out_path,
-                        target_lang=target_lang,
-                        error_message=(
-                            "GEMINI_API_KEY is not set. To synthesize cross-lingual code autonomously, "
-                            "set GEMINI_API_KEY in your environment."
-                        ),
-                    )
+            if fallback_target.exists() and fallback_target != source_path:
+                candidate_code = fallback_target.read_text(encoding="utf-8")
             else:
-                try:
-                    resp = client.models.generate_content(
-                        model=model_name,
-                        contents=prompt,
-                        config=types.GenerateContentConfig(temperature=0.0),
-                    )
-                    candidate_code = self._extract_code(resp.text or "", target_lang)
-                except Exception as e:
-                    return TranspilationResult(
-                        success=False,
-                        source_path=source_path,
-                        target_path=out_path,
-                        target_lang=target_lang,
-                        error_message=f"Gemini API generation failed: {e}",
-                    )
+                return TranspilationResult(
+                    success=False,
+                    source_path=source_path,
+                    target_path=out_path,
+                    target_lang=target_lang,
+                    error_message=(
+                        "The `claude` CLI was not found on PATH and no mock generator or golden anchor "
+                        "was available. Install Claude Code to synthesize cross-lingual code autonomously."
+                    ),
+                )
+        else:
+            try:
+                response_text = self._call_claude_cli(prompt, model_name)
+                candidate_code = self._extract_code(response_text, target_lang)
+            except Exception as e:
+                return TranspilationResult(
+                    success=False,
+                    source_path=source_path,
+                    target_path=out_path,
+                    target_lang=target_lang,
+                    error_message=f"Claude CLI invocation failed: {e}",
+                )
 
         # 4. Save candidate file
         out_path.parent.mkdir(parents=True, exist_ok=True)

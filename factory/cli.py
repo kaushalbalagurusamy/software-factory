@@ -193,12 +193,11 @@ def cmd_run(args: argparse.Namespace) -> int:
             repo_dir=repo_path,
             target_files=args.targets,
             model_name=args.model,
-            thinking_budget=args.thinking_budget,
             max_retries=args.max_retries,
             dry_run=args.dry_run,
         )
 
-        print(f"\n{CYAN}Executing Autonomous Synthesis Cycle (model={args.model}, thinking_budget={args.thinking_budget})...{RESET}")
+        print(f"\n{CYAN}Executing Autonomous Synthesis Cycle (model={args.model})...{RESET}")
         result = engine.execute_cycle(request)
 
         if result.success:
@@ -258,8 +257,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_run = subparsers.add_parser("run", help="Ingest specification and execute autonomous engineering cycle")
     p_run.add_argument("--spec", required=True, help="Path to specification markdown file")
     p_run.add_argument("--repo", default=".", help="Target repository directory")
-    p_run.add_argument("--model", default="gemini-2.5-flash", help="Model to use for autonomous synthesis (e.g. gemini-2.5-flash, gemini-3.8-flash)")
-    p_run.add_argument("--thinking-budget", type=int, default=2048, help="Thinking budget token limit for test-time compute")
+    p_run.add_argument("--model", default="sonnet", help="Claude Code model alias or full name to use for autonomous synthesis (e.g. sonnet, opus, fable)")
     p_run.add_argument("--max-retries", type=int, default=3, help="Maximum self-repair reflection iterations")
     p_run.add_argument("--dry-run", action="store_true", help="Simulate synthesis cycle without making live API calls")
     p_run.add_argument("--targets", nargs="*", help="Optional target source files to focus on")
@@ -269,7 +267,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_trans.add_argument("--source", required=True, help="Path to source language file (e.g. ledger.py)")
     p_trans.add_argument("--target-lang", default="go", help="Target language (e.g. go, python)")
     p_trans.add_argument("--out", help="Optional output file path")
-    p_trans.add_argument("--model", default="gemini-2.5-flash", help="Model to use for synthesis")
+    p_trans.add_argument("--model", default="sonnet", help="Claude Code model alias or full name to use for synthesis")
 
     return parser
 

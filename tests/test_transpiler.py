@@ -13,7 +13,7 @@ import pytest
 from factory.transpiler import PolyglotTranspiler, TranspilationResult
 from factory.cli import main
 
-UNITY_DIR = Path("/Users/kaushal/Documents/Github/unity/examples/ledger")
+UNITY_DIR = Path("/Users/kaushal/Projects/unity/examples/ledger")
 LEDGER_PY = UNITY_DIR / "ledger.py"
 LEDGER_GO = UNITY_DIR / "ledger.go"
 

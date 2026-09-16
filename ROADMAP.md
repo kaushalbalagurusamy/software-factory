@@ -75,14 +75,14 @@ A foundational thesis guiding both repositories is the rejection of the **"Panop
   - `factory/zero_trust.py`: Epistemic Zero-Trust Substrate (`BaselineHashGuard` + `ZeroTrustGate`, detecting test deletion, assertion drops, `@pytest.mark.skip`, and trivial asserts).
   - `factory/synthesis.py`: Test-Time Compute (TTC) synthesis loop with atomic rollback and multi-turn self-repair reflection.
   - `factory/transpiler.py`: Polyglot Dual-Anchor Transpiler synthesizing cross-lingual code with mathematically certified $\Delta \mathcal{S} = \emptyset$.
-* **Skills Catalog:** Renamed and standardized with `sf-` prefix (`sf-door-guard`, `sf-adr-debate`, `sf-interface-auditor`, `sf-io-analyzer`, `sf-spec-testing`) and mounted globally into Antigravity.
+* **Skills Catalog:** Renamed and standardized with `sf-` prefix (`sf-door-guard`, `sf-adr-debate`, `sf-interface-auditor`, `sf-io-analyzer`, `sf-spec-testing`) and mounted globally into Claude Code (`~/.claude/skills/`).
 * **Test Suite:** 25/25 tests passing in `tests/`. Total ecosystem test count: 39/39 passing.
 
 ---
 
 ## 4. Key Architectural Decisions (Ratified)
 
-1. **Bare-Metal Orchestration:** `software-factory` will use a lightweight, async Python CLI runner communicating directly via official model SDKs (Gemini SDK / Anthropic SDK / OpenAI SDK) rather than bloated third-party agent frameworks.
+1. **Bare-Metal Orchestration:** `software-factory` uses a lightweight Python CLI runner that shells out to the local Claude Code CLI (`claude -p`) for generation steps, rather than calling a model SDK directly or depending on a bloated third-party agent framework.
 2. **Dual-Anchor Language Proof:** For the initial implementation of `unity`, focus strictly on **Python + Go**:
    - *Python:* Dynamic, duck-typed, ubiquitous.
    - *Go:* Statically typed, explicit error handling, native CSP concurrency (mutexes, goroutines, channels).

@@ -1,8 +1,8 @@
 """
 Autonomous Synthesis Engine for Software Factory.
-Implements the Gauntlet AI test-time compute synthesis cycle:
+Implements the test-time compute synthesis cycle:
 1. Ingest specification and compile context into canonical Unity-IR.
-2. Formulate invariant-constrained synthesis prompt for Gemini.
+2. Formulate an invariant-constrained synthesis prompt for Claude.
 3. Apply candidate patches with atomic rollback capability.
 4. Enforce Semantic Invariant Delta (ΔS) and Governance Gate.
 5. Enforce Epistemic Zero-Trust Test Preservation Gate.
@@ -14,9 +14,9 @@ from dataclasses import dataclass, field
 import datetime
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -30,13 +30,6 @@ try:
 except ImportError:
     UNITY_AVAILABLE = False
 
-try:
-    from google import genai
-    from google.genai import types
-    GENAI_AVAILABLE = True
-except ImportError:
-    GENAI_AVAILABLE = False
-
 
 @dataclass
 class SynthesisRequest:
@@ -45,8 +38,7 @@ class SynthesisRequest:
     spec_path: Optional[Path]
     repo_dir: Path
     target_files: Optional[List[str]] = None
-    model_name: str = "gemini-2.5-flash"
-    thinking_budget: Optional[int] = 2048
+    model_name: str = "sonnet"
     max_retries: int = 3
     dry_run: bool = False
     mock_generator: Optional[Callable[[str, int], str]] = None
@@ -149,21 +141,29 @@ class SynthesisEngine:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
         governance: Optional[GovernanceEngine] = None,
         zero_trust: Optional[ZeroTrustGate] = None,
     ) -> None:
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
         self.governance = governance or GovernanceEngine()
         self.zero_trust = zero_trust or ZeroTrustGate()
         self.guard = BaselineHashGuard()
 
-    def _get_genai_client(self) -> Optional[Any]:
-        if not GENAI_AVAILABLE:
-            return None
-        if not self.api_key:
-            return None
-        return genai.Client(api_key=self.api_key)
+    def _call_claude_cli(self, prompt: str, model_name: str) -> str:
+        """Invoke the local Claude Code CLI as a one-shot text completion.
+
+        --restricted strips Bash/code-execution tools since this call only
+        needs a text response (the full repo context is already inlined in
+        the prompt); it must not take actions on its own.
+        """
+        result = subprocess.run(
+            ["claude", "-p", prompt, "--model", model_name, "--output-format", "text", "--restricted"],
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or f"claude CLI exited with code {result.returncode}")
+        return result.stdout
 
     def extract_repo_context(
         self,
@@ -317,34 +317,22 @@ class SynthesisEngine:
             elif request.mock_generator:
                 response_text = request.mock_generator(prompt, iteration)
             else:
-                client = self._get_genai_client()
-                if client is None:
+                if shutil.which("claude") is None:
                     return SynthesisResult(
                         success=False,
                         iterations=iteration,
                         error_message=(
-                            "GEMINI_API_KEY environment variable is not set and no mock generator provided. "
-                            "Please set GEMINI_API_KEY to execute autonomous synthesis."
+                            "The `claude` CLI was not found on PATH and no mock generator was provided. "
+                            "Install Claude Code to execute autonomous synthesis."
                         ),
                     )
                 try:
-                    config_kwargs: Dict[str, Any] = {"temperature": 0.0}
-                    if request.thinking_budget is not None and hasattr(types, "ThinkingConfig"):
-                        config_kwargs["thinking_config"] = types.ThinkingConfig(
-                            thinking_budget=request.thinking_budget,
-                        )
-                    config = types.GenerateContentConfig(**config_kwargs)
-                    resp = client.models.generate_content(
-                        model=request.model_name,
-                        contents=prompt,
-                        config=config,
-                    )
-                    response_text = resp.text or ""
+                    response_text = self._call_claude_cli(prompt, request.model_name)
                 except Exception as e:
                     return SynthesisResult(
                         success=False,
                         iterations=iteration,
-                        error_message=f"Gemini API call failed: {e}",
+                        error_message=f"Claude CLI invocation failed: {e}",
                     )
 
             # Parse patches
