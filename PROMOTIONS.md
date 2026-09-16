@@ -21,13 +21,13 @@ A **harness** entry, per the promotion rule, is not just instructions — it's t
 | `brownfield-explorer` | Skill | `~/.claude/skills/brownfield-explorer` | Repo orientation + blast-radius mapping for unfamiliar/huge codebases, without requiring formal axioms afterward. `axiomatic-spec` Mode B steps 1-2 now delegate to it instead of duplicating the logic inline. Iteration/eval history in `~/Projects/brownfield-explorer-workspace`. |
 | `sf audit` / `sf verify` (governance + zero-trust gates) | Harness | `factory/governance.py`, `factory/zero_trust.py`, `sf`/`factory` CLI entry points | Deterministic AST/SMT/hash-manifest checks, model-agnostic. Depends on `z3-solver`, `deal`, `crosshair-tool`, optionally `unity-ir` (`~/Projects/unity`). |
 | `sf run` / `sf transpile` (autonomous synthesis + transpilation) | Harness | `factory/synthesis.py`, `factory/transpiler.py` | Generation step now shells out to the local `claude` CLI (`claude -p ... --restricted`); governance/zero-trust gates, atomic staging, and self-repair loop wrap it. Requires Claude Code installed and on `PATH`. |
+| `eval-designer` | Skill | `~/.claude/skills/eval-designer` | Designs deterministic eval harnesses for AI-produced/judged capabilities — a skill's own trigger accuracy and output quality, or a non-deterministic product feature (LLM suggestion/summary/classification) — with boundary/failure-mode cases ordered before happy-path ones and a candidate-vs-baseline benchmark loop; absorbs `sf-spec-testing`'s intent. Reuses `skill-creator`'s benchmarking tooling directly rather than duplicating it. Iteration/eval history in `~/Projects/eval-designer-workspace`. |
+| `prd-designer` | Skill | `~/.claude/skills/prd-designer` | Turns a vague idea, stakeholder one-liner, or messy conversation into a structured PRD (goals, non-goals, user stories/scenarios, quantified success metrics, constraints, open questions) shaped so `axiomatic-spec` can consume it directly, without writing axioms/contracts/ADRs itself. Sits upstream of `axiomatic-spec`, which otherwise assumes a PRD already exists. Iteration/eval history in `~/Projects/prd-designer-workspace`. |
 
 ## Pending promotions (new skills, in progress as of 2026-09-15)
 
 | Capability | Target rung | Gap it closes |
 | :--- | :--- | :--- |
-| `prd-designer` | Skill | Nothing today turns a vague idea/ask into a structured PRD; `axiomatic-spec` assumes one already exists. |
-| `eval-designer` | Skill | Generalizes `sf-spec-testing`'s "deterministic eval harness, not vibe checks" intent, and formalizes the eval/benchmark/iterate loop already hand-run twice (`axiomatic-spec-workspace`, `grounded-research-workspace`). |
 
 ## How to update this ledger
 
