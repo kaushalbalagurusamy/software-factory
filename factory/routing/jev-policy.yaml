@@ -1,0 +1,107 @@
+# Jev routing policy for the software factory.
+#
+# Wording in this file is behavior: a changed criterion changes what the router picks.
+# Change it through review, like code, and bump policy_version.
+#
+# Status: shadow mode only. Thresholds are placeholders until our own labelled past tasks
+# set them (see the orchestration skill, reference/jev-routing.md).
+policy_version: "0.1.0"
+
+# Pinned model. Never use a floating alias such as ~typesafe/jev-latest: it would change
+# routing behaviour silently.
+model: "typesafe/jev-1.13"
+endpoint: "https://openrouter.ai/api/alpha/decisions"
+transport_timeout_ms: 800
+retries: 0
+
+# Probability bands applied to the top option of a choice question.
+#   act   : top probability and margin both high enough: use Jev's choice
+#   flag  : use Jev's choice but record it for review
+#   human : too uncertain: ask a person (or use the deterministic rule if one exists)
+bands:
+  act:   {min_top: 0.90, min_margin: 0.50}
+  flag:  {min_top: 0.70, min_margin: 0.20}
+  # anything below the flag band is "human"
+
+decisions:
+  model_tier:
+    description: "Which capability tier does this engineering task need?"
+    state_fields: [task_summary, files_touched, has_tests, prior_failed_attempts]
+    rules_first:
+      - when: {prior_failed_attempts_at_least: 3}
+        choose: specialist
+    question: "What capability tier is required for this engineering task?"
+    options:
+      mechanical: >-
+        Shallow, single-file or purely mechanical work: search, inventory, formatting, lint fixes,
+        type annotations, running the test suite, digesting logs. No new behavior is designed.
+      implementation: >-
+        Bounded software work across a few files: a feature slice, a data model, a query, unit
+        tests, a local bug fix. The design is already decided.
+      specialist: >-
+        Cross-cutting or hard-to-reason-about work: concurrency races, sandbox or security bypasses,
+        a defect that has survived several fix attempts.
+      unknown: >-
+        The task description does not say enough to tell which of the three applies.
+    action:
+      mechanical: haiku_class
+      implementation: sonnet_class
+      specialist: opus_class
+      unknown: human
+
+  ci_failure_owner:
+    description: "Who should repair this failing test or build?"
+    state_fields: [failure_excerpt]
+    rules_first:
+      - when: {failure_excerpt_contains_any: ["SyntaxError", "ImportError", "ModuleNotFoundError"]}
+        choose: syntax_or_import
+      - when: {failure_excerpt_contains_any: ["Timeout", "Deadlock"]}
+        choose: race_or_timeout
+    question: "What is the primary root cause of this failure?"
+    options:
+      syntax_or_import: >-
+        The code does not parse or a module cannot be imported.
+      assertion_mismatch: >-
+        The code runs but a value differs from what the test expects.
+      stale_mock_or_fixture: >-
+        The test's mock, fixture or recorded data no longer matches the code under test.
+      race_or_timeout: >-
+        The failure depends on timing, ordering or a hung call.
+      environment_or_dependency: >-
+        The failure comes from the machine, installed packages, credentials or network.
+      unknown: >-
+        The excerpt does not show enough to pick one.
+    action:
+      syntax_or_import: haiku_class
+      assertion_mismatch: sonnet_class
+      stale_mock_or_fixture: sonnet_class
+      race_or_timeout: opus_class
+      environment_or_dependency: human
+      unknown: human
+
+  milestone_readiness:
+    description: "Is this milestone ready for an independent review?"
+    state_fields: [tests_failed, tests_skipped, open_product_decisions, evidence_summary]
+    rules_first:
+      - when: {tests_failed_at_least: 1}
+        choose: incomplete_local_evidence
+      - when: {tests_skipped_at_least: 1}
+        choose: incomplete_local_evidence
+      - when: {open_product_decisions_at_least: 1}
+        choose: blocked_on_product_decision
+    question: "Is the local evidence for this milestone complete enough to send to the independent reviewer?"
+    options:
+      ready: >-
+        All local tests pass with none skipped, and the evidence summary covers every invariant the
+        milestone promised.
+      incomplete_local_evidence: >-
+        Something the milestone promised has no passing test or no evidence yet.
+      blocked_on_product_decision: >-
+        Progress depends on a decision that a person has not made.
+      unknown: >-
+        The summary does not show enough to tell.
+    action:
+      ready: build_review_packet
+      incomplete_local_evidence: return_to_implementer
+      blocked_on_product_decision: human
+      unknown: human
