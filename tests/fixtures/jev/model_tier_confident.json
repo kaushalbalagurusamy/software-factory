@@ -1,0 +1,19 @@
+{
+ "answers": {
+  "pick": {
+   "type": "choice",
+   "choice": "implementation",
+   "confidence": 0.96,
+   "probabilities": {
+    "mechanical": 0.02,
+    "implementation": 0.96,
+    "specialist": 0.02
+   }
+  }
+ },
+ "usage": {
+  "input_tokens": 453,
+  "output_tokens": 31,
+  "cost": 1.9e-05
+ }
+}
