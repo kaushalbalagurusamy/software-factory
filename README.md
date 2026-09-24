@@ -54,6 +54,8 @@ The master copy of every personal skill lives in `~/.claude/skills` (a local git
 | **`one-way-door`** | `~/.claude/skills/one-way-door` | Blast-radius check and rollback design for hard-to-reverse changes; for true one-way doors, a Socratic trade-off debate that ends in an Architecture Decision Record (ADR). Merges the former `sf-door-guard` and `sf-adr-debate`. |
 | **`implementation-review`** | `~/.claude/skills/implementation-review` | One independent review of the diff, traces, earned passes and requirements drift; carries the former `sf-interface-auditor` and `sf-io-analyzer` as checklists in `reference/`. |
 | **`orchestration`** | `~/.claude/skills/orchestration` | Division of labor across engines and model tiers, safe parallel dispatch on a shared checkout, independent review gates and routing. Merges the former `sf-hierarchical-orchestration`, `sf-parallel-integration` and `sf-jev-dispatcher`. |
+| **`deploy-verify`** | `~/.claude/skills/deploy-verify` | Pre-deploy gate, deploy, verify loop against the project's named health checks with a roll-back stop condition, and a fixed Deploy Log. Reads `docs/ops/deploy-verification.md` in the project. |
+| **`legacy-audit`** | `~/.claude/skills/legacy-audit` | Reverse-first audit of a legacy codebase before a rewrite: per-unit analyses, a severity-tagged bug catalog and route selection. Read-only, writes under `docs/audit/`. |
 
 ---
 
