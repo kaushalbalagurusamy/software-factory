@@ -47,13 +47,13 @@ In the modern AI development loop, code velocity is no longer the bottleneck. Wh
 
 ## Skills Catalog
 
-| Skill Name | Path | Primary Purpose |
+The master copy of every personal skill lives in `~/.claude/skills` (a local git repository), not in this repository. `~/.agents/skills` links to it for Codex. The retired originals are kept under [`skills/_archive/`](skills/_archive/) as history only.
+
+| Skill Name | Master location | Primary Purpose |
 | :--- | :--- | :--- |
-| **`sf-adr-debate`** | [`skills/sf-adr-debate/SKILL.md`](skills/sf-adr-debate/SKILL.md) | Socratic trade-off debate on one-way doors; authors formal Architecture Decision Records (ADRs). |
-| **`sf-spec-testing`** | [`skills/sf-spec-testing/SKILL.md`](skills/sf-spec-testing/SKILL.md) | Contract-first schema design, failure-mode injection, and deterministic eval harnesses. |
-| **`sf-io-analyzer`** | [`skills/sf-io-analyzer/SKILL.md`](skills/sf-io-analyzer/SKILL.md) | Audits $O(N)$ query loops, unindexed scans, connection pooling, and payload bloat. |
-| **`sf-door-guard`** | [`skills/sf-door-guard/SKILL.md`](skills/sf-door-guard/SKILL.md) | Pre-flight safety check, blast-radius calculation, and rollback strategy design. |
-| **`sf-interface-auditor`** | [`skills/sf-interface-auditor/SKILL.md`](skills/sf-interface-auditor/SKILL.md) | Enforces discriminated unions, minimal public surface area, and prunes PR bloat. |
+| **`one-way-door`** | `~/.claude/skills/one-way-door` | Blast-radius check and rollback design for hard-to-reverse changes; for true one-way doors, a Socratic trade-off debate that ends in an Architecture Decision Record (ADR). Merges the former `sf-door-guard` and `sf-adr-debate`. |
+| **`implementation-review`** | `~/.claude/skills/implementation-review` | One independent review of the diff, traces, earned passes and requirements drift; carries the former `sf-interface-auditor` and `sf-io-analyzer` as checklists in `reference/`. |
+| **`orchestration`** | `~/.claude/skills/orchestration` | Division of labor across engines and model tiers, safe parallel dispatch on a shared checkout, independent review gates and routing. Merges the former `sf-hierarchical-orchestration`, `sf-parallel-integration` and `sf-jev-dispatcher`. |
 
 ---
 
