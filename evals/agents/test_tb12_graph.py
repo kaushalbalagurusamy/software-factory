@@ -1,10 +1,9 @@
 """TB-12 stage graph as data: golden and diagnostic cases.
 
-Expectations come only from docs/contracts/graph-and-ledger.md (Graph section), docs/contracts/profile.md
-and docs/prds/TB-12-graph.md. Where the contract leaves open whether a graph problem surfaces from
-load_graph or from validate(), a rejection from either counts (ambiguities A-20). Where TB-01's check order
-lists `graph` while TB-01 puts graph validation out of scope, a ProfileError on the graph field also counts
-as the rejection (ambiguities A-02).
+Expectations come only from docs/contracts/graph-and-ledger.md (Graph section), docs/contracts/profile.md,
+docs/prds/TB-12-graph.md and the binding docs/contracts/clarifications.md (bracketed ids cite it).
+load_graph builds and validates, raising GraphError [A-20]; the profile loader checks only graph shape [A-02],
+so a well-shaped graph with a semantic problem loads and load_graph raises. gates() returns stage ids [A-30].
 """
 from __future__ import annotations
 
@@ -48,30 +47,19 @@ def valid(tmp_path, data="base", sub="p"):
 
 
 def rejection(tmp_path, graph, sub="p"):
-    """Return the text of the rejection (GraphError from load_graph/validate, or ProfileError on graph)."""
+    """[A-20] + [A-02]: the well-shaped profile loads; load_graph raises GraphError. Returns its text."""
     prof, g = mods()
     root = lib.make_project(tmp_path / sub, with_graph(graph))
-    try:
-        p = prof.load_profile(root / ".factory" / "profile.yaml")
-    except prof.ProfileError as e:
-        assert str(getattr(e, "field", "")).startswith("graph"), f"unexpected ProfileError field {e.field}"
-        return f"{e} {e.field} {getattr(e, 'message', '')}"
+    p = prof.load_profile(root / ".factory" / "profile.yaml")
     with pytest.raises(g.GraphError) as info:
-        gr = g.load_graph(p)
-        gr.validate()
+        g.load_graph(p)
     return str(info.value)
 
 
 def ids(items):
-    out = []
-    for x in items:
-        if isinstance(x, str):
-            out.append(x)
-        elif isinstance(x, Mapping):
-            out.append(x["id"])
-        else:
-            out.append(getattr(x, "id"))
-    return out
+    """[A-30]: gates() returns a list of stage ids."""
+    assert isinstance(items, list) and all(isinstance(x, str) for x in items), items
+    return items
 
 
 def st(i, role, gate=None):
@@ -284,11 +272,11 @@ def test_d016_default_small_roles(tmp_path):
 
 @case("TB12-D-017", "diagnostic")
 def test_d017_gates_exclude_non_gates(tmp_path):
-    """Behaviour 6: only gate stages are reported; a graph with no gate: true stage reports none (alt)."""
+    """Behaviour 6 + [A-26]: a stage is a gate iff gate: true (role does not matter); alt reports none."""
     assert ids(valid(tmp_path, "alt").gates()) == []
     gr = valid(tmp_path, with_graph({"stages": [st("a", "design", True), st("b", "implement", False),
-                                                st("c", "review", True)],
-                                     "edges": [["a", "b"], ["b", "c"]]}))
+                                                st("c", "review", True), st("d", "design")],
+                                     "edges": [["a", "b"], ["b", "c"], ["c", "d"]]}))
     assert ids(gr.gates()) == ["a", "c"]
 
 
@@ -302,8 +290,11 @@ def test_d018_every_role_accepted(tmp_path):
 
 @case("TB12-D-019", "diagnostic")
 def test_d019_empty_graph_has_no_end_stage(tmp_path):
-    """Contract: at least one end stage exists; a graph with no stages is rejected."""
-    rejection(tmp_path, {"stages": [], "edges": []})
+    """Contract + [A-31]: an empty stages list is rejected (GraphError, or ProfileError on the shape)."""
+    prof, g = mods()
+    root = lib.make_project(tmp_path, with_graph({"stages": [], "edges": []}))
+    with pytest.raises((g.GraphError, prof.ProfileError)):
+        g.load_graph(prof.load_profile(root / ".factory" / "profile.yaml"))
 
 
 @case("TB12-D-020", "diagnostic")
@@ -341,3 +332,129 @@ def test_d023_valid_graph_does_not_raise_for_multiple_starts(tmp_path):
                                                 st("d", "test")],
                                      "edges": [["a", "c"], ["b", "c"], ["c", "d"]]}))
     assert list(gr.order()) == ["a", "b", "c", "d"]
+
+
+# ---------------------------------------------------------------- added after docs/contracts/clarifications.md
+
+def profile_without_graph(tmp_path, sub="ng"):
+    prof, g = mods()
+    d = lib.profile_dict("base")
+    d.pop("graph", None)
+    root = lib.make_project(tmp_path / sub, d)
+    return prof.load_profile(root / ".factory" / "profile.yaml")
+
+
+@case("TB12-G-008", "golden")
+def test_g008_kahn_smallest_ready_id(tmp_path):
+    """Behaviour 2 + [A-27]: order() is Kahn's algorithm always taking the smallest ready id: starts a, z with
+    edges z->m, a->n give [a, n, z, m] (n becomes ready before z is taken)."""
+    gr = valid(tmp_path, with_graph({"stages": [st("z", "design"), st("a", "research"), st("m", "implement"),
+                                                st("n", "test")],
+                                     "edges": [["z", "m"], ["a", "n"]]}))
+    assert list(gr.order()) == ["a", "n", "z", "m"]
+
+
+@case("TB12-D-024", "diagnostic")
+def test_d024_base_small_selects(tmp_path):
+    """[A-25]: select raises only if the result has no start, no end or no stages; base `small` drops only the
+    start stage spec, leaving evals -> build -> review, which is valid."""
+    sel = valid(tmp_path).select("small")
+    sel.validate()
+    assert list(sel.order()) == ["evals", "build", "review"]
+
+
+@case("TB12-D-025", "diagnostic")
+def test_d025_load_graph_raises_directly(tmp_path):
+    """[A-20]: load_graph itself validates and raises GraphError (validate() is not needed to see it)."""
+    prof, g = mods()
+    root = lib.make_project(tmp_path, with_graph({"stages": [st("a", "design"), st("a", "test")], "edges": []}))
+    p = prof.load_profile(root / ".factory" / "profile.yaml")
+    with pytest.raises(g.GraphError):
+        g.load_graph(p)
+
+
+@case("TB12-D-026", "diagnostic")
+def test_d026_no_graph_uses_default(tmp_path):
+    """[A-28]: with no graph in the profile, load_graph uses the shipped default graph."""
+    _, g = mods()
+    gr = g.load_graph(profile_without_graph(tmp_path))
+    ref = valid(tmp_path, with_graph(default_graph_data()), "ref")
+    assert list(gr.order()) == list(ref.order())
+    assert gr.gates() == ref.gates()
+
+
+@case("TB12-D-027", "diagnostic")
+def test_d027_default_subsets_selectable(tmp_path):
+    """[A-29]: subset names are keys of graph.subsets or of the default graph's subsets; with no graph in the
+    profile, select("small") works."""
+    _, g = mods()
+    sel = g.load_graph(profile_without_graph(tmp_path)).select("small")
+    sel.validate()
+    assert sel.order()
+
+
+@case("TB12-D-028", "diagnostic")
+def test_d028_select_drops_loop_with_removed_endpoint(tmp_path):
+    """[A-29]: select keeps a loop only if both endpoints are kept, so a loop into a removed stage does not make
+    the selected graph invalid."""
+    gr = valid(tmp_path, with_graph({"stages": [st("a", "test"), st("b", "design"), st("c", "review")],
+                                     "edges": [["a", "b"], ["b", "c"]], "loops": [["c", "b"]],
+                                     "subsets": {"lean": ["test", "review"]}}))
+    sel = gr.select("lean")
+    sel.validate()
+    assert list(sel.order()) == ["a", "c"]
+
+
+@case("TB12-D-029", "diagnostic")
+def test_d029_gates_in_topological_order(tmp_path):
+    """[A-30]: gates() lists stage ids in order() order, not declaration order."""
+    gr = valid(tmp_path, with_graph({"stages": [st("a", "review", True), st("c", "design", True)],
+                                     "edges": [["c", "a"]]}))
+    assert ids(gr.gates()) == ["c", "a"]
+
+
+@case("TB12-D-030", "diagnostic")
+def test_d030_select_unknown_subset_graph_error_or_raise(tmp_path):
+    """[A-29]: subset names are keys of graph.subsets; a role id that is not a subset name is unknown."""
+    gr = valid(tmp_path)
+    with pytest.raises(Exception):
+        gr.select("implement")
+
+
+# ---------------------------------------------------------------- added after clarifications, third round
+
+@case("TB12-D-031", "diagnostic")
+def test_d031_select_keeps_loop_only_with_both_endpoints(tmp_path):
+    """[A-29]: select keeps a loop only if both its endpoints are kept and drops the others; edges are
+    reconnected across the removed stage. Read through Graph.loops and Graph.edges (tuples of (from, to))."""
+    gr = valid(tmp_path, with_graph({"stages": [st("a", "test"), st("b", "implement"), st("c", "design"),
+                                                st("d", "review")],
+                                     "edges": [["a", "b"], ["b", "c"], ["c", "d"]],
+                                     "loops": [["d", "b"], ["c", "a"]],
+                                     "subsets": {"lean": ["test", "implement", "review"]}}))
+    sel = gr.select("lean")
+    assert set(sel.loops) == {("d", "b")}
+    assert set(sel.edges) == {("a", "b"), ("b", "d")}
+    assert {s.id for s in sel.stages} == {"a", "b", "d"}
+
+
+@case("TB12-D-032", "diagnostic")
+def test_d032_graph_attributes(tmp_path):
+    """[A-29]: Graph exposes stages (tuple of objects with id, role, gate), edges and loops (tuples of
+    (from_id, to_id)) for the base fixture."""
+    gr = valid(tmp_path)
+    assert isinstance(gr.stages, tuple) and isinstance(gr.edges, tuple) and isinstance(gr.loops, tuple)
+    assert {(s.id, s.role, bool(s.gate)) for s in gr.stages} == {
+        ("spec", "design", True), ("evals", "test", False), ("build", "implement", False), ("review", "review", True)}
+    assert set(gr.edges) == {("spec", "evals"), ("evals", "build"), ("build", "review")}
+    assert set(gr.loops) == {("review", "build")}
+    assert all(isinstance(e, tuple) and len(e) == 2 for e in gr.edges + gr.loops)
+
+
+@case("TB12-D-033", "diagnostic")
+def test_d033_graph_attributes_read_only(tmp_path):
+    """[A-29]: the attributes are read-only; assigning one raises."""
+    gr = valid(tmp_path)
+    for name in ["stages", "edges", "loops"]:
+        with pytest.raises(Exception):
+            setattr(gr, name, ())

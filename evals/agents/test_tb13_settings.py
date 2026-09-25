@@ -2,7 +2,8 @@
 
 Expectations come only from docs/prds/TB-13-settings-emitter.md, docs/contracts/hook-io.md,
 docs/contracts/roles-and-generation.md (the Claude Code hooks shape `event -> [{matcher, hooks: [{type:
-command, command}]}]`) and docs/contracts/profile.md.
+command, command}]}]`, confirmed by [A-33]), docs/contracts/profile.md and the binding
+docs/contracts/clarifications.md (bracketed ids cite it).
 """
 from __future__ import annotations
 
@@ -12,7 +13,6 @@ import io
 import json
 import os
 import re
-from collections.abc import Mapping
 from pathlib import Path
 
 import pytest
@@ -28,6 +28,8 @@ EVENT = {"path_guard": "PreToolUse", "blindness_guard": "PreToolUse", "secrets_g
          "stop_gate": "SubagentStop", "session_start": "SessionStart"}
 SECRET_RE = re.compile(r"(sk-(ant|or)-[A-Za-z0-9_-]{8,}|ghp_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
                        r"|AKIA[0-9A-Z]{16}|xox[bp]-[A-Za-z0-9-]{10,})")
+MATCHER = {"path_guard": "Write|Edit|Bash", "secrets_guard": "Write|Edit|Bash",
+           "blindness_guard": "Read|Grep|Glob|Bash", "bash_guard": "Bash"}
 HOME_RE = re.compile(r"(/Users/[^/\s\"]+|/home/[^/\s\"]+)")
 PREFIX = "python -m factory.hooks"
 
@@ -52,7 +54,7 @@ def inputs(tmp_path, data="base", sub="p"):
 def role_hook_ids(roles):
     out = set()
     for spec in roles.values():
-        out |= set(spec["hooks"] if isinstance(spec, Mapping) else getattr(spec, "hooks"))
+        out |= set(spec.hooks)
     return out
 
 
@@ -164,15 +166,13 @@ def test_g007_stale_factory_entry_removed(tmp_path):
 
 @case("TB13-D-001", "diagnostic")
 def test_d001_guard_matchers(tmp_path):
-    """Behaviour 1 'under its event and matcher': each guard's PreToolUse matcher covers the tools it inspects
-    (path_guard Write/Edit; blindness_guard Read/Grep/Glob/Bash; secrets_guard Write/Edit/Bash; bash_guard
-    Bash)."""
+    """Behaviour 1 + [A-34]: guard matchers are exactly path_guard and secrets_guard `Write|Edit|Bash`,
+    blindness_guard `Read|Grep|Glob|Bash`, bash_guard `Bash`."""
     p, roles, st = inputs(tmp_path)
     s = st.emit_settings(p, roles)
-    for hid in role_hook_ids(roles) & set(GUARD_TOOLS):
+    for hid in set(MATCHER):
         ms = [m for _, m, _, c in entries(s, "PreToolUse") if c == f"{PREFIX} {hid}"]
-        for tool in GUARD_TOOLS[hid]:
-            assert any(matches(m, tool) for m in ms), (hid, tool)
+        assert ms == [MATCHER[hid]], (hid, ms)
 
 
 @case("TB13-D-002", "diagnostic")
@@ -361,3 +361,54 @@ def test_d020_stale_entry_replaced_in_mixed_group(tmp_path):
         {"type": "command", "command": f"{PREFIX} retired_hook"}]}]}}
     cmds = {c for _, _, _, c in entries(st.emit_settings(p, roles, existing=existing))}
     assert "./keep-me.sh" in cmds and f"{PREFIX} retired_hook" not in cmds
+
+
+# ---------------------------------------------------------------- added after docs/contracts/clarifications.md
+
+@case("TB13-G-008", "golden")
+def test_g008_existing_not_mutated(tmp_path):
+    """[A-35]: emit_settings must not mutate `existing`."""
+    p, roles, st = inputs(tmp_path)
+    existing = copy.deepcopy(FOREIGN)
+    existing["hooks"]["PreToolUse"].append({"matcher": "Bash", "hooks": [
+        {"type": "command", "command": f"{PREFIX} retired_hook"}]})
+    snapshot = copy.deepcopy(existing)
+    st.emit_settings(p, roles, existing=existing)
+    assert existing == snapshot
+
+
+@case("TB13-D-021", "diagnostic")
+def test_d021_all_eight_registered(tmp_path):
+    """[A-32]: it registers the union of hook ids used by the generated roles, which is all eight."""
+    p, roles, st = inputs(tmp_path)
+    assert role_hook_ids(roles) == HOOK_IDS
+    s = st.emit_settings(p, roles)
+    got = {c.split()[-1] for _, _, _, c in entries(s) if c.startswith(PREFIX + " ")}
+    assert got == HOOK_IDS
+
+
+@case("TB13-D-022", "diagnostic")
+def test_d022_non_guard_hooks_no_matcher(tmp_path):
+    """[A-34] + [A-21]: stop_gate, subagent_stop, ledger_audit and session_start are registered with no matcher."""
+    p, roles, st = inputs(tmp_path)
+    for ev, m, _, c in entries(st.emit_settings(p, roles)):
+        if c.split()[-1] in {"stop_gate", "subagent_stop", "ledger_audit", "session_start"}:
+            assert m in (None, ""), (ev, c, m)
+
+
+@case("TB13-D-023", "diagnostic")
+def test_d023_stop_gate_on_subagent_stop_only(tmp_path):
+    """[A-22]: in project settings stop_gate is registered under SubagentStop."""
+    p, roles, st = inputs(tmp_path)
+    evs = {ev for ev, _, _, c in entries(st.emit_settings(p, roles)) if c == f"{PREFIX} stop_gate"}
+    assert evs == {"SubagentStop"}
+
+
+@case("TB13-D-024", "diagnostic")
+def test_d024_existing_not_mutated_when_only_factory(tmp_path):
+    """[A-35]: emitting over its own earlier output leaves that earlier object unchanged."""
+    p, roles, st = inputs(tmp_path)
+    first = st.emit_settings(p, roles)
+    snapshot = copy.deepcopy(first)
+    st.emit_settings(p, roles, existing=first)
+    assert first == snapshot

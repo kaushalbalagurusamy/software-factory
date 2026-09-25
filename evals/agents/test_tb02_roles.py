@@ -1,8 +1,9 @@
 """TB-02 seven role specs and loader: golden and diagnostic cases.
 
 Expectations come only from docs/contracts/roles-and-generation.md, docs/contracts/hook-io.md (hook ids),
-docs/prds/TB-02-role-specs.md and section 3 of docs/plans/2026-09-24-agent-capability-map.md.
-RoleSpec field access (attribute or key) is not specified, so `get()` accepts either (ambiguities A-01).
+docs/prds/TB-02-role-specs.md, section 3 of docs/plans/2026-09-24-agent-capability-map.md and the binding
+docs/contracts/clarifications.md (bracketed ids cite it). RoleSpec and nested values (mcp entries) are frozen
+dataclasses read by attribute [A-01]; role errors are RoleError with .role and .field [A-16].
 """
 from __future__ import annotations
 
@@ -30,15 +31,11 @@ def case(cid, tier, reqs=("R-04",)):
 
 
 def mod():
-    return lib.need("factory.agents.roles", "load_roles")
+    return lib.need("factory.agents.roles", "load_roles", "RoleError")
 
 
 def get(obj, name):
-    if isinstance(obj, Mapping):
-        return obj[name]
-    if hasattr(obj, name):
-        return getattr(obj, name)
-    return obj[name]
+    return getattr(obj, name)
 
 
 def roles():
@@ -60,11 +57,12 @@ def role_copy(tmp_path, role=None, mutate=None):
 
 
 def rejects(tmp_path, role, mutate):
+    """[A-16]: role-loading errors raise RoleError with .role and .field."""
     m = mod()
     d = role_copy(tmp_path, role, mutate)
-    with pytest.raises(Exception) as info:
+    with pytest.raises(m.RoleError) as info:
         m.load_roles(d)
-    return str(info.value)
+    return info.value
 
 
 def agent_names(tools):
@@ -138,8 +136,8 @@ def test_g007_common_hooks_and_known_ids():
 @case("TB02-G-008", "golden", reqs=("R-05",))
 def test_g008_rejects_max_tools_over_20(tmp_path):
     """Behaviour 9: load_roles rejects max_tools > 20 with an error naming the role and the field."""
-    msg = rejects(tmp_path, "research", lambda d: d.__setitem__("max_tools", 21))
-    assert "research" in msg and "max_tools" in msg
+    e = rejects(tmp_path, "research", lambda d: d.__setitem__("max_tools", 21))
+    assert (e.role, e.field) == ("research", "max_tools")
 
 
 # ---------------------------------------------------------------- diagnostic
@@ -180,10 +178,10 @@ def test_d005_implement_hooks():
 
 
 @case("TB02-D-006", "diagnostic", reqs=("R-04", "R-06"))
-def test_d006_path_guard_on_folder_writers():
-    """Behaviour 6 + map 3.2-3.4: research, design and audit (write-restricted to their folder) list path_guard."""
+def test_d006_path_guard_on_all_roles():
+    """[A-13]: all seven roles list path_guard (the hook decides by role)."""
     rs = roles()
-    for r in ["research", "design", "audit"]:
+    for r in ROLES:
         assert "path_guard" in set(get(rs[r], "hooks")), r
 
 
@@ -202,30 +200,35 @@ def test_d008_orchestrator_hooks():
 
 
 SKILLS = {
-    "orchestrator": {"orchestration", "plan-adherence", "session-handoff", "away-mode", "deploy-verify", "one-way-door"},
+    "orchestrator": {"orchestration", "plan-adherence", "session-handoff", "away-mode", "deploy-verify", "one-way-door",
+                     "superpowers:dispatching-parallel-agents"},
     "research": {"grounded-research", "deep-research", "brownfield-explorer"},
-    "design": {"prd-designer", "axiomatic-spec", "one-way-door"},
-    "audit": {"legacy-audit", "brownfield-explorer"},
-    "test": {"eval-designer", "deploy-verify"},
-    "review": {"implementation-review"},
+    "design": {"prd-designer", "axiomatic-spec", "one-way-door", "superpowers:brainstorming",
+               "superpowers:writing-plans"},
+    "audit": {"legacy-audit", "brownfield-explorer", "claude-security:scan"},
+    "test": {"eval-designer", "deploy-verify", "superpowers:verification-before-completion", "langfuse"},
+    "review": {"implementation-review", "code-review:code-review"},
 }
+IMPLEMENT_SKILLS = {"superpowers:test-driven-development", "superpowers:systematic-debugging", "claude-api",
+                    "frontend-design:frontend-design"}
 
 
 @pytest.mark.parametrize("role", [
     pytest.param(r, marks=case(f"TB02-D-{9 + i:03d}", "diagnostic"), id=r) for i, r in enumerate(SKILLS)
 ])
 def test_d009_skills_per_role(role):
-    """Behaviour 7: skills per role match the consolidated names in capability map section 3."""
-    assert SKILLS[role] <= set(get(roles()[role], "skills"))
+    """Behaviour 7 + [A-14]: each role's skill list is exactly the clarification table (personal skills
+    unprefixed, plugin skills as plugin:skill), with no duplicates."""
+    skills = [str(x) for x in get(roles()[role], "skills")]
+    assert set(skills) == SKILLS[role] and len(skills) == len(SKILLS[role])
 
 
 @case("TB02-D-015", "diagnostic")
 def test_d015_implement_skills():
-    """Behaviour 7 + map 3.5: implement loads the superpowers test-driven-development and systematic-debugging
-    skills (plugin prefix form not fixed by the map, so matched by name)."""
-    skills = [str(s) for s in get(roles()["implement"], "skills")]
-    assert any(s.endswith("test-driven-development") for s in skills)
-    assert any(s.endswith("systematic-debugging") for s in skills)
+    """Behaviour 7 + [A-14]: implement's skills are exactly superpowers:test-driven-development,
+    superpowers:systematic-debugging, claude-api, frontend-design:frontend-design."""
+    skills = [str(x) for x in get(roles()["implement"], "skills")]
+    assert set(skills) == IMPLEMENT_SKILLS and len(skills) == len(IMPLEMENT_SKILLS)
 
 
 @case("TB02-D-016", "diagnostic", reqs=("R-05",))
@@ -239,10 +242,10 @@ def test_d016_mcp_entries_read_only():
 
 @case("TB02-D-017", "diagnostic", reqs=("R-01", "R-05"))
 def test_d017_no_specific_deploy_platform():
-    """Behaviour 8 + map 5: no role names a specific project deploy platform as an MCP server."""
+    """Behaviour 8 + [A-15]: role MCP entries never name a deploy platform or git host."""
     for rid, spec in roles().items():
         servers = {str(get(e, "server")).lower() for e in get(spec, "mcp")}
-        assert not servers & {"railway", "vercel", "supabase"}, rid
+        assert not servers & {"railway", "vercel", "supabase", "github", "gitlab"}, rid
 
 
 @case("TB02-D-018", "diagnostic", reqs=("R-01",))
@@ -284,13 +287,14 @@ def test_d021_no_edit_for_research_audit():
 
 @case("TB02-D-022", "diagnostic", reqs=("R-07",))
 def test_d022_agent_tool_matches_spawn_allowlist():
-    """R-07 / map 3.1 and 3.7: any Agent(...) entry in core_tools names only allowed spawns; orchestrator and
-    review have no unrestricted bare Agent entry."""
-    rs = roles()
-    for r, allowed in [("orchestrator", set(ROLES) - {"orchestrator"}), ("review", REVIEWERS)]:
-        names, bare = agent_names(get(rs[r], "core_tools"))
+    """R-07 + [A-18]: the Agent(...) entries in core_tools list exactly the role's spawns; a role with no spawns
+    has no Agent tool; no role has a bare unrestricted Agent entry."""
+    for r, spec in roles().items():
+        names, bare = agent_names(get(spec, "core_tools"))
         assert not bare, r
-        assert names <= allowed, r
+        assert names == set(get(spec, "spawns")), r
+        if not list(get(spec, "spawns")):
+            assert not any(str(t).startswith("Agent") for t in get(spec, "core_tools")), r
 
 
 @case("TB02-D-023", "diagnostic")
@@ -308,15 +312,15 @@ def test_d023_enum_values_valid():
 @case("TB02-D-024", "diagnostic")
 def test_d024_rejects_unknown_hook(tmp_path):
     """Behaviour 9: an unknown hook id is rejected with an error naming the role and the field."""
-    msg = rejects(tmp_path, "review", lambda d: d["hooks"].append("made_up_hook"))
-    assert "review" in msg and "hooks" in msg
+    e = rejects(tmp_path, "review", lambda d: d["hooks"].append("made_up_hook"))
+    assert (e.role, e.field) == ("review", "hooks")
 
 
 @case("TB02-D-025", "diagnostic", reqs=("R-06",))
 def test_d025_rejects_unknown_writes(tmp_path):
     """Behaviour 9: an unknown writes value is rejected with an error naming the role and the field."""
-    msg = rejects(tmp_path, "audit", lambda d: d.__setitem__("writes", "everywhere"))
-    assert "audit" in msg and "writes" in msg
+    e = rejects(tmp_path, "audit", lambda d: d.__setitem__("writes", "everywhere"))
+    assert (e.role, e.field) == ("audit", "writes")
 
 
 @pytest.mark.parametrize("field", [
@@ -327,8 +331,8 @@ def test_d025_rejects_unknown_writes(tmp_path):
 ])
 def test_d026_rejects_missing_field(tmp_path, field):
     """Behaviour 9: a missing field is rejected with an error naming the role and the field."""
-    msg = rejects(tmp_path, "design", lambda d: d.pop(field))
-    assert "design" in msg and field in msg
+    e = rejects(tmp_path, "design", lambda d: d.pop(field))
+    assert (e.role, e.field) == ("design", field)
 
 
 @case("TB02-D-030", "diagnostic", reqs=("R-05",))
@@ -367,3 +371,57 @@ def test_d033_spawns_are_known():
         assert "orchestrator" not in sp, rid
         if rid != "review":
             assert sp <= set(ROLES), rid
+
+
+# ---------------------------------------------------------------- added after docs/contracts/clarifications.md
+
+ALLOWED_MCP = {
+    "orchestrator": {"$git_host", "$deploy"},
+    "research": {"$git_host", "deepwiki", "alphaXiv", "firecrawl"},
+    "design": set(),
+    "audit": set(),
+    "implement": set(),
+    "test": {"$deploy", "playwright"},
+    "review": {"$git_host", "$deploy"},
+}
+
+
+@case("TB02-D-034", "diagnostic", reqs=("R-05", "R-01"))
+def test_d034_mcp_servers_within_allowed_set():
+    """[A-15]: placeholders $deploy (orchestrator, test, review) and $git_host (orchestrator, research, review);
+    general servers deepwiki, alphaXiv, firecrawl for research and playwright for test. No other server."""
+    for rid, spec in roles().items():
+        servers = {str(get(e, "server")) for e in get(spec, "mcp")}
+        assert servers <= ALLOWED_MCP[rid], (rid, servers - ALLOWED_MCP[rid])
+
+
+@case("TB02-D-035", "diagnostic", reqs=("R-05",))
+def test_d035_placeholders_present_where_map_attaches():
+    """[A-15] + map 3.1, 3.2, 3.6, 3.7: the git-host placeholder is on orchestrator, research and review; the
+    deploy placeholder on orchestrator, test and review; both with read access."""
+    rs = roles()
+    for r in ["orchestrator", "research", "review"]:
+        assert ("$git_host", "read") in {(get(e, "server"), get(e, "access")) for e in get(rs[r], "mcp")}, r
+    for r in ["orchestrator", "test", "review"]:
+        assert ("$deploy", "read") in {(get(e, "server"), get(e, "access")) for e in get(rs[r], "mcp")}, r
+
+
+@case("TB02-D-036", "diagnostic")
+def test_d036_rolespec_frozen_with_to_dict():
+    """[A-01]: RoleSpec is a frozen dataclass read by attribute, with .to_dict()."""
+    import dataclasses
+    spec = roles()["audit"]
+    assert dataclasses.is_dataclass(spec)
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        spec.writes = "app"
+    td = spec.to_dict()
+    assert td["id"] == "audit" and td["writes"] == "audit_dir"
+
+
+@case("TB02-D-037", "diagnostic")
+def test_d037_role_file_is_field_mapping():
+    """[A-17]: each role YAML file is a mapping whose keys are the RoleSpec field names."""
+    mod()
+    for r in ROLES:
+        data = yaml.safe_load((ROLE_DIR / f"{r}.yaml").read_text())
+        assert isinstance(data, dict) and set(data) == set(FIELDS), r

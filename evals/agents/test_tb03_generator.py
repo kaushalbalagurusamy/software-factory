@@ -1,13 +1,13 @@
 """TB-03 agent file generator: golden and diagnostic cases.
 
 Expectations come only from docs/contracts/roles-and-generation.md, docs/contracts/profile.md and
-docs/prds/TB-03-agent-generator.md. The `tools` frontmatter value may be a YAML list or a comma-separated
-string (not fixed by the contract; ambiguities A-10), so `tools_of()` accepts both.
+docs/prds/TB-03-agent-generator.md and the binding docs/contracts/clarifications.md (bracketed ids cite it).
+`tools` and `disallowedTools` render as one comma-separated string and `skills` as a YAML list [A-10];
+RoleSpec and Profile are read by attribute [A-01].
 """
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
 from pathlib import Path
 
 import pytest
@@ -23,6 +23,9 @@ GUARD_TOOLS = {"path_guard": ["Write", "Edit"], "blindness_guard": ["Read", "Gre
                "secrets_guard": ["Write", "Edit", "Bash"], "bash_guard": ["Bash"]}
 SECRET_RE = re.compile(r"(sk-(ant|or)-[A-Za-z0-9_-]{8,}|ghp_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
                        r"|AKIA[0-9A-Z]{16}|xox[bp]-[A-Za-z0-9-]{10,})")
+MATCHER = {"path_guard": "Write|Edit|Bash", "secrets_guard": "Write|Edit|Bash",
+           "blindness_guard": "Read|Grep|Glob|Bash", "bash_guard": "Bash"}
+HEADINGS = ["## Purpose", "## You may write", "## You must never", "## Skills"]
 HOME_RE = re.compile(r"(/Users/[^/\s]+|/home/[^/\s]+)")
 
 
@@ -38,11 +41,7 @@ def mods():
 
 
 def get(obj, name):
-    if isinstance(obj, Mapping):
-        return obj[name]
-    if hasattr(obj, name):
-        return getattr(obj, name)
-    return obj[name]
+    return getattr(obj, name)
 
 
 def profile(tmp_path, data="base", sub="p"):
@@ -64,12 +63,12 @@ def split(text):
     return fm, body
 
 
-def tools_of(fm):
-    v = fm.get("tools")
+def tools_of(fm, key="tools"):
+    """Split the comma-separated string [A-10], keeping commas inside Agent(...) together."""
+    v = fm.get(key)
     if v is None:
         return []
-    if isinstance(v, list):
-        return [str(x).strip() for x in v]
+    assert isinstance(v, str), f"{key} must render as one comma-separated string [A-10]"
     out, cur, depth = [], "", 0
     for ch in str(v):
         if ch == "(":
@@ -282,8 +281,9 @@ def test_d006_role_server_provided_by_profile(tmp_path):
     are listed as mcp__<server>__<tool>, after the core tools."""
     _, roles, gen = mods()
     rs = roles.load_roles()
-    picked = [(r, get(e, "server")) for r in ROLES for e in get(rs[r], "mcp") if get(e, "access") == "read"]
-    assert picked, "capability map section 3 gives Research read MCP servers"
+    picked = [(r, get(e, "server")) for r in ROLES for e in get(rs[r], "mcp")
+              if get(e, "access") == "read" and not str(get(e, "server")).startswith("$")]
+    assert picked, "[A-15] research names general read servers (deepwiki, alphaXiv, firecrawl)"
     role, server = picked[0]
     d = lib.profile_dict("base")
     d["mcp_servers"] = {server: {"read_tools": ["alpha_tool"]}}
@@ -301,7 +301,7 @@ def test_d007_no_whole_server_for_read_access(tmp_path):
     gets a whole-server mcp__<server> entry, even when every server is provided."""
     _, roles, gen = mods()
     rs = roles.load_roles()
-    servers = {get(e, "server") for r in ROLES for e in get(rs[r], "mcp")}
+    servers = {get(e, "server") for r in ROLES for e in get(rs[r], "mcp") if not str(get(e, "server")).startswith("$")}
     d = lib.profile_dict("base")
     if servers:
         d["mcp_servers"] = {s: {"read_tools": ["one"]} for s in servers}
@@ -309,7 +309,7 @@ def test_d007_no_whole_server_for_read_access(tmp_path):
     for r in ROLES:
         tools = tools_of(split(out[f".claude/agents/{r}.md"])[0])
         for e in get(rs[r], "mcp"):
-            if get(e, "access") == "read":
+            if get(e, "access") == "read" and not str(get(e, "server")).startswith("$"):
                 assert f"mcp__{get(e, 'server')}" not in tools, (r, e)
 
 
@@ -331,14 +331,15 @@ def test_d008_exactly_max_tools_accepted(tmp_path):
 
 @case("TB03-D-009", "diagnostic", reqs=("R-06",))
 def test_d009_writes_override_rejected(tmp_path):
-    """Behaviour 4: a profile request that would change `writes` is rejected (GenerationError; a loader that
-    rejects the key first with ProfileError also satisfies 'rejected', see ambiguities A-11)."""
+    """Behaviour 4 + [A-11]: a profile asking to change `writes` never reaches the generator: the loader rejects
+    the override key with ProfileError field agents.review.writes."""
     prof, roles, gen = mods()
     d = lib.profile_dict("base")
     d["agents"] = {"review": {"writes": "app"}}
     root = lib.make_project(tmp_path, d)
-    with pytest.raises((gen.GenerationError, prof.ProfileError)):
+    with pytest.raises(prof.ProfileError) as info:
         gen.generate_agents(prof.load_profile(root / ".factory" / "profile.yaml"), roles.load_roles())
+    assert info.value.field == "agents.review.writes"
 
 
 @case("TB03-D-010", "diagnostic", reqs=("R-01",))
@@ -356,8 +357,8 @@ def test_d010_project_name_in_template_raises(tmp_path):
 
 @case("TB03-D-011", "diagnostic", reqs=("R-04",))
 def test_d011_guard_hooks_pretooluse_matchers(tmp_path):
-    """Behaviour 6: guards render under PreToolUse with a matcher covering the tools they inspect (path_guard
-    Write/Edit; blindness_guard Read/Grep/Glob/Bash; secrets_guard Write/Edit/Bash; bash_guard Bash)."""
+    """Behaviour 6 + [A-34]: guards render under PreToolUse with matcher exactly path_guard and secrets_guard
+    `Write|Edit|Bash`, blindness_guard `Read|Grep|Glob|Bash`, bash_guard `Bash`."""
     _, roles, _ = mods()
     rs = roles.load_roles()
     out = generate(tmp_path)
@@ -365,9 +366,7 @@ def test_d011_guard_hooks_pretooluse_matchers(tmp_path):
         entries = hook_entries(split(out[f".claude/agents/{r}.md"])[0])
         for hid in set(get(rs[r], "hooks")) & set(GUARD_TOOLS):
             ms = [m for e, m, _, c in entries if e == "PreToolUse" and c == cmd(hid)]
-            assert ms, (r, hid)
-            for tool in GUARD_TOOLS[hid]:
-                assert any(matches(m, tool) for m in ms), (r, hid, tool)
+            assert ms == [MATCHER[hid]], (r, hid, ms)
 
 
 @case("TB03-D-012", "diagnostic", reqs=("R-04",))
@@ -411,14 +410,16 @@ def test_d014_hook_commands_match_spec(tmp_path):
 
 @case("TB03-D-015", "diagnostic", reqs=("R-04",))
 def test_d015_body_mentions_every_skill(tmp_path):
-    """Behaviour 8: the body mentions each skill the role loads by name."""
+    """Behaviour 8 + [A-19]: the `## Skills` section mentions each skill the role loads by name."""
     _, roles, _ = mods()
     rs = roles.load_roles()
     out = generate(tmp_path)
     for r in ROLES:
         _, body = split(out[f".claude/agents/{r}.md"])
+        assert "## Skills" in body, r
+        section = body.split("## Skills", 1)[1]
         for s in get(rs[r], "skills"):
-            assert str(s) in body, (r, s)
+            assert str(s) in section, (r, s)
 
 
 @case("TB03-D-016", "diagnostic", reqs=("R-04",))
@@ -466,14 +467,14 @@ def test_d020_independent_of_project_location(tmp_path):
 
 @case("TB03-D-021", "diagnostic", reqs=("R-07",))
 def test_d021_spawn_allowlists_in_tools(tmp_path):
-    """R-07: orchestrator may start only the other six roles; implement may start none; review only the three
-    reviewer agents. No unrestricted bare Agent entry for these roles."""
+    """R-07 + [A-18]: orchestrator's Agent(...) lists exactly the other six roles; implement has no Agent tool;
+    review's lists exactly the three reviewer agents. No unrestricted bare Agent entry."""
     out = generate(tmp_path)
     t = {r: tools_of(split(out[f".claude/agents/{r}.md"])[0]) for r in ROLES}
     names, bare = agent_names(t["orchestrator"])
-    assert not bare and names <= set(ROLES) - {"orchestrator"}
+    assert not bare and names == set(ROLES) - {"orchestrator"}
     names, bare = agent_names(t["review"])
-    assert not bare and names <= REVIEWERS
+    assert not bare and names == REVIEWERS
     assert agent_names(t["implement"]) == (set(), False)
 
 
@@ -519,3 +520,143 @@ def test_d026_override_server_limited_to_that_role(tmp_path):
         tools = tools_of(split(out[f".claude/agents/{r}.md"])[0])
         has = any(t.startswith("mcp__docsrv") for t in tools)
         assert has == (r == "test"), r
+
+
+# ---------------------------------------------------------------- added after docs/contracts/clarifications.md
+
+def with_extra(**top):
+    d = lib.profile_dict("base")
+    d.update(top)
+    return d
+
+
+@case("TB03-G-009", "golden", reqs=("R-04",))
+def test_g009_body_headings_in_order(tmp_path):
+    """Behaviour 8 + [A-19]: body headings, in order: ## Purpose, ## You may write, ## You must never, ## Skills."""
+    for path, text in generate(tmp_path).items():
+        _, body = split(text)
+        pos = [body.find(h) for h in HEADINGS]
+        assert all(p >= 0 for p in pos), (path, pos)
+        assert pos == sorted(pos), (path, pos)
+
+
+@case("TB03-D-027", "diagnostic", reqs=("R-08",))
+def test_d027_tools_string_skills_list(tmp_path):
+    """[A-10]: tools and disallowedTools render as one comma-separated string; skills as a YAML list."""
+    for path, text in generate(tmp_path).items():
+        fm, _ = split(text)
+        assert isinstance(fm["tools"], str), path
+        if "disallowedTools" in fm:
+            assert isinstance(fm["disallowedTools"], str), path
+        if "skills" in fm:
+            assert isinstance(fm["skills"], list), path
+
+
+@case("TB03-D-028", "diagnostic", reqs=("R-04",))
+def test_d028_ledger_audit_subagent_stop_no_matcher(tmp_path):
+    """[A-21]: ledger_audit is registered on SubagentStop with no matcher (orchestrator lists it)."""
+    _, roles, _ = mods()
+    rs = roles.load_roles()
+    out = generate(tmp_path)
+    for r in ROLES:
+        if "ledger_audit" in set(get(rs[r], "hooks")):
+            es = [(e, m) for e, m, _, c in hook_entries(split(out[f".claude/agents/{r}.md"])[0])
+                  if c == cmd("ledger_audit")]
+            assert es and all(e == "SubagentStop" and m in (None, "") for e, m in es), (r, es)
+
+
+@case("TB03-D-029", "diagnostic", reqs=("R-04",))
+def test_d029_non_guard_hooks_have_no_matcher(tmp_path):
+    """[A-34]: stop_gate, subagent_stop, ledger_audit and session_start have no matcher."""
+    out = generate(tmp_path)
+    for r in ROLES:
+        for e, m, _, c in hook_entries(split(out[f".claude/agents/{r}.md"])[0]):
+            if c.split()[-1] in {"stop_gate", "subagent_stop", "ledger_audit", "session_start"}:
+                assert m in (None, ""), (r, c, m)
+
+
+@case("TB03-D-030", "diagnostic")
+def test_d030_description_verbatim(tmp_path):
+    """[A-23]: frontmatter description is the role spec's description, verbatim."""
+    _, roles, _ = mods()
+    rs = roles.load_roles()
+    out = generate(tmp_path)
+    for r in ROLES:
+        assert split(out[f".claude/agents/{r}.md"])[0]["description"] == get(rs[r], "description"), r
+
+
+@case("TB03-D-031", "diagnostic", reqs=("R-01",))
+def test_d031_project_name_check_case_insensitive(tmp_path):
+    """[A-24] + [A-19]: the project-name check is a case-insensitive whole-word match on the body; every body has
+    the heading `## Purpose`, so a project named PURPOSE raises GenerationError."""
+    _, roles, gen = mods()
+    p = profile(tmp_path, with_extra(project={"name": "PURPOSE"}))
+    with pytest.raises(gen.GenerationError):
+        gen.generate_agents(p, roles.load_roles())
+
+
+@case("TB03-D-032", "diagnostic", reqs=("R-01",))
+def test_d032_project_name_substring_is_not_a_match(tmp_path):
+    """[A-24] negative control: a project name that occurs only inside a longer word (`urpos` in `Purpose`) is not a
+    whole-word match and generation succeeds."""
+    assert len(generate(tmp_path, with_extra(project={"name": "urpos"}))) == 7
+
+
+@case("TB03-D-033", "diagnostic", reqs=("R-05", "R-01"))
+def test_d033_deploy_placeholder_resolves(tmp_path):
+    """[A-15]: $deploy resolves to profile.deploy.platform_server with read access, for orchestrator, test and
+    review; the server's read_tools are listed, and no other role gets them."""
+    d = with_extra(deploy={"route": "shipit", "platform_server": "platsrv", "checklist": "ops/check.md"})
+    d["mcp_servers"] = {"platsrv": {"read_tools": ["status"]}}
+    out = generate(tmp_path, d)
+    for r in ROLES:
+        tools = tools_of(split(out[f".claude/agents/{r}.md"])[0])
+        assert ("mcp__platsrv__status" in tools) == (r in {"orchestrator", "test", "review"}), r
+        assert "mcp__platsrv" not in tools, r
+
+
+@case("TB03-D-034", "diagnostic", reqs=("R-05", "R-01"))
+def test_d034_git_host_placeholder_resolves(tmp_path):
+    """[A-15]: $git_host resolves to github or gitlab from profile.git_host, read access, for orchestrator,
+    research and review."""
+    d = with_extra(git_host="github")
+    d["mcp_servers"] = {"github": {"read_tools": ["get_pr"]}}
+    out = generate(tmp_path, d)
+    for r in ROLES:
+        tools = tools_of(split(out[f".claude/agents/{r}.md"])[0])
+        assert ("mcp__github__get_pr" in tools) == (r in {"orchestrator", "research", "review"}), r
+
+
+@case("TB03-D-035", "diagnostic", reqs=("R-05", "R-01"))
+def test_d035_unresolved_placeholders_omitted(tmp_path):
+    """[A-15]: a placeholder that resolves to nothing is omitted: git_host none, a null platform_server, or a
+    git host the profile does not declare under mcp_servers (alt: gitlab, no servers). No `$` reaches tools."""
+    for fx in ["base", "alt"]:
+        out = generate(tmp_path, fx, fx)
+        for r in ROLES:
+            tools = tools_of(split(out[f".claude/agents/{r}.md"])[0])
+            assert not any("$" in t for t in tools), (fx, r)
+            assert not any(t.startswith(("mcp__github", "mcp__gitlab")) for t in tools), (fx, r)
+
+
+@case("TB03-D-036", "diagnostic", reqs=("R-06",))
+def test_d036_disallowed_tools_from_spec(tmp_path):
+    """[A-10] + contract: disallowedTools renders the role spec's disallowed_tools as a comma-separated string."""
+    _, roles, _ = mods()
+    rs = roles.load_roles()
+    out = generate(tmp_path)
+    for r in ROLES:
+        fm, _ = split(out[f".claude/agents/{r}.md"])
+        want = [str(t) for t in get(rs[r], "disallowed_tools")]
+        if want:
+            assert tools_of(fm, "disallowedTools") == want, r
+
+
+@case("TB03-D-037", "diagnostic", reqs=("R-01",))
+def test_d037_profile_built_in_code_generates_same(tmp_path):
+    """[A-11] third round: a Profile built with parse_profile(data) generates the same files as one loaded from
+    disk with the same data."""
+    prof, roles, gen = mods()
+    lib.need("factory.agents.profile", "parse_profile")
+    d = lib.profile_dict("alt")
+    assert gen.generate_agents(prof.parse_profile(d), roles.load_roles()) == generate(tmp_path, "alt")
