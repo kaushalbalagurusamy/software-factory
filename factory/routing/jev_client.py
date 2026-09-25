@@ -12,9 +12,10 @@ Design rules (see the orchestration skill, ``reference/jev-routing.md``):
   * the API key is read from ``OPENROUTER_API_KEY`` and never stored or logged;
   * tests use recorded responses through the ``transport`` argument, never a live call.
 
-UNVERIFIED: the exact request body shape for ``questions`` (see ``build_request``) is inferred
-from the 2026-09-24 integration assessment, whose observed *response* shape is what the parser
-follows. The first shadow-mode call must confirm the request shape before anything relies on it.
+Wire format: verified on 2026-09-24 with one live call (HTTP 200, about 250 ms, about $0.00002).
+The API rejected a question without an ``instructions`` field ("questions.pick.instructions"), and
+accepted ``instructions`` as a string. The response echoes a dated model snapshot
+(``typesafe/jev-1.13-20260917`` for the pinned ``typesafe/jev-1.13``), which is worth logging.
 """
 
 from __future__ import annotations
@@ -84,7 +85,7 @@ def _rule_matches(when: Mapping[str, Any], state: Mapping[str, Any]) -> bool:
 
 
 def build_request(policy: Mapping[str, Any], decision: str, state: Mapping[str, Any]) -> Dict[str, Any]:
-    """Body for POST /api/alpha/decisions. Shape is UNVERIFIED (see module docstring)."""
+    """Body for POST /api/alpha/decisions (shape verified live on 2026-09-24, see module docstring)."""
     dec = policy["decisions"][decision]
     allowed = set(dec["state_fields"])
     extra = set(state) - allowed
@@ -96,7 +97,7 @@ def build_request(policy: Mapping[str, Any], decision: str, state: Mapping[str, 
         "questions": {
             "pick": {
                 "type": "choice",
-                "question": dec["question"],
+                "instructions": dec["question"],
                 "criteria": {name: " ".join(text.split()) for name, text in dec["options"].items()},
             }
         },

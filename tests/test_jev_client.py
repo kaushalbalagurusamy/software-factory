@@ -59,6 +59,8 @@ def test_request_offers_every_option_and_only_allowed_state(policy):
     assert body["model"] == "typesafe/jev-1.13"
     assert set(body["questions"]["pick"]["criteria"]) == {"mechanical", "implementation", "specialist", "unknown"}
     assert body["state"] == TASK
+    assert body["questions"]["pick"]["instructions"] == policy["decisions"]["model_tier"]["question"]
+    assert "question" not in body["questions"]["pick"]  # the API requires "instructions"
     with pytest.raises(ValueError):
         build_request(policy, "model_tier", {**TASK, "api_key": "x"})
 
