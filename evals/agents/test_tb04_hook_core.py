@@ -364,14 +364,10 @@ def test_run_hook_decide_raises_non_guard_events(tmp_path, pl):
 
 
 def _assert_failed_closed(r_exit, r_stdout, r_stderr):
-    """Event unknown (see ambiguities-B A-04-1): either a deny (exit 2, reason on stderr starting 'hook error:')
-    or a block (exit 0, stdout block JSON whose reason starts 'hook error:'). Never a silent allow."""
-    assert r_exit in (0, 2)
-    if r_exit == 2:
-        assert "hook error:" in r_stderr
-    else:
-        out = json.loads(r_stdout)
-        assert out["decision"] == "block" and out["reason"].startswith("hook error:")
+    """clarifications [A-04-1]: 'Malformed input or an unknown event always fails closed as a deny: exit 2 with
+    hook error: ... on stderr, whichever hook id is running.'"""
+    assert r_exit == 2
+    assert r_stderr.lstrip().startswith("hook error:")
 
 
 @pytest.mark.parametrize("text", [
@@ -379,8 +375,8 @@ def _assert_failed_closed(r_exit, r_stdout, r_stderr):
     case("TB04-D-021", json.dumps({"session_id": "s1", "tool_name": "Read", "tool_input": {}})),
 ])
 def test_run_hook_malformed_fails_closed(tmp_path, text):
-    """B3 / adapter: 'if the stdin text is not valid JSON, lacks hook_event_name ... run_hook returns a deny ... or
-    block ... whose reason begins hook error:'; never an allow."""
+    """B3 / adapter + clarifications [A-04-1]: invalid JSON or a missing hook_event_name fails closed as a deny
+    (exit 2, 'hook error:' on stderr)."""
     core = _core("run_hook", "Decision")
     _root, cfg = _cfg(tmp_path)
     r = core.run_hook(_const("allow"), text, cfg)
@@ -468,8 +464,8 @@ def test_cli_factory_profile_env(tmp_path):
 
 @mark("TB04-D-028")
 def test_cli_malformed_stdin_fails_closed(tmp_path):
-    """B6 + B3: the command line runs through run_hook, so non-JSON stdin fails closed (deny or block with
-    'hook error:'), never an allow and never a traceback."""
+    """B6 + B3 + clarifications [A-04-1]: non-JSON stdin fails closed as a deny (exit 2, 'hook error:' on stderr),
+    never a traceback."""
     _need_cli("factory.hooks.path_guard")
     root = lib.make_project(tmp_path)
     r = _cli_raw("path_guard", "{oops", root)
@@ -642,3 +638,127 @@ def test_docs_hooks_core_md():
     assert doc_path.is_file()
     text = doc_path.read_text()
     assert any(s in text for s in ("hook_event_name", "decide(", "python -m factory.hooks")), "one example payload or call"
+
+
+# ================================================================ clarifications (docs/contracts/clarifications.md)
+
+@mark("TB04-D-047")
+def test_run_hook_unknown_event_fails_closed(tmp_path):
+    """clarifications [A-04-1]: an unknown event always fails closed as a deny (exit 2, 'hook error:' on stderr)."""
+    core = _core("run_hook", "Decision")
+    root, cfg = _cfg(tmp_path)
+    r = core.run_hook(_const("allow"), json.dumps(_with_cwd({**PRE, "hook_event_name": "NoSuchEvent"}, root)), cfg)
+    _assert_failed_closed(r.exit_code, r.stdout, r.stderr)
+
+
+@mark("TB04-D-048")
+def test_cli_malformed_stdin_stop_hook_is_deny(tmp_path):
+    """clarifications [A-04-1]: malformed input is a deny 'whichever hook id is running' (here stop_gate)."""
+    _need_cli()
+    root = lib.make_project(tmp_path)
+    r = _cli_raw("stop_gate", "{oops", root)
+    assert "Traceback" not in r.stderr
+    _assert_failed_closed(r.returncode, r.stdout, r.stderr)
+
+
+@pytest.mark.parametrize("hook_id", [
+    case("TB04-D-049", "stop_gate"),
+    case("TB04-D-050", "subagent_stop"),
+    case("TB04-D-051", "ledger_audit"),
+    case("TB04-D-052", "session_start"),
+])
+def test_cli_registry_knows_all_eight(tmp_path, hook_id):
+    """clarifications [A-04-2]: 'There are eight hook ids ... the registry knows all eight.' With its module
+    unavailable a known id resolves to the B8 stub ('hook not implemented'), never 'unknown hook'."""
+    _need_cli()
+    root = lib.make_project(tmp_path)
+    pl = lib.payload(root, tool_name="Bash", tool_input={"command": "ls"}, agent_type="implement")
+    r = _cli_patched(hook_id, pl, root, blocked=[f"factory.hooks.{hook_id}"])
+    assert "unknown hook" not in r.stdout + r.stderr
+    assert r.returncode == 2 and "hook not implemented" in r.stderr
+
+
+@mark("TB04-D-053")
+def test_cli_factory_profile_env_beats_project_file(tmp_path):
+    """clarifications [A-04-3]: '$FACTORY_PROFILE, when set, wins over .factory/profile.yaml.' Project file = base
+    (evals/** protected), env = alt (qa/cases/** protected, evals/** not)."""
+    _need_cli("factory.hooks.blindness_guard")
+    root = lib.make_project(tmp_path, "base", files={"qa/cases/c.py": "x = 1\n", "evals/e.py": "x = 1\n"})
+    env = {"FACTORY_PROFILE": str(lib.PROFILES / "alt.yaml")}
+    r1 = lib.run_cli("blindness_guard", lib.payload(root, tool_name="Read", tool_input={"file_path": str(root / "qa/cases/c.py")},
+                                                    agent_type="implement"), root, env=env)
+    r2 = lib.run_cli("blindness_guard", lib.payload(root, tool_name="Read", tool_input={"file_path": str(root / "evals/e.py")},
+                                                    agent_type="implement"), root, env=env)
+    assert r1.returncode == 2
+    assert r2.returncode == 0 and r2.stdout.strip() == ""
+
+
+@pytest.mark.parametrize("kwargs", [
+    case("TB04-D-054", {"kind": "maybe", "reason": "r"}),
+    case("TB04-D-055", {"kind": "deny", "reason": ""}),
+    case("TB04-D-056", {"kind": "ask"}),
+    case("TB04-D-057", {"kind": "block", "reason": ""}),
+])
+def test_decision_validation_rejects(kwargs):
+    """clarifications [A-04-4]: 'Decision(kind, reason) raises ValueError if kind is not one of the four, or if
+    kind != "allow" and reason is empty.'"""
+    core = _core("Decision")
+    with pytest.raises(ValueError):
+        core.Decision(**kwargs)
+
+
+@mark("TB04-D-058")
+def test_decision_allow_without_reason_ok():
+    """clarifications [A-04-4]: an allow needs no reason."""
+    core = _core("Decision")
+    d = core.Decision(kind="allow")
+    assert d.kind == "allow" and d.reason == ""
+
+
+@pytest.mark.parametrize("pl,kind", [
+    case("TB04-D-059", STOP, "deny"),
+    case("TB04-D-060", STOP, "ask"),
+    case("TB04-D-061", SUBSTOP, "deny"),
+    case("TB04-D-062", SUBSTOP, "ask"),
+])
+def test_adapter_stop_non_allow_is_block(tmp_path, pl, kind):
+    """clarifications [A-04-5]: 'on Stop and SubagentStop, deny, block and ask all produce the block JSON (exit 0)'."""
+    core = _core("run_hook", "Decision")
+    root, cfg = _cfg(tmp_path)
+    r = core.run_hook(_const(kind, "why-4417"), json.dumps(_with_cwd(pl, root)), cfg)
+    assert r.exit_code == 0
+    assert json.loads(r.stdout) == {"decision": "block", "reason": "why-4417"}
+
+
+@mark("TB04-D-063")
+def test_adapter_pretooluse_block_is_deny(tmp_path):
+    """clarifications [A-04-5]: 'on PreToolUse, block is treated as deny' (exit 2, reason on stderr)."""
+    core = _core("run_hook", "Decision")
+    root, cfg = _cfg(tmp_path)
+    r = core.run_hook(_const("block", "why-5528"), json.dumps(_with_cwd(PRE, root)), cfg)
+    assert r.exit_code == 2 and "why-5528" in r.stderr
+
+
+@pytest.mark.parametrize("pl,kind", [
+    case("TB04-D-064", POST, "deny"),
+    case("TB04-D-065", POST, "ask"),
+    case("TB04-D-066", START, "block"),
+    case("TB04-D-067", START, "deny"),
+])
+def test_adapter_post_and_sessionstart_non_allow(tmp_path, pl, kind):
+    """clarifications [A-04-5]: 'on PostToolUse and SessionStart, any non-allow decision exits 0 with the reason on
+    stderr.'"""
+    core = _core("run_hook", "Decision")
+    root, cfg = _cfg(tmp_path)
+    r = core.run_hook(_const(kind, "why-6639"), json.dumps(_with_cwd(pl, root)), cfg)
+    assert r.exit_code == 0 and "why-6639" in r.stderr
+
+
+@mark("TB04-D-068")
+def test_core_api_reexported_from_package():
+    """clarifications [A-04-6]: 'The core API is importable from factory.hooks.core and re-exported from
+    factory.hooks.' The package attributes are the same objects as the core ones."""
+    core = _core("Payload", "Decision", "HookResult", "HookConfig", "PayloadError", "parse_payload", "run_hook")
+    import factory.hooks as pkg
+    for name in ("Payload", "Decision", "HookResult", "HookConfig", "PayloadError", "parse_payload", "run_hook"):
+        assert getattr(pkg, name, None) is getattr(core, name), name

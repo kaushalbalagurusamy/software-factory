@@ -356,6 +356,43 @@ def test_cli_allow(tmp_path):
     assert r.returncode == 0 and r.stdout.strip() == ""
 
 
+
+# ================================================================ clarifications (docs/contracts/clarifications.md)
+
+CLAR = [
+    # [A-07-1] colon assignments
+    case("TB07-D-099", doc(f'{{"api_key": "{V20}"}}'), "deny", "[A-07-1] JSON colon assignment counts"),
+    case("TB07-D-100", doc(f'password: "{V20}"'), "deny", "[A-07-1] YAML colon assignment counts"),
+    case("TB07-D-101", doc(f"  client_secret: '{V20}'"), "deny", "[A-07-1] YAML colon assignment, single quotes"),
+    case("TB07-D-102", doc(f'"username": "{V20}"'), "allow", "[A-07-1] colon assignment to a non-secret name"),
+    # [A-07-2] quoted variable reference
+    case("TB07-D-103", doc('password = "${DB_PASSWORD_FROM_ENV}"'), "allow", "[A-07-2] quoted value is exactly ${X}"),
+    case("TB07-D-104", doc('api_key = "$OPENROUTER_API_KEY_VALUE"'), "allow", "[A-07-2] quoted value is exactly $X"),
+    case("TB07-D-105", doc('"token": "${GITHUB_TOKEN_FOR_CI}"'), "allow", "[A-07-1]+[A-07-2] colon form with a variable reference"),
+    case("TB07-D-106", doc(f'password = "${{X}}{V20}"'), "deny", "[A-07-2] only a value that is exactly a reference is exempt"),
+    # [A-07-3] token-level placeholder rule
+    case("TB07-D-107", doc(f"blob {j('sk', '-', mix(40))}... end"), "allow", "[A-07-3] token ending in ... is a placeholder"),
+    case("TB07-D-108", doc(f"blob {j('sk', '-', '0' * 40)} end"), "allow", "[A-07-3] sk-000...0 is a placeholder"),
+    case("TB07-D-109", doc(f"blob {j('gh', 'p_', '0' * 36)} end"), "allow", "[A-07-3] repeated-character body is a placeholder"),
+    case("TB07-D-110", doc(f"k = \"{j('sk', '-', mix(40))}...\""), "allow", "[A-07-3] quote-delimited token ending in ..."),
+    # [A-07-4] case-insensitive placeholder words
+    case("TB07-D-111", doc('api_key = "EXAMPLE-KEY-1234567890"'), "allow", "[A-07-4] EXAMPLE"),
+    case("TB07-D-112", doc('token = "YOUR-TOKEN-GOES-HERE-1"'), "allow", "[A-07-4] YOUR"),
+    case("TB07-D-113", doc('password = "CHANGEME-CHANGEME-123"'), "allow", "[A-07-4] CHANGEME"),
+    case("TB07-D-114", doc('secret = "PlaceHolder-Value-12345"'), "allow", "[A-07-4] PlaceHolder"),
+    case("TB07-D-115", doc(f"blob {j('gh', 'p_', 'XXXX', mix(24))} end"), "allow", "[A-07-4] XXXX"),
+    # [A-07-5] AIza 35 or more
+    case("TB07-D-116", doc(f"blob {j('AI', 'za', mix(40, URLSAFE))} end"), "deny", "[A-07-5] AIza + 40"),
+    case("TB07-D-117", doc(f"blob {j('AI', 'za', mix(36, URLSAFE))} end"), "deny", "[A-07-5] AIza + 36"),
+]
+
+
+@pytest.mark.parametrize("content,expected,clause", CLAR)
+def test_clarified_content(tmp_path, content, expected, clause):
+    """clarifications [A-07-1] to [A-07-5] for Write content (clause per case)."""
+    _check(_run(tmp_path, "Write", _w(content)), expected, clause)
+
+
 # ---------------------------------------------------------------- R-24: published documentation
 
 @pytest.mark.case("TB07-D-098", tier="diagnostic", tb="07", reqs=["R-24"])

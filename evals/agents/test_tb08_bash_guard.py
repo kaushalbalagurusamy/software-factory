@@ -26,6 +26,7 @@ def case(cid: str, *values, reqs=R13):
 def _run(tmp_path, profile, agent, command, tool="Bash"):
     prof = profile if isinstance(profile, dict) else lib.profile_dict(profile)
     root = lib.make_project(tmp_path, prof, files={"src/app.py": "print('app')\n"})
+    command = command.replace("{ROOT}", str(root))
     ti = {"command": command} if tool == "Bash" else {"file_path": str(root / "src/x.md"), "content": command}
     return lib.run_decide(HOOK, lib.payload(root, tool_name=tool, tool_input=ti, agent_type=agent), root)
 
@@ -290,6 +291,62 @@ def test_cli_ask_and_deny(tmp_path):
     out = json.loads(r_ask.stdout)["hookSpecificOutput"]
     assert out["hookEventName"] == "PreToolUse" and out["permissionDecision"] == "ask" and out["permissionDecisionReason"]
     assert r_deny.returncode == 2 and r_deny.stderr.strip()
+
+
+
+# ================================================================ clarifications (docs/contracts/clarifications.md)
+
+CLAR = [
+    # [A-08-1] main session with a non-orchestrator main_session_role
+    case("TB08-D-147", lib.profile_dict("base", main_session_role="test"), None, "git add -A", "deny",
+         "[A-08-1] main session gets its role's treatment (test -> deny)"),
+    case("TB08-D-148", lib.profile_dict("base", main_session_role="test"), None, "terraform destroy", "deny",
+         "[A-08-1] main session one-way door as test -> deny", reqs=R14),
+    case("TB08-D-149", lib.profile_dict("base", main_session_role="implement"), None, "git commit -m x", "deny",
+         "[A-08-1] main session as implement never commits"),
+    # [A-08-2] plain rm and mv are not restricted for implement
+    case("TB08-D-150", "base", "implement", "rm build/out.txt", "allow", "[A-08-2] plain rm not restricted"),
+    case("TB08-D-151", "base", "implement", "mv src/a.py src/b.py", "allow", "[A-08-2] plain mv not restricted"),
+    # [A-08-3] case-insensitive SQL
+    case("TB08-D-152", "base", "orchestrator", 'psql -c "drop table users;"', "ask", "[A-08-3] lowercase DROP TABLE", reqs=R14),
+    case("TB08-D-153", "base", "test", 'psql -c "truncate users;"', "deny", "[A-08-3] lowercase TRUNCATE", reqs=R14),
+    case("TB08-D-154", "base", "orchestrator", 'psql -c "delete from users;"', "ask", "[A-08-3] lowercase DELETE FROM without WHERE", reqs=R14),
+    case("TB08-D-155", "base", "orchestrator", 'psql -c "delete from users where id = 1;"', "allow", "[A-08-3] lowercase with where", reqs=R14),
+    case("TB08-D-156", "base", "test", 'psql -c "Drop Database app;"', "deny", "[A-08-3] mixed case", reqs=R14),
+    # [A-08-4] sh/bash/zsh -c string parsed
+    case("TB08-D-157", "base", "orchestrator", 'bash -c "git push --force"', "ask", "[A-08-4] bash -c string parsed"),
+    case("TB08-D-158", "base", "test", "sh -c 'git add -A'", "deny", "[A-08-4] sh -c string parsed"),
+    case("TB08-D-159", "base", "test", 'zsh -c "terraform destroy"', "deny", "[A-08-4] zsh -c string parsed", reqs=R14),
+    case("TB08-D-160", "base", "implement", 'bash -c "git commit -m x"', "deny", "[A-08-4] parsed for implement's rule"),
+    case("TB08-D-161", "base", "orchestrator", 'bash -c "ls -la"', "allow", "[A-08-4] parsed string with no match"),
+    # [A-08-5] rm -rf exemption forms
+    case("TB08-D-162", "base", "orchestrator", "rm -rf ./node_modules", "allow", "[A-08-5] node_modules at any depth", reqs=R14),
+    case("TB08-D-163", "base", "test", "rm -rf app/web/node_modules", "allow", "[A-08-5] nested node_modules", reqs=R14),
+    case("TB08-D-164", "base", "orchestrator", "rm -rf {ROOT}/node_modules", "allow", "[A-08-5] absolute node_modules", reqs=R14),
+    case("TB08-D-165", "base", "test", "rm -rf packages/a/.venv", "allow", "[A-08-5] nested .venv", reqs=R14),
+    case("TB08-D-166", "base", "orchestrator", "rm -rf /tmp/x/y/z", "allow", "[A-08-5] anything under /tmp", reqs=R14),
+    case("TB08-D-167", "base", "orchestrator", "rm -rf node_modules_backup", "ask", "[A-08-5] not a node_modules directory", reqs=R14),
+    case("TB08-D-168", "base", "test", "rm -rf .venv-old", "deny", "[A-08-5] not a .venv directory", reqs=R14),
+    # [A-08-6] +refspec force push and git global options
+    case("TB08-D-169", "base", "orchestrator", "git push origin +main", "ask", "[A-08-6] +refspec is a force push"),
+    case("TB08-D-170", "base", "test", "git push origin +feature:main", "deny", "[A-08-6] +refspec is a force push"),
+    case("TB08-D-171", "base", "test", "git -C . add -A", "deny", "[A-08-6] -C <dir> skipped"),
+    case("TB08-D-172", "base", "orchestrator", "git -c core.editor=true rebase main", "ask", "[A-08-6] -c k=v skipped"),
+    case("TB08-D-173", "base", "test", "git --git-dir=.git --work-tree=. reset --hard", "deny", "[A-08-6] --git-dir/--work-tree skipped"),
+    case("TB08-D-174", "base", "implement", "git -C sub commit -m x", "deny", "[A-08-6] -C skipped for implement's rule"),
+    case("TB08-D-175", "base", "implement", "git -C src diff", "allow", "[A-08-6] -C skipped; diff is read-only"),
+    # [U-3] normalise before the /tmp exemption
+    case("TB08-D-176", "base", "orchestrator", "rm -rf ../sibling-project", "ask", "[U-3] ../sibling is not exempt", reqs=R14),
+    case("TB08-D-177", "base", "test", "rm -rf ../sibling-project", "deny", "[U-3] ../sibling is not exempt", reqs=R14),
+    case("TB08-D-178", "base", "orchestrator", "rm -rf /tmp/a/../../var/lib", "ask", "[U-3] normalised path leaves /tmp", reqs=R14),
+    case("TB08-D-179", "base", "test", "rm -rf /tmp/a/../b", "allow", "[U-3] normalised path stays under /tmp", reqs=R14),
+]
+
+
+@pytest.mark.parametrize("profile,agent,command,expected,clause", CLAR)
+def test_clarified(tmp_path, profile, agent, command, expected, clause):
+    """clarifications [A-08-1] to [A-08-6] (clause per case)."""
+    _check(_run(tmp_path, profile, agent, command), expected, clause)
 
 
 # ---------------------------------------------------------------- R-24: published documentation

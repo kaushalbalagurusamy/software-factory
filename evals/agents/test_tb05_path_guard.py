@@ -307,6 +307,80 @@ def test_cli_path_guard(tmp_path):
 test_cli_path_guard = pytest.mark.case("TB05-D-113", tier="diagnostic", tb=TB, reqs=list(REQS))(test_cli_path_guard)
 
 
+
+# ================================================================ clarifications (docs/contracts/clarifications.md)
+
+CLAR_WRITE = [
+    case("TB05-D-115", "base", "implement", "Write", "ROOT/.factory/frozen", "deny", {}, "[A-05-5] implement may not write under .factory/**"),
+    case("TB05-D-116", "base", "implement", "Edit", "ROOT/.factory/profile.yaml", "deny", {}, "[A-05-5] implement may not write under .factory/**"),
+    case("TB05-D-117", "base", "implement", "Write", "ROOT/.factory/ledger/T-1.md", "deny", {}, "[A-05-5] implement may not write under .factory/**"),
+    case("TB05-D-118", "base", "implement", "Write", "ROOT/src/evlink/new_case.py", "deny",
+         {"symlinks": {"src/evlink": "evals"}}, "[A-05-6] nearest existing ancestor resolved through symlinks (lands in evals)"),
+    case("TB05-D-119", "base", "research", "Write", "ROOT/research/srclink/new.md", "deny",
+         {"symlinks": {"research/srclink": "src"}}, "[A-05-6] nearest existing ancestor resolved (lands in src)"),
+    case("TB05-D-120", "base", "implement", "Write", "ROOT/src/outlink/sub/new.py", "deny",
+         {"outside_symlinks": {"src/outlink": "."}}, "[A-05-6] + B4 nearest existing ancestor resolves outside the root"),
+    case("TB05-D-121", "base", "implement", "Write", "ROOT/src/brand/new/dir/x.py", "allow", {}, "[A-05-6] nonexistent chain under src stays in src"),
+    case("TB05-D-122", "base", "research", "Write", "ROOT/research/deep/new/x.md", "allow", {}, "[A-05-6] nonexistent chain under research"),
+]
+
+
+@pytest.mark.parametrize("profile,agent,tool,path,expected,setup,clause", CLAR_WRITE)
+def test_write_edit_clarified(tmp_path, profile, agent, tool, path, expected, setup, clause):
+    """clarifications [A-05-5] and [A-05-6] for Write and Edit (clause per case)."""
+    ti = _write(path) if tool == "Write" else _edit(path)
+    d = _run(tmp_path, profile, agent, tool, ti, setup)
+    assert d.kind == expected, clause
+    if expected != "allow":
+        assert d.reason
+
+
+CLAR_BASH = [
+    case("TB05-D-123", None, "echo x > notes.txt", "allow", "[A-05-1] Bash writes by full-mode roles are not inspected (main session orchestrator)"),
+    case("TB05-D-124", "orchestrator", "cp src/app.py src/b.py", "allow", "[A-05-1] orchestrator is full mode"),
+    case("TB05-D-125", "implement", "rm -rf build && mv a b", "allow", "[A-05-1] implement is full mode"),
+    case("TB05-D-126", "test", "chmod +x run.sh | tee log.txt", "allow", "[A-05-1] test is full mode"),
+    case("TB05-D-127", "audit", "awk '{print > \"out.txt\"}' src/app.py", "allow", "[A-05-2] only shell redirection is checked for awk"),
+    case("TB05-D-128", "research", 'grep "$(whoami)" src/app.py', "deny", "[A-05-3] double quotes do not exempt $(...)"),
+    case("TB05-D-129", "research", 'grep "`whoami`" src/app.py', "deny", "[A-05-3] double quotes do not exempt backticks"),
+    case("TB05-D-130", "review", "grep '`whoami`' src/app.py", "allow", "[A-05-3] backticks inside single quotes are exempt"),
+]
+
+
+@pytest.mark.parametrize("agent,command,expected,clause", CLAR_BASH)
+def test_bash_clarified(tmp_path, agent, command, expected, clause):
+    """clarifications [A-05-1], [A-05-2], [A-05-3] for Bash (clause per case)."""
+    d = _run(tmp_path, "base", agent, "Bash", {"command": command})
+    assert d.kind == expected, clause
+    if expected != "allow":
+        assert d.reason
+
+
+@pytest.mark.parametrize("agent,tool,target", [
+    case("TB05-D-131", "review", "Write", "ROOT/docs/audit/x.md"),
+    case("TB05-D-132", "orchestrator", "Edit", "ROOT/src/app.py"),
+])
+def test_no_folder_reason(tmp_path, agent, tool, target):
+    """clarifications [A-05-4]: 'For a role with no allowed folders the deny reason says no write access for role
+    <role>.'"""
+    ti = _write(target) if tool == "Write" else _edit(target)
+    d = _run(tmp_path, "base", agent, tool, ti)
+    assert d.kind == "deny"
+    assert f"no write access for role {agent}" in d.reason
+
+
+
+@pytest.mark.parametrize("tool,tool_input", [
+    case("TB05-D-133", "Write", {"file_path": "ROOT/src/app.py", "content": "x"}),
+    case("TB05-D-134", "Bash", {"command": "ls"}),
+])
+def test_unknown_agent_reason(tmp_path, tool, tool_input):
+    """clarifications [U-4]: 'For an unknown agent type, path-guard deny reasons read unknown agent type <type>.'"""
+    d = _run(tmp_path, "base", "intruder", tool, tool_input)
+    assert d.kind == "deny"
+    assert "unknown agent type intruder" in d.reason
+
+
 # ---------------------------------------------------------------- R-24: published documentation
 
 @pytest.mark.case("TB05-D-114", tier="diagnostic", tb="05", reqs=["R-24"])

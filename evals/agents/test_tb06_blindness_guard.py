@@ -420,6 +420,104 @@ def test_cli_blindness_guard(tmp_path):
 test_cli_blindness_guard = pytest.mark.case("TB06-D-178", tier="diagnostic", tb=TB, reqs=list(REQS))(test_cli_blindness_guard)
 
 
+
+# ================================================================ clarifications (docs/contracts/clarifications.md)
+
+CLAR_BASH = [
+    # [A-06-1] bare test runners
+    case("TB06-D-182", "base", "pytest", None, "deny", "[A-06-1] bare pytest is denied for blind roles"),
+    case("TB06-D-183", "base", "python -m pytest", None, "deny", "[A-06-1] bare python -m pytest is denied"),
+    case("TB06-D-184", "base", "pytest -q -x", None, "deny", "[A-06-1] options only, no path argument"),
+    case("TB06-D-185", "base", "pytest tests", None, "deny", "[A-06-1] a path that is an ancestor of a protected path"),
+    case("TB06-D-186", "base", "pytest src tests/unit", None, "allow", "[A-06-1] path arguments neither protected nor ancestors"),
+    # [A-06-4] $VAR rule
+    case("TB06-D-187", "base", "cat $X/notes.md", None, "allow", "[A-06-4] unresolved $VAR, remainder not protected, not PWD/OLDPWD/HOME"),
+    case("TB06-D-188", "base", "cat $X/evals/case_a.py", None, "deny", "[A-06-4] remainder names a protected fragment"),
+    case("TB06-D-189", "base", "cat $HOME/anything.txt", None, "deny", "[A-06-4] variable is HOME"),
+    case("TB06-D-190", "base", "cat $OLDPWD/anything.txt", None, "deny", "[A-06-4] variable is OLDPWD"),
+    case("TB06-D-191", "base", "X=src; cat $X/app.py", None, "allow", "[A-06-4] variable assigned in the same command is expanded first"),
+    case("TB06-D-192", "base", "X=tests/held_out; cat $X/h.py", None, "deny", "[A-06-4] expanded assignment lands in held_out"),
+    # [A-06-3] tilde forms that do not depend on HOME
+    case("TB06-D-193", "base", "cat ~-/evals/case_a.py", None, "deny", "[A-06-3] ~- unresolvable, remainder protected"),
+    case("TB06-D-194", "base", "cat ~bob/evals/case_a.py", None, "deny", "[A-06-3] ~user unresolvable, remainder protected"),
+    case("TB06-D-195", "base", "cat ~bob/notes.md", None, "allow", "[A-06-3] ~user with an unprotected, resolvable remainder"),
+    # [A-06-5]
+    case("TB06-D-196", "base", "base64 -d build/blob.b64 > build/blob.bin", None, "deny", "[A-06-5] standalone base64 -d is denied"),
+    case("TB06-D-197", "base", "base64 --decode build/blob.b64", None, "deny", "[A-06-5] base64 decode (long option)"),
+    # [A-06-6] git pathspec rule
+    case("TB06-D-198", "base", "git status", None, "allow", "[A-06-6] git status allowed"),
+    case("TB06-D-199", "base", "git diff", None, "allow", "[A-06-6] git diff allowed"),
+    case("TB06-D-200", "base", "git log", None, "deny", "[A-06-6] git log without a pathspec after --"),
+    case("TB06-D-201", "base", "git log -p -- src", None, "allow", "[A-06-6] git log with an unprotected pathspec after --"),
+    case("TB06-D-202", "base", "git show HEAD", None, "deny", "[A-06-6] git show without a pathspec"),
+    case("TB06-D-203", "base", "git show HEAD -- src/app.py", None, "allow", "[A-06-6] git show with an unprotected pathspec"),
+    case("TB06-D-204", "base", "git blame src/app.py", None, "deny", "[A-06-6] git blame without -- pathspec"),
+    case("TB06-D-205", "base", "git blame -- src/app.py", None, "allow", "[A-06-6] git blame with an unprotected pathspec"),
+    case("TB06-D-206", "base", "git grep TODO", None, "deny", "[A-06-6] git grep without a pathspec"),
+    case("TB06-D-207", "base", "git grep TODO -- src", None, "allow", "[A-06-6] git grep with an unprotected pathspec"),
+    case("TB06-D-208", "base", "git ls-files", None, "deny", "[A-06-6] git ls-files"),
+    case("TB06-D-209", "base", "git ls-tree -r HEAD", None, "deny", "[A-06-6] git ls-tree"),
+    case("TB06-D-210", "base", "git cat-file -p HEAD:src/app.py", None, "deny", "[A-06-6] git cat-file"),
+    case("TB06-D-211", "base", "git archive HEAD", None, "deny", "[A-06-6] git archive"),
+    case("TB06-D-212", "base", "git log -- evals", None, "deny", "[A-06-6] pathspec after -- is protected"),
+    case("TB06-D-213", "base", "git grep TODO -- tests", None, "deny", "[U-1] pathspec is an ancestor of a protected path"),
+    case("TB06-D-214", "alt", "git ls-files -- qa/cases", None, "deny", "[A-06-6] protected pathspec (alt)"),
+    case("TB06-D-225", "base", "git ls-files -- tests", None, "deny", "[U-1] ancestor pathspec"),
+    case("TB06-D-226", "base", "git log -- src tests", None, "deny", "[U-1] every pathspec must be clean"),
+    case("TB06-D-227", "base", "git log -- src docs", None, "allow", "[U-1] all pathspecs neither protected nor ancestors"),
+    case("TB06-D-228", "alt", "git grep x -- qa", None, "deny", "[U-1] ancestor pathspec (alt)"),
+    case("TB06-D-229", "alt", "git grep x -- tests", None, "allow", "[U-1] tests is no ancestor in alt"),
+    # [U-2] unresolved $VAR prefix
+    case("TB06-D-230", "base", "cat $X/case_a.py", None, "allow", "[U-2] a bare file name alone does not deny"),
+    case("TB06-D-231", "base", "cat $X/held_out/h.py", None, "deny", "[U-2] remainder names a protected directory segment (held_out)"),
+    case("TB06-D-232", "alt", "cat $X/qa/cases/c.py", None, "deny", "[U-2] remainder contains a protected glob match"),
+    case("TB06-D-233", "base", "cat ${X}/evals", None, "deny", "[U-2] remainder names the evals segment"),
+    case("TB06-D-215", "alt", "git ls-files -- evals", None, "allow", "[A-06-6] evals is not protected in alt"),
+]
+
+
+@pytest.mark.parametrize("profile,command,cwd_sub,expected,clause", CLAR_BASH)
+def test_bash_clarified(tmp_path, profile, command, cwd_sub, expected, clause):
+    """clarifications [A-06-1], [A-06-3], [A-06-4], [A-06-5], [A-06-6] for implement Bash (clause per case)."""
+    d = _run(tmp_path, profile, "implement", "Bash", {"command": command}, cwd_sub)
+    _check(d, expected, clause)
+
+
+@pytest.mark.parametrize("file_path,expected,clause", [
+    case("TB06-D-216", "{ROOT}/evals", "deny", "[A-06-2] evals/** also matches the directory evals itself"),
+    case("TB06-D-217", "{ROOT}/tests/held_out", "deny", "[A-06-2] held_out glob matches its directory"),
+    case("TB06-D-218", "{ROOT}/tests", "allow", "[A-06-2] an ancestor is not matched by the glob for Read"),
+])
+def test_read_protected_directory(tmp_path, file_path, expected, clause):
+    """clarifications [A-06-2]: 'A protected glob such as evals/** also matches the directory evals itself.'"""
+    _check(_run(tmp_path, "base", "implement", "Read", {"file_path": file_path}), expected, clause)
+
+
+@pytest.mark.parametrize("home,command,expected,clause", [
+    case("TB06-D-219", "ROOT", "cat ~/evals/case_a.py", "deny", "[A-06-3] ~ expands to $HOME (HOME = project root)"),
+    case("TB06-D-220", "ELSEWHERE", "cat ~/evals/case_a.py", "allow", "[A-06-3] ~ expands to $HOME (HOME elsewhere)"),
+    case("TB06-D-221", "ROOT", "ls ~/tests/held_out", "deny", "[A-06-3] ~ expands to $HOME (held_out)"),
+])
+def test_tilde_home(tmp_path, monkeypatch, home, command, expected, clause):
+    """clarifications [A-06-3]: '~ expands to $HOME'."""
+    root = _root(tmp_path)
+    elsewhere = tmp_path / "home_elsewhere"
+    elsewhere.mkdir()
+    monkeypatch.setenv("HOME", str(root) if home == "ROOT" else str(elsewhere))
+    d = lib.run_decide(HOOK, lib.payload(root, tool_name="Bash", tool_input={"command": command}, agent_type="implement"), root)
+    _check(d, expected, clause)
+
+
+@pytest.mark.parametrize("tool,tool_input,expected,clause", [
+    case("TB06-D-222", "Read", {"file_path": "{ROOT}/evals/case_a.py"}, "deny", "[A-06-7] unknown agent_type is blind"),
+    case("TB06-D-223", "Bash", {"command": "grep -r TODO ."}, "deny", "[A-06-7] unknown agent_type is blind (B4b)"),
+    case("TB06-D-224", "Grep", {"pattern": "x", "path": "{ROOT}/src"}, "allow", "[A-06-7] blind role may still search src"),
+])
+def test_unknown_agent_is_blind(tmp_path, tool, tool_input, expected, clause):
+    """clarifications [A-06-7]: 'An unknown agent_type is treated as a blind role by this hook.'"""
+    _check(_run(tmp_path, "base", "intruder", tool, tool_input), expected, clause)
+
+
 # ---------------------------------------------------------------- R-24: published documentation
 
 @pytest.mark.case("TB06-D-181", tier="diagnostic", tb="06", reqs=["R-24"])
