@@ -15,6 +15,8 @@ Source for this section: a docs lookup run today (code.claude.com pages on sub-a
 - **Blindness limits:** a `permissions.deny` rule such as `Read(evals/**)` applies to sub-agents, and is applied best-effort to Grep and Glob. It does **not** stop a shell command or script that reads the files without naming them. The sandbox is the OS-level backstop.
 - **Not verified:** whether Codex has hook equivalents. Treat Codex enforcement as exec-policy and permission profiles until checked.
 
+> **Generality.** The seven roles, their skills and their hooks are project-independent. Everything that names a platform, a host or a hazard (which deploy MCP server, which git host, which commands count as one-way doors, which paths are evals) comes from a **project profile** read at run time (section 7), not from the agent definitions.
+
 ## 2. Rules the map follows
 
 1. **Enforce with hooks and missing tools, never with prompt text alone.** A "must never" is a hook, a deny rule or an absent tool.
@@ -32,10 +34,10 @@ Each entry: model, skills to preload, tools, MCP servers, hooks, and what it mus
 - **Model:** Opus, the main session. Long-lived; compaction plus the ticket ledger.
 - **Skills:** `orchestration`, `plan-adherence`, `session-handoff`, `away-mode`, `deploy-verify` (the pre-deploy gate and the deploy step), `one-way-door` (to classify a door before any risky step). Plugin: superpowers `dispatching-parallel-agents`.
 - **Tools:** Read; `Agent(research, design, audit, implement, test, review)` only; Bash restricted to git (read plus commit by path), the Jev client, and the deploy command the project checklist names; PushNotification for gate packets.
-- **MCP servers:** the project's git host for PR and CI status (`github` or `gitlab`, read tools only); `railway` read tools (status, logs) for deploy state. A tracker (Linear or Notion) once one is chosen.
+- **MCP servers:** the project's git host for PR and CI status (`github` or `gitlab`, read tools only); the project's deploy-platform server, read tools only (status, logs), if the project has one. A tracker (Linear or Notion) once one is chosen.
 - **Hooks:**
   - `SessionStart`: load the ticket ledger and routing state.
-  - `PreToolUse` on Bash: one-way-door rules. Ask a human on force push, `--no-verify`, destructive SQL, service or volume deletes, variable changes on a service whose image source is the known hazard, and any deploy.
+  - `PreToolUse` on Bash: one-way-door rules. Ask a human on force push, `--no-verify`, destructive SQL, resource deletes, any deploy, and every pattern in the project profile's `one_way_door_patterns` list (for example a variable change on a service with a known redeploy hazard).
   - `PreCompact` and `Stop`: write the ledger and a handoff.
   - `Notification`: push permission prompts and finished tasks to the phone.
   - A per-run budget cap.
@@ -86,7 +88,7 @@ Each entry: model, skills to preload, tools, MCP servers, hooks, and what it mus
 - **Model:** Opus to author evals, Haiku to run them and digest logs. Runs in parallel with Review.
 - **Skills:** `eval-designer`; `eval-gate-triage` (project-local); `deploy-verify` (its post-deploy checks section); superpowers `verification-before-completion`; `langfuse`.
 - **Tools:** Read, Glob, Grep, Bash for test runners, Write under `evals/**` only before the freeze.
-- **MCP servers:** `playwright` for post-deploy UI checks; `railway` read tools (status, logs, HTTP metrics) for live checks; Langfuse through its skill or API for traces. Add `vercel` or `supabase` only in a project that uses them.
+- **MCP servers:** `playwright` for post-deploy UI checks; the project's deploy-platform read tools (status, logs, HTTP metrics) for live checks; Langfuse through its skill or API for traces.
 - **Hooks:** `PreToolUse`: after the freeze, block writes to eval files unless the baseline-update path is used. `Stop`: require evidence of a full-suite run. `SubagentStop` on the Haiku runner: return failure lines only.
 - **Never:** Edit application code; edit evals after the freeze.
 
@@ -95,7 +97,7 @@ Each entry: model, skills to preload, tools, MCP servers, hooks, and what it mus
 - **Model:** a different vendor from Implement (Codex or a GPT-class model) when available, otherwise Opus in a fresh context. Runs in parallel with Test; read-only.
 - **Skills:** `implementation-review` (with its two checklists). Plugins: `code-review`, the `pr-review-toolkit` reviewers, `feature-dev:code-reviewer`, `claude-security`.
 - **Tools:** Read, Glob, Grep; read-only Bash (`git diff`, trace queries); `Agent(pr-review-toolkit:silent-failure-hunter, pr-review-toolkit:pr-test-analyzer, feature-dev:code-reviewer)`.
-- **MCP servers:** git-host read tools (PR diff, CI logs); Langfuse read for traces; `railway` logs read-only.
+- **MCP servers:** git-host read tools (PR diff, CI logs); Langfuse read for traces; the deploy platform's logs, read-only.
 - **Hooks:** `PreToolUse`: deny Write and Edit. `SubagentStop`: the verdict must be APPROVE or REJECT, with file and line citations and a right-reason, wrong-reason or inconclusive grade for each passing case.
 - **Never:** edit implementation, tests or cases; re-run the whole suite; read the implementer's own account of its work.
 
@@ -112,10 +114,9 @@ Each entry: model, skills to preload, tools, MCP servers, hooks, and what it mus
 | `deepwiki`, `alphaXiv` | Research | Repo documentation and papers |
 | `firecrawl` (plugin) | Research, optional | Scraping; WebFetch may be enough |
 | `github` or `gitlab` | Orchestrator, Research, Review (read tools) | PR, CI and code search; pick the one the project uses |
-| `railway` | Orchestrator, Test, Review (read tools) | Deploy state, logs, HTTP metrics; deploys go through the checklist route |
+| Deploy-platform server (`railway`, `vercel`, `supabase` or none, per project profile) | Orchestrator, Test, Review (read tools) | Deploy state, logs, HTTP metrics; deploys go through the checklist route |
 | `playwright` | Test | Post-deploy UI checks |
 | Notion, Claude Docs | Design, optional per project | Only if PRDs live there |
-| `vercel`, `supabase` | Test, Orchestrator, per project | Only for projects deployed there |
 | Gmail, Calendar, Drive, Slack, Wolfram, Alpha Vantage, Safari, Figma, Stripe | none | No agent's job needs them |
 
 Every agent that gets an MCP server should list only the server or its read tools in `tools`, so the write tools never appear in its context.
@@ -125,3 +126,17 @@ Every agent that gets an MCP server should list only the server or its read tool
 - **Exists:** the OpenEMR repo has five agent files (`implementer`, `eval-author`, `implementation-reviewer`, `ops-operator`, `docs-writer`). They map to Implement, Test, Review, an Orchestrator-side deploy utility, and a docs utility. They use `name`, `description`, `model` and `tools` only; none uses `skills`, `hooks` or `mcpServers` yet.
 - **Build first (highest value per effort):** (1) the Implement blindness rules (deny rules, the agent-type Bash hook, sandbox), because they turn the eval-first rule from advice into enforcement; (2) the Review deny-Write hook and verdict check; (3) the secrets hook; (4) the Orchestrator's one-way-door Bash hook. Research, Design and Audit path guards are small and can follow.
 - **Then:** add `skills:` to each definition so roles preload their skills, and test whether single-tool MCP entries work in `tools`.
+
+## 7. Project profile: what varies per project
+
+The agents stay generic; a small profile file per project (proposed: `.factory/profile.yaml` in the project) supplies the rest. Proposed fields:
+
+- `graph`: which stages and gates run, and their order (for a small ticket, only Orchestrator, Implement, Test and Review).
+- `agents`: per role, optional overrides of model, extra allowed tools and MCP servers.
+- `paths`: eval and held-out paths (Implement's blindness), docs folders each role may write, `own` paths for parallel slices.
+- `one_way_door_patterns`: command and file patterns the Orchestrator's hook must ask a human about.
+- `deploy`: deploy route, deploy-platform MCP server (or none), and the checklist file (default `docs/ops/deploy-verification.md`).
+- `git_host` and `tracker`.
+- `checks`: the test, lint and `sf verify` commands.
+
+Hooks and definitions are generated from the role templates plus the profile, so adding a project means writing a profile, not editing seven agents. This matches the Austin plan's "graph as data" architecture (section 3 of that plan). Not built yet; the design needs your confirmation.
