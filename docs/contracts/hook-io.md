@@ -41,6 +41,8 @@ class HookResult: exit_code: int; stdout: str; stderr: str
 
 Every hook module exposes `decide(payload: Payload, cfg: HookConfig) -> Decision`, a pure function of its arguments (it may read files under `cfg.project_root` but makes no network or model call).
 
+A hook module may also export `record(payload, cfg) -> None` (a side effect such as appending to the ledger, called by the command line after `decide`; an exception in `record` is reported on stderr and never changes the exit code) and, for SessionStart only, `emit(payload, cfg) -> str` (text the command line prints on stdout as added context, exit 0).
+
 `HookConfig.from_profile(profile: Profile, project_root: Path) -> HookConfig` carries the resolved paths, patterns and role mapping.
 
 ## Protocol adapter (`run_hook`)
@@ -56,4 +58,4 @@ Fail closed: if the stdin text is not valid JSON, lacks `hook_event_name`, or th
 
 ## Command line
 
-`python -m factory.hooks <hook_id>` reads stdin, loads the profile from `$FACTORY_PROFILE` or `.factory/profile.yaml` under the payload's `cwd`, calls the hook's `decide` through `run_hook`, prints the result and exits with its `exit_code`. Hook ids: `path_guard`, `blindness_guard`, `secrets_guard`, `bash_guard`, `stop_gate`, `subagent_stop`, `ledger_audit`.
+`python -m factory.hooks <hook_id>` reads stdin, loads the profile from `$FACTORY_PROFILE` or `.factory/profile.yaml` under the payload's `cwd`, calls the hook's `decide` through `run_hook`, prints the result and exits with its `exit_code`. Hook ids: `path_guard`, `blindness_guard`, `secrets_guard`, `bash_guard`, `stop_gate`, `subagent_stop`, `ledger_audit`, `session_start`.
