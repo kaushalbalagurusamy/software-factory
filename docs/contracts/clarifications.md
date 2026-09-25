@@ -144,3 +144,4 @@ Status: published, **binding**. It resolves the 94 ambiguities the eval authors 
 ## Third round
 - **[A-11]** `factory.agents.profile.parse_profile(data: dict) -> Profile` exists alongside `load_profile(path)` (which is `yaml.safe_load` then `parse_profile`), so a profile can be built in code. It applies every rule of the profile contract, including the override-key rule.
 - **[A-29]** `Graph` exposes read-only attributes `stages` (tuple of stage objects with `id`, `role`, `gate`), `edges` (tuple of `(from_id, to_id)`) and `loops` (tuple of `(from_id, to_id)`).
+- **[C-35]** The chain covers entry text only, so reordering entries within the file while keeping `seq` intact is not a tamper. `verify` also reports an entry that sits in a section its role may not write (moving an entry into another section is caught this way when the roles differ).
