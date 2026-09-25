@@ -6,7 +6,7 @@
 | **Depends on** | TB-04 |
 | **Kind** | PAR (wave 3) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md` |
+| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Reject sub-agent reports that do not have the shape their role owes the orchestrator.

@@ -6,7 +6,7 @@
 | **Depends on** | TB-01, TB-02, TB-04 |
 | **Kind** | BLOCKING (wave 4) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/roles-and-generation.md`, `docs/contracts/profile.md` |
+| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/roles-and-generation.md`, `docs/contracts/profile.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Produce the project-level Claude Code settings that register the hooks, as a reviewable change.

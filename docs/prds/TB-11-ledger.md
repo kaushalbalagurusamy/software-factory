@@ -6,7 +6,7 @@
 | **Depends on** | TB-04 |
 | **Kind** | PAR (wave 3) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/graph-and-ledger.md`, `docs/contracts/hook-io.md` |
+| **Published contracts** | `docs/contracts/graph-and-ledger.md`, `docs/contracts/hook-io.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Give agents shared, tamper-evident memory in files, and give sessions their state at start.

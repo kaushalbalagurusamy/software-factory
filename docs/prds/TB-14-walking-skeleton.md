@@ -6,7 +6,7 @@
 | **Depends on** | TB-03, TB-05 to TB-13 |
 | **Kind** | BLOCKING (wave 5) |
 | **Implementer model** | Opus |
-| **Published contracts** | all contracts |
+| **Published contracts** | all contracts, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Prove the pieces work together on a fixture project with no model calls, and log Jev decisions without giving them authority.

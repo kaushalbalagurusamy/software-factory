@@ -6,7 +6,7 @@
 | **Depends on** | TB-04 |
 | **Kind** | PAR (wave 3) |
 | **Implementer model** | Opus |
-| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md` |
+| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Make the eval-first rule enforceable: an agent with `blind: true` (only `implement`) cannot read, list, search or run the eval and held-out paths. Other roles are never affected by this hook.

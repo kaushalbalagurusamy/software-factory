@@ -6,7 +6,7 @@
 | **Depends on** | TB-04 |
 | **Kind** | PAR (wave 3) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md` |
+| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Block unsafe git and destructive commands, and pause a human before irreversible operations.

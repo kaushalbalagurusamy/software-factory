@@ -6,7 +6,7 @@
 | **Depends on** | TB-01, TB-02 |
 | **Kind** | BLOCKING (wave 2) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/roles-and-generation.md`, `docs/contracts/profile.md` |
+| **Published contracts** | `docs/contracts/roles-and-generation.md`, `docs/contracts/profile.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Turn role specs plus a profile into `.claude/agents/<role>.md` files, deterministically.

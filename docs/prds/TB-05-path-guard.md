@@ -6,7 +6,7 @@
 | **Depends on** | TB-04 |
 | **Kind** | PAR (wave 3) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, `docs/contracts/roles-and-generation.md` |
+| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, `docs/contracts/roles-and-generation.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Restrict where each role may write, and restrict read-only roles to a list of read commands.

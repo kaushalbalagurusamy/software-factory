@@ -6,7 +6,7 @@
 | **Depends on** | TB-01 |
 | **Kind** | BLOCKING (wave 2) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md` |
+| **Published contracts** | `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 The shared pieces every hook uses, so the seven hook slices can be built in parallel without touching each other.

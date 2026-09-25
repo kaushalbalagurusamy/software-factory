@@ -6,7 +6,7 @@
 | **Depends on** | none |
 | **Kind** | BLOCKING (wave 1) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/roles-and-generation.md`, `docs/contracts/hook-io.md` (hook ids), capability map `docs/plans/2026-09-24-agent-capability-map.md` section 3 |
+| **Published contracts** | `docs/contracts/roles-and-generation.md`, `docs/contracts/hook-io.md` (hook ids), capability map `docs/plans/2026-09-24-agent-capability-map.md` section 3, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Encode the seven roles as data, and load and validate them. The values come from section 3 of the capability map, stripped of anything project-specific.

@@ -6,7 +6,7 @@
 | **Depends on** | TB-01 |
 | **Kind** | PAR (wave 2) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/graph-and-ledger.md`, `docs/contracts/profile.md` |
+| **Published contracts** | `docs/contracts/graph-and-ledger.md`, `docs/contracts/profile.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Represent the stages and gates a project runs as validated data, and pick a subset for small tickets.

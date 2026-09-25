@@ -6,7 +6,7 @@
 | **Depends on** | none |
 | **Kind** | BLOCKING (wave 1) |
 | **Implementer model** | Sonnet |
-| **Published contracts** | `docs/contracts/profile.md` |
+| **Published contracts** | `docs/contracts/profile.md`, `docs/contracts/clarifications.md` (binding) |
 
 ## Purpose
 Load and validate `.factory/profile.yaml` into an immutable `Profile`. Everything project-specific reaches the rest of the system through this object.

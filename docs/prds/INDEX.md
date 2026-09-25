@@ -40,6 +40,7 @@ BLOCKING means another slice needs its output; PAR means it needs only committed
 R-01 (02, 03, 14), R-02 (01), R-03 (12), R-04 (02, 03), R-05 (02, 03), R-06 (03, 05), R-07 (02, 03), R-08 (03), R-09 (04), R-10 (05), R-11 (06), R-12 (07), R-13 (08), R-14 (08), R-15 (09), R-16 (10), R-17 (11), R-18 (13), R-19 (14), R-20 (14), R-21 to R-24 (method and documentation, checked by process evidence and by the docs each PRD requires).
 
 ## Rules for the slices
+- `docs/contracts/clarifications.md` is binding and wins over a PRD or contract where they differ.
 - Implementers read their PRD and the contracts it names, and nothing under `evals/`.
 - Everything project-specific comes from the profile; no PRD, role file or hook may name a specific project.
 - Hooks are deterministic: no network, no model call.
