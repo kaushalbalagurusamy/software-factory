@@ -140,3 +140,7 @@ Status: published, **binding**. It resolves the 94 ambiguities the eval authors 
 - **[U-2]** An unresolved `$VAR` prefix is denied only if the remaining path text names a protected directory segment (the first segment of a protected glob, such as `evals` or `held_out`) or contains a protected glob match; a bare file name alone does not.
 - **[U-3]** Paths are normalised (`..` collapsed) **before** the `/tmp` exemption is applied, so `/tmp/../etc` is not exempt; `rm -rf ../sibling` is not exempt either.
 - **[U-4]** For an unknown agent type, path-guard deny reasons read `unknown agent type <type>`.
+
+## Third round
+- **[A-11]** `factory.agents.profile.parse_profile(data: dict) -> Profile` exists alongside `load_profile(path)` (which is `yaml.safe_load` then `parse_profile`), so a profile can be built in code. It applies every rule of the profile contract, including the override-key rule.
+- **[A-29]** `Graph` exposes read-only attributes `stages` (tuple of stage objects with `id`, `role`, `gate`), `edges` (tuple of `(from_id, to_id)`) and `loops` (tuple of `(from_id, to_id)`).
