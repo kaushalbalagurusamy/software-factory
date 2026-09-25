@@ -77,7 +77,7 @@ Each entry: model, skills to preload, tools, MCP servers, hooks, and what it mus
 - **Tools:** Read, Glob, Grep, Write, Edit, LSP, Bash in the OS sandbox.
 - **MCP servers:** none by default. A docs server for library questions only if a slice needs one.
 - **Hooks:**
-  - Blindness: `permissions.deny` for `Read` and `Grep` on `evals/**` and held-out fixtures, plus a `PreToolUse` Bash hook that checks `agent_type == implement` and blocks commands naming those paths. The sandbox denies file reads there at the OS level. Residual gap: a script that opens the files itself, which is why the sandbox is not optional.
+  - Blindness: a `PreToolUse` hook that checks `agent_type == implement` and blocks Read, Grep, Glob and Bash access to `evals/**` and held-out fixtures. A global `permissions.deny` rule is **not** used: it would also block the Test role, which must read the evals (corrected 2026-09-24; see `docs/factory/requirements.md` R-11). The sandbox denies file reads there at the OS level. Residual gap: a script that opens the files itself, which is why the sandbox is not optional.
   - `PreToolUse` on Bash: block the git commands that touch a shared tree (`stash`, `checkout`, `restore`, `reset`, `clean`, `add -A`, `add .`) as the orchestration skill requires.
   - `PostToolUse` on Edit and Write: formatter and linter.
   - `Stop`: run `sf verify` (baseline test hash, skip and xfail scan, trivial-assert scan) and block "done" on failure; check `git status --porcelain` stayed inside the agent's own paths; iteration cap.
