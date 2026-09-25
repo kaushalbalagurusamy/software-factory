@@ -1,0 +1,22 @@
+schema_version: 1
+project: {name: fixture-alpha}
+paths:
+  eval: [evals/**]
+  held_out: [tests/held_out/**]
+  frozen_tests: [tests/frozen/**]
+  baseline_update: [evals/baselines/**]
+mcp_servers:
+  docsrv: {read_tools: [search, fetch]}
+checks: {test: "pytest -q", lint: "ruff check .", verify: "sf verify"}
+deploy: {route: "deployctl push", platform_server: null, checklist: docs/ops/deploy-verification.md}
+one_way_door_patterns: ["\\bmigrate\\s+--drop\\b"]
+graph:
+  stages:
+    - {id: spec, role: design, gate: true}
+    - {id: evals, role: test}
+    - {id: build, role: implement}
+    - {id: review, role: review, gate: true}
+  edges: [[spec, evals], [evals, build], [build, review]]
+  loops: [[review, build]]
+  subsets:
+    small: [orchestrator, implement, test, review]

@@ -1,0 +1,22 @@
+schema_version: 1
+project: {name: fixture-beta}
+main_session_role: orchestrator
+paths:
+  eval: [qa/cases/**, qa/golden/**]
+  held_out: [qa/secret/**]
+  frozen_tests: [qa/frozen/**]
+  baseline_update: [qa/baselines/**]
+  research_dir: notes/research
+  design_dirs: [design/prd, design/adr]
+  audit_dir: notes/audit
+  ledger_dir: .factory/ledger
+checks: {test: "npm test", lint: "npm run lint", verify: "npm run verify"}
+deploy: {route: "cloudctl release", platform_server: null, checklist: ops/deploy.md}
+one_way_door_patterns: ["\\bdb-reset\\b", "\\bpurge-bucket\\b"]
+secret_allow_patterns: ["FIXTURE-KEY-[0-9]+"]
+git_host: gitlab
+graph:
+  stages:
+    - {id: build, role: implement}
+    - {id: verify, role: test}
+  edges: [[build, verify]]
