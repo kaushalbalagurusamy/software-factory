@@ -1,0 +1,26 @@
+[
+ {
+  "query": "The eval run just went all green after one commit, which feels too green. Can you review whether the passes were earned or whether the implementation shortcut the tests?",
+  "should_trigger": true
+ },
+ {
+  "query": "Before I cut the release tag, do an independent review of the implementation: diff, traces against our observability expectations, and drift from the requirements",
+  "should_trigger": true
+ },
+ {
+  "query": "Check the traces from the last run: is the observability doing what we designed, and did any case pass for the wrong reason?",
+  "should_trigger": true
+ },
+ {
+  "query": "a golden case flipped from red to green in a single commit and I suspect reward hacking; audit it",
+  "should_trigger": true
+ },
+ {
+  "query": "add a unit test for the parse_date helper",
+  "should_trigger": false
+ },
+ {
+  "query": "summarize what changed in the last three commits in plain english",
+  "should_trigger": false
+ }
+]

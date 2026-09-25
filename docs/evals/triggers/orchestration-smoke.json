@@ -1,0 +1,26 @@
+[
+ {
+  "query": "I have five tracer-bullet slices ready and want to fan out implementer sub-agents against one shared git checkout. How do I make sure they don't stomp on each other's files?",
+  "should_trigger": true
+ },
+ {
+  "query": "Which model should do what in my agent hierarchy: who orchestrates, who implements, who runs the tests and digests the logs?",
+  "should_trigger": true
+ },
+ {
+  "query": "Two of my sub-agents just finished. Walk me through how to integrate their work: commit, CI, and what to verify before the next one",
+  "should_trigger": true
+ },
+ {
+  "query": "Prepare a review packet for the independent reviewer at this milestone so it can give APPROVE or REJECT",
+  "should_trigger": true
+ },
+ {
+  "query": "write a python function that dedupes a list of dicts by the id key",
+  "should_trigger": false
+ },
+ {
+  "query": "explain how git rebase differs from git merge",
+  "should_trigger": false
+ }
+]

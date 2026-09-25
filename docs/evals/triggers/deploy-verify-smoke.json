@@ -1,0 +1,26 @@
+[
+ {
+  "query": "The reviewer approved the change and tests are green. Deploy it to production and make sure the live service is actually healthy afterwards.",
+  "should_trigger": true
+ },
+ {
+  "query": "I just redeployed the api service on Railway. Did the deploy work? Check it against our health checks and roll back if anything is red.",
+  "should_trigger": true
+ },
+ {
+  "query": "ship this release to prod, and write up a deploy log with the post-deploy check results",
+  "should_trigger": true
+ },
+ {
+  "query": "after the deploy the login page returns 500 on the live site; verify what state the deployment is in and decide whether to roll back",
+  "should_trigger": true
+ },
+ {
+  "query": "write a Dockerfile for this flask app",
+  "should_trigger": false
+ },
+ {
+  "query": "explain the difference between blue-green and canary deployments",
+  "should_trigger": false
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "query": "We inherited a 15,000-line VB6 hotel booking app with no docs or tests and want to rewrite it. Before anything else, audit the source file by file and catalog the bugs.",
+  "should_trigger": true
+ },
+ {
+  "query": "Reverse engineer this old PHP monolith before we migrate it: one analysis per module and a severity-tagged bug list, then help me choose a migration route",
+  "should_trigger": true
+ },
+ {
+  "query": "Do a per-form audit of these Delphi forms: purpose, controls, permission checks, database reads vs writes, globals, and bugs, so the rewrite doesn't port them",
+  "should_trigger": true
+ },
+ {
+  "query": "build a BUGS-MITIGATIONS catalog from the legacy code I'm going to replace, one row per finding with severity and a mitigation",
+  "should_trigger": true
+ },
+ {
+  "query": "give me a quick orientation of this repo: where does authentication live and what would changing the session timeout touch?",
+  "should_trigger": false
+ },
+ {
+  "query": "write a python function that parses ISO dates",
+  "should_trigger": false
+ }
+]

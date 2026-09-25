@@ -1,0 +1,26 @@
+[
+ {
+  "query": "I'm about to write a migration that drops the legacy_orders table and renames customer_id to account_id in our public REST API. Before I run it, what should I check?",
+  "should_trigger": true
+ },
+ {
+  "query": "we're choosing the embedding dimension for our production vector store, 768 vs 1536, and re-indexing later means regenerating the whole corpus. help me decide and write it down as an ADR",
+  "should_trigger": true
+ },
+ {
+  "query": "Can you delete the old staging S3 bucket and the RDS instance behind it? I think nothing uses them but I'm not 100% sure",
+  "should_trigger": true
+ },
+ {
+  "query": "We're switching our session token scheme and permission tree; this is hard to undo once clients ship. Walk me through the trade-offs with me before we commit",
+  "should_trigger": true
+ },
+ {
+  "query": "rename the CSS class btn-primary to button-primary across the frontend and fix the tests",
+  "should_trigger": false
+ },
+ {
+  "query": "which HTTP client library should I use for this small python script that calls one internal endpoint?",
+  "should_trigger": false
+ }
+]
