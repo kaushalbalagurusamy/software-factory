@@ -656,3 +656,204 @@ def test_d051_cli_block_output_shape(tmp_path):
     lib.need(HOOK, "decide")
     root = cap_repo(tmp_path)
     assert cli(root, stop_payload(root, tmp_path, agent_id="shape")) == "block"
+
+
+# ================================================================ clarifications.md (binding) additions
+
+def log_lines(root: Path) -> list[str]:
+    log = root / ".factory" / "stop_gate.log"
+    return [x for x in log.read_text().splitlines() if x.strip()] if log.exists() else []
+
+
+@case("TB09-D-052")
+def test_d052_missing_transcript_skips_check5_and_logs(tmp_path):
+    """Clarification C-01/C-02: 'If the file is missing ... check 5 is skipped and a line is appended to
+    `.factory/stop_gate.log`.' A clean change with `checks.test` set and no transcript file is allowed and logged."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, profile=prof(checks=True), changes={"src/calc.py": CLEAN_CALC})
+    pl = stop_payload(root, tmp_path, tp=tmp_path / "no_such_transcript.jsonl")
+    assert cli(root, pl) == "allow"
+    assert len(log_lines(root)) == 1  # C-32: one line
+
+
+@case("TB09-D-053")
+def test_d053_unparseable_transcript_skips_check5_and_logs(tmp_path):
+    """Clarification C-01/C-02: a transcript that 'does not parse' skips check 5 and appends a log line."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, profile=prof(checks=True), changes={"src/calc.py": CLEAN_CALC})
+    tp = tmp_path / "garbage.jsonl"
+    tp.write_text("this is {not json\n\x00\x01 nor this\n")
+    assert cli(root, stop_payload(root, tmp_path, tp=tp)) == "allow"
+    assert len(log_lines(root)) == 1  # C-32: one line
+
+
+@case("TB09-D-054")
+def test_d054_parseable_transcript_without_edits_passes(tmp_path):
+    """Clarification C-02: 'If it parses and holds no Edit or Write call, the check passes' (only a Bash `ls`)."""
+    lib.need(HOOK, "decide")
+    assert b5(tmp_path, [("Bash", {"command": "ls src"})]).kind == "allow"
+
+
+@case("TB09-D-055")
+def test_d055_stop_uses_transcript_path(tmp_path):
+    """Clarification C-03: 'On Stop (main session) check 5 uses `transcript_path` if the payload has it' - an Edit
+    with no later test run blocks."""
+    lib.need(HOOK, "decide")
+    p = prof(checks=True)
+    p["main_session_role"] = "implement"
+    root = repo(tmp_path, profile=p, changes={"src/calc.py": CLEAN_CALC})
+    pl = lib.payload(root, event="Stop", last_assistant_message="Done.", stop_hook_active=False,
+                     transcript_path=str(transcript(tmp_path, [EDIT])))
+    assert decide(root, pl).kind == "block"
+
+
+@case("TB09-D-056")
+def test_d056_stop_without_transcript_path_skips_check5(tmp_path):
+    """Clarification C-03: on Stop without `transcript_path`, check 5 'is skipped' - a clean change is allowed."""
+    lib.need(HOOK, "decide")
+    p = prof(checks=True)
+    p["main_session_role"] = "implement"
+    root = repo(tmp_path, profile=p, changes={"src/calc.py": CLEAN_CALC})
+    pl = lib.payload(root, event="Stop", last_assistant_message="Done.", stop_hook_active=False)
+    assert decide(root, pl).kind == "allow"
+
+
+@case("TB09-D-057")
+def test_d057_untracked_test_file_lines_are_added(tmp_path):
+    """Clarification C-04: 'Every line of an untracked new file counts as an added line' - a new test file with a
+    skip marker blocks."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, changes={"tests/test_new.py": '@pytest.mark.skip(reason="later")\ndef test_new():\n'
+                                                         '    assert add(2, 2) == 4\n'})
+    d = decide(root, stop_payload(root, tmp_path))
+    assert d.kind == "block"
+    assert "test_new.py" in d.reason
+
+
+@case("TB09-D-058")
+def test_d058_sys_exit_is_not_xit(tmp_path):
+    """Clarification C-05: markers match as whole tokens; `sys.exit` does not match `xit` (negative control)."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, changes={"tests/test_calc.py": with_test_fn(
+        "def test_exit_code():\n    import sys\n    assert callable(sys.exit)\n")})
+    assert decide(root, stop_payload(root, tmp_path)).kind == "allow"
+
+
+@case("TB09-D-059")
+def test_d059_assert_1_equals_call_is_not_trivial(tmp_path):
+    """Clarification C-05: '`assert 1 == f()` does not match `assert 1`' (negative control)."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, changes={"tests/test_calc.py": with_test_fn("def test_one():\n    assert 1 == add(0, 1)\n")})
+    assert decide(root, stop_payload(root, tmp_path)).kind == "allow"
+
+
+@case("TB09-D-060")
+def test_d060_marker_in_non_test_file_ignored(tmp_path):
+    """Clarification C-06: markers count 'only in test files'; `pytest.skip(` in src/calc.py does not block."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, changes={"src/calc.py": CALC + '\n\ndef maybe():\n    pytest.skip("not here")\n'})
+    assert decide(root, stop_payload(root, tmp_path)).kind == "allow"
+
+
+@pytest.mark.parametrize("rel,content", [
+    pytest.param("src/widget.spec.js", 'it.skip("w", () => {});\n', marks=case("TB09-D-061"), id="spec_js"),
+    pytest.param("pkg/calc_test.py", "@pytest.mark.xfail\ndef test_c():\n    assert add(1, 1) == 2\n",
+                 marks=case("TB09-D-062"), id="suffix_test_py"),
+    pytest.param("web/__tests__/w.js", 'xdescribe("w", () => {});\n', marks=case("TB09-D-063"), id="__tests__"),
+    pytest.param("test/unit.py", "def test_u():\n    assert True\n", marks=case("TB09-D-064"), id="test_dir"),
+])
+def test_d_test_file_patterns(tmp_path, rel, content):
+    """Clarification C-05/C-06: test files are paths under `tests/`, `test/` or `__tests__/`, or named `test_*.py`,
+    `*_test.py`, `*.test.*`, `*.spec.*`; a marker in each form blocks."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, changes={rel: content})
+    d = decide(root, stop_payload(root, tmp_path))
+    assert d.kind == "block"
+    assert Path(rel).name in d.reason
+
+
+@case("TB09-D-065")
+def test_d065_not_a_repository_blocks(tmp_path):
+    """Clarification C-07: 'Git unavailable' includes 'the project root is not a repository'."""
+    lib.need(HOOK, "decide")
+    root = lib.make_project(tmp_path, prof(), files={"src/calc.py": CALC})
+    d = decide(root, stop_payload(root, tmp_path))
+    assert d.kind == "block" and d.reason
+
+
+@case("TB09-D-066")
+def test_d066_no_head_commit_blocks(tmp_path):
+    """Clarification C-07: 'Git unavailable' includes a repository that 'has no HEAD commit'."""
+    lib.need(HOOK, "decide")
+    root = lib.make_project(tmp_path, prof(), files={"src/calc.py": CALC})
+    git(root, "init", "-q")
+    d = decide(root, stop_payload(root, tmp_path))
+    assert d.kind == "block" and d.reason
+
+
+@case("TB09-D-067")
+def test_d067_counter_resets_after_passing_stop(tmp_path):
+    """Clarification C-08: 'The block counter resets when a stop is allowed by passing all checks'. Five blocks,
+    then a passing stop, then the failure returns: it blocks again (without the reset it would be past the cap)."""
+    lib.need(HOOK, "decide")
+    root = cap_repo(tmp_path)
+    pl = stop_payload(root, tmp_path, agent_id="reset-1")
+    assert [cli(root, pl) for _ in range(5)] == ["block"] * 5
+    (root / "tests" / "test_calc.py").write_text(TEST_CALC)
+    assert cli(root, pl) == "allow"
+    (root / "tests" / "test_calc.py").write_text(with_test_fn(PY_ADD["xfail"]))
+    assert cli(root, pl) == "block"
+
+
+@case("TB09-D-068")
+def test_d068_one_log_line_per_allow_after_cap(tmp_path):
+    """Clarification C-08: 'after the cap, every allowed stop appends one log line' - calls 6, 7 and 8 give three
+    lines."""
+    lib.need(HOOK, "decide")
+    root = cap_repo(tmp_path)
+    pl = stop_payload(root, tmp_path, agent_id="cap-lines")
+    for _ in range(8):
+        cli(root, pl)
+    assert len(log_lines(root)) == 3
+
+
+@case("TB09-D-069")
+def test_d069_frozen_file_missing_on_disk_blocks(tmp_path):
+    """Clarification C-09: 'A frozen file that is missing on disk ... blocks' (listed in the manifest, absent)."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, committed={"tests/frozen/test_contract.py": FROZEN,
+                                     ".factory/baseline.json": json.dumps({"tests/frozen/test_contract.py": sha(FROZEN),
+                                                                           "tests/frozen/test_gone.py": sha(FROZEN)})})
+    d = decide(root, stop_payload(root, tmp_path))
+    assert d.kind == "block"
+    assert "test_gone.py" in d.reason
+
+
+@case("TB09-D-070")
+def test_d070_narrowed_test_run_counts(tmp_path):
+    """Clarification C-10: a Bash call containing `checks.test` counts as evidence 'even if narrowed to one file'."""
+    lib.need(HOOK, "decide")
+    assert b5(tmp_path, [EDIT, ("Bash", {"command": "pytest -q tests/test_calc.py"})]).kind == "allow"
+
+
+# ================================================================ second-round clarification C-32
+
+@case("TB09-D-071")
+def test_d071_zero_byte_transcript_is_unparseable(tmp_path):
+    """Clarification C-32: 'A zero-byte transcript file counts as unparseable (check 5 skipped, one line logged)'."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, profile=prof(checks=True), changes={"src/calc.py": CLEAN_CALC})
+    tp = tmp_path / "empty.jsonl"
+    tp.write_text("")
+    assert cli(root, stop_payload(root, tmp_path, tp=tp)) == "allow"
+    assert len(log_lines(root)) == 1
+
+
+@case("TB09-D-072")
+def test_d072_missing_transcript_not_logged_without_checks(tmp_path):
+    """Clarification C-32: a missing transcript 'is logged only when `checks.test` is set' - with checks unset the
+    stop is allowed and nothing is logged."""
+    lib.need(HOOK, "decide")
+    root = repo(tmp_path, changes={"src/calc.py": CLEAN_CALC})
+    assert cli(root, stop_payload(root, tmp_path, tp=tmp_path / "absent.jsonl")) == "allow"
+    assert log_lines(root) == []

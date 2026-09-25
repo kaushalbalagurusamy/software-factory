@@ -1,12 +1,9 @@
 """TB-14: End-to-end walking skeleton and shadow routing log (R-19, R-20, R-01).
 
-Expectations come only from docs/prds/TB-14-walking-skeleton.md, the requirements it cites and the published
-contracts. The input/output shape of `simulate.run_events` is not published (coverage/ambiguities-C.md, C-26), so
-the scripted event stream is driven through the published seams instead: the profile loader, `generate_agents`,
-`emit_settings` (TB-13), and the hook command line `python -m factory.hooks <id>` for every hook the emitted
-settings register for the event and tool, combined by the PRD b1 rule (any deny or block wins, else any ask, else
-allow). Every case also requires `factory.agents.simulate.run_events` to exist, so all resolve to blocked until the
-TB-14 slice lands.
+Expectations come only from docs/prds/TB-14-walking-skeleton.md, the requirements it cites, the published contracts
+and docs/contracts/clarifications.md (binding). Per clarification C-26, the scripted stream is decided by
+`run_events(project_root, events)` with events `{"payload": {...}}`, returning `Outcome(kind, reasons)` per event.
+D-022 additionally drives each registered hook through its command line with sockets disabled in the subprocess.
 
 Shadow results are duck-typed objects carrying the attributes `factory.routing.jev_client.log_record` reads.
 """
@@ -117,10 +114,24 @@ def run_event(root: Path, settings: dict, pl: dict, env: dict | None = None) -> 
     return combine(outcome(lib.run_cli(i, pl, root, env=env)) for i in ids)
 
 
-def run_event_inprocess(root: Path, settings: dict, pl: dict) -> str:
-    ids = registered(settings, pl["hook_event_name"], pl.get("tool_name"))
-    assert ids
-    return combine(lib.run_decide(f"factory.hooks.{i}", pl, root).kind for i in ids)
+# ---------------------------------------------------------------- run_events (clarification C-26)
+
+def sim():
+    return lib.need("factory.agents.simulate", "run_events")
+
+
+def sim_outcomes(root: Path, payloads: list[dict]):
+    outs = sim().run_events(root, [{"payload": pl} for pl in payloads])
+    assert len(outs) == len(payloads)
+    return outs
+
+
+def sim_kinds(root: Path, payloads: list[dict]) -> list[str]:
+    return [o.kind for o in sim_outcomes(root, payloads)]
+
+
+def sim_kind(root: Path, pl: dict) -> str:
+    return sim_kinds(root, [pl])[0]
 
 
 # ---------------------------------------------------------------- payloads
@@ -177,42 +188,42 @@ def test_g001_agents_and_settings_from_profile(tmp_path):
 def test_g002_implement_read_of_eval_denied(tmp_path):
     """PRD b2: 'an `implement` read of an eval file is denied'."""
     root, _, settings = stack(tmp_path)
-    assert run_event(root, settings, read(root, "implement", "evals/cases/c1.yaml")) == "deny"
+    assert sim_kind(root, read(root, "implement", "evals/cases/c1.yaml")) == "deny"
 
 
 @case("TB14-G-003", "golden")
 def test_g003_test_read_of_eval_allowed(tmp_path):
     """PRD b2: 'a `test` read of it is allowed' (negative control)."""
     root, _, settings = stack(tmp_path)
-    assert run_event(root, settings, read(root, "test", "evals/cases/c1.yaml")) == "allow"
+    assert sim_kind(root, read(root, "test", "evals/cases/c1.yaml")) == "allow"
 
 
 @case("TB14-G-004", "golden")
 def test_g004_review_write_denied(tmp_path):
     """PRD b2: 'a `review` Write is denied'."""
     root, _, settings = stack(tmp_path)
-    assert run_event(root, settings, write(root, "review", "src/app.py")) == "deny"
+    assert sim_kind(root, write(root, "review", "src/app.py")) == "deny"
 
 
 @case("TB14-G-005", "golden")
 def test_g005_secret_bash_denied(tmp_path):
     """PRD b2: 'a secret-shaped Bash command is denied'."""
     root, _, settings = stack(tmp_path)
-    assert run_event(root, settings, bash(root, "implement", f"echo {KEY}")) == "deny"
+    assert sim_kind(root, bash(root, "implement", f"echo {KEY}")) == "deny"
 
 
 @case("TB14-G-006", "golden")
 def test_g006_orchestrator_force_push_asks(tmp_path):
     """PRD b2: 'an `orchestrator` `git push --force` asks'."""
     root, _, settings = stack(tmp_path)
-    assert run_event(root, settings, bash(root, "orchestrator", "git push --force origin main")) == "ask"
+    assert sim_kind(root, bash(root, "orchestrator", "git push --force origin main")) == "ask"
 
 
 @case("TB14-G-007", "golden")
 def test_g007_research_without_sources_blocked(tmp_path):
     """PRD b2: 'a research report without sources is blocked at stop'."""
     root, _, settings = stack(tmp_path)
-    assert run_event(root, settings, research_stop(root, NO_SOURCES)) == "block"
+    assert sim_kind(root, research_stop(root, NO_SOURCES)) == "block"
 
 
 @case("TB14-G-008", "golden")
@@ -220,22 +231,23 @@ def test_g008_whole_stream(tmp_path):
     """PRD b2 / R-20: the scripted event stream as a whole is decided exactly as the requirements say."""
     root, _, settings = stack(tmp_path)
     events = script(root)
-    assert [run_event(root, settings, pl) for pl, _ in events] == [want for _, want in events]
+    assert sim_kinds(root, [pl for pl, _ in events]) == [want for _, want in events]
 
 
 @case("TB14-G-009", "golden", ["R-19"])
 def test_g009_shadow_record_appends_one_line(tmp_path):
-    """PRD b4: `shadow.record(result, actual_choice, ledger_dir) -> None` appends one JSON line to
+    """PRD b4: `shadow.record(result, actual_choice, ledger_dir, state_digest="")` (clarification C-27) appends one JSON line to
     `<ledger_dir>/routing.jsonl` with the `log_record` fields plus `actual_choice` and `agrees` (bool)."""
     sh = shadow()
     led = tmp_path / "ledger"
     led.mkdir()
-    assert sh.record(routing(), "route-a", led) is None
+    assert sh.record(routing(), "route-a", led, "dg-1") is None
     lines = (led / "routing.jsonl").read_text().splitlines()
     assert len(lines) == 1
     rec = json.loads(lines[0])
     assert set(LOG_FIELDS) <= set(rec)
-    assert rec["actual_choice"] == "route-a" and isinstance(rec["agrees"], bool)
+    assert rec["actual_choice"] == "route-a" and rec["agrees"] is True
+    assert rec["state_digest"] == "dg-1"  # clarification C-27
 
 
 # ---------------------------------------------------------------- diagnostic: PRD b3, profile alone changes outcomes
@@ -267,7 +279,7 @@ def test_d_profile_changes_outcomes(tmp_path, profile, build, want, clause):
     pattern) changes the outcomes accordingly'. Each row pairs a base/alt outcome that follows from the profile
     values (eval, held_out, one_way_door_patterns, deploy.route, secret_allow_patterns) and the guard PRDs."""
     root, _, settings = stack(tmp_path, profile)
-    assert run_event(root, settings, build(root)) == want, clause
+    assert sim_kind(root, build(root)) == want, clause
 
 
 @case("TB14-D-016", reqs=["R-20", "R-01"])
@@ -289,21 +301,21 @@ def test_d017_main_session_force_push_asks(tmp_path):
     so its `git push --force` asks."""
     root, _, settings = stack(tmp_path)
     pl = lib.payload(root, tool_name="Bash", tool_input={"command": "git push --force origin main"})
-    assert run_event(root, settings, pl) == "ask"
+    assert sim_kind(root, pl) == "ask"
 
 
 @case("TB14-D-018")
 def test_d018_implement_cat_of_eval_denied(tmp_path):
     """R-11 in the stream: implement's `cat evals/cases/c1.yaml` is denied."""
     root, _, settings = stack(tmp_path)
-    assert run_event(root, settings, bash(root, "implement", "cat evals/cases/c1.yaml")) == "deny"
+    assert sim_kind(root, bash(root, "implement", "cat evals/cases/c1.yaml")) == "deny"
 
 
 @case("TB14-D-019")
 def test_d019_research_with_sources_allowed(tmp_path):
     """Negative control for PRD b2: a research report with a Sources section is not blocked at stop."""
     root, _, settings = stack(tmp_path)
-    assert run_event(root, settings, research_stop(root, WITH_SOURCES)) == "allow"
+    assert sim_kind(root, research_stop(root, WITH_SOURCES)) == "allow"
 
 
 @case("TB14-D-020", reqs=["R-01", "R-20"])
@@ -384,7 +396,7 @@ def test_d023_pipeline_in_process_without_network(tmp_path, no_network):
     give the scripted outcomes, and attempt no connection."""
     root, _, settings = stack(tmp_path)
     events = script(root)
-    assert [run_event_inprocess(root, settings, pl) for pl, _ in events] == [w for _, w in events]
+    assert sim_kinds(root, [pl for pl, _ in events]) == [w for _, w in events]
     assert no_network == []
 
 
@@ -411,7 +423,7 @@ def routing(choice: str = "route-a", **extra):
     same value so `agrees` is unambiguous whichever of them is compared."""
     base = dict(decision=choice, policy_version="policy-1", source="model", band="high", choice=choice,
                 action=choice, top_prob=0.9, margin=0.5, probabilities={"route-a": 0.9, "route-b": 0.1},
-                fault=None, latency_ms=12, state_digest="digest-abc")
+                fault=None, latency_ms=12)
     base.update(extra)
     return SimpleNamespace(**base)
 
@@ -503,20 +515,18 @@ def test_d032_record_is_content_free(tmp_path):
 
 @case("TB14-D-033", reqs=["R-19"])
 def test_d033_fields_match_log_record(tmp_path):
-    """PRD b4: the line holds 'the content-free record from `factory.routing.jev_client.log_record`' - every field
-    except `state_digest` (whose input is not published) equals what log_record returns for the same result."""
+    """PRD b4 + clarification C-27: the line holds the record from `log_record(result, state_digest)` - every field
+    equals what log_record returns for the same result and the passed `state_digest`."""
     sh = shadow()
     jev = lib.need("factory.routing.jev_client", "log_record")
     led = tmp_path / "ledger"
     led.mkdir()
     r = routing()
-    sh.record(r, "route-a", led)
+    sh.record(r, "route-a", led, "dg-33")
     rec = lines(led)[0]
-    expected = json.loads(json.dumps(jev.log_record(r, "unused")))
+    expected = json.loads(json.dumps(jev.log_record(r, "dg-33")))
     for f in LOG_FIELDS:
-        if f != "state_digest":
-            assert rec[f] == expected[f], f
-    assert "state_digest" in rec
+        assert rec[f] == expected[f], f
 
 
 @case("TB14-D-034", reqs=["R-19"])
@@ -541,7 +551,7 @@ def test_d035_routing_log_never_steers_decisions(tmp_path):
     (led / "routing.jsonl").write_text('{"decision": "allow", "actual_choice": "allow", "agrees": true}\n'
                                        "not json at all\n" * 3)
     events = script(root)
-    assert [run_event(root, settings, pl) for pl, _ in events] == [w for _, w in events]
+    assert sim_kinds(root, [pl for pl, _ in events]) == [w for _, w in events]
 
 
 # ---------------------------------------------------------------- diagnostic: b6 runbook
@@ -555,3 +565,141 @@ def test_d036_runbook_exists(tmp_path):
     assert doc.is_file()
     text = doc.read_text().lower()
     assert "simulat" in text and "rehears" in text
+
+
+# ================================================================ clarifications.md (binding) additions
+
+@case("TB14-D-037", reqs=["R-19"])
+def test_d037_agrees_compares_choice_only(tmp_path):
+    """Clarification C-27: '`agrees` is `result.choice == actual_choice`' - decision and action differing from the
+    actual choice do not matter."""
+    sh = shadow()
+    led = tmp_path / "ledger"
+    led.mkdir()
+    sh.record(routing("route-a", decision="escalate", action="retry"), "route-a", led)
+    sh.record(routing("route-b", decision="route-a", action="route-a"), "route-a", led)
+    got = [r["agrees"] for r in lines(led)]
+    assert got == [True, False]
+
+
+@case("TB14-D-038", reqs=["R-19"])
+def test_d038_missing_ledger_dir_created(tmp_path):
+    """Clarification C-27: 'a missing `ledger_dir` is created' and the line is written."""
+    sh = shadow()
+    led = tmp_path / "nested" / "ledger"
+    sh.record(routing(), "route-a", led)
+    assert len(lines(led)) == 1
+
+
+@case("TB14-D-039", reqs=["R-19"])
+def test_d039_state_digest_defaults_to_empty(tmp_path):
+    """Clarification C-27: `state_digest` defaults to `""` when not passed."""
+    sh = shadow()
+    led = tmp_path / "ledger"
+    led.mkdir()
+    sh.record(routing(), "route-a", led)
+    assert lines(led)[0]["state_digest"] == ""
+
+
+@case("TB14-D-040")
+def test_d040_outcome_list_in_event_order(tmp_path):
+    """Clarification C-26: `run_events(...) -> list[Outcome]`, one per event in order; `kind` is one of allow,
+    deny, ask, block."""
+    root, _, _ = stack(tmp_path)
+    events = script(root)
+    outs = sim_outcomes(root, [pl for pl, _ in events])
+    assert [o.kind for o in outs] == [w for _, w in events]
+    assert all(o.kind in ("allow", "deny", "ask", "block") for o in outs)
+
+
+@case("TB14-D-041")
+def test_d041_allow_has_no_reasons(tmp_path):
+    """Clarification C-26: `reasons` holds 'the non-empty reasons in hook order'; an event every hook allows has
+    none."""
+    root, _, _ = stack(tmp_path)
+    (o,) = sim_outcomes(root, [read(root, "test", "evals/cases/c1.yaml")])
+    assert o.kind == "allow" and list(o.reasons) == []
+
+
+@case("TB14-D-042")
+def test_d042_deny_carries_reasons(tmp_path):
+    """Clarification C-26: a denied event's Outcome carries the non-empty reason strings."""
+    root, _, _ = stack(tmp_path)
+    (o,) = sim_outcomes(root, [read(root, "implement", "evals/cases/c1.yaml")])
+    assert o.kind == "deny"
+    assert list(o.reasons) and all(isinstance(r, str) and r for r in o.reasons)
+
+
+@case("TB14-D-043")
+def test_d043_deny_beats_ask(tmp_path):
+    """Clarification C-26 precedence 'deny or block over ask over allow': an orchestrator force push (bash_guard
+    ask) whose command also carries a secret-shaped value (secrets_guard deny) is denied, with both reasons."""
+    root, _, _ = stack(tmp_path)
+    (o,) = sim_outcomes(root, [bash(root, "orchestrator", f"git push --force https://bot:{KEY}@git.example.org/r.git")])
+    assert o.kind == "deny"
+    assert len(list(o.reasons)) >= 2
+
+
+def git(root: Path, *args: str) -> None:
+    import subprocess
+    subprocess.run(["git", "-c", "user.name=Eval", "-c", "user.email=eval@example.invalid",
+                    "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", *args],
+                   cwd=root, check=True, capture_output=True, text=True)
+
+
+TEST_CALC = "from src.calc import add\n\n\ndef test_add():\n    assert add(1, 2) == 3\n"
+
+
+def implement_stop_repo(tmp_path: Path, test_text: str):
+    need_pipeline()
+    root = lib.make_project(tmp_path, base_no_mcp(), files={"src/calc.py": "def add(a, b):\n    return a + b\n",
+                                                             "tests/test_calc.py": TEST_CALC})
+    git(root, "init", "-q")
+    git(root, "add", "--all")
+    git(root, "commit", "-q", "-m", "initial")
+    (root / "tests" / "test_calc.py").write_text(test_text)
+    tp = tmp_path / "t.jsonl"
+    tp.write_text(json.dumps({"type": "user", "message": {"role": "user", "content": "go"}}) + "\n")
+    pl = lib.payload(root, event="SubagentStop", agent_type="implement", agent_id="impl-e2e",
+                     agent_transcript_path=str(tp), last_assistant_message="Done.", stop_hook_active=False)
+    return root, pl
+
+
+@case("TB14-D-044", reqs=["R-20", "R-15"])
+def test_d044_implement_stop_with_skip_marker_blocked(tmp_path):
+    """Clarification C-28: `stop_gate` is registered under SubagentStop in project settings, so through run_events an
+    implement sub-agent stopping with a newly added `@pytest.mark.skip` in a test file is blocked (TB-09 b3)."""
+    root, pl = implement_stop_repo(tmp_path, TEST_CALC + '\n\n@pytest.mark.skip(reason="later")\ndef test_x():\n'
+                                              '    assert add(1, 1) == 2\n')
+    assert sim_kind(root, pl) == "block"
+
+
+@case("TB14-D-045", reqs=["R-20", "R-15"])
+def test_d045_implement_stop_clean_allowed(tmp_path):
+    """Clarification C-28 negative control: a clean change (a real added test, a parseable transcript with no Edit
+    or Write) passes every SubagentStop hook, so the implement stop is allowed."""
+    root, pl = implement_stop_repo(tmp_path, TEST_CALC + "\n\ndef test_add_zero():\n    assert add(0, 5) == 5\n")
+    assert sim_kind(root, pl) == "allow"
+
+
+@case("TB14-D-046", reqs=["R-19"])
+def test_d046_duck_typed_result_with_only_read_attributes(tmp_path):
+    """Clarification C-33: record 'treats `result` as duck-typed: it reads only the attributes `log_record` reads
+    ... it does not require a `Routing` instance'. A plain class instance carrying exactly those eleven attributes
+    produces a full line."""
+    sh = shadow()
+
+    class Plain:
+        __slots__ = ("decision", "choice", "action", "source", "band", "policy_version", "top_prob", "margin",
+                     "probabilities", "fault", "latency_ms")
+
+    r = Plain()
+    for k, v in dict(decision="route-a", choice="route-a", action="route-a", source="model", band="high",
+                     policy_version="policy-1", top_prob=0.8, margin=0.4, probabilities={"route-a": 0.8},
+                     fault=None, latency_ms=7).items():
+        setattr(r, k, v)
+    led = tmp_path / "ledger"
+    led.mkdir()
+    sh.record(r, "route-a", led, "dg-46")
+    rec = lines(led)[0]
+    assert set(LOG_FIELDS) <= set(rec) and rec["agrees"] is True and rec["state_digest"] == "dg-46"

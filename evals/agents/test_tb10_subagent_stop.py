@@ -29,9 +29,11 @@ def git(root: Path, *args: str) -> None:
                    cwd=root, check=True, capture_output=True, text=True)
 
 
-def project(tmp_path: Path, profile="base", new_files: dict | None = None) -> Path:
-    """Committed baseline (profile + README), then `new_files` written as untracked additions."""
-    root = lib.make_project(tmp_path, profile, files={"README.md": "fixture\n", "src/app.py": "X = 1\n"})
+def project(tmp_path: Path, profile="base", new_files: dict | None = None, committed: dict | None = None) -> Path:
+    """Committed baseline (profile + README + `committed`), then `new_files` written on top (untracked or modified)."""
+    files = {"README.md": "fixture\n", "src/app.py": "X = 1\n"}
+    files.update(committed or {})
+    root = lib.make_project(tmp_path, profile, files=files)
     git(root, "init", "-q")
     git(root, "add", "--all")
     git(root, "commit", "-q", "-m", "initial")
@@ -213,12 +215,13 @@ def test_d004_url_only_before_sources_heading_blocks(tmp_path):
 
 
 @case("TB10-D-005")
-def test_d005_plain_sources_word_is_not_a_label(tmp_path):
-    """PRD b2: 'a heading or bold label `Sources`'; a plain sentence mentioning sources is neither."""
+def test_d005_plain_sources_label_allows(tmp_path):
+    """Clarification C-16: 'the label may be `Sources`, `**Sources**`, `**Sources:**` or a heading `## Sources`' - a
+    plain `Sources` label line followed by a URL is accepted."""
     lib.need(HOOK, "decide")
     root = project(tmp_path)
-    msg = "Batching is supported; my sources were varied, e.g. https://docs.example.org/api/batching.\n"
-    assert decide(root, "research", msg).kind == "block"
+    msg = "Batching is supported.\n\nSources\n- https://docs.example.org/api/batching\n"
+    assert decide(root, "research", msg).kind == "allow"
 
 
 @case("TB10-D-006")
@@ -568,3 +571,122 @@ def test_d043_cli_block_shape(tmp_path):
     assert data["decision"] == "block" and data["reason"]
     allowed = lib.run_cli("subagent_stop", stop(root, "research", RESEARCH_OK), root)
     assert allowed.returncode == 0 and allowed.stdout.strip() == ""
+
+
+# ================================================================ clarifications.md (binding) additions
+
+@case("TB10-D-044")
+def test_d044_bold_sources_colon_label_allows(tmp_path):
+    """Clarification C-16: `**Sources:**` is an accepted label form."""
+    lib.need(HOOK, "decide")
+    root = project(tmp_path)
+    msg = "Batching is supported.\n\n**Sources:**\n- docs/research/batching.md\n"
+    assert decide(root, "research", msg).kind == "allow"
+
+
+@case("TB10-D-045")
+def test_d045_unverified_matches_case_insensitively(tmp_path):
+    """Clarification C-16: '`unverified` matches case-insensitively' - `Unverified` without the marker blocks."""
+    lib.need(HOOK, "decide")
+    root = project(tmp_path)
+    msg = "Unverified: the limit is 50 per minute. Batching works.\n\n## Sources\n- https://docs.example.org/a\n"
+    assert decide(root, "research", msg).kind == "block"
+
+
+@case("TB10-D-046")
+def test_d046_inconclusive_with_approve_blocks(tmp_path):
+    """Clarification C-15: '`inconclusive` grades with `VERDICT: APPROVE` also block'."""
+    lib.need(HOOK, "decide")
+    root = project(tmp_path)
+    msg = "Reviewed.\nTB09-G-001: right_reason\nTB09-D-001: inconclusive\n\nVERDICT: APPROVE\n"
+    assert decide(root, "review", msg).kind == "block"
+
+
+@case("TB10-D-047")
+def test_d047_both_verdicts_block(tmp_path):
+    """Clarification C-17: 'A message containing both `VERDICT: APPROVE` and `VERDICT: REJECT` blocks'."""
+    lib.need(HOOK, "decide")
+    root = project(tmp_path)
+    msg = "Bug at src/app.py:7.\nTB09-G-001: right_reason\n\nVERDICT: APPROVE\nVERDICT: REJECT\n"
+    assert decide(root, "review", msg).kind == "block"
+
+
+AUDIT_HEADER = "| Location | Severity | Mitigation |\n|---|---|---|\n"
+
+
+@case("TB10-D-048")
+def test_d048_header_and_separator_excluded(tmp_path):
+    """Clarification C-12: 'Audit table rows exclude the header line and the separator line' - a conventional table
+    with valid data rows is allowed."""
+    lib.need(HOOK, "decide")
+    assert audit(tmp_path, AUDIT_HEADER + AUDIT_OK_ROWS).kind == "allow"
+
+
+@case("TB10-D-049")
+def test_d049_preexisting_rows_are_not_new(tmp_path):
+    """Clarification C-11: 'new' means added relative to git HEAD - a committed malformed row is not re-checked
+    when valid rows are appended."""
+    lib.need(HOOK, "decide")
+    rel = "docs/audit/BUGS-MITIGATIONS.md"
+    old = AUDIT_HEADER + "| legacy note without citation | whatever |\n"
+    root = project(tmp_path, committed={rel: old}, new_files={rel: old + AUDIT_OK_ROWS})
+    assert decide(root, "audit", "Audit complete; findings recorded.").kind == "allow"
+
+
+@case("TB10-D-050")
+def test_d050_appended_row_to_tracked_file_checked(tmp_path):
+    """Clarification C-11: rows added relative to HEAD in a tracked file are new - an appended row without a
+    severity blocks."""
+    lib.need(HOOK, "decide")
+    rel = "docs/audit/BUGS-MITIGATIONS.md"
+    old = AUDIT_HEADER + AUDIT_OK_ROWS
+    root = project(tmp_path, committed={rel: old}, new_files={rel: old + "| src/app.py:99 | fix it |\n"})
+    assert decide(root, "audit", "Audit complete; findings recorded.").kind == "block"
+
+
+@case("TB10-D-051")
+def test_d051_unchanged_committed_spec_not_checked(tmp_path):
+    """Clarification C-13: 'changed' means added or modified relative to HEAD - an incomplete spec that is
+    committed and unchanged is not checked."""
+    lib.need(HOOK, "decide")
+    root = project(tmp_path, committed={"docs/spec/old-spec.md": "# Old spec\nnothing\n"})
+    assert decide(root, "design", "Design written.").kind == "allow"
+
+
+@case("TB10-D-052")
+def test_d052_modified_committed_spec_checked(tmp_path):
+    """Clarification C-13: a tracked spec modified since HEAD is changed and must keep the four headings."""
+    lib.need(HOOK, "decide")
+    rel = "docs/spec/login-spec.md"
+    root = project(tmp_path, committed={rel: SPEC_OK},
+                   new_files={rel: SPEC_OK.replace("## Axioms", "## Rules")})
+    d = decide(root, "design", "Design written.")
+    assert d.kind == "block"
+    assert "Axioms" in d.reason
+
+
+ALT_SPEC = SPEC_OK + "\none-way door: yes\n"
+
+
+@case("TB10-D-053")
+def test_d053_alt_adr_design_dir_satisfies(tmp_path):
+    """Clarification C-14: the ADR directory is literal `docs/adr` 'or any `paths.design_dirs` entry whose last
+    segment is `adr`' - under alt, an ADR in design/adr satisfies a one-way door."""
+    lib.need(HOOK, "decide")
+    files = {"design/prd/checkout-spec.md": ALT_SPEC, "design/adr/ADR-0001-ledger.md": "# ADR-0001\n"}
+    assert design(tmp_path, files, profile="alt").kind == "allow"
+
+
+@case("TB10-D-054")
+def test_d054_alt_one_way_door_without_adr_blocks(tmp_path):
+    """Clarification C-14 with PRD b5: under alt, `one-way door: yes` with no ADR in design/adr or docs/adr blocks."""
+    lib.need(HOOK, "decide")
+    assert design(tmp_path, {"design/prd/checkout-spec.md": ALT_SPEC}, profile="alt").kind == "block"
+
+
+@case("TB10-D-055")
+def test_d055_alt_literal_docs_adr_satisfies(tmp_path):
+    """Clarification C-14: the literal `docs/adr` is always an ADR directory, also under alt."""
+    lib.need(HOOK, "decide")
+    files = {"design/prd/checkout-spec.md": ALT_SPEC, "docs/adr/ADR-0002-x.md": "# ADR-0002\n"}
+    assert design(tmp_path, files, profile="alt").kind == "allow"

@@ -1,8 +1,8 @@
 """TB-11: Ticket ledger and its hooks (R-17).
 
 Expectations come only from docs/prds/TB-11-ledger.md and docs/contracts/graph-and-ledger.md / hook-io.md.
-The exact byte layout hashed by the chain is not published, so no case recomputes a chain value; tamper cases only
-require that verify() reports a problem (see coverage/ambiguities-C.md).
+docs/contracts/clarifications.md (binding) fixes the chain formula (C-19), append-order chaining with a `seq` on
+each chain line (C-30), the head anchor (C-21, C-31) and the verify wording (C-22).
 """
 from __future__ import annotations
 
@@ -28,7 +28,8 @@ OWNERS = {  # contract: section ownership
     "audit": set(),
 }
 T0 = datetime(2026, 9, 24, 12, 0, 0, tzinfo=timezone.utc)
-CHAIN_RE = re.compile(r"^<!-- chain: ([0-9a-fA-F]{64}) -->\s*$", re.M)
+CHAIN_RE = re.compile(r"^<!-- chain: ([0-9a-fA-F]{64}); seq: \d+ -->\s*$", re.M)  # clarification C-30
+SEQ_LINE = re.compile(r"^<!-- chain: ([0-9a-f]{64}); seq: (\d+) -->\s*$")
 
 
 def case(cid: str, tier: str = "diagnostic", reqs=None):
@@ -102,7 +103,7 @@ def test_g003_append_header_text_and_chain(tmp_path):
     led.append(p, "Implementation", "implement", "ALPHA implementation note", T0)
     text = p.read_text()
     b = block(text, "ALPHA")
-    assert re.match(r"^### 2026-09-24T12:00:00(\.0+)?(Z|\+00:00) implement\s*$", b.splitlines()[0])
+    assert b.splitlines()[0].rstrip() == "### 2026-09-24T12:00:00Z implement"  # clarification C-23
     assert CHAIN_RE.search(b.splitlines()[-1])
     assert heading_pos(text, "Implementation") < text.index("ALPHA") < heading_pos(text, "Review")
 
@@ -125,13 +126,14 @@ def test_g005_verify_intact_is_empty(tmp_path):
 
 @case("TB11-G-006", "golden")
 def test_g006_verify_detects_edited_entry(tmp_path):
-    """PRD b4 + contract: an edit to an earlier entry is detectable; `verify` names the section."""
+    """PRD b4 + contract + clarification C-22: an edit to an earlier entry is detected and reported as
+    `section 'Implementation' entry 2` (entries numbered 1-based within the file: CHARLIE, ALPHA, BRAVO, DELTA)."""
     led = L()
     p = fill(tmp_path)
     p.write_text(p.read_text().replace("ALPHA implementation note", "ALPHA implementation n0te"))
     problems = led.verify(p)
     assert problems
-    assert "Implementation" in " ".join(problems)
+    assert "section 'Implementation' entry 2" in " ".join(problems)  # clarification C-22
 
 
 @case("TB11-G-007", "golden")
@@ -351,31 +353,31 @@ def test_d020_edit_last_entry_detected(tmp_path):
     p = fill(tmp_path)
     p.write_text(p.read_text().replace("DELTA review note", "DELTA review nope"))
     problems = led.verify(p)
-    assert problems and "Review" in " ".join(problems)
+    assert problems and "section 'Review' entry 4" in " ".join(problems)
 
 
 @case("TB11-D-021")
 def test_d021_removed_entry_detected(tmp_path):
-    """PRD b4: 'a removed entry' is named - deleting the ALPHA block (followed by BRAVO) is detected."""
+    """PRD b4: 'a removed entry' is detected - deleting the ALPHA block (seq 2) leaves a gap."""
     led = L()
     p = fill(tmp_path)
     text = p.read_text()
     p.write_text(text.replace(block(text, "ALPHA"), ""))
-    problems = led.verify(p)
-    assert problems and "Implementation" in " ".join(problems)
+    assert led.verify(p)  # clarification C-30: surfaces as a seq gap and/or a chain mismatch
 
 
 @case("TB11-D-022")
 def test_d022_reordered_entries_detected(tmp_path):
-    """PRD b4: 'a reordered entry' is detected - swapping ALPHA and BRAVO."""
+    """PRD b4 + clarification C-30: the chain runs in append order given by `seq`; reordering ALPHA (seq 2) and
+    BRAVO (seq 3) in append order by swapping their seq values breaks the chain and is detected."""
     led = L()
     p = fill(tmp_path)
     text = p.read_text()
     a, b = block(text, "ALPHA"), block(text, "BRAVO")
-    p.write_text(text.replace(a, "\x00").replace(b, a).replace("\x00", b))
-    assert p.read_text() != text
-    problems = led.verify(p)
-    assert problems and "Implementation" in " ".join(problems)
+    a2, b2 = a.replace("; seq: 2 -->", "; seq: 3 -->"), b.replace("; seq: 3 -->", "; seq: 2 -->")
+    assert a2 != a and b2 != b
+    p.write_text(text.replace(a, a2).replace(b, b2))
+    assert led.verify(p)
 
 
 @case("TB11-D-023")
@@ -388,7 +390,7 @@ def test_d023_missing_chain_line_detected(tmp_path):
     chain_line = b.splitlines(keepends=True)[-1]
     p.write_text(text.replace(b, b[: -len(chain_line)]))
     problems = led.verify(p)
-    assert problems and "Implementation" in " ".join(problems)
+    assert problems and "section 'Implementation'" in " ".join(problems)
 
 
 @case("TB11-D-024")
@@ -398,7 +400,7 @@ def test_d024_edit_in_earlier_section_named(tmp_path):
     p = fill(tmp_path)
     p.write_text(p.read_text().replace("CHARLIE research note", "CHARLIE research n0te"))
     problems = led.verify(p)
-    assert problems and "Research" in " ".join(problems)
+    assert problems and "section 'Research' entry 1" in " ".join(problems)
 
 
 @case("TB11-D-025")
@@ -409,7 +411,7 @@ def test_d025_forged_chain_value_detected(tmp_path):
     p = fill(tmp_path)
     text = p.read_text()
     b = block(text, "ALPHA")
-    forged = CHAIN_RE.sub("<!-- chain: " + "ab" * 32 + " -->", b)
+    forged = re.sub(r"chain: [0-9a-f]{64}", "chain: " + "ab" * 32, b)
     assert forged != b
     p.write_text(text.replace(b, forged))
     assert led.verify(p)
@@ -598,3 +600,229 @@ def test_d041_session_start_cli_no_ticket(tmp_path):
     assert proc.returncode == 0
     out = proc.stdout.strip()
     assert out and "\n" not in out
+
+
+# ================================================================ clarifications.md (binding) additions
+
+import hashlib  # noqa: E402
+
+ENTRY_HEADER = re.compile(r"^### \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z \S+\s*$")
+ANCHOR_RE = re.compile(r"^<!-- entries: (\d+); head: ?([0-9a-f]*) -->\s*$")
+
+
+def entries(text: str) -> list[tuple[str, str, int]]:
+    """(body text, stored chain, seq) per entry, sorted by seq; body = lines after the header up to the chain line,
+    trailing newline removed (clarifications C-19, C-30)."""
+    out, lines, i = [], text.splitlines(keepends=True), 0
+    while i < len(lines):
+        if ENTRY_HEADER.match(lines[i]):
+            j = i + 1
+            while j < len(lines) and not lines[j].startswith("<!-- chain:"):
+                j += 1
+            body = "".join(lines[i + 1:j])
+            body = body[:-1] if body.endswith("\n") else body
+            m = SEQ_LINE.match(lines[j])
+            out.append((body, m.group(1), int(m.group(2))))
+            i = j
+        i += 1
+    return sorted(out, key=lambda e: e[2])
+
+
+def chain(prev: str, text: str) -> str:
+    return hashlib.sha256(prev.encode("utf-8") + b"\n" + text.encode("utf-8")).hexdigest()
+
+
+@case("TB11-D-042")
+def test_d042_chain_formula_global_file_order(tmp_path):
+    """Clarifications C-19 and C-30: chain = sha256(prev_chain + "\\n" + text), prev "" for seq 1, run over all
+    entries in append (seq) order across sections. Recomputed for the four-entry ledger."""
+    text = fill(tmp_path).read_text()
+    es = entries(text)
+    assert [e[2] for e in es] == [1, 2, 3, 4]
+    prev = ""
+    for body, stored, _ in es:
+        assert stored == chain(prev, body)
+        prev = stored
+
+
+@case("TB11-D-043")
+def test_d043_first_entry_chain_value(tmp_path):
+    """Clarification C-19: the first entry's chain is sha256("" + "\\n" + text) of its body."""
+    led = L()
+    p = new_ledger(tmp_path)
+    led.append(p, "Implementation", "implement", "ALPHA implementation note", T0)
+    ((body, stored, seq),) = entries(p.read_text())
+    assert seq == 1
+    assert body == "ALPHA implementation note"
+    assert stored == chain("", "ALPHA implementation note")
+
+
+@case("TB11-D-044")
+def test_d044_head_anchor_line(tmp_path):
+    """Clarification C-21: 'The file's first line after the title is `<!-- entries: N; head: <chain> -->`, updated
+    on each append' - after four appends N is 4 and head is the last entry's chain."""
+    text = fill(tmp_path).read_text()
+    lines = [x for x in text.splitlines()[1:] if x.strip()]
+    m = ANCHOR_RE.match(lines[0])
+    assert m, lines[0]
+    assert int(m.group(1)) == 4
+    assert m.group(2) == entries(text)[-1][1]
+
+
+@case("TB11-D-045")
+def test_d045_anchor_updates_on_each_append(tmp_path):
+    """Clarification C-21: the anchor is updated on each append (1 entry, then 2)."""
+    led = L()
+    p = new_ledger(tmp_path)
+    for n in (1, 2):
+        led.append(p, "Implementation", "implement", f"entry {n}", T0 + timedelta(minutes=n))
+        text = p.read_text()
+        m = next(ANCHOR_RE.match(x) for x in text.splitlines() if ANCHOR_RE.match(x))
+        assert int(m.group(1)) == n and m.group(2) == entries(text)[-1][1]
+
+
+@case("TB11-D-046")
+def test_d046_removing_last_entry_detected(tmp_path):
+    """Clarification C-21: 'verify compares it with the entries, so removing the last entry is detected'."""
+    led = L()
+    p = fill(tmp_path)
+    text = p.read_text()
+    p.write_text(text.replace(block(text, "DELTA"), ""))
+    assert led.verify(p)
+
+
+@case("TB11-D-047")
+def test_d047_now_as_z_string(tmp_path):
+    """Clarification C-23: `now` may be 'an ISO string ending `Z`'; headers print `YYYY-MM-DDTHH:MM:SSZ`."""
+    led = L()
+    p = new_ledger(tmp_path)
+    led.append(p, "Review", "review", "ZULU review note", "2026-09-24T13:45:10Z")
+    assert block(p.read_text(), "ZULU").splitlines()[0].rstrip() == "### 2026-09-24T13:45:10Z review"
+    assert led.verify(p) == []
+
+
+@case("TB11-D-048")
+def test_d048_audit_entry_role_is_orchestrator(tmp_path):
+    """Clarification C-24: 'The Audit Trail entry is appended with role `orchestrator`'."""
+    root = audit_record(tmp_path, "Research finished.", agent_id="agent-hdr")
+    text = (root / ".factory" / "ledger" / "T-7.md").read_text()
+    header = block(text, "agent-hdr").splitlines()[0]
+    assert ENTRY_HEADER.match(header) and header.rstrip().endswith(" orchestrator")
+
+
+@case("TB11-D-049")
+def test_d049_missing_ledger_file_does_nothing(tmp_path):
+    """Clarification C-24: 'a missing ledger file ... makes the hook do nothing' - no exception, no file created."""
+    hook = lib.need("factory.hooks.ledger_audit", "decide", "record")
+    root = lib.make_project(tmp_path)
+    (root / ".factory" / "current_ticket").write_text("T-404")
+    cfg, payload = hook_env(root, stop_pl(root, "done"))
+    hook.record(payload, cfg)
+    assert not (root / ".factory" / "ledger" / "T-404.md").exists()
+
+
+@case("TB11-D-050")
+def test_d050_ticket_id_whitespace_trimmed(tmp_path):
+    """Clarification C-24: 'whitespace around the ticket id is trimmed'."""
+    hook = lib.need("factory.hooks.ledger_audit", "decide", "record")
+    root = ticket_project(tmp_path)
+    (root / ".factory" / "current_ticket").write_text("  T-7 \n")
+    cfg, payload = hook_env(root, stop_pl(root, "trimmed run", agent_id="agent-trim"))
+    hook.record(payload, cfg)
+    assert "agent-trim" in (root / ".factory" / "ledger" / "T-7.md").read_text()
+
+
+@case("TB11-D-051")
+def test_d051_redact_then_truncate(tmp_path):
+    """Clarification C-25: 'Secret-shaped values are removed first, then the text is cut to 200 characters' - a key
+    straddling character 200 leaves no fragment of itself."""
+    key = "ghp" + "_" + "Ab3Xy9" * 6
+    root = audit_record(tmp_path, "a" * 190 + key + " trailing words")
+    text = (root / ".factory" / "ledger" / "T-7.md").read_text()
+    assert key[:10] not in text
+
+
+# ================================================================ second-round clarifications (C-30, C-31)
+
+def out_of_order(tmp_path: Path) -> Path:
+    """Implementation first (seq 1), then Research (seq 2), whose section sits earlier in the file."""
+    led = L()
+    p = new_ledger(tmp_path)
+    led.append(p, "Implementation", "implement", "INDIA implementation note", T0)
+    led.append(p, "Research", "research", "JULIET research note", T0 + timedelta(minutes=1))
+    return p
+
+
+@case("TB11-D-052")
+def test_d052_append_to_earlier_section_verifies(tmp_path):
+    """Clarification C-30: the chain runs in append order and entries stay in their sections, so appending to
+    Research after an Implementation entry leaves an intact ledger (`verify` orders by seq)."""
+    led = L()
+    p = out_of_order(tmp_path)
+    text = p.read_text()
+    assert text.index("JULIET") < text.index("INDIA")
+    assert led.verify(p) == []
+
+
+@case("TB11-D-053")
+def test_d053_seq_is_global_append_counter(tmp_path):
+    """Clarification C-30: `seq` is 'the 1-based global append counter' and the hash covers the entry with seq n-1:
+    Implementation (appended first) has seq 1, Research seq 2 whose chain covers seq 1's value."""
+    text = out_of_order(tmp_path).read_text()
+    es = entries(text)
+    assert [(e[0], e[2]) for e in es] == [("INDIA implementation note", 1), ("JULIET research note", 2)]
+    assert es[0][1] == chain("", es[0][0])
+    assert es[1][1] == chain(es[0][1], es[1][0])
+
+
+@case("TB11-D-054")
+def test_d054_anchor_head_is_highest_seq(tmp_path):
+    """Clarifications C-21 and C-30: after an out-of-file-order append the anchor reads `entries: 2` and its head is
+    the chain of seq 2 (the Research entry, although it is not last in the file)."""
+    text = out_of_order(tmp_path).read_text()
+    m = next(ANCHOR_RE.match(x) for x in text.splitlines() if ANCHOR_RE.match(x))
+    assert int(m.group(1)) == 2 and m.group(2) == entries(text)[1][1]
+
+
+@case("TB11-D-055")
+def test_d055_seq_gap_detected(tmp_path):
+    """Clarification C-30: `verify` 'requires seq to run 1..N without gaps ... and reports a seq gap' - DELTA's
+    seq changed from 4 to 5."""
+    led = L()
+    p = fill(tmp_path)
+    text = p.read_text()
+    b = block(text, "DELTA")
+    p.write_text(text.replace(b, b.replace("; seq: 4 -->", "; seq: 5 -->")))
+    assert led.verify(p)
+
+
+@case("TB11-D-056")
+def test_d056_seq_repeat_detected(tmp_path):
+    """Clarification C-30: a repeated seq is reported - BRAVO's seq changed from 3 to 2 (ALPHA's)."""
+    led = L()
+    p = fill(tmp_path)
+    text = p.read_text()
+    b = block(text, "BRAVO")
+    p.write_text(text.replace(b, b.replace("; seq: 3 -->", "; seq: 2 -->")))
+    assert led.verify(p)
+
+
+@case("TB11-D-057")
+def test_d057_empty_ledger_anchor(tmp_path):
+    """Clarification C-31: 'For a ledger with no entries the anchor line is `<!-- entries: 0; head: -->`', as the
+    first non-blank line after the title."""
+    lines = [x for x in new_ledger(tmp_path).read_text().splitlines()[1:] if x.strip()]
+    assert lines[0].strip() == "<!-- entries: 0; head: -->"
+
+
+@case("TB11-D-058")
+def test_d058_chain_line_carries_seq(tmp_path):
+    """Contract (graph-and-ledger, revised) + C-30: each entry's trailing line is `<!-- chain: <sha256 hex>; seq: <n>
+    -->`; three appends carry seq 1, 2, 3 in append order."""
+    led = L()
+    p = new_ledger(tmp_path)
+    for i, (sec, role) in enumerate([("Review", "review"), ("Spec", "design"), ("Evals", "test")], start=1):
+        led.append(p, sec, role, f"entry {i}", T0 + timedelta(minutes=i))
+    got = {e[0]: e[2] for e in entries(p.read_text())}
+    assert got == {"entry 1": 1, "entry 2": 2, "entry 3": 3}
+    assert led.verify(p) == []
