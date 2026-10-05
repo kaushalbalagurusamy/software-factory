@@ -56,6 +56,7 @@ In the modern AI development loop, code velocity is no longer the bottleneck. Wh
 | **`sf-interface-auditor`** | [`skills/sf-interface-auditor/SKILL.md`](skills/sf-interface-auditor/SKILL.md) | Enforces discriminated unions, minimal public surface area, and prunes PR bloat. |
 | **`biz-decomposer`** | [`skills/biz-decomposer/SKILL.md`](skills/biz-decomposer/SKILL.md) | Decomposes fixed business requirements into a question tree and the ranked research seeds that start the build loop. |
 | **`experiment-designer`** | [`skills/experiment-designer/SKILL.md`](skills/experiment-designer/SKILL.md) | Chooses which architectural uncertainties merit an experiment and designs fair, abstracted comparisons with a pre-registered decision rule. |
+| **`prd-writer`** | [`skills/prd-writer/SKILL.md`](skills/prd-writer/SKILL.md) | Writes the developer-facing PRD with a per-unit file scope (owned, new, and read-only files plus entry points), a soft sandbox that replaces exploratory searching. |
 
 ---
 
