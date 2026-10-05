@@ -24,10 +24,15 @@ A **harness** entry, per the promotion rule, is not just instructions — it's t
 | `eval-designer` | Skill | `~/.claude/skills/eval-designer` | Designs deterministic eval harnesses for AI-produced/judged capabilities — a skill's own trigger accuracy and output quality, or a non-deterministic product feature (LLM suggestion/summary/classification) — with boundary/failure-mode cases ordered before happy-path ones and a candidate-vs-baseline benchmark loop; absorbs `sf-spec-testing`'s intent. Reuses `skill-creator`'s benchmarking tooling directly rather than duplicating it. Iteration/eval history in `~/Projects/eval-designer-workspace`. |
 | `prd-designer` | Skill | `~/.claude/skills/prd-designer` | Turns a vague idea, stakeholder one-liner, or messy conversation into a structured PRD (goals, non-goals, user stories/scenarios, quantified success metrics, constraints, open questions) shaped so `axiomatic-spec` can consume it directly, without writing axioms/contracts/ADRs itself. Sits upstream of `axiomatic-spec`, which otherwise assumes a PRD already exists. Iteration/eval history in `~/Projects/prd-designer-workspace`. |
 
-## Pending promotions (new skills, in progress as of 2026-09-15)
+## Pending promotions (new skills, in progress as of 2026-10-05)
 
 | Capability | Target rung | Gap it closes |
 | :--- | :--- | :--- |
+| `biz-decomposer` | Skill | Turns fixed business requirements into a requirement tree and ranked research seeds; nothing seeds the research fan-out without it. Drafted in `skills/biz-decomposer`; not yet installed or run through the eval loop. |
+| `experiment-designer` | Skill | Chooses which architectural uncertainties merit an experiment and designs fair, abstracted comparisons with a pre-registered decision rule. Drafted in `skills/experiment-designer`; not yet installed or run through the eval loop. First planned test case: ROADMAP Phase 3. |
+| `prd-writer` | Skill | Dev-facing PRD that merges the spec targets, accepted ADRs, and experiment verdicts, so `axiomatic-spec` does not derive axioms from a document it wrote itself. Not started. |
+| `spec-writer` | Rename of `prd-designer` | `prd-designer` becomes the business-facing `spec-writer`. The installed directory and the `prd-designer` row above are unchanged until the rename is done. |
+| `experiment-arm-runner`, `experiment-referee`, `red-team-verifier` | Subagent | Isolation is structural for these roles: arms must not see each other, and the referee and red-team verifier must not see the builder's work. Defined from the first experiment, not after repetition. Not started. |
 
 ## How to update this ledger
 

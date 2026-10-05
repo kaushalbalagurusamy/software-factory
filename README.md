@@ -54,6 +54,8 @@ In the modern AI development loop, code velocity is no longer the bottleneck. Wh
 | **`sf-io-analyzer`** | [`skills/sf-io-analyzer/SKILL.md`](skills/sf-io-analyzer/SKILL.md) | Audits $O(N)$ query loops, unindexed scans, connection pooling, and payload bloat. |
 | **`sf-door-guard`** | [`skills/sf-door-guard/SKILL.md`](skills/sf-door-guard/SKILL.md) | Pre-flight safety check, blast-radius calculation, and rollback strategy design. |
 | **`sf-interface-auditor`** | [`skills/sf-interface-auditor/SKILL.md`](skills/sf-interface-auditor/SKILL.md) | Enforces discriminated unions, minimal public surface area, and prunes PR bloat. |
+| **`biz-decomposer`** | [`skills/biz-decomposer/SKILL.md`](skills/biz-decomposer/SKILL.md) | Decomposes fixed business requirements into a question tree and the ranked research seeds that start the build loop. |
+| **`experiment-designer`** | [`skills/experiment-designer/SKILL.md`](skills/experiment-designer/SKILL.md) | Chooses which architectural uncertainties merit an experiment and designs fair, abstracted comparisons with a pre-registered decision rule. |
 
 ---
 
