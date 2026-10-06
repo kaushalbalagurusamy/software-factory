@@ -49,6 +49,8 @@ Sources: cursor.com/docs/bugbot; cursor.com/blog/bugbot-learning; cursor.com/blo
 | `reviews/<slice>/review.md` | Rendered diff hunks with each finding as an inline comment |
 | `reviews/<slice>/dispositions.json` | The disposition of each finding |
 | `.claude/rule-candidates.md` (per repo) | Candidate rules proposed from dismissals, pending approval |
+| `.claude/review-knowledge.md` (per repo) | Approved repo knowledge: architecture, style idioms, intended oddities, hazards (section 9b) |
+| `.claude/knowledge-candidates.md` (per repo) | Proposed knowledge entries awaiting human approval |
 
 The build-loop profile (`.claude/build-loop.md`) gains one line naming the rules file and the reviews directory.
 
@@ -130,6 +132,23 @@ Learning loop, human-gated where Bugbot's is automatic:
 - Each `dismiss` with a reason, and each human reviewer comment on a diff, can add a candidate to `.claude/rule-candidates.md`.
 - A candidate becomes a rule only when the human approves it. A rule that accrues dismissals is flagged for review, not silently disabled.
 
+## 9b. Repo knowledge learned from feedback
+
+Rules say what to flag. Knowledge says how this repository works and how code is written in it, so the reviewer reads a diff the way a long-time maintainer would. Both are fed by the same human feedback, and they are kept apart because they are used differently: a rule is enforced and needs an example, while a knowledge entry is context the reviewer weighs.
+
+- **File:** `.claude/review-knowledge.md` per repo, one entry per fact, grouped by area (architecture and module boundaries, naming and style idioms, error and logging conventions, concurrency and data-access patterns, known hazards, things that look wrong but are intended).
+- **Entry fields:** `id`, `area` or `glob`, the statement, `evidence` (a file path and symbol, a commit, or the feedback quoted verbatim), `learned` (date), `source` (disposition id or human comment), and `last_verified` (date).
+- **What feeds it:**
+  - A `dismiss` with a reason such as "this is intended because..." becomes a "looks wrong but intended" entry.
+  - An `accept` or `fix-in-slice` whose comment states a convention becomes a style or architecture entry.
+  - A human reviewer's comment on a diff, or an edit the human makes to a builder's fix, can propose an entry, with the diff as evidence.
+  - A finding the human adds that the reviewer missed becomes a candidate hazard entry, and is also queued as an eval case (section 10).
+- **Gate:** entries are proposed into `.claude/knowledge-candidates.md` and become active only on human approval, logged like rule approvals. Nothing the reviewer wrote about itself is trusted as repo knowledge without that approval.
+- **Use:** the reviewer loads entries whose `area` or `glob` matches the changed files, within a size budget. A knowledge entry never suppresses a finding on its own. It lowers confidence or adds context, and the verifier still has to confirm from the code.
+- **Staleness:** before relying on an entry, the reviewer checks its evidence still exists in the current code. If the file or symbol is gone, the entry is treated as a hint and flagged for the human to retire or update. `last_verified` is updated only by that check.
+- **Hygiene:** no secrets, credentials, or personal data in entries; quotes are redacted the same way as in the Decision Trail.
+- **Bootstrap:** on a repo with no knowledge file, the first reviews seed candidates from `CLAUDE.md`, existing ADRs, and a `brownfield-explorer` map when one exists, all marked as unapproved candidates.
+
 ## 10. Evaluation of diff-review itself
 
 Authored before the skill body, using `eval-designer`.
@@ -139,6 +158,8 @@ Authored before the skill body, using `eval-designer`.
 - **Clean diffs** must produce zero confirmed findings. This measures false positives directly.
 - **Integrity cases:** a diff that special-cases a fixture id, and one that widens an assertion range; both must be flagged as integrity.
 - **Verifier cases:** a plausible but false candidate must be rejected.
+- **Knowledge cases:** (a) a convention taught through one feedback item is applied to a later diff that violates it; (b) an "intended oddity" entry stops the same non-bug from being flagged again; (c) an entry whose evidence no longer exists is treated as a hint and flagged, not trusted; (d) an entry that conflicts with the code must not suppress a confirmed defect.
+- **Feedback-miss cases:** each finding a human adds that the reviewer missed is added to the coverage set as a seeded case, so the same miss is measurable next time.
 - **Metrics:** precision and recall per lens, measured on these sets. The resolution rate Bugbot publishes is not used, because it cannot separate a fixed bug from a dismissed comment.
 - The golden set holds only checks at rung 3 or below (anchor correctness, rule id present, zero findings on clean diffs). Judgment-quality checks go in the coverage set.
 - Also measured: cost per review and wall time, so the fan-out threshold and the default `effort` are set from numbers.
@@ -167,5 +188,6 @@ Authored before the skill body, using `eval-designer`.
 | Separate `diff-review` skill (approach B) | Human gate (conversation) |
 | Local first, PR optional | Human gate (conversation) |
 | Human decides re-entry; remediation PRD and new eval surface | Human direction (conversation) |
+| Feedback also builds repo knowledge and style understanding (section 9b), human-approved | Human direction (conversation) |
 | Reward-hacking diff checks move to `diff-review` | AI autonomous, pending spec review |
 | Rule format, config keys, schema fields, round cap default | AI autonomous, pending spec review |
