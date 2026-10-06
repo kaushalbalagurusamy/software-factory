@@ -49,7 +49,7 @@ In the modern AI development loop, code velocity is no longer the bottleneck. Wh
 
 | Skill Name | Path | Primary Purpose |
 | :--- | :--- | :--- |
-| **`sf-adr-debate`** | [`skills/sf-adr-debate/SKILL.md`](skills/sf-adr-debate/SKILL.md) | Socratic trade-off debate on one-way doors; authors formal Architecture Decision Records (ADRs). |
+| **`sf-adr-debate`** | [`skills/sf-adr-debate/SKILL.md`](skills/sf-adr-debate/SKILL.md) | Socratic trade-off debate on one-way doors; authors formal Architecture Decision Records (ADRs) and keeps each ADR's decision trail (autonomous steps, human gates, and the feedback received). |
 | **`sf-spec-testing`** | [`skills/sf-spec-testing/SKILL.md`](skills/sf-spec-testing/SKILL.md) | Contract-first schema design, failure-mode injection, and deterministic eval harnesses. |
 | **`sf-io-analyzer`** | [`skills/sf-io-analyzer/SKILL.md`](skills/sf-io-analyzer/SKILL.md) | Audits $O(N)$ query loops, unindexed scans, connection pooling, and payload bloat. |
 | **`sf-door-guard`** | [`skills/sf-door-guard/SKILL.md`](skills/sf-door-guard/SKILL.md) | Pre-flight safety check, blast-radius calculation, and rollback strategy design. |
@@ -103,7 +103,7 @@ The autonomous engine is organized into four neurosymbolic modules:
 
 ## Reusable Templates
 
-* [`templates/adr-template.md`](templates/adr-template.md): Standardized format for recording Architecture Decision Records in `docs/adr/`.
+* [`templates/adr-template.md`](templates/adr-template.md): Standardized format for recording Architecture Decision Records in `docs/adr/`, including an append-only Decision Trail section.
 * [`templates/system-design-rfc-template.md`](templates/system-design-rfc-template.md): High-level system design RFC template for complex systems.
 * [`templates/deterministic-eval-template.py`](templates/deterministic-eval-template.py): Deterministic Pytest eval harness for structured LLM outputs.
 

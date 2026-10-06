@@ -44,3 +44,23 @@
 ### Option 2: [Name of Option 2]
 * Good, because [argument a]
 * Bad, because [argument b]
+
+---
+
+## 6. Decision Trail
+_Append-only. Add rows at the bottom, oldest first. Never edit or delete a row; correct a mistake with a new row that cites the old one. Rules, field meanings, and an example: `skills/sf-adr-debate/references/decision-trail.md`._
+
+| # | When (UTC) | Mode | Step | Actor | What happened | Evidence |
+|---|---|---|---|---|---|---|
+| 1 | YYYY-MM-DD HH:MM | auto | [step] | [actor] | [what happened] | [evidence] |
+
+### Gate Records
+_One block per `gate` row, keyed by its row number._
+
+**#[N]** · Paused [YYYY-MM-DD HH:MM] · Resumed [YYYY-MM-DD HH:MM]
+* **Shown:** [what the human was given: options, evidence, recommended default]
+* **Known gaps:** [material uncertainty the human was not shown, or "none known"]
+* **Feedback (verbatim):** "[the human's words]"
+* **Outcome:** approved as proposed | approved with changes | rejected | deferred
+* **Effect:** [what changed in the decision because of the feedback, in the agent's words]
+* **Source:** [link to the message or session]

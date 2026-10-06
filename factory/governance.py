@@ -5,6 +5,7 @@ grounded in Unity-IR Semantic Deltas (ΔS), Systems Contracts, and AST analysis.
 """
 
 from __future__ import annotations
+import datetime
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -23,6 +24,24 @@ try:
     UNITY_AVAILABLE = True
 except ImportError:
     UNITY_AVAILABLE = False
+
+
+# The example row in templates/adr-template.md's Decision Trail table. generate_adr_draft replaces
+# it with rows recorded from the audit; tests keep the template and this constant in step.
+TRAIL_PLACEHOLDER_ROW = "| 1 | YYYY-MM-DD HH:MM | auto | [step] | [actor] | [what happened] | [evidence] |"
+
+_FALLBACK_TRAIL_SECTION = (
+    "\n\n## 5. Decision Trail\n"
+    "_Append-only. Never edit or delete a row; correct a mistake with a new row that cites the old one._\n\n"
+    "| # | When (UTC) | Mode | Step | Actor | What happened | Evidence |\n"
+    "|---|---|---|---|---|---|---|\n"
+    f"{TRAIL_PLACEHOLDER_ROW}\n"
+)
+
+
+def _table_cell(text: str) -> str:
+    """Make text safe for one markdown table cell."""
+    return " ".join(text.split()).replace("|", "\\|")
 
 
 class DoorType(str, Enum):
@@ -273,8 +292,13 @@ class GovernanceEngine:
         risks: List[ArchitecturalRisk],
         title: str = "Architectural Invariant Review",
         context: str = "",
+        now: Optional[datetime.datetime] = None,
     ) -> str:
-        """Populate standardized ADR template for Socratic architectural debate."""
+        """Populate standardized ADR template for Socratic architectural debate.
+
+        The Decision Trail starts with one `auto` row per One-Way risk, copied from the audit, so the
+        record begins with what the tool found and not with anyone's recollection of it.
+        """
         one_way_risks = [r for r in risks if r.door_type == DoorType.ONE_WAY]
         drivers = [f"* Invariant Preservation: {r.description}" for r in one_way_risks]
         if not drivers:
@@ -289,6 +313,7 @@ class GovernanceEngine:
                 "# {title}\n\n* **Status:** Proposed\n\n## 1. Context and Problem Statement\n{context}\n\n"
                 "## 2. Decision Drivers\n{drivers}\n\n## 3. Considered Options\n* **Option 1:** Proceed\n* **Option 2:** Rollback\n\n"
                 "## 4. Decision Outcome\nPending Socratic debate."
+                + _FALLBACK_TRAIL_SECTION
             )
 
         # Interpolate
@@ -303,6 +328,19 @@ class GovernanceEngine:
         driver_block = "\n".join(drivers)
         rendered = re.sub(r"\* \[Driver 1.*?\n\* \[Driver 3.*?\]", driver_block, rendered, flags=re.DOTALL)
         rendered = rendered.replace("{drivers}", driver_block)
+
+        if one_way_risks:
+            stamp = (now or datetime.datetime.now(datetime.timezone.utc)).strftime("%Y-%m-%d %H:%M")
+            rows = []
+            for i, risk in enumerate(one_way_risks, start=1):
+                what = (
+                    f"Classified ONE_WAY: {risk.category.value} on {risk.symbol_id or 'global'}. "
+                    f"{risk.description}"
+                )
+                rows.append(
+                    f"| {i} | {stamp} | auto | governance audit | tool: sf audit | {_table_cell(what)} | sf audit output |"
+                )
+            rendered = rendered.replace(TRAIL_PLACEHOLDER_ROW, "\n".join(rows))
         return rendered
 
     # API alias for clarity

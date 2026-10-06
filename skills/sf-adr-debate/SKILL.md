@@ -5,6 +5,9 @@ description: >-
   for one-way doors (database schemas, auth models, API contracts, vector store dimensions).
   Balances execution intelligence with deep alignment, analyzing trade-offs, and authoring
   formal Architecture Decision Records (ADRs) before committing to high-blast-radius decisions.
+  Also keeps each ADR's decision trail, which records where agents acted autonomously, where a
+  human gate paused, and what feedback came back. Use it for questions such as how a decision was
+  made, who approved it, or where a human weighed in.
 ---
 
 # Architectural Debate & Decision Records (ADR) Protocol
@@ -58,6 +61,7 @@ Present the choices concisely using the interactive `ask_question` tool or struc
 * **Frame the Core Conflict:** Avoid generic descriptions. Highlight the specific architectural tension (e.g., *"Single-table inheritance simplifies queries but risks wide sparse rows vs. Class-table inheritance gives strict typing but requires multi-table JOINs on reads."*).
 * **Provide Concrete Recommendations:** State a recommended default grounded in the current codebase's trajectory, but explain what constraints would favor the alternatives.
 * **Incorporate User Directives:** Allow the human to supply domain nuance, traffic projections, or compliance requirements.
+* **Record the gate:** Note when the debate paused for the human and what you showed them. Section 4 says how.
 
 ### Phase 3: ADR Generation
 Once consensus is reached, generate an Architecture Decision Record in `docs/adr/NNNN-<title>.md`:
@@ -90,5 +94,21 @@ Eliminates distributed dual-write synchronization bugs between separate datastor
 * Negative: Requires tuning PostgreSQL `shared_buffers` and `maintenance_work_mem` for HNSW build operations.
 ```
 
+The ADR template at `templates/adr-template.md` also has a Decision Trail section (section 6). Fill it in as described in section 4.
+
 ### Phase 4: Downstream Execution Handoff
 With the ADR committed, proceed to test-driven implementation. All subsequent code edits MUST align with the constraints articulated in the accepted ADR.
+
+---
+
+## 4. The Decision Trail
+
+An ADR says what was decided. The decision trail says how: which steps an agent or tool took on its own, where the process paused for a human, what the human was shown, and what they said. Anyone can then walk a decision back, challenge the step that went wrong, and see whether a human had the evidence that mattered.
+
+Keep the trail in section 6 of every ADR this skill writes. The field list, the rules, and a worked example are in `references/decision-trail.md`. In short:
+
+* **Record autonomy with its basis.** Log each step an agent or tool took without pausing as an `auto` row, naming the actor. For a door classification, record the risk categories checked and what they returned. A two-way classification is the call that skips the human, so it needs its reasoning on record.
+* **Record each human gate in full.** Note the pause, show the options, evidence, and your recommended default, and list any material uncertainty the human may not weigh. Then record their words verbatim as the feedback, and say what changed because of it. The verbatim quote is theirs; the Effect line is your reading, and is labeled as yours.
+* **Append only.** Never edit or delete an existing row. Correct a mistake with a new row that cites the old one. When new evidence reopens a decision, add a `reopen` row that links it to the earlier rows.
+* **Never reconstruct a trail from memory.** An ADR written before the trail existed has none, and should say so when asked.
+* **Answer "how did we decide this?" from the trail.** Separate `auto` rows from `gate` rows, quote the human feedback, and say plainly what the trail does not cover.
