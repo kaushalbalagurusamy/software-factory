@@ -14,7 +14,7 @@ from pathlib import Path
 import sys
 from typing import List, Optional
 
-from .governance import GovernanceEngine, DoorType, RiskCategory
+from .governance import GateUnavailableError, GovernanceEngine, DoorType, RiskCategory
 from .zero_trust import ZeroTrustGate, BaselineHashGuard
 from .synthesis import SynthesisEngine, SynthesisRequest
 from .transpiler import PolyglotTranspiler
@@ -53,7 +53,11 @@ def cmd_audit(args: argparse.Namespace) -> int:
         return 1
 
     engine = GovernanceEngine()
-    report = engine.audit_source_pair(pre_path, post_path)
+    try:
+        report = engine.audit_source_pair(pre_path, post_path)
+    except GateUnavailableError as e:
+        print(f"{RED}GATE UNAVAILABLE: {e}{RESET}")
+        return 2
 
     print(f"\n{BOLD}Audit Target:{RESET} {pre_path.name} -> {post_path.name}")
     print(f"{BOLD}Classification:{RESET} ", end="")

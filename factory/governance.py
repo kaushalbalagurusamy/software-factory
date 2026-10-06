@@ -22,8 +22,17 @@ try:
         VerificationStatus,
     )
     UNITY_AVAILABLE = True
-except ImportError:
+    UNITY_IMPORT_ERROR = ""
+except ImportError as _unity_import_error:
     UNITY_AVAILABLE = False
+    UNITY_IMPORT_ERROR = str(_unity_import_error)
+
+# Unity lowers only these; any other file gets the text scan alone.
+UNITY_SUFFIXES = (".py", ".go")
+
+
+class GateUnavailableError(RuntimeError):
+    """The governance gate cannot run because a required tool (Unity-IR or z3) is missing."""
 
 
 # The example row in templates/adr-template.md's Decision Trail table. generate_adr_draft replaces
@@ -58,6 +67,7 @@ class RiskCategory(str, Enum):
     SECURITY_AUTH_BOUNDARY = "SECURITY_AUTH_BOUNDARY"
     SYMBOL_REMOVAL = "SYMBOL_REMOVAL"
     LOCAL_REFACTOR = "LOCAL_REFACTOR"
+    UNANALYZABLE = "UNANALYZABLE"
 
 
 @dataclass
@@ -238,18 +248,24 @@ class GovernanceEngine:
         risks: List[ArchitecturalRisk] = []
         semantic_delta = None
 
-        if UNITY_AVAILABLE:
+        if pre_p.suffix in UNITY_SUFFIXES or post_p.suffix in UNITY_SUFFIXES:
+            # Fail closed: a Python or Go change that was not analyzed must not pass as two-way.
+            if not UNITY_AVAILABLE:
+                raise GateUnavailableError(
+                    "Unity-IR (and z3) are required to audit .py and .go changes but could not be imported: "
+                    f"{UNITY_IMPORT_ERROR}"
+                )
             try:
                 semantic_delta = compute_semantic_delta(str(pre_p), str(post_p))
                 risks.extend(self.audit_semantic_delta(semantic_delta))
             except Exception as e:
                 risks.append(
                     ArchitecturalRisk(
-                        door_type=DoorType.TWO_WAY,
-                        category=RiskCategory.LOCAL_REFACTOR,
+                        door_type=DoorType.ONE_WAY,
+                        category=RiskCategory.UNANALYZABLE,
                         symbol_id=None,
-                        description=f"Unity-IR lowering fallback: {e}",
-                        blast_radius="Low: Analyzed via text heuristics.",
+                        description=f"Unity-IR lowering failed: {e}",
+                        blast_radius="Unknown: the change could not be analyzed, so it is held as a one-way door until a human reviews it.",
                         requires_adr=False,
                     )
                 )
