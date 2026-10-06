@@ -49,7 +49,7 @@ Work in this order. The order matters because each step needs the one before it.
    | Which of several approaches to pick | `experiment-designer`, after research has returned the avenues (set `depends_on`) |
    | Business intent, priority, or budget | Ask the human at the gate. Do not write a seed. |
 
-5. **Classify the door and rank.** Ask the `sf-adr-debate` question of each leaf: is reversing this cheap and isolated? One-way doors with high uncertainty come first. Two-way doors with low uncertainty get no seed. They are decided during the build.
+5. **Classify the door and rank.** Ask the `one-way-door` question of each leaf: is reversing this cheap and isolated? One-way doors with high uncertainty come first. Two-way doors with low uncertainty get no seed. They are decided during the build.
 
 6. **Write the seeds.** Use the schema in `references/seed-schema.md`. Set the research-round cap in the same file (default 3). The cap is what stops a loop of failed experiments from running forever when a target is infeasible.
 

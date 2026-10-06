@@ -39,7 +39,7 @@ Primary (the spec targets, each with its unit and how the proxy value maps to th
 Timebox and cost cap per experiment.
 
 ## Decisions needing no experiment
-Decision, door type, reason, where it goes next (decide in build, or sf-adr-debate).
+Decision, door type, reason, where it goes next (decide in build, or one-way-door).
 ```
 
 ## Avenue by uncertainty matrix

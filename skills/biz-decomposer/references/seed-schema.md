@@ -60,7 +60,7 @@ When every avenue fails a target, the experiment referee writes one seed per bin
 
 The question names the binding constraint and lists what was already tried, so the next round searches somewhere new instead of rediscovering the same avenues.
 
-## Worked example, adapted from the ADR example in sf-adr-debate
+## Worked example, adapted from the ADR example in one-way-door
 
 Terminal requirement T1: semantic search over 100,000+ technical articles, under 50 ms per query, with relational integrity to the organization models.
 

@@ -14,7 +14,7 @@ description: >-
 
 Research returns avenues, and claims about them that are sourced but not yet tested against your workload. This skill decides which of those uncertainties deserve an experiment and designs each one so that the result transfers to the real build without building the real thing several times.
 
-It runs at station 4 of the build loop, after research and before the experiments run. Its plan is executed by `experiment-arm-runner` subagents and judged by an independent `experiment-referee`. A choice that is a one-way door then goes to `sf-adr-debate` with the verdict as evidence.
+It runs at station 4 of the build loop, after research and before the experiments run. Its plan is executed by `experiment-arm-runner` subagents and judged by an independent `experiment-referee`. A choice that is a one-way door then goes to `one-way-door` with the verdict as evidence.
 
 ## Inputs
 
@@ -29,7 +29,7 @@ If a target is missing a number or a unit, stop and ask. A pass line cannot be i
 
 1. **Lay avenues against uncertainties.** Rows are avenues, columns are the claims each avenue's case depends on. Mark each cell settled by evidence or open. Remove any avenue that a settled claim already rules out. Cheap elimination comes before expensive testing.
 
-2. **Test whether an experiment is worth running.** Run one only when all three hold: an outcome could change the choice, the door is hard to reverse, and the test costs less than being wrong. For each decision, write one of three outcomes: run an experiment, decide by reasoning (two-way doors; record the reasoning), or send it to `sf-adr-debate` as it stands. Keep the "no experiment needed" list with a reason per line. It is part of the output.
+2. **Test whether an experiment is worth running.** Run one only when all three hold: an outcome could change the choice, the door is hard to reverse, and the test costs less than being wrong. For each decision, write one of three outcomes: run an experiment, decide by reasoning (two-way doors; record the reasoning), or send it to `one-way-door` as it stands. Keep the "no experiment needed" list with a reason per line. It is part of the output.
 
 3. **Build the proxy problem.** Keep the properties of the real build that make the decision matter: data shape and volume, concurrency pattern, failure modes, latency budget, consistency needs, workload mix. Remove the domain detail. Then check traceability: every open claim from step 1 must map to a proxy feature and a metric. A claim with no feature means the proxy cannot answer it, so extend the proxy or take that claim out of this experiment.
 
@@ -53,13 +53,13 @@ If a target is missing a number or a unit, stop and ask. A pass line cannot be i
 
 ## After the results
 
-- **Choose or eliminate:** pass the verdict and raw logs to `sf-adr-debate` for a one-way door. A two-way door proceeds with the winning avenue.
+- **Choose or eliminate:** pass the verdict and raw logs to `one-way-door` for a one-way door. A two-way door proceeds with the winning avenue.
 - **None passes:** the gap report goes to station 3 as new seeds. On the next round, read it first so the new avenues relax the binding constraint instead of repeating the old ones. When the round cap is reached, the gap reports go to the human via `biz-decomposer`.
 - **A decision already accepted in an ADR:** an experiment can test it. If it fails, say so plainly and reopen the ADR instead of explaining the result away.
 
 ## Boundaries
 
-This skill does not run arms, judge results, decide a one-way door, or build harness mechanics. Those belong to `experiment-arm-runner`, `experiment-referee`, `sf-adr-debate` with the human, and `eval-designer`. It also does not treat a proxy result as a measurement of the real system. The fidelity statement says how far the result carries.
+This skill does not run arms, judge results, decide a one-way door, or build harness mechanics. Those belong to `experiment-arm-runner`, `experiment-referee`, `one-way-door` with the human, and `eval-designer`. It also does not treat a proxy result as a measurement of the real system. The fidelity statement says how far the result carries.
 
 ## Reference files
 
