@@ -2,11 +2,12 @@
 Tests for Software Factory Bare-Metal CLI Runner.
 """
 
+import os
 from pathlib import Path
 import pytest
 from factory.cli import main
 
-UNITY_EXAMPLES_DIR = Path("/Users/kaushal/Documents/Github/unity/examples/ledger")
+UNITY_EXAMPLES_DIR = Path(os.environ.get("UNITY_REPO", Path.home() / "Projects" / "unity")) / "examples" / "ledger"
 LEDGER_PY = UNITY_EXAMPLES_DIR / "ledger.py"
 
 

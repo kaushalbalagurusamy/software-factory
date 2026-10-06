@@ -7,13 +7,14 @@ Validates:
 4. CLI command integration (sf transpile).
 """
 
+import os
 from pathlib import Path
 import pytest
 
 from factory.transpiler import PolyglotTranspiler, TranspilationResult
 from factory.cli import main
 
-UNITY_DIR = Path("/Users/kaushal/Projects/unity/examples/ledger")
+UNITY_DIR = Path(os.environ.get("UNITY_REPO", Path.home() / "Projects" / "unity")) / "examples" / "ledger"
 LEDGER_PY = UNITY_DIR / "ledger.py"
 LEDGER_GO = UNITY_DIR / "ledger.go"
 

@@ -3,12 +3,13 @@ Tests for Software Factory Invariant Governance Engine.
 Verifies One-Way vs. Two-Way Door classifications backed by Unity-IR and SMT solvers.
 """
 
+import os
 from pathlib import Path
 import pytest
 from factory.governance import GovernanceEngine, DoorType, RiskCategory
 
 # Paths to Unity golden examples
-UNITY_EXAMPLES_DIR = Path("/Users/kaushal/Documents/Github/unity/examples/ledger")
+UNITY_EXAMPLES_DIR = Path(os.environ.get("UNITY_REPO", Path.home() / "Projects" / "unity")) / "examples" / "ledger"
 LEDGER_PY = UNITY_EXAMPLES_DIR / "ledger.py"
 
 
