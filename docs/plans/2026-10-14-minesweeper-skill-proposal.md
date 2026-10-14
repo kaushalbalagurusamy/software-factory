@@ -1,6 +1,6 @@
 # Proposal: the `minesweeper` skill
 
-Status: proposal for the owner to check. Nothing is built yet.
+Status: proposal, owner decisions recorded 2026-10-14. Nothing is built yet.
 Date: 2026-10-14. Author: SF session.
 
 ## The problem
@@ -95,7 +95,8 @@ The steps run in order, and each one writes a file:
 3. **Ground each suspect.** Retrieve the primary passage, then label the suspect `confirmed` (with a quote and its source),
    `plausible` (no primary passage found yet, with what would settle it), or `dismissed` (with the reason).
 4. **Run a skeptic pass.** A separate agent tries to dismiss each confirmed trap. Over-flagging has a real cost: it turns a
-   legitimate brief into refusals. Where the budget allows, the skeptic runs on a different model family through OpenRouter.
+   legitimate brief into refusals. The skeptic runs on Claude under the Max subscription, in a fresh context with no access
+   to the sweepers' reasoning, only their claims and citations (owner decision: no OpenRouter).
 5. **Reframe.** For each surviving trap, record:
    - **Severity**, on the peer's scale:
      - **Critical:** following the brief harms people or plainly breaks a law, licence or professional duty.
@@ -149,7 +150,7 @@ Failed runs stay in the history, as with every other gate.
 
 - Each brief costs four lens agents, one grounding pass, one skeptic pass and one reframe pass. That is roughly seven agent
   runs, on Sonnet by default, with Opus for the deep-technical lens.
-- The cross-family skeptic uses OpenRouter within project limits. That key expires on 2026-10-16.
+- Everything runs on the Claude Max subscription. No OpenRouter or other paid API (owner decision 2026-10-14).
 - This is not legal advice. The skill flags problems and cites sources; the owner decides. Where the answer depends on
   jurisdiction or contract terms, the disposition is `ask-owner`.
 - Snapshots of terms of service go stale, which is why they are fetched again at sweep time.
@@ -162,11 +163,10 @@ Failed runs stay in the history, as with every other gate.
 4. Run the sweep on the golden set; record recall and precision; fix the procedure, not the expectations.
 5. Add stage 0 and the ledger `trust` column to `/sf`, and run the sweep on this week's briefs when they arrive.
 
-## Decisions for the owner
+## Owner decisions (2026-10-14)
 
-1. **Hard gate:** should Critical traps block scheduling until you sign off? Recommended: yes for Critical; High needs only a
-   recorded disposition.
-2. **Retrieval:** start with lexical search and add embeddings only if the experiment justifies them? Recommended: yes.
-3. **Cross-family skeptic** through OpenRouter: allow it within the current spending limits?
-4. **This week's briefs:** run the sweep on them as soon as they land, before any build starts, even before the skill is
-   fully calibrated? Recommended: yes, with the register marked uncalibrated.
+1. **Hard gate: yes.** Critical traps block scheduling until the owner signs off. High needs a recorded disposition.
+2. **Retrieval: yes.** Lexical search first; embeddings only if the golden-set experiment justifies them.
+3. **Cross-family skeptic: no.** The project runs on the Claude Max subscription; the skeptic is a fresh Claude context.
+4. **This week's briefs: yes.** Sweep them as soon as they land, before any build starts, with the register marked
+   uncalibrated.
