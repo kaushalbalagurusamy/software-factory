@@ -1,6 +1,6 @@
 # Proposal: the `minesweeper` skill
 
-Status: proposal, revision 3. Owner decisions recorded 2026-10-14. Nothing is built yet.
+Status: proposal, revision 4. Owner decisions recorded 2026-10-14. Nothing is built yet.
 Date: 2026-10-14. Author: SF session.
 
 Revision 2 follows the owner's direction: design for modularity and maintainability across future releases. Do not
@@ -9,6 +9,11 @@ fit the design to past projects or limit it to the current ones.
 Revision 3 follows a second direction from the owner. The sweep is not a one-shot gate. It runs interleaved and
 iteratively with the `deep-research` and `experiment-designer` skills to establish findings properly, and the real PRD is
 written only after that loop converges.
+
+Revision 4 takes in the executive summary of an external research report the owner supplied ("Adversarial PRD
+Deconstruction and Distinguished Engineering Syllabus", produced with Argon 4). The pasted text ended before the report's
+taxonomy table and syllabus, so only the summary is used here. The report's claims are treated as a secondary source
+until each one is checked against the primary sources named in the lenses.
 
 ## The problem
 
@@ -24,7 +29,16 @@ Followed literally, a trapped brief leads the builder to:
 - promise a guarantee that theory rules out,
 - optimise a rubric against the real goal.
 
-Agents rarely raise these unprompted. The skill makes the brief something to check, not something to trust: it is
+Agents fail on trapped briefs in two ways:
+
+- **Sycophantic instruction-following.** The agent assumes the brief's author has technical and legal authority and
+  builds what was asked, even when that means unlawful surveillance, copyleft code in a proprietary tree, or a brittle
+  design shaped to a poisoned rubric.
+- **Boundary evasion, the "out of scope" pathology.** Faced with a hard invariant, such as Byzantine fault tolerance
+  across untrusted relays or a complex regulatory duty, the agent declares it out of scope and moves on to easy
+  boilerplate.
+
+Agents rarely raise these traps unprompted. The skill makes the brief something to check, not something to trust: it is
 checked against real rules before its lines reach the requirements ledger.
 
 ## Design goals
@@ -79,9 +93,19 @@ checked against real rules before its lines reach the requirements ledger.
 The engine knows the procedure and the schemas but no domain. Its steps run in order, and each writes a file that
 conforms to a schema:
 
-1. **Extract claims.** The brief and everything attached to it become a list of claims. Attachments include the rubric,
-   examples, sample data, linked repos, and suggested libraries and models. Implied claims count: "regardless of
-   order" implies a trust model. Output: `claims.json`.
+1. **Extract claims.** Zero trust: everything in and around the brief becomes a claim. That covers six kinds:
+   - every requirement sentence;
+   - every named dependency (library, model, API, dataset, service);
+   - every target metric and rubric item;
+   - examples and sample data;
+   - implied assumptions, as when "regardless of order" implies a trust model;
+   - omitted boundary conditions: what each applicable lens says a brief in its domain must state but this brief does
+     not. Examples are a threat model, a trust model, failure behaviour, data retention, jurisdiction and licence of
+     output.
+
+   Every claim gets a type. An omission is a claim like any other and is swept and settled the same way.
+
+   Output: `claims.json`.
 2. **Sweep by lens.** One agent per group in `groups.yaml` loads its lenses' `lens.md` and `traps.yaml`. For each claim
    it records one of:
    - `clear`, with a reason;
@@ -102,7 +126,10 @@ conforms to a schema:
 4. **Skeptic.** A fresh Claude context sees only the claims and the citations, not the sweepers' reasoning, and tries to
    dismiss each confirmed finding.
 5. **Reframe.** Each surviving finding gets three fields:
-   - **severity:** Critical, High, Medium or Low, as defined in `policy.yaml`;
+   - **severity:** Critical, High, Medium or Low, assigned deterministically. `policy.yaml` holds an ordered list of
+     yes/no questions, for example "does following the line harm people or plainly break a law, licence or professional
+     duty?" The first yes sets the tier, and the answers are recorded with the finding. Two runs on the same evidence
+     must give the same tier;
    - **the underlying problem the brief should have stated;**
    - **a disposition:** `comply-safely`, `reframe`, `decline` or `ask-owner`.
 6. **Register.** A trap register is written as JSON for machines and Markdown for people, plus a problem-definition note
@@ -181,6 +208,10 @@ A lens is a folder. Its manifest declares an id, a semver version, a scope, an o
 adapters. It also declares `applies_when`, the conditions that mark a brief as in scope for the lens (a domain, a data
 type, a technology), so lenses that don't apply are skipped and cost nothing.
 
+Each manifest also lists the lens's **required statements**: what a brief in its domain must say. Examples are the
+trust model for distributed systems, the threat model for cryptography, and the lawful basis and retention period for
+privacy. Extraction checks these to produce omission claims.
+
 `traps.yaml` entries are generic patterns, never project anecdotes. Each entry has:
 
 - an id, a statement and the cues that suggest it;
@@ -242,6 +273,8 @@ Policy enforced through `/sf` (owner decision):
   - recall on planted traps;
   - the false-alarm rate on clean twins;
   - citation rate on confirmed findings;
+  - severity agreement across repeated runs on the same brief, which checks that tiering is deterministic;
+  - recall on omission cases, which are briefs that leave out a required statement;
   - tokens and minutes per brief.
 
   Results are committed beside the cases. Failed runs stay in the history.
@@ -288,3 +321,5 @@ Policy enforced through `/sf` (owner decision):
    maintainability for future releases are the design goal.
 6. **Discovery loop (revision 3):** the sweep is interleaved and iterative with `deep-research` and
    `experiment-designer`, which establish the findings. The real PRD is written only after the loop converges.
+7. **External research (revision 4):** the Argon 4 report's summary is incorporated. Its full taxonomy and syllabus are
+   still to come; when they arrive, they will be checked against primary sources and folded into the lens packs.
