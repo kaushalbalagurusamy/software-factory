@@ -18,7 +18,7 @@ until each one is checked against the primary sources named in the lenses.
 Revision 5 takes in the full report. It contributes:
 
 - a four-tier severity table;
-- six domain detection matrices with 32 trap entries;
+- six domain detection matrices with 35 trap entries;
 - a four-gate protocol.
 
 The report is stored verbatim in the private `gauntlet` repo (`research/2026-10-14-argon4-adversarial-prd-report.md`,
@@ -411,7 +411,7 @@ Policy enforced through `/sf` (owner decision):
 2. The lens template, `adding-a-lens.md`, and case format; `evaluate.py` with cases written before lenses.
 3. Engine prompts and `procedure.md`; `SKILL.md`.
 4. Source adapters, cache, `search.py`, `refresh.py`, and `tools/checks/`, each check with unit tests.
-5. Import the report's 32 matrix entries as `unverified` seeds, with names of specific briefs removed.
+5. Import the report's 35 matrix entries as `unverified` seeds, with names of specific briefs removed.
 6. Lenses one group at a time. For each group:
    1. promote its seeds by re-sourcing them through `grounded-research`;
    2. write planted cases and clean twins;
@@ -439,5 +439,5 @@ Policy enforced through `/sf` (owner decision):
    `experiment-designer`, which establish the findings. The real PRD is written only after the loop converges.
 7. **External research (revisions 4–5):** the full Argon 4 report is incorporated:
    - its severity table, domain matrices and four-gate protocol shape the design;
-   - its 32 entries seed the catalogue as `unverified`;
+   - its 35 entries seed the catalogue as `unverified`;
    - its defects are listed in the review section.
