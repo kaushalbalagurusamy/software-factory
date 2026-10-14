@@ -1,10 +1,14 @@
 # Proposal: the `minesweeper` skill
 
-Status: proposal, revision 2. Owner decisions recorded 2026-10-14. Nothing is built yet.
+Status: proposal, revision 3. Owner decisions recorded 2026-10-14. Nothing is built yet.
 Date: 2026-10-14. Author: SF session.
 
 Revision 2 follows the owner's direction: design for modularity and maintainability across future releases. Do not
 fit the design to past projects or limit it to the current ones.
+
+Revision 3 follows a second direction from the owner. The sweep is not a one-shot gate. It runs interleaved and
+iteratively with the `deep-research` and `experiment-designer` skills to establish findings properly, and the real PRD is
+written only after that loop converges.
 
 ## The problem
 
@@ -84,9 +88,15 @@ conforms to a schema:
    - `suspect`, with the trap id and the cues it matched.
 
    Every claim gets a verdict, so a silent lens can be told apart from a lens that never looked.
-3. **Ground.** For each suspect, search the cache and fetch the cited source if the cached copy is stale. The suspect
-   becomes:
-   - `confirmed`, with a quote, source id and fetch date;
+3. **Ground.** Each suspect is routed to the cheapest method that can settle it (see "The discovery loop"):
+   - retrieval from the cache;
+   - `grounded-research`;
+   - `deep-research`;
+   - `experiment-designer`.
+
+   The suspect becomes:
+   - `confirmed`, with evidence: a quote, a research note, a report or an experiment result, each with its path and
+     date;
    - `plausible`, with what would settle it;
    - `dismissed`, with a reason.
 4. **Skeptic.** A fresh Claude context sees only the claims and the citations, not the sweepers' reasoning, and tries to
@@ -97,6 +107,73 @@ conforms to a schema:
    - **a disposition:** `comply-safely`, `reframe`, `decline` or `ask-owner`.
 6. **Register.** A trap register is written as JSON for machines and Markdown for people, plus a problem-definition note
    for research to start from.
+
+## The discovery loop
+
+The sweep is one of three activities in a loop that runs before the real PRD exists. The input brief is treated as an
+untrusted draft. The output is a problem definition that has been checked, and the PRD is written from that.
+
+```
+brief (untrusted) ──► sweep ──► findings ──► route each open finding
+                        ▲                      ├─ retrieval            (a quote settles it)
+                        │                      ├─ grounded-research    (one decidable claim)
+                        │                      ├─ deep-research        (a landscape: law, market, practice)
+                        │                      └─ experiment-designer  (only a measurement settles it)
+                        │                                │
+                        └── re-sweep the reframed ◄──────┘ evidence updates findings and the problem definition
+                            problem and new claims
+                                         │ converged
+                                         ▼
+                        prd-writer writes the real PRD ──► /sf Decide, Spec, Tests ...
+```
+
+**Routing rule.** Each finding records why it took its route.
+
+| A finding is settled by | Route | Example |
+|---|---|---|
+| A primary-source quote | retrieval | "this licence forbids commercial use" |
+| One checkable fact about a tool or version | `grounded-research` | "does this library still ship this default" |
+| A synthesis of many sources | `deep-research` | "what does this regulation require of this kind of product" |
+| A number nobody has measured | `experiment-designer` | "can this latency budget be met"; "does this dedupe hold under retries" |
+
+**Why it iterates.** Evidence changes the problem. Here is what each result can do:
+
+| Result | Effect on the loop |
+|---|---|
+| A research report surfaces a rule nobody listed | It adds new claims to sweep. |
+| An experiment shows a guarantee is impossible | The finding is confirmed, and the reframed problem has new claims to check. |
+| A dismissal | The claim is cleared for the PRD. |
+
+Each pass sweeps only what changed: new claims, reframed text, and findings whose evidence moved.
+
+**Convergence.** The loop stops when all four of these hold:
+
+1. every finding is `confirmed` with evidence, `dismissed` with a reason, or `ask-owner` with the question recorded;
+2. a full pass produced no new findings;
+3. the problem definition did not change in the last pass;
+4. or the iteration cap in `policy.yaml` was reached. In that case the remaining open findings are listed, and the PRD
+   carries them as open questions.
+
+An `ask-owner` finding does not block other findings. The loop keeps going around it.
+
+**Hand-off to PRD writing.** `prd-writer` receives:
+
+- the problem definition;
+- the register;
+- the research reports and the experiment results.
+
+Every PRD requirement traces to either a brief line it keeps, with its trust status, or a finding that replaced it.
+Discarded brief lines are listed with the finding that discarded them, so nothing disappears silently.
+
+**Ownership of artifacts.**
+
+| Artifacts | Written by |
+|---|---|
+| Research notes and reports | the research skills, in their usual places (`research-notes/`, `research/`) |
+| Experiments | `experiment-designer`, in its usual place |
+| The register | minesweeper, linking to the other two by path |
+
+The two research skills stay unchanged and reusable.
 
 ### Lens packs (the modules)
 
@@ -140,12 +217,14 @@ customers, regulators, public incidents. It writes to the project's own `docs/mi
 
 | Consumer | Uses | Contract |
 |---|---|---|
-| `/sf` stage 0 (new) | runs the sweep before Research | register schema v1 |
+| `/sf` stages 1–2 (Research, Experiment) | become the discovery loop: sweep, research and experiment interleaved until convergence | register schema v1 |
+| `grounded-research`, `deep-research` | receive routed findings, return notes or reports | finding id in, artifact path out |
+| `experiment-designer` | receives findings only a measurement can settle | finding id in, results path out |
+| `prd-writer` | writes the real PRD after convergence, with traceability to brief lines and findings | register schema v1 |
 | `/sf` ledger | a `trust` column per row: `trusted`, `conditioned (finding id)` or `rejected` | finding ids |
 | `/sf` stage 1 | problem-definition note | Markdown section names |
 | `/sf` stage 8 review | open findings as a hunting list | register schema v1 |
 | `/sf` stages 9 and 12 | re-sweep changed or new requirement text only | claims schema v1 |
-| `prd-writer`, `deep-research` | optional: sweep a draft, or seed research | register schema v1 |
 
 Policy enforced through `/sf` (owner decision):
 
@@ -193,8 +272,10 @@ Policy enforced through `/sf` (owner decision):
 3. Engine prompts and `procedure.md`; `SKILL.md`.
 4. Source adapters, cache, `search.py`, `refresh.py`.
 5. Lenses one group at a time, each landing with its cases passing their thresholds; evaluation results committed.
-6. `/sf` integration: stage 0, ledger `trust` column, gates, stage 8/9/12 hooks.
-7. Sweep each new brief as it arrives, with the register marked uncalibrated until its lenses have passed evaluation
+6. Routing hand-offs to `grounded-research`, `deep-research` and `experiment-designer`, plus the convergence check.
+7. `/sf` integration: stages 1–2 as the discovery loop, `prd-writer` after convergence, ledger `trust` column, gates,
+   stage 8/9/12 hooks.
+8. Sweep each new brief as it arrives, with the register marked uncalibrated until its lenses have passed evaluation
    (owner decision).
 
 ## Owner decisions (2026-10-14)
@@ -205,3 +286,5 @@ Policy enforced through `/sf` (owner decision):
 4. **Sweep new briefs on arrival: yes,** marked uncalibrated until their lenses pass evaluation.
 5. **Scope (revision 2):** no fitting to past projects and no restriction to current ones. Modularity and
    maintainability for future releases are the design goal.
+6. **Discovery loop (revision 3):** the sweep is interleaved and iterative with `deep-research` and
+   `experiment-designer`, which establish the findings. The real PRD is written only after the loop converges.
