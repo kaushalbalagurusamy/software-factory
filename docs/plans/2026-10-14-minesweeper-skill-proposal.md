@@ -1,6 +1,6 @@
 # Proposal: the `minesweeper` skill
 
-Status: proposal, revision 4. Owner decisions recorded 2026-10-14. Nothing is built yet.
+Status: proposal, revision 5. Owner decisions recorded 2026-10-14. Nothing is built yet.
 Date: 2026-10-14. Author: SF session.
 
 Revision 2 follows the owner's direction: design for modularity and maintainability across future releases. Do not
@@ -14,6 +14,17 @@ Revision 4 takes in the executive summary of an external research report the own
 Deconstruction and Distinguished Engineering Syllabus", produced with Argon 4). The pasted text ended before the report's
 taxonomy table and syllabus, so only the summary is used here. The report's claims are treated as a secondary source
 until each one is checked against the primary sources named in the lenses.
+
+Revision 5 takes in the full report. It contributes:
+
+- a four-tier severity table;
+- six domain detection matrices with 32 trap entries;
+- a four-gate protocol.
+
+The report is stored verbatim in the private `gauntlet` repo (`research/2026-10-14-argon4-adversarial-prd-report.md`,
+commit a09ff6d). It is not stored here because it names programme briefs and this repo has a public mirror. Revision 5
+adopts its structure and seeds the lens catalogue from it. Every entry stays `unverified` until promoted. The review
+below lists what is wrong or unsupported in it.
 
 ## The problem
 
@@ -82,6 +93,11 @@ checked against real rules before its lines reach the requirements ledger.
     refresh.py                # re-fetches stale sources and reports changed ones
     search.py                 # local BM25 over the cache
     evaluate.py               # runs cases, writes per-lens recall and precision
+    checks/                   # deterministic checks a trap entry can name (read-only, never installs)
+      registry.py             # npm / PyPI metadata: exists, created, maintainers, downloads, cross-registry name
+      licence.py              # SPDX id and licence family for a named package or model card
+      calc.py                 # back-of-envelope physics: memory footprint, bandwidth, fan-out tail
+                              # probability, BFT/CFT quorum sizes, egress cost, payload vs MTU
   docs/
     adding-a-lens.md
     writing-cases.md
@@ -126,14 +142,40 @@ conforms to a schema:
 4. **Skeptic.** A fresh Claude context sees only the claims and the citations, not the sweepers' reasoning, and tries to
    dismiss each confirmed finding.
 5. **Reframe.** Each surviving finding gets three fields:
-   - **severity:** Critical, High, Medium or Low, assigned deterministically. `policy.yaml` holds an ordered list of
-     yes/no questions, for example "does following the line harm people or plainly break a law, licence or professional
-     duty?" The first yes sets the tier, and the answers are recorded with the finding. Two runs on the same evidence
-     must give the same tier;
+   - **severity:** Critical, High, Medium or Low, assigned deterministically (see "Severity tiers"). `policy.yaml`
+     holds an ordered list of yes/no questions. The first yes sets the tier, and the answers are recorded with the
+     finding. Two runs on the same evidence must give the same tier;
    - **the underlying problem the brief should have stated;**
    - **a disposition:** `comply-safely`, `reframe`, `decline` or `ask-owner`.
 6. **Register.** A trap register is written as JSON for machines and Markdown for people, plus a problem-definition note
-   for research to start from.
+   for research to start from. The register has a **poisoned-instruction autopsy** section. It lists every brief line
+   or rubric item that is quarantined, meaning it will not be followed as written, with the finding behind each one.
+
+### Severity tiers
+
+The criteria come from the report and match the owner's scale. Each tier becomes yes/no questions in `policy.yaml`.
+
+| Tier | Criterion | Typical consequence |
+|---|---|---|
+| Critical | Following the brief harms users, compromises physical safety, or plainly breaks a law, licence, third-party terms or professional ethics. | Legal liability, injunctions, criminal exposure, loss of IP, physical damage. |
+| High | The deliverable fails under production conditions, gains a severe security hole, or creates substantial financial or legal exposure. | Outages, key recovery, remote code execution, supply-chain compromise, unit-economic failure. |
+| Medium | A correctness, measurement, statistical or design flaw that a principal-level reviewer would reject. | Tail-latency breaches, silent data drift, uncalibrated predictions, metrics invalidated by leakage. |
+| Low | Operational friction, weaker maintainability, minor inefficiency. | Technical debt, toil, wasted compute. |
+
+### Topics that can never be dismissed as out of scope
+
+`policy.yaml` holds a list of topics that a finding can never close as "out of scope". The list starts with:
+
+- distributed consensus and trust models;
+- Byzantine faults;
+- key management and nonce uniqueness;
+- regulatory duties;
+- licences and provider terms;
+- memory, bandwidth and latency physics;
+- agent action safety.
+
+When a brief omits one of these where a lens applies, the omission is itself a finding, and its tier follows the
+questions in `policy.yaml`. This is the report's Gate 2.
 
 ## The discovery loop
 
@@ -178,8 +220,13 @@ Each pass sweeps only what changed: new claims, reframed text, and findings whos
 1. every finding is `confirmed` with evidence, `dismissed` with a reason, or `ask-owner` with the question recorded;
 2. a full pass produced no new findings;
 3. the problem definition did not change in the last pass;
-4. or the iteration cap in `policy.yaml` was reached. In that case the remaining open findings are listed, and the PRD
-   carries them as open questions.
+4. or a budget in `policy.yaml` was reached. In that case the remaining open findings are listed, and the PRD carries
+   them as open questions. The budget has three parts:
+   - an iteration cap;
+   - a token and wall-clock ceiling per loop;
+   - an immediate halt when a pass repeats the same routed calls with no change in findings.
+
+   The skill applies its own agent-loop trap (unbounded agent loops) to itself.
 
 An `ask-owner` finding does not block other findings. The loop keeps going around it.
 
@@ -191,6 +238,26 @@ An `ask-owner` finding does not block other findings. The loop keeps going aroun
 
 Every PRD requirement traces to either a brief line it keeps, with its trust status, or a finding that replaced it.
 Discarded brief lines are listed with the finding that discarded them, so nothing disappears silently.
+
+The PRD keeps the brief's legitimate business objective: the real-world change the organisation needs. It replaces each
+naive feature demand with four kinds of statement:
+
+- system invariants;
+- service-level objectives;
+- regulatory and terms guardrails;
+- explicit non-goals.
+
+This is the report's Gate 3, done by `prd-writer`.
+
+**Hand-off to the technical spec.** The report's Gate 4 belongs to `/sf` stage 4 (`spec-writer`), not to this skill.
+Each confirmed finding names the spec section that must answer it, so the spec cannot drop it:
+
+- trust and consensus topology;
+- cryptographic and agent-security posture;
+- capacity and memory physics;
+- the verification and calibration harness.
+
+Stage 8 review checks that every section is filled.
 
 **Ownership of artifacts.**
 
@@ -212,24 +279,39 @@ Each manifest also lists the lens's **required statements**: what a brief in its
 trust model for distributed systems, the threat model for cryptography, and the lawful basis and retention period for
 privacy. Extraction checks these to produce omission claims.
 
-`traps.yaml` entries are generic patterns, never project anecdotes. Each entry has:
+`traps.yaml` entries are generic patterns, never project anecdotes. Their fields follow the report's detection-matrix
+columns:
 
-- an id, a statement and the cues that suggest it;
-- the sources that decide it;
-- a default severity and safe alternatives.
+| Field | Meaning |
+|---|---|
+| `id` | stable, `<lens-id>.<slug>`; the report's ids (LEG-01, DIST-03 …) kept as `aliases` |
+| `kind` | `requirement`, `dependency`, `metric`, `rubric` or `omission` |
+| `cues` | naive phrasings and rubric patterns that suggest the trap |
+| `principle` | the law, theorem, standard or term it violates |
+| `sources` | primary sources that decide it, by source id |
+| `severity` | default tier and blast radius; the policy questions still decide |
+| `remediation` | the safe route and the invariant the spec must state |
+| `checks` | optional deterministic checks from `tools/checks/` (for example `registry.exists`, `calc.bft_quorum`) |
+| `status` | `unverified` until every source resolves to a primary quote; only `verified` entries can confirm a finding |
 
 An example entry from `distributed-systems`: "exactly-once delivery asserted end to end". Its cues are *exactly once*,
 *never duplicated*, *regardless of retries*. It is decided by the Two Generals and FLP results and the idempotency
 literature. Its safe alternative is effectively-once via idempotent keys, stated with the trust model.
 
-The initial catalogue covers broad professional literacy and can grow:
+The initial catalogue follows the report's six domains plus the business lenses. The seed entries come from the
+report's matrices; each starts `unverified`.
 
-| Group | Lenses |
-|---|---|
-| Law and terms | licensing, provider-terms, copyright-data-rights, privacy-regulated-data, professional-duty, accessibility |
-| Security | security-ethics, supply-chain, appsec-auth |
-| Deep technical | cryptography, distributed-systems, theory-complexity, os-systems, databases, performance |
-| Evaluation and business | rubric-inversion, company-context, market-reality |
+| Group (sweep agent) | Lenses | Report seeds |
+|---|---|---|
+| Law, terms and ethics | licensing, provider-terms, ai-regulation, privacy-regulated-data, copyright-data-rights, security-ethics, professional-duty, accessibility | LEG-01 … LEG-06 |
+| Supply chain, agent security and cryptography | supply-chain, agent-security (MCP: confused deputy, token passthrough, tool poisoning, silent redefinition, shadowing), cryptography (AEAD and nonce misuse, randomness, post-quantum migration) | SEC-01 … SEC-06 |
+| Distributed systems and data | distributed-systems (CFT vs BFT, Two Generals, fencing, clocks), databases (CAP/PACELC, dual writes, hot partitions) | DIST-01 … DIST-06 |
+| Systems and performance | os-systems (ports, file descriptors, OOM), performance (fan-out tails, egress economics), media-pipelines (memory physics, colour-space precision), realtime-transport (head-of-line blocking, jitter, causality limits on streaming translation) | PERF-01 … PERF-06 |
+| Theory and measurement | theory-complexity (disguised NP-hard work, undecidability in rules engines), numeric-representation (money in binary floats), ml-evaluation (leakage, calibration), rubric-inversion (Goodhart) | TCS-01 … TCS-05 |
+| Agents and cyber-physical | agent-orchestration (unbounded loops, irreversible actions without compensation or approval), cyber-physical (OT protocols, safety interlocks, NERC CIP where the brief touches the bulk electric system) | AGT-01, AGT-02, CPS-01 … CPS-04 |
+| Business | company-context, market-reality | none |
+
+Lenses whose `applies_when` does not match a brief are skipped. A brief about a web shop never loads `cyber-physical`.
 
 `company-context` holds no company data. It is a procedure for researching whatever company a brief names: mission,
 customers, regulators, public incidents. It writes to the project's own `docs/minesweep/`.
@@ -243,6 +325,29 @@ customers, regulators, public incidents. It writes to the project's own `docs/mi
   becomes a review item rather than a silent drift.
 - Search starts as local BM25. Embeddings are added only if the evaluation shows BM25 missing traps that they find
   (owner decision).
+- Dependency checks read registry metadata only. The skill never installs a package it is checking, which is the
+  report's own slopsquatting rule applied to the skill.
+
+### Review of the Argon 4 report
+
+The report has good structure and many correct core claims. The arithmetic checks out, for example:
+
+- 5 × 48 MP × 16 B ≈ 3.84 GB;
+- 4K60 FP16 RGBA ≈ 3.98 GB/s;
+- 1 − 0.99^50 ≈ 39.5%;
+- BFT needs N ≥ 3f + 1.
+
+It is still a secondary source with real defects. These matter for how it is used:
+
+| Issue | Detail | Handling |
+|---|---|---|
+| Citations do not support most claims | The numbered references are almost all EU AI Act blog posts, attached even to the cryptography, supply-chain and NERC sections. Only the NIST PQC and GCM-forgery links match their topic. | Every seed entry is re-sourced from a primary source before promotion. |
+| LEG-04 overstates GPLv3 | Using GPLv3 code in a hosted service that is not distributed does not by itself oblige source release. AGPLv3 section 13 is the network clause; GPLv3 has none. | Split into two entries: distribution of GPL code; network use of modified AGPL code. |
+| Stale licence examples | Sentry moved from BSL to its Functional Source Licence in 2023, and Elasticsearch added AGPLv3 as an option in 2024. | Lenses name licence families, not vendors; `licence.py` reads the current licence at sweep time. |
+| Unverifiable specifics | "Regulation (EU) 2026/1744" and its dates; "Recitals 99–100" applying high-risk duties across multi-agent chains; CVE-2026-26014 and CVE-2026-50577; the "July 2026 MCP security best practices"; the "TeamPCP" campaign; the NERC per-day penalty figure; the AES-GCM-SIV "48% slower" figure. | Each is marked `unverified`. Promotion needs the primary text: EUR-Lex, NVD, the MCP specification, an incident report, FERC's penalty notice, a measured benchmark. |
+| Performance figures without a source | AES-GCM vs CCM vs CBC speed ratios; LMS and XMSS signature sizes depend on parameter sets. | Replaced by `calc.py` or an experiment, not quoted. |
+| Names programme briefs | It ties traps to specific briefs (FacilityGrid, Qrypt, Boostlingo, AutoHDR, Thesis, Cover). | Stripped from lens content by the no-project rule. Briefs appear only as inputs, never in the catalogue. |
+| Severity sometimes fixed per entry | The matrices hard-code a tier per trap. | Kept as a default only. The `policy.yaml` questions decide, so context can raise or lower the tier. |
 
 ### Contracts with the rest of the factory
 
@@ -283,6 +388,8 @@ Policy enforced through `/sf` (owner decision):
   - An engine or schema change re-runs everything.
   - A schema change bumps its major version and keeps a reader for the previous one for one release.
 - **Lint.** `lint.py` fails when:
+  - a `verified` trap cites a source that is not primary;
+  - a `checks` entry names a check that does not exist;
   - a manifest is invalid;
   - a trap has no source or no case;
   - a source has no adapter;
@@ -303,12 +410,21 @@ Policy enforced through `/sf` (owner decision):
 1. Schemas and `lint.py` (the contracts first).
 2. The lens template, `adding-a-lens.md`, and case format; `evaluate.py` with cases written before lenses.
 3. Engine prompts and `procedure.md`; `SKILL.md`.
-4. Source adapters, cache, `search.py`, `refresh.py`.
-5. Lenses one group at a time, each landing with its cases passing their thresholds; evaluation results committed.
-6. Routing hand-offs to `grounded-research`, `deep-research` and `experiment-designer`, plus the convergence check.
-7. `/sf` integration: stages 1–2 as the discovery loop, `prd-writer` after convergence, ledger `trust` column, gates,
-   stage 8/9/12 hooks.
-8. Sweep each new brief as it arrives, with the register marked uncalibrated until its lenses have passed evaluation
+4. Source adapters, cache, `search.py`, `refresh.py`, and `tools/checks/`, each check with unit tests.
+5. Import the report's 32 matrix entries as `unverified` seeds, with names of specific briefs removed.
+6. Lenses one group at a time. For each group:
+   1. promote its seeds by re-sourcing them through `grounded-research`;
+   2. write planted cases and clean twins;
+   3. land the group with its cases passing their thresholds and the evaluation results committed.
+7. Routing hand-offs to `grounded-research`, `deep-research` and `experiment-designer`, plus the convergence check and
+   loop budget.
+8. `/sf` integration:
+   - stages 1–2 as the discovery loop;
+   - `prd-writer` after convergence, with the four PRD statement kinds;
+   - spec sections required by findings;
+   - the ledger `trust` column and the gates;
+   - the stage 8/9/12 hooks.
+9. Sweep each new brief as it arrives, with the register marked uncalibrated until its lenses have passed evaluation
    (owner decision).
 
 ## Owner decisions (2026-10-14)
@@ -321,5 +437,7 @@ Policy enforced through `/sf` (owner decision):
    maintainability for future releases are the design goal.
 6. **Discovery loop (revision 3):** the sweep is interleaved and iterative with `deep-research` and
    `experiment-designer`, which establish the findings. The real PRD is written only after the loop converges.
-7. **External research (revision 4):** the Argon 4 report's summary is incorporated. Its full taxonomy and syllabus are
-   still to come; when they arrive, they will be checked against primary sources and folded into the lens packs.
+7. **External research (revisions 4–5):** the full Argon 4 report is incorporated:
+   - its severity table, domain matrices and four-gate protocol shape the design;
+   - its 32 entries seed the catalogue as `unverified`;
+   - its defects are listed in the review section.
