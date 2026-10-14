@@ -1,172 +1,207 @@
 # Proposal: the `minesweeper` skill
 
-Status: proposal, owner decisions recorded 2026-10-14. Nothing is built yet.
+Status: proposal, revision 2. Owner decisions recorded 2026-10-14. Nothing is built yet.
 Date: 2026-10-14. Author: SF session.
+
+Revision 2 follows the owner's direction: design for modularity and maintainability across future releases. Do not
+fit the design to past projects or limit it to the current ones.
 
 ## The problem
 
-The factory trusts the PRD. Stage 9 of `/sf` treats every line of the source requirements as a requirement, and the ledger
-counts a run as finished when every line is satisfied. That works only when the brief is honest. The current briefs are not
-reliably honest. A peer who evaluated six of this week's briefs found traps in all six. Some briefs, read literally, would
-make the builder:
+The factory trusts the brief. `/sf` treats every line of the source requirements as a requirement, and a run ends when
+every line is satisfied. That is safe only when the brief is honest. Briefs can contain traps, on purpose or not.
+Followed literally, a trapped brief leads the builder to:
 
-- break the licence terms of the software being used,
-- break the terms of the model providers being used,
-- break copyright law,
-- cross ethical engineering lines, such as disclosing a vulnerability in a harmful way,
-- install dependencies that are unmaintained, against project rules, or insecure,
-- chase a goal that a grading rubric rewards but the real problem punishes.
+- break a software licence,
+- break a model provider's terms,
+- break copyright or privacy law,
+- breach a professional duty,
+- install a dependency that is unsafe or unmaintained,
+- promise a guarantee that theory rules out,
+- optimise a rubric against the real goal.
 
-Agents miss these unless they are told to look, and even then it takes several passes. When asked "any issues with building
-this?", the answer was "Nothing blocks it."
+Agents rarely raise these unprompted. The skill makes the brief something to check, not something to trust: it is
+checked against real rules before its lines reach the requirements ledger.
 
-We already have two cases of our own:
+## Design goals
 
-1. **FacilityGrid.** Requirement 1 says "no reading is ever duplicated or lost … regardless of delivery order, retries, or
-   how many times a gateway resends it". Requirement 3 says a new device is "registered exactly once". Both are distributed
-   systems claims with known impossibility results behind them (Two Generals, FLP, and Byzantine faults when a sender can
-   lie). The agent built a sound idempotent design, but it filed the trust questions under "cuts":
-   - gateway clocks are trusted, so a gateway that boots in 2099 pins a device's value;
-   - the claim endpoint has no authentication;
-   - nothing defends against a gateway that lies.
+1. **Modular.** Knowledge lives in self-contained lens packs. Adding, removing or updating a topic never touches the
+   engine.
+2. **Stable contracts.** Inputs and outputs are versioned schemas. `/sf` and other skills depend on the schemas, not on
+   internals.
+3. **Evidence over recall.** A finding is confirmed only with a quote from a primary source fetched by the skill.
+4. **Tested per module.** Each lens carries its own test cases. Any change to the engine or a lens re-runs the affected
+   cases.
+5. **Maintainable by default.** Sources have freshness policies, lenses have versions and changelogs, and a lint script
+   enforces the structure.
+6. **Not tied to any project.** No lens, case or rule refers to a specific past or current project.
 
-   It listed them without naming the problem: the brief asks for guarantees that need a trust model the brief never gives.
-   The real problem was "decide which gateways to believe", and the answer was effectively "out of scope ✅".
-2. **OpenEMR one-click sign-in (2026-10-13).** This session built and deployed a shortcut that discloses the reviewer
-   password to any visitor and enables login CSRF. The security review found both problems only after the deploy. A sweep
-   before the feature was built would have offered a separate low-privilege demo account up front.
+## Architecture
 
-What both cases show: naive, feature-driven development turns PRD sentences into tickets. The fix is a stage that asks what
-the PRD should be solving, checks each line against real rules, and only then lets the line onto the ledger.
+```
+~/.claude/skills/minesweeper/
+  SKILL.md                    # entry point: when to run, how to call, the procedure
+  engine/                     # stable core, rarely changes
+    procedure.md              # the six sweep steps and their contracts
+    prompts/                  # extractor, lens-sweeper, grounder, skeptic, reframer briefs
+    schemas/                  # claim, finding, register, lens-manifest, source (JSON Schema, versioned)
+  lenses/                     # one folder per lens; add a folder to add a topic
+    <lens-id>/
+      lens.md                 # manifest + guidance: scope, principles, questions, severity guidance
+      traps.yaml              # trap catalogue: id, pattern, cues, sources, safe alternatives
+      sources.yaml            # primary sources this lens cites, with adapter and freshness policy
+      cases/                  # planted-trap briefs, clean twins, expected findings
+      CHANGELOG.md
+  sources/
+    adapters/                 # fetchers by source kind: spdx, web-page, ecfr, osv, paper
+    cache/                    # fetched copies (regenerable, never hand-edited)
+  config/
+    groups.yaml               # which lenses each sweep agent covers (tuning knob, not structure)
+    models.yaml               # model per role (Claude Max subscription only)
+    policy.yaml               # severity gates, freshness defaults, dispositions
+  tools/
+    lint.py                   # validates manifests, schemas, source refs, case coverage
+    refresh.py                # re-fetches stale sources and reports changed ones
+    search.py                 # local BM25 over the cache
+    evaluate.py               # runs cases, writes per-lens recall and precision
+  docs/
+    adding-a-lens.md
+    writing-cases.md
+    versioning.md
+```
 
-## What the skill is
+### The engine (stable core)
 
-`minesweeper` is a global skill at `~/.claude/skills/minesweeper/`. It has three parts:
+The engine knows the procedure and the schemas but no domain. Its steps run in order, and each writes a file that
+conforms to a schema:
 
-1. **A syllabus.** One file per topic. Each file holds the principles, the usual traps, the phrases in a brief that hint
-   at them, the primary sources to check, and the question to ask.
-2. **A retrieval corpus.** Dated snapshots of primary sources (licences, terms of service, statutes, standards, papers),
-   plus a live fetch for anything that changes. Every confirmed trap cites a passage from this corpus or from a live fetch.
-3. **A sweep procedure.** It turns a brief into a trap register and a list of conditions on the ledger.
+1. **Extract claims.** The brief and everything attached to it become a list of claims. Attachments include the rubric,
+   examples, sample data, linked repos, and suggested libraries and models. Implied claims count: "regardless of
+   order" implies a trust model. Output: `claims.json`.
+2. **Sweep by lens.** One agent per group in `groups.yaml` loads its lenses' `lens.md` and `traps.yaml`. For each claim
+   it records one of:
+   - `clear`, with a reason;
+   - `suspect`, with the trap id and the cues it matched.
 
-`/sf` calls it as a new **stage 0** before Research. It runs again on any requirement text that changes (stage 9) and on any
-new inbound item (stage 12).
+   Every claim gets a verdict, so a silent lens can be told apart from a lens that never looked.
+3. **Ground.** For each suspect, search the cache and fetch the cited source if the cached copy is stale. The suspect
+   becomes:
+   - `confirmed`, with a quote, source id and fetch date;
+   - `plausible`, with what would settle it;
+   - `dismissed`, with a reason.
+4. **Skeptic.** A fresh Claude context sees only the claims and the citations, not the sweepers' reasoning, and tries to
+   dismiss each confirmed finding.
+5. **Reframe.** Each surviving finding gets three fields:
+   - **severity:** Critical, High, Medium or Low, as defined in `policy.yaml`;
+   - **the underlying problem the brief should have stated;**
+   - **a disposition:** `comply-safely`, `reframe`, `decline` or `ask-owner`.
+6. **Register.** A trap register is written as JSON for machines and Markdown for people, plus a problem-definition note
+   for research to start from.
 
-## Part 1: the syllabus
+### Lens packs (the modules)
 
-Topics are grouped so each group can be swept by a separate agent. Each file uses one template: principles, traps (each
-with a known real case), smell phrases, primary sources, and the questions to ask.
+A lens is a folder. Its manifest declares an id, a semver version, a scope, an owner and dependencies on source
+adapters. It also declares `applies_when`, the conditions that mark a brief as in scope for the lens (a domain, a data
+type, a technology), so lenses that don't apply are skipped and cost nothing.
 
-| Group | Topic files | Example smells in a brief |
-|---|---|---|
-| **Law and terms** | `licensing` (SPDX, GPL/AGPL network clause, non-commercial model and data licences, attribution) · `provider-terms` (Anthropic, OpenAI, Google and others: usage policies, rules on output use and training, account sharing, automation on consumer plans) · `copyright-data-rights` (scraping, site ToS, training data, media rights) · `privacy-regulated-data` (HIPAA, 42 CFR Part 2, GDPR/CCPA, COPPA, FERPA, BIPA, TCPA) · `professional-duty` (medical device / SaMD, financial and trading rules, unauthorised practice, interpreter certification, ADA/WCAG) | "use any open model", "scrape", "fine-tune on outputs", "real patient", "send texts to", "trade", "diagnose" |
-| **Security ethics and supply chain** | `security-ethics` (coordinated disclosure, CFAA and authorisation scope, credential handling, dark patterns) · `supply-chain` (unmaintained packages, OSV/CVE checks, typosquats, dependency licences, pinning) | "publish the vulnerabilities", "use library X" (check X), "share the demo login", "bypass" |
-| **Deep technical** | `cryptography` (no home-made crypto, nonce reuse, RNG, key management, "quantum-proof" claims) · `distributed-systems` (FLP, CAP/PACELC, Two Generals, effectively-once vs exactly-once, Byzantine 3f+1, clocks and ordering, split brain) · `theory-complexity` (undecidable asks, NP-hard optimum at scale, impossibility results in fairness metrics, information limits) · `os-systems` · `databases` (isolation anomalies, write skew, uniqueness under concurrency) · `performance` (physically impossible latency budgets, tail latency, Little's law, bad measurement) | "exactly once", "regardless of", "never lost", "guaranteed", "real time", "unbreakable", "optimal", "zero latency" |
-| **Evaluation and business** | `rubric-inversion` (Goodhart, metrics that reward the wrong behaviour, rubrics that reward fabrication or dark patterns) · `company-context` (the hiring company's mission, customers, regulators, public incidents, what they would never ship) | a rubric that scores volume, speed or conversion with no quality floor |
+`traps.yaml` entries are generic patterns, never project anecdotes. Each entry has:
 
-Each file grows from real cases. FacilityGrid seeds `distributed-systems`, OpenEMR seeds `security-ethics`, and this week's
-briefs seed the rest. The course lectures in `~/Projects/gauntlet/lectures` are read first, as `/sf` stage 1 already
-requires. They are the floor, not the ceiling.
+- an id, a statement and the cues that suggest it;
+- the sources that decide it;
+- a default severity and safe alternatives.
 
-## Part 2: retrieval
+An example entry from `distributed-systems`: "exactly-once delivery asserted end to end". Its cues are *exactly once*,
+*never duplicated*, *regardless of retries*. It is decided by the Two Generals and FLP results and the idempotency
+literature. Its safe alternative is effectively-once via idempotent keys, stated with the trust model.
 
-- **Corpus layout:** `minesweeper/corpus/<topic>/<source-id>.md`. Each file holds the source URL, the fetch date, a content
-  hash, and the text. Licences come from SPDX and the licence's own repository. Terms come from the provider's own page.
-  Statutes come from eCFR or the official text.
-- **Freshness:** terms of service and usage policies are fetched again at sweep time if the snapshot is over 30 days old.
-  Licences and statutes are re-checked on a 90-day schedule.
-- **Search, first version:** local lexical search (ripgrep plus a small BM25 script). It is free, needs no new service, and
-  can be checked by hand.
-- **Embeddings:** added only if an experiment on the golden set (below) shows lexical search misses traps that embeddings
-  find. That follows the `/sf` experiment rule rather than assuming RAG needs vectors.
-- **Company context:** gathered per brief by web search into `docs/minesweep/company-<name>.md`, with sources. It covers the
-  mission, products, customers, regulators and public incidents.
+The initial catalogue covers broad professional literacy and can grow:
 
-## Part 3: the sweep
-
-The steps run in order, and each one writes a file:
-
-1. **Split the brief into claims.** Every sentence is a claim, and so is everything attached to the brief: the rubric,
-   examples, sample data, linked repos, suggested libraries and models. Implied claims count too: "regardless of order"
-   assumes a trust model. Output: `claims.md`.
-2. **Sweep by lens.** One agent per group runs in parallel, so there are four. Each marks every claim either `clear` (with
-   the reason) or `suspect` (with the trap and the syllabus entry). A lens with nothing to report must still list each claim
-   it checked. A blank result then means "checked" rather than "not looked at".
-3. **Ground each suspect.** Retrieve the primary passage, then label the suspect `confirmed` (with a quote and its source),
-   `plausible` (no primary passage found yet, with what would settle it), or `dismissed` (with the reason).
-4. **Run a skeptic pass.** A separate agent tries to dismiss each confirmed trap. Over-flagging has a real cost: it turns a
-   legitimate brief into refusals. The skeptic runs on Claude under the Max subscription, in a fresh context with no access
-   to the sweepers' reasoning, only their claims and citations (owner decision: no OpenRouter).
-5. **Reframe.** For each surviving trap, record:
-   - **Severity**, on the peer's scale:
-     - **Critical:** following the brief harms people or plainly breaks a law, licence or professional duty.
-     - **High:** the deliverable fails, or there is substantial legal or security exposure.
-     - **Medium:** a flaw a careful reviewer would catch.
-     - **Low:** operational.
-   - **The problem the brief should have stated.**
-   - **A disposition:** `comply-safely` (a route that meets the intent without the trap), `reframe`, `decline`, or
-     `ask-owner`.
-6. **Write the register.** Output: `docs/minesweep/<date>-trap-register.md`. It holds one row per trap with its severity,
-   brief line, quote, source, disposition and status. It also gets a short "problem definition" section that stage 1
-   research starts from.
-
-## Changes to `/sf`
-
-- **Stage 0 Minesweep is added** before Research, with a todo of its own like every other stage.
-- **The ledger gains a `trust` column:** `trusted`, `conditioned (trap id)` or `rejected`. A row from a brief line with an
-  open Critical or High trap cannot be scheduled until its disposition is recorded. A Critical row also needs the owner's
-  sign-off.
-- **"Out of scope" no longer closes a trap.** A trap can be cut only with its consequence written down and a disposition.
-  This is the FacilityGrid lesson.
-- **Stage 1 Research widens.** Before market sizing and SOTA methods, it states the real problem: the company's mission, the
-  rules that govern its industry, and the known pitfalls. It then states where the brief points away from that problem.
-- **Stage 8 review** gets the trap register as a hunting list.
-- **Stages 9 and 12** run the sweep again on changed requirement text and on new inbound items.
-
-## How we test the skill (tests first, as `/sf` requires)
-
-A golden set built from cases we know, with expected traps written before the skill exists:
-
-| Case | Expected traps |
+| Group | Lenses |
 |---|---|
-| FacilityGrid brief | the trust model is missing (Byzantine or lying gateways); clock trust; the unauthenticated claim; "exactly once" needs to be framed as effectively-once |
-| OpenEMR one-click sign-in request | password disclosure; login CSRF and session fixation; a low-privilege demo account as the safe route |
-| OpenEMR modifications on a public deploy | GPL obligations for distributed changes (to verify against the licence text) |
-| Meridian brief | trading and prediction-market rules; real money; jurisdiction |
-| ai-red-team brief | disclosure ethics and authorisation scope |
-| This week's six briefs | compared against the peer's counts as an outside benchmark (their judgement, not ground truth) |
-| Two clean controls | briefs with no planted traps, to measure false alarms |
+| Law and terms | licensing, provider-terms, copyright-data-rights, privacy-regulated-data, professional-duty, accessibility |
+| Security | security-ethics, supply-chain, appsec-auth |
+| Deep technical | cryptography, distributed-systems, theory-complexity, os-systems, databases, performance |
+| Evaluation and business | rubric-inversion, company-context, market-reality |
 
-Metrics:
+`company-context` holds no company data. It is a procedure for researching whatever company a brief names: mission,
+customers, regulators, public incidents. It writes to the project's own `docs/minesweep/`.
 
-- **recall**, the share of expected traps found;
-- **precision**, the share of confirmed traps that survive owner review;
-- **citation rate**, the share of confirmed traps with a primary quote;
-- tokens and minutes per brief.
+### Sources and retrieval
 
-Failed runs stay in the history, as with every other gate.
+- `sources.yaml` lists primary sources by id, URL, adapter and freshness policy. Terms of service are refreshed when
+  older than 30 days at sweep time. Licences and statutes are refreshed every 90 days.
+- Adapters keep fetching logic out of the lenses. A new source kind needs one adapter that every lens can use.
+- The cache is regenerable. `refresh.py` reports which sources changed text since the last fetch, so a changed policy
+  becomes a review item rather than a silent drift.
+- Search starts as local BM25. Embeddings are added only if the evaluation shows BM25 missing traps that they find
+  (owner decision).
+
+### Contracts with the rest of the factory
+
+| Consumer | Uses | Contract |
+|---|---|---|
+| `/sf` stage 0 (new) | runs the sweep before Research | register schema v1 |
+| `/sf` ledger | a `trust` column per row: `trusted`, `conditioned (finding id)` or `rejected` | finding ids |
+| `/sf` stage 1 | problem-definition note | Markdown section names |
+| `/sf` stage 8 review | open findings as a hunting list | register schema v1 |
+| `/sf` stages 9 and 12 | re-sweep changed or new requirement text only | claims schema v1 |
+| `prd-writer`, `deep-research` | optional: sweep a draft, or seed research | register schema v1 |
+
+Policy enforced through `/sf` (owner decision):
+
+- An open Critical finding blocks scheduling of its rows until the owner signs off.
+- A High finding needs a recorded disposition.
+- "Out of scope" never closes a finding without a written consequence and a disposition.
+
+## Testing and maintenance
+
+- **Per-lens cases.** Each lens ships synthetic briefs, each with one planted trap, plus a clean twin that differs only
+  in the trap. Twins measure false alarms precisely. Cases come from the trap catalogue, not from past projects.
+- **Integration cases.** A small set of multi-trap briefs crossing lenses tests grouping, de-duplication and severity
+  ranking.
+- **Metrics.** `evaluate.py` writes per-lens and overall figures:
+  - recall on planted traps;
+  - the false-alarm rate on clean twins;
+  - citation rate on confirmed findings;
+  - tokens and minutes per brief.
+
+  Results are committed beside the cases. Failed runs stay in the history.
+- **Change rules.**
+  - A lens change re-runs that lens's cases.
+  - An engine or schema change re-runs everything.
+  - A schema change bumps its major version and keeps a reader for the previous one for one release.
+- **Lint.** `lint.py` fails when:
+  - a manifest is invalid;
+  - a trap has no source or no case;
+  - a source has no adapter;
+  - a lens has no clean twin.
+- **Real-world findings.** When a sweep in the field confirms a trap no case covers, it is written up as a new generic
+  trap entry plus a planted case through `writing-cases.md`, with no project names.
 
 ## Cost and limits
 
-- Each brief costs four lens agents, one grounding pass, one skeptic pass and one reframe pass. That is roughly seven agent
-  runs, on Sonnet by default, with Opus for the deep-technical lens.
-- Everything runs on the Claude Max subscription. No OpenRouter or other paid API (owner decision 2026-10-14).
-- This is not legal advice. The skill flags problems and cites sources; the owner decides. Where the answer depends on
-  jurisdiction or contract terms, the disposition is `ask-owner`.
-- Snapshots of terms of service go stale, which is why they are fetched again at sweep time.
+- Everything runs on the Claude Max subscription. There is no OpenRouter or other paid API (owner decision).
+- Model per role is set in `models.yaml`: Sonnet by default, Opus for deep-technical lenses.
+- `applies_when` and the group config bound the cost per brief. Lenses that don't apply are skipped.
+- This is not legal advice. The skill flags and cites; the owner decides. Where the answer depends on jurisdiction or
+  contract terms, the disposition is `ask-owner`.
 
-## Build order once approved
+## Build order
 
-1. Write the golden set and expected registers (tests first).
-2. Write `SKILL.md`, the syllabus template and the four group files, seeded from FacilityGrid and OpenEMR.
-3. Build the corpus and the lexical search; snapshot the primary sources the golden set needs.
-4. Run the sweep on the golden set; record recall and precision; fix the procedure, not the expectations.
-5. Add stage 0 and the ledger `trust` column to `/sf`, and run the sweep on this week's briefs when they arrive.
+1. Schemas and `lint.py` (the contracts first).
+2. The lens template, `adding-a-lens.md`, and case format; `evaluate.py` with cases written before lenses.
+3. Engine prompts and `procedure.md`; `SKILL.md`.
+4. Source adapters, cache, `search.py`, `refresh.py`.
+5. Lenses one group at a time, each landing with its cases passing their thresholds; evaluation results committed.
+6. `/sf` integration: stage 0, ledger `trust` column, gates, stage 8/9/12 hooks.
+7. Sweep each new brief as it arrives, with the register marked uncalibrated until its lenses have passed evaluation
+   (owner decision).
 
 ## Owner decisions (2026-10-14)
 
-1. **Hard gate: yes.** Critical traps block scheduling until the owner signs off. High needs a recorded disposition.
-2. **Retrieval: yes.** Lexical search first; embeddings only if the golden-set experiment justifies them.
-3. **Cross-family skeptic: no.** The project runs on the Claude Max subscription; the skeptic is a fresh Claude context.
-4. **This week's briefs: yes.** Sweep them as soon as they land, before any build starts, with the register marked
-   uncalibrated.
+1. **Hard gate: yes.** Critical findings block scheduling until the owner signs off. High needs a recorded disposition.
+2. **Retrieval: yes.** Lexical search first; embeddings only if the evaluation justifies them.
+3. **Cross-family skeptic: no.** Claude Max subscription only; the skeptic is a fresh Claude context.
+4. **Sweep new briefs on arrival: yes,** marked uncalibrated until their lenses pass evaluation.
+5. **Scope (revision 2):** no fitting to past projects and no restriction to current ones. Modularity and
+   maintainability for future releases are the design goal.
