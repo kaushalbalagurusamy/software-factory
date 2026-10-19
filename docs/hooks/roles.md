@@ -5,7 +5,7 @@ Data for the seven agent roles (`orchestrator research design audit implement te
 ## API
 - `load_roles(dir=None) -> dict[str, RoleSpec]`: keys in the order above. `dir` defaults to the shipped data; a str or `Path` is accepted.
 - `RoleSpec` and `McpEntry` are frozen dataclasses with `.to_dict()`; list fields are tuples.
-- `RoleError(ValueError)` has `.role` and `.field`; the message names both. List entries use `field[index]` (for example `hooks[2]`); MCP entries `mcp[0].access`.
+- `RoleError(ValueError)` has `.role` and `.field`; the message names both. Per C-37, `.field` is always the bare top-level field name (`hooks`, `core_tools`, `skills`, `spawns`, `disallowed_tools`, `mcp`), never indexed or nested; the offending entry and its position are in the message (for example `entry 3: unknown hook id 'x'`).
 
 ## Validation
 Raised as `RoleError`: a missing or unknown field; wrong types; `writes` not in `none app research_dir design_dirs audit_dir eval_paths`; `bash` not in `none readonly full`; MCP `access` not `read` or `write`; a hook id outside the eight in `hook-io.md`; `max_tools` above 20; `len(core_tools) > max_tools`; `id` not matching the file name; a missing or extra role file.
@@ -25,7 +25,7 @@ print(impl.hooks)   # ('path_guard', 'blindness_guard', 'secrets_guard', 'bash_g
 try:
     load_roles("/path/with/a/bad/audit.yaml/hook")
 except RoleError as e:
-    print(e.role, e.field)   # e.g. audit hooks[3]
+    print(e.role, e.field)   # e.g. audit hooks
 ```
 
 Tests: `.venv/bin/python -m pytest tests/agents/test_roles.py` (unit coverage, not the acceptance gate).

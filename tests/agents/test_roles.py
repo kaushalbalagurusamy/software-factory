@@ -177,7 +177,8 @@ def test_unknown_hook_rejected(role_dir, bad):
     with pytest.raises(RoleError) as e:
         load_roles(role_dir)
     assert e.value.role == "audit"
-    assert e.value.field == f"hooks[{len(yaml.safe_load((role_dir / 'audit.yaml').read_text())['hooks']) - 1}]"
+    assert e.value.field == "hooks"
+    assert "made_up" in str(e.value) or bad in str(e.value)
     assert "audit" in str(e.value) and "hooks" in str(e.value)
 
 
@@ -225,7 +226,7 @@ def test_mcp_write_access_value_checked(role_dir):
     _mutate(role_dir, "review", lambda d: d["mcp"].append({"server": "x", "access": "admin"}))
     with pytest.raises(RoleError) as e:
         load_roles(role_dir)
-    assert e.value.role == "review" and e.value.field.startswith("mcp[")
+    assert e.value.role == "review" and e.value.field == "mcp"
 
 
 def test_blind_must_be_bool(role_dir):
