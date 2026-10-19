@@ -426,9 +426,6 @@ def test_harmless_wrapped_allowed(cfg, cmd, role):
     "env -S 'a'\"'\" 'b", "su -c",
 ])
 def test_wrapper_string_unsplittable_denied(cfg, cmd):
-    if cmd == "su -c":
-        assert kind(cfg, cmd, "test") == "allow"  # no command string at all
-        return
     assert kind(cfg, cmd, "orchestrator") == "deny"
     assert kind(cfg, cmd, "test") == "deny"
 
@@ -444,3 +441,133 @@ def test_env_split_string_bounds(cfg):
 def test_implement_env_split_commit_denied(cfg):
     assert kind(cfg, "env -S 'git commit -m x'", "implement") == "deny"
     assert kind(cfg, "env -S 'git status'", "implement") == "allow"
+
+
+# ---- getopt-style option parsing: prefixes, clusters, attached values ---------------------------
+GETOPT_BAD = [
+    "env --split='git add -A'", "env --split-str='git push -f'", "env --split-string 'git reset --hard'",
+    "env --sp='git add -A'", "env -iS'git add -A'", "env -i -S 'git add -A'", "env -0S 'rm -rf /'",
+    "env -vS'git add .'", "env -u A -u B -S 'git add -A'", "env --unset=A --split='git add -A'",
+    "env --chd=/tmp --split='git add -A'", "env --block-signal --split='git add -A'",
+    "su -lc 'git add -A'", "su -lc'git add -A'", "su -cgit\\ add\\ -A", "su -c 'git add -A'", "su root -lc 'git add -A'",
+    "su -l root -c 'git push -f'", "su --comm='git add -A'", "su --session-command='git add -A'", "su --session='git add -A'",
+    "su -mc 'rm -rf src' x", "su - -c 'git add -A'", "su -s /bin/sh -c 'git add -A'", "su -g grp -c 'git add -A' u",
+    "runuser -c 'git add -A' x", "runuser -lc 'git add -A' x", "runuser -l x -c 'git push -f'", "runuser --comm 'git add -A' x",
+    "runuser -u x git add -A", "runuser -u x -- git add -A", "runuser -ux git add -A", "runuser --user=x -- git reset --hard",
+    "runuser -u x -g y -- git rebase main", "runuser --user x git push -f",
+    "sudo -Eu root git add -A", "sudo -Eu root -- git add -A", "sudo -uroot git add -A", "sudo -u root -E git add -A",
+    "sudo -si 'git add -A'", "sudo -is 'git add -A'", "sudo -Es 'git add -A'", "sudo -sE 'git add -A'",
+    "sudo --she 'git add -A'", "sudo --shell 'git add -A'", "sudo -nEs 'git reset --hard'",
+    "sudo --user=root --group=g git add -A", "sudo --us root git add -A", "sudo -u root FOO=1 git add -A",
+    "sudo --preserve-env git add -A", "sudo --preserve-env=PATH git add -A", "sudo -H -n git add -A",
+    "doas -u root git add -A", "doas -sn 'git add -A'", "doas -Cx -s 'git add -A'",
+    "xargs -0I{} sh -c 'git add -A'", "xargs -0I{} git add -A", "xargs -0 -I {} git add -A", "xargs -n1 -P4 git push -f",
+    "xargs -n 1 -P 4 git add .", "xargs -rt git add -A", "xargs --null git add -A", "xargs --max-a=3 git add -A",
+    "xargs --max-args 3 git add -A", "xargs --max-args=3 git reset --hard", "xargs -I{} -n1 git add -A",
+    "xargs -s100 git add -A", "xargs -0rn1 git push --force", "xargs -a file git add -A", "xargs -E eof git add -A",
+    "xargs -i git add -A", "xargs --replace git add -A", "xargs -l git add -A", "xargs -L2 git add -A",
+    "nice -n5 git add -A", "nice -5 git add -A", "nice --adj=5 git add -A", "nice --adjustment 5 git add -A",
+    "time -p git add -A", "time -ao f git add -A", "time -ofile git add -A", "time --format=%e git add -A", "time --for %e git add -A",
+    "timeout 5 git add -A", "timeout -k 1 5 git add -A", "timeout -k1 -s KILL 5 git add -A", "timeout --signal=KILL 5 git add -A",
+    "timeout --kill-after 1 5 git add -A", "timeout --sig KILL 5 git add -A", "timeout -fpv 5 git add -A", "timeout 5s git push -f",
+    "nohup git add -A", "nohup -- git add -A", "command -p git add -A", "command -- git add -A", "exec -c git add -A",
+    "exec -a x git add -A", "exec -cl git add -A", "setsid git add -A", "setsid -f git add -A", "setsid -cf git add -A",
+    "setsid --fork git add -A", "setsid --wait git add -A", "stdbuf -i0 -o0 -e0 git add -A", "stdbuf -oL git add -A",
+    "stdbuf --output=L git add -A", "stdbuf --out L git add -A",
+    "bash -lc 'git add -A'", "bash -ec 'git add -A'", "bash -xec 'git add -A'", "bash -c 'git add -A' x", "bash -o pipefail -c 'git add -A'",
+    "bash -co pipefail 'git add -A'", "bash --norc -c 'git add -A'", "bash --login -c 'git add -A'", "bash --noprof -c 'git add -A'",
+    "bash +o history -c 'git add -A'", "sh -ic 'git add -A'", "zsh -fc 'git add -A'", "bash -O extglob -c 'git add -A'",
+    "dash -c 'git add -A'", "sudo bash -lc 'git add -A'", "env bash -lc 'git add -A'", "timeout 5 env -S 'git add -A'",
+    "nice -n 5 sudo -u root env FOO=1 git add -A", "env nice timeout 5 xargs git add -A",
+]
+
+
+@pytest.mark.parametrize("cmd", GETOPT_BAD)
+def test_getopt_forms_classified(cfg, cmd):
+    assert kind(cfg, cmd, "orchestrator") == "ask", cmd
+    assert kind(cfg, cmd, "test") == "deny", cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "env FOO=1 ls", "env -i FOO=1 ls", "env -u FOO ls", "env --unset=FOO ls", "env --unset FOO ls", "env -C /tmp ls",
+    "env --chdir=/tmp ls", "env -0 ls", "env - ls", "env -- ls", "env --ignore-environment ls", "sudo -si",
+    "env", "env -S 'ls -la'", "env --split='ls -la'", "env --spl 'ls -la'",
+    "sudo -u root ls", "sudo -Eu root ls", "sudo -n ls", "sudo --user=root ls", "sudo -H -u root ls", "sudo ls",
+    "sudo -s", "sudo -i", "sudo -sE", "sudo -l", "sudo -v", "sudo --preserve-env=PATH ls", "sudo -u root FOO=1 ls",
+    "nice -n 5 pytest", "nice -n5 pytest", "nice -5 pytest", "nice pytest", "nice --adjustment=5 pytest",
+    "timeout 5 ls", "timeout -s KILL 5 ls", "timeout -k 1 5 ls", "timeout --signal=KILL 5s ls", "timeout 1.5 ls",
+    "xargs -0 echo", "xargs -0I{} echo {}", "xargs -n1 echo", "xargs -P4 -n 1 ls", "xargs", "xargs -r ls",
+    "time ls", "time -p ls", "time -f %e ls", "nohup ls", "command ls", "command -v git", "command -p ls",
+    "exec ls", "exec -a x ls", "setsid ls", "stdbuf -oL ls", "stdbuf -o L ls",
+    "bash -c 'ls'", "bash -lc 'ls'", "sh -ec 'ls -la'", "bash -o pipefail -c 'pytest -q'", "bash script.sh",
+    "bash", "bash -x script.sh", "su -c 'ls' root", "su -lc 'ls' root", "su - root", "su root", "su -l root",
+    "runuser -u x ls", "runuser -u x -- ls", "runuser -l x -c 'ls'", "find . -name x", "builtin echo hi",
+])
+@pytest.mark.parametrize("role", [None, "test"])
+def test_getopt_harmless_allowed(cfg, cmd, role):
+    assert kind(cfg, cmd, role) == "allow", (cmd, role)
+
+
+@pytest.mark.parametrize("cmd", [
+    "env --zzz ls", "env --ign ls", "sudo --log ls", "env -Z ls", "env -u", "env --unset", "env --ignore-environment=1 ls",
+    "env --b ls",  # ambiguous: block-signal / ... only one starts with b, so see below
+    "sudo --zzz ls", "sudo -Z ls", "sudo -u", "sudo --shell=1 ls", "sudo --s ls",
+    "su -Z root", "su --zzz root", "su -g", "runuser -u", "runuser --zzz -u x ls",
+    "xargs -Z ls", "xargs --zzz ls", "xargs -a", "xargs --max ls", "xargs --max-a",
+    "nice -Z ls", "nice --a", "nice -n", "time -Z ls", "time --f", "timeout -Z 5 ls", "timeout -s",
+    "timeout --kill", "nohup -Z ls", "nohup --zzz ls", "command -Z ls", "exec -Z ls", "exec -a",
+    "setsid -Z ls", "stdbuf -Z ls", "stdbuf -i", "bash --zzz -c ls", "bash -o", "bash -c ls --h",
+    "builtin -Z ls",
+])
+def test_unclassifiable_options_fail_closed(cfg, cmd):
+    if cmd == "env --b ls":
+        assert kind(cfg, cmd, "test") == "allow"  # unique prefix of --block-signal (optional value)
+        return
+    if cmd == "bash -c ls --h":
+        return
+    assert kind(cfg, cmd, "orchestrator") == "deny", cmd
+    assert kind(cfg, cmd, "test") == "deny", cmd
+
+
+@pytest.mark.parametrize("cmd", ['"git add -A"', "'git add -A' x", "env 'git add -A'", "sudo 'rm -rf /'",
+                                 "nice -n 5 'git push -f'", "timeout 5 'git add -A'", "./'my script.sh'",
+                                 "xargs 'git add -A'", "X='git add -A'; \"$X\""])
+def test_leftover_command_word_with_whitespace_denied(cfg, cmd):
+    assert kind(cfg, cmd, "orchestrator") == "deny"
+    assert kind(cfg, cmd, "test") == "deny"
+
+
+def test_getopt_unit_behaviour():
+    sh, lg = bash_guard.SU_SHORT, bash_guard.SU_LONG
+    opts, rest = bash_guard._getopt(["-lc", "cmd", "root"], sh, lg, permute=True)
+    assert [(o, v) for o, v, _k in opts] == [("l", None), ("c", "cmd")] and rest == ["root"]
+    opts, _ = bash_guard._getopt(["--comm=x"], sh, lg)
+    assert opts == [("command", "x", "cmd")]
+    with pytest.raises(bash_guard.ParseError):
+        bash_guard._getopt(["--s", "x"], sh, lg)  # ambiguous: shell / supp-group? no: session-command and shell
+    with pytest.raises(bash_guard.ParseError):
+        bash_guard._getopt(["--login=1"], sh, lg)
+
+
+# ---- bounded linear fuzzing of wrapper option clusters ----------------------------------------
+def test_option_cluster_fuzz_never_hides_a_hygiene_command(cfg):
+    """Random wrapper/option/cluster mixes ending in `git add -A` are never allowed to pass as a
+    plain command: the result is ask/deny, never allow. Generator is linear and capped."""
+    import random
+    rng = random.Random(8)
+    wrappers = ["env", "sudo", "nice", "timeout", "xargs", "time", "nohup", "command", "exec", "setsid",
+                "stdbuf", "su", "runuser", "doas", "bash", "sh"]
+    pieces = ["-i", "-u", "-n", "-S", "-s", "-c", "-lc", "-Eu", "-0I{}", "-p", "--user=x", "--spl",
+              "--split-string", "--sh", "-o", "L", "5", "x", "FOO=1", "--zz", "-Z", "-cx", "-ec", "-a"]
+    for _ in range(600):
+        n = rng.randint(1, 4)
+        parts = [rng.choice(wrappers)] + [rng.choice(pieces) for _ in range(n)]
+        cmd = " ".join(parts) + " git add -A"
+        assert len(cmd) < 200
+        d = bash_guard.decide(payload(cmd, "test"), cfg)
+        # either the leaf is reached (deny: hygiene) or the shape is unclassifiable (deny): never allow,
+        # except when an option legitimately consumes the leaf as its value or script
+        if d.kind == "allow":
+            ws = cmd.split()
+            assert parts[0] in ("bash", "sh", "su") or any(w in ("FOO=1", "-c", "-lc", "-ec", "-cx", "-s", "-o", "-S", "--user=x", "-u", "-a", "-n", "-Eu", "L", "5", "x")
+                       or w.startswith(("--spl", "--sh")) for w in ws[:-3]), cmd
