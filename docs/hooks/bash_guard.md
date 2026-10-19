@@ -16,12 +16,13 @@ Module `factory/hooks/bash_guard.py`, hook id `bash_guard`, event PreToolUse, to
 ## Wrappers and option-carried command strings
 Wrapper options are parsed table-driven, as GNU getopt does (`_getopt` in the module). Each wrapper has a small table of its short and long options, marked `flag`, `value`, `opt` (optional value, attached only) or `cmd` (carries a COMMAND STRING). Long options resolve by unique prefix against the table (exactly one match, an exact name always wins); short clusters are walked letter by letter, a value or command letter consuming the rest of the cluster or else the next word (`-lc CMD`, `-cCMD`, `-Eu root`, `-0I{}`, `-SX`). An unknown option, an ambiguous prefix, a missing value or a value given to a flag is unclassifiable: the whole command is denied for every role, never skipped.
 - `env`: `-S`/`--split-string` (and any unique prefix such as `--split`, `--spl`, or a cluster such as `-iS`) is split with shlex and analysed as the words after `env` (unsplittable, missing or over 100000 characters: deny). `-u -C -a -P` take values. Options after assignments are still parsed (conservative).
-- `sudo`/`doas`: `-s`, `-i`, `--shell`, `--login` (also in clusters, `-sE`, `-si`) turn the remaining words into a shell command line parsed like `sh -c`; value options (`-u -g -h -p -C -D -R -r -T -t -U`) are consumed.
-- `su`/`runuser`: `-c`, `--command`, `--session-command` (any unique prefix, attached or clustered) strings are parsed as shell commands; `runuser -u USER [--] CMD` analyses CMD.
+- `sudo`: `-s`, `-i`, `--shell`, `--login` (also in clusters, `-sE`, `-si`) turn the remaining words into a shell command line parsed like `sh -c`; value options (`-u -g -h -p -C -D -R -r -T -t -U`) are consumed.
+- Operands after `--` are the wrapped command and are analysed like any other (`env -- git add -A`, `sudo -u root -- git push -f`). `su`/`runuser` post-user operands are not parsed at all; see the next list.
+- **Always ask / deny (unanalysable wrappers):** `su`, `runuser`, `doas`, `pkexec`, `machinectl shell`, `nsenter`, `chroot`, `ssh`, `watch`, `flock`, `parallel`. They switch privilege or context and run arbitrary command strings, so they are never unwrapped: any use, with any options or none, asks the orchestrator (and the main session) and denies every other role (rule `unanalysable-wrapper`). Reached through another wrapper, `bash -c`, `find -exec` or a pipeline, the same rule applies.
 - `xargs`, `nice`, `time`, `timeout`, `nohup`, `command`, `builtin`, `exec`, `setsid`, `stdbuf`: tables of flags and value options; none carries a command string, the rest is the wrapped command (`timeout` drops its duration).
 - `bash|sh|zsh|dash|ksh|ash`: any letter cluster, `-o`/`-O`/`+o` values, a table of long options; `-c` makes the first operand a script, parsed. `eval X` and `find -exec|-execdir|-ok|-okdir ... ;|+` are parsed the same way.
 - Defence in depth: after unwrapping, a command word that contains whitespace is treated as unparseable and denied.
-- Not interpreted: `ssh host cmd`, `watch`, `flock`, `parallel`, `chroot`, `ionice`.
+- Not interpreted: `ionice`.
 
 **Limits.** A command-line parser cannot be complete: shells, wrappers and their option grammars are open-ended, and this guard only recognises what its tables list. It is a best-effort filter in front of the real controls. The OS sandbox and the Claude Code permission layer remain the backstop; do not rely on this hook alone to prevent an irreversible action.
 
@@ -46,4 +47,4 @@ Orchestrator, `railway up`, result `ask`: reason `bash_guard deploy-route: the p
 Orchestrator, `git commit -m 'never git add -A'`: allow (exit 0, empty output), because the text is a commit message.
 
 ## Known gaps (not verified or not handled)
-Shell aliases (`!cmd` git aliases), `ssh`/`watch`/`flock`/`parallel`, variables set outside the command, `psql -f file.sql` (file contents are not read), and arrays/`case` syntax beyond splitting are not interpreted. Unit tests: `tests/hooks/test_bash_guard.py`.
+Shell aliases (`!cmd` git aliases), variables set outside the command, `psql -f file.sql` (file contents are not read), and arrays/`case` syntax beyond splitting are not interpreted. Unit tests: `tests/hooks/test_bash_guard.py`.

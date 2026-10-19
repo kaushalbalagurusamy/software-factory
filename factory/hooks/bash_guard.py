@@ -40,6 +40,11 @@ SQL_CLIENTS = frozenset({
     "psql", "mysql", "mariadb", "sqlite3", "sqlcmd", "duckdb", "usql", "sqlplus", "cockroach",
     "clickhouse-client", "pgcli", "mycli",
 })
+# Privilege or context-switching wrappers that run arbitrary command strings. They are never
+# unwrapped: any use is unanalysable, so it asks the orchestrator and denies every other role.
+UNANALYSABLE_WRAPPERS = frozenset({
+    "su", "runuser", "doas", "pkexec", "nsenter", "chroot", "ssh", "watch", "flock", "parallel",
+})
 SHELLS = frozenset({"sh", "bash", "zsh", "dash", "ksh", "ash"})
 RESERVED_PREFIX = frozenset({"if", "then", "else", "elif", "do", "while", "until", "{", "!", "}", "fi", "done", "esac"})
 ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*\+?=")
@@ -581,15 +586,6 @@ SUDO_LONG = _lspec(
     values=("close-from", "chdir", "group", "host", "login-class", "prompt", "chroot", "role", "type",
             "command-timeout", "other-user", "user"),
     opts=("preserve-env",))
-DOAS_SHORT = _spec(flags="Lns", values="Cu")
-SU_SHORT = _spec(flags="flmpPV-", values="gGsw", cmds="c", opts="")
-SU_LONG = _lspec(flags=("login", "preserve-environment", "fast", "pty", "help", "version"),
-                 values=("group", "supp-group", "shell", "whitelist-environment"),
-                 cmds=("command", "session-command"))
-RUNUSER_SHORT = _spec(flags="flmpPV", values="ugGsw", cmds="c")
-RUNUSER_LONG = _lspec(flags=("login", "preserve-environment", "fast", "pty", "help", "version"),
-                      values=("user", "group", "supp-group", "shell", "whitelist-environment"),
-                      cmds=("command", "session-command"))
 XARGS_SHORT = _spec(flags="0oprtvx", values="adILnPsE", opts="eil")
 XARGS_LONG = _lspec(
     flags=("null", "interactive", "no-run-if-empty", "verbose", "exit", "open-tty", "show-limits", "help",
@@ -652,26 +648,12 @@ def _strip_prefix(words: list[str], scripts: list[str]) -> list[str]:
                     continue
                 break
             ws = rest
-        elif name in ("sudo", "doas"):
-            sp, lg = (SUDO_SHORT, SUDO_LONG) if name == "sudo" else (DOAS_SHORT, {})
-            opts, rest = _getopt(args, sp, lg)
+        elif name == "sudo":
+            opts, rest = _getopt(args, SUDO_SHORT, SUDO_LONG)
             if any(o in ("s", "i", "shell", "login") for o, _v, _k in opts) and rest:
                 scripts.append(" ".join(rest))
                 return []
             ws = rest
-        elif name in ("su", "runuser"):
-            sp, lg = (SU_SHORT, SU_LONG) if name == "su" else (RUNUSER_SHORT, RUNUSER_LONG)
-            opts, rest = _getopt(args, sp, lg)
-            if not (name == "runuser" and any(o in ("u", "user") for o, _v, _k in opts)):
-                opts, rest = _getopt(args, sp, lg, permute=True)  # `su user -c cmd` puts options last
-            cmds = [v for _o, v, k in opts if k == "cmd"]
-            if cmds:
-                scripts.extend(c or "" for c in cmds)
-                return []
-            if name == "runuser" and any(o in ("u", "user") for o, _v, _k in opts):
-                ws = rest
-            else:
-                return ws
         elif name == "xargs":
             ws = _getopt(args, XARGS_SHORT, XARGS_LONG)[1]
         elif name == "nice":
@@ -949,6 +931,9 @@ def _analyse(cmds: list[Cmd], cfg: HookConfig, depth: int = 0) -> list[Finding]:
         args = words[1:]
         is_git = name == "git"
         is_text = name in TEXT_COMMANDS
+
+        if name in UNANALYSABLE_WRAPPERS or (name == "machinectl" and "shell" in args):
+            findings.append(Finding("unanalysable-wrapper", f"{name} runs arbitrary command strings the guard cannot inspect"))
 
         # nested shell strings
         if name in SHELLS:
