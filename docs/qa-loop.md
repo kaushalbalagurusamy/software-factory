@@ -62,3 +62,9 @@ and is refused (exit 4) when the slices package rejects; the slice's `verificati
 window (whitespace-normalized), or a protected file path. Memory is bounded by the feedback text (at most 1 MB);
 protected material above 8 MB or 5000 files fails closed with "protected material too large to check".
 With no protected paths configured the command refuses unless `--allow-no-protect` is given.
+
+## Written-file hardening
+Signatures used as file names or headers must match `^[A-Za-z0-9_-]{1,64}$` (exit 2 otherwise). The leak check runs
+over the complete content about to be written: the whole `qa-feedback/<n>.md`, the header plus section of each
+regression proposal, and the `reviewer-verdict` note (persisted into `state.json`). Raw gate error text recorded
+by `record` is QA-private (normalized into the logs, never sent to the implementer) and is not leak-checked.

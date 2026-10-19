@@ -10,12 +10,12 @@ import sys
 from pathlib import Path
 
 from .decide import decide_next
-from .feedback import NoProtectedPaths, propose_regression, write_feedback
+from .feedback import NoProtectedPaths, check_text, propose_regression, write_feedback
 from .leak import LeakError
 from .policy import PolicyError, load_policy
 from .runs import record_run
 from .stats import slice_dirs, tier_stats
-from .store import AuditError, SliceStore
+from .store import AuditError, SliceStore, check_signature
 
 OK, ERR, USAGE, LEAK, REFUSED = 0, 1, 2, 3, 4
 
@@ -91,7 +91,10 @@ def cmd_verify_pass(a):
 
 
 def cmd_reviewer(a):
-    _store(a).set_reviewer_verdict(a.signature, a.verdict, a.note)
+    st = _store(a)
+    check_signature(a.signature)
+    check_text(a.note, st.root, a.protect, a.allow_no_protect)  # the note is persisted into state.json
+    st.set_reviewer_verdict(a.signature, a.verdict, a.note)
     return OK
 
 
@@ -146,15 +149,15 @@ def build():
     c = add("regression-propose", cmd_regression)
     for k in ("signature", "criterion", "input-class", "expected", "recurred"):
         c.add_argument(f"--{k}", required=True)
-    for n in ("feedback", "regression-propose"):
-        sp = sub.choices[n]
-        sp.add_argument("--protect", action="append", default=[])
-        sp.add_argument("--allow-no-protect", action="store_true")
     c = add("verify-pass", cmd_verify_pass); c.add_argument("task"); c.add_argument("--slice-dir")
     c.add_argument("--evidence", required=True); c.add_argument("--commit", required=True); c.add_argument("--criteria", nargs="+")
     c = add("reviewer-verdict", cmd_reviewer); c.add_argument("--signature", required=True)
     c.add_argument("--verdict", required=True, choices=["amended", "unresolved"]); c.add_argument("--note", required=True)
     add("unblock", cmd_unblock); add("stats", cmd_stats); add("audit", cmd_audit); add("policy", cmd_policy)
+    for n in ("feedback", "regression-propose", "reviewer-verdict"):
+        sp = sub.choices[n]
+        sp.add_argument("--protect", action="append", default=[])
+        sp.add_argument("--allow-no-protect", action="store_true")
     return ap
 
 

@@ -4,6 +4,7 @@ from pathlib import Path
 import yaml
 
 from .leak import LeakError, assert_no_leak, expand
+from .store import check_signature
 
 
 class NoProtectedPaths(Exception):
@@ -18,6 +19,11 @@ def protected_paths(root, extra=()) -> list:
         paths = (yaml.safe_load(prof.read_text(encoding="utf-8")) or {}).get("paths") or {}
         out += list(paths.get("eval") or []) + list(paths.get("held_out") or [])
     return out
+
+
+def check_text(text, root, extra=(), allow_none=False):
+    """Leak-check the COMPLETE text that is about to be written. Raises LeakError / NoProtectedPaths."""
+    _check(text, root, extra, allow_none)
 
 
 def _check(text, root, extra, allow_none):
@@ -35,7 +41,7 @@ def _check(text, root, extra, allow_none):
 def write_feedback(store, *, criteria, observed, expected, repro, signature=None, changed=None,
                    protect=(), allow_no_protect=False) -> Path:
     f = store.facts()
-    sig = signature or f["current_sig"]
+    sig = check_signature(signature) if signature is not None else f["current_sig"]
     attempt = len(f["fails_by_sig"].get(sig, [])) if sig else f["counted"]
     if changed is None:
         changed = ("first failure for this signature; nothing to compare" if attempt <= 1
@@ -59,16 +65,18 @@ def propose_regression(store, *, signature, criterion, input_class, expected, re
                        allow_no_protect=False) -> Path:
     """Append a proposal for the eval author. Never touches eval files."""
     from .store import now
+    check_signature(signature)
+    header = (f"# Regression proposals for signature {signature}\n\n"
+              "Append-only. For the eval author to review and add; QA does not edit eval files.\n\n")
     section = (f"## Proposal at {now()}\n- Criterion: {criterion}\n- Input class: {input_class}\n"
                f"- Expected behaviour: {expected}\n- Where the failure recurred: {recurred}\n\n")
-    _check(section, store.root, protect, allow_no_protect)
+    _check(header + section, store.root, protect, allow_no_protect)  # everything that will be written
     out = store.dir / "regression-proposals" / f"{signature}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     new = not out.exists()
     with open(out, "a", encoding="utf-8") as fh:
         if new:
-            fh.write(f"# Regression proposals for signature {signature}\n\n"
-                     "Append-only. For the eval author to review and add; QA does not edit eval files.\n\n")
+            fh.write(header)
         fh.write(section)
     store.note_proposal(signature, str(out.relative_to(store.root)))
     return out
