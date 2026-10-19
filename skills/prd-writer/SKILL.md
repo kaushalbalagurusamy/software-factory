@@ -87,3 +87,7 @@ This skill does not write the business-facing spec, choose architectures, or wri
 - `references/prd-template.md`: the PRD layout and every scope field. Read it before writing a PRD.
 - `references/example-prd.md`: a short PRD whose scope block names real paths in this repository and passes the checker.
 - `scripts/check_scope.py`: the checker. Run it with `--help` for the options.
+
+## Slice format
+
+Tracer-bullet slices (UX stories first, then public acceptance criteria and tasks) follow `docs/slice-format.md`: `docs/slices/<id>/` with `proposal.md`, `specs/<capability>/spec.md`, `tasks.md`, and CLI-written `verification.json`, `criteria.lock`, `amendments.md`. Check and gate them with `python -m factory.slices` (`check`, `lock`, `tick`, `verify`, `amend`, `done`, `triage`). The slice author writes stories and criteria; only the implementer ticks `[x]`, only QA verifies, and weakening a locked criterion needs `--approved-by human:<ref>` or `codex:<ref>`.
