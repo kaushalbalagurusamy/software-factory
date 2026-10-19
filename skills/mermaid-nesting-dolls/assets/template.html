@@ -29,6 +29,7 @@
   }
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}
 button,input{font:inherit;color:inherit}
@@ -67,6 +68,7 @@ body.present aside{display:none}
 .chip{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:inherit;text-decoration:none;min-height:36px}
 .chip:hover{border-color:var(--accent)}
 .chip[aria-current]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.dot.st-built{background:var(--st-built-ink)}.dot.st-partial{background:var(--st-partial-ink)}.dot.st-designed{background:var(--st-designed-ink)}.dot.st-external{background:var(--st-external-ink)}.dot.st-gap{background:var(--st-gap-ink)}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;border:1px solid var(--node-line)}
 .st-built{background:var(--st-built)}.st-partial{background:var(--st-partial)}.st-designed{background:var(--st-designed)}.st-external{background:var(--st-external)}.st-gap{background:var(--st-gap)}
 aside{border-left:1px solid var(--line);background:var(--surface);overflow:auto;padding:16px 18px 32px;min-height:0}
@@ -116,10 +118,17 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 body.present #canvas{margin:0 16px 8px}
 body.present{font-size:17px}
 @media (max-width:900px){
-  main{grid-template-columns:minmax(0,1fr);overflow:auto}
-  aside{border-left:0;border-top:1px solid var(--line)}
-  #search input{width:130px}
-  .toolbar .hint{display:none}
+  main{display:block;overflow:auto}
+  #stage{display:block}
+  #canvas{height:60vh;min-height:300px}
+  aside{border-left:0;border-top:1px solid var(--line);margin-top:12px}
+  header{padding:8px 12px;gap:6px}
+  header h1{font-size:14px;flex-basis:100%}header h1 small{display:none}
+  header button{padding:3px 9px;min-height:32px}
+  #search{flex:1 1 120px}#search input{width:100%}#results{width:min(320px,86vw);right:auto;left:0}
+  .toolbar{padding:8px 12px}.toolbar .hint{display:none}
+  nav.crumbs{padding:6px 12px;font-size:13px}
+  #canvas{margin:0 12px}.kids{padding:12px}
 }
 </style>
 </head>
@@ -145,7 +154,7 @@ body.present{font-size:17px}
 <main id="explore">
   <section id="stage">
     <div class="toolbar">
-      <button id="zfit">Fit</button><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button>
+      <button id="zfit">Fit</button><button id="lay" title="Let the viewer pick left-to-right or top-to-bottom">Layout: auto</button><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button>
       <span id="legend"></span>
       <span class="hint">Click a stacked box to open the diagram inside it.</span>
     </div>
@@ -181,7 +190,7 @@ function diagramOwner(id){return drillable(id)?id:(PARENT[id]||id)}
 var ORDER=[];(function walk(id){ORDER.push(id);kids(id).forEach(function(k){walk(k[1])})})(ROOT);
 
 /* ---- state / routing -------------------------------------------------------------------------------- */
-var cur=ROOT, view="explore", hist=[], lastKey=null, backing=false, zoom="fit", seq=0;
+var cur=ROOT, view="explore", hist=[], lastKey=null, backing=false, zoom="fit", seq=0, layout="auto";
 function go(id){location.hash="#/"+(N[id]?id:ROOT)}
 window.addEventListener("hashchange",route);
 function route(){
@@ -260,12 +269,22 @@ function panel(){
 }
 
 /* ---- diagram ----------------------------------------------------------------------------------------- */
+function variants(src){
+  var m=/^(\s*(?:flowchart|graph)\s+)(LR|RL|TB|TD|BT)\b/.exec(src);
+  if(!m||layout!=="auto")return [src];
+  return [src,src.replace(m[0],m[1]+(m[2]==="LR"||m[2]==="RL"?"TB":"LR"))];
+}
+function fitScore(svgText){
+  var m=/viewBox="[-\d.]+ [-\d.]+ ([\d.]+) ([\d.]+)"/.exec(svgText);if(!m)return 0;
+  var c=$("canvas");return Math.min((c.clientWidth-26)/m[1],(c.clientHeight-26)/m[2],1.1);
+}
 function drawDiagram(owner,sel){
   var my=++seq,box=$("canvas"),n=N[owner];
   if(!n.diagram){box.innerHTML='<p class="err">No diagram for '+esc(n.title)+'.</p>';return}
-  mermaid.render("nd-svg-"+my,n.diagram).then(function(r){
+  Promise.all(variants(n.diagram).map(function(src,k){return mermaid.render("nd-svg-"+my+"-"+k,src)})).then(function(rs){
     if(my!==seq)return;
-    box.innerHTML=r.svg;
+    var best=rs[0];rs.forEach(function(r){if(fitScore(r.svg)>fitScore(best.svg)*1.15)best=r});
+    box.innerHTML=best.svg;
     var svg=box.querySelector("svg");decorate(svg,owner,sel);sizeSvg(svg);
   }).catch(function(e){
     if(my!==seq)return;
@@ -302,8 +321,8 @@ function sizeSvg(svg){
   if(!svg)svg=$("canvas").querySelector("svg");if(!svg)return;
   var vb=svg.viewBox&&svg.viewBox.baseVal;if(!vb||!vb.width)return;
   svg.removeAttribute("style");svg.removeAttribute("height");
-  var avail=$("canvas").clientWidth-26;
-  svg.setAttribute("width",Math.round(zoom==="fit"?Math.min(avail,vb.width*1.6):vb.width*zoom));
+  var c=$("canvas"),fit=Math.max(.55,Math.min((c.clientWidth-26)/vb.width,(c.clientHeight-26)/vb.height,1.1));
+  svg.setAttribute("width",Math.round(vb.width*(zoom==="fit"?fit:zoom)));
   svg.style.maxWidth="none";
 }
 function zoomBy(f){
@@ -365,6 +384,7 @@ $("prev").onclick=function(){var i=ORDER.indexOf(cur);if(i>0)go(ORDER[i-1])};
 $("next").onclick=function(){var i=ORDER.indexOf(cur);if(i<ORDER.length-1)go(ORDER[i+1])};
 $("present").onclick=function(){var on=document.body.classList.toggle("present");this.setAttribute("aria-pressed",on);sizeSvg()};
 $("zfit").onclick=function(){zoom="fit";sizeSvg()};$("zin").onclick=function(){zoomBy(1.25)};$("zout").onclick=function(){zoomBy(.8)};
+$("lay").onclick=function(){layout=layout==="auto"?"as written":"auto";this.textContent="Layout: "+layout;render()};
 $("check").onclick=showCheck;
 $("theme").onclick=function(){var t=isDark()?"light":"dark";document.documentElement.setAttribute("data-theme",t);try{localStorage.setItem("nd-theme",t)}catch(e){}initMermaid();render()};
 $("q").addEventListener("input",search);

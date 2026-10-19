@@ -37,6 +37,7 @@ One JSON file describes the whole explorer. `scripts/nesting_dolls.py check` enf
 - **Tree, not graph.** Every node except `root` has exactly one parent (**checked**). A node with `children` must have a `diagram` (**checked**).
 - **Diagram node ids are model ids.** Each child id must appear in the parent's diagram so it can be clicked (**checked**, and re-checked in the browser by the Check button). Use flowcharts; other diagram types render but cannot be clicked.
 - `children` may be a list of ids, or an object `{"id used in the diagram": "global node id"}` when two diagrams reuse a short name (the omm importer does this).
+- `diagram` is a string or a list of lines (joined with newlines; easier to edit in JSON).
 - **A node with a `diagram` is a "doll"** (drawn as a stacked box, opens its own diagram). A node without one is a leaf (opens its details, shown inside the parent's diagram with a highlight).
 - Ids: letters, digits, `-`, `/`; start with a letter; never a Mermaid keyword (`end`, `class`, `graph`, ...) (**checked**).
 - Colour comes from `coverage.status`, applied by the viewer, so do not add `classDef`/`style` fills to the Mermaid source. Edge labels and `classDef` strokes are fine.

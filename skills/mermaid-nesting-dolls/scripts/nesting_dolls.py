@@ -25,6 +25,11 @@ def id_in(text: str, node_id: str) -> bool:
     return re.search(rf"(?<![\w-]){re.escape(node_id)}(?![\w-])", text) is not None
 
 
+def bare(diagram: str) -> str:
+    """The diagram with quoted labels blanked, so ids are matched only where Mermaid sees ids."""
+    return re.sub(r'"[^"]*"', '""', diagram)
+
+
 def children_map(node: dict) -> dict[str, str]:
     """Normalise `children` to {id used in the diagram: global node id}."""
     ch = node.get("children") or []
@@ -60,11 +65,11 @@ def validate(model: dict, repo: Path) -> tuple[list[str], list[str]]:
                 errors.append(f"{gid}: has two parents ({parent[gid]}, {nid}); nesting must be a tree")
             else:
                 parent[gid] = nid
-            if n.get("diagram") and not id_in(n["diagram"], local):
+            if n.get("diagram") and not id_in(bare(n["diagram"]), local):
                 errors.append(f"{nid}: child {local!r} does not appear in its diagram, so it cannot be clicked")
         if n.get("diagram"):
             for local in {i for i in nodes if "/" not in i and i != nid}:
-                if id_in(n["diagram"], local) and local not in cm and local not in {parent.get(nid)}:
+                if id_in(bare(n["diagram"]), local) and local not in cm and local not in {parent.get(nid)}:
                     warns.append(f"{nid}: diagram mentions node {local!r} that is not listed in children")
 
     seen: set[str] = set()
@@ -207,6 +212,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     model = json.loads(Path(a.model).read_text(encoding="utf-8"))
+    for n in model.get("nodes", {}).values():  # a diagram may be a list of lines, which is easier to edit in JSON
+        if isinstance(n.get("diagram"), list):
+            n["diagram"] = "\n".join(n["diagram"])
     errors, warns = validate(model, Path(a.repo).resolve())
     for w in warns:
         print("warn: ", w)
