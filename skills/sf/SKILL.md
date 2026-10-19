@@ -250,6 +250,52 @@ Create one todo per stage. Mark a stage complete only when its artifact exists o
     and whenever the owner asks for an update. Read the survey answers from the page's database at the
     start of the next slice and record each as a Human (gate) row in the ADR it touches.
 
+## Factory toolchain by stage (the owner's flow, with what is enforced)
+
+The owner's flow is authoritative: business requirements, then minesweeping for core business value and best
+practices in advanced subcategories, then multi-agent research seeds on state-of-the-art techniques, then
+experiments where the options are not already resolved, then tracer-bullet slices that start with UX stories
+(triaged by priority and dependency), then a MECE eval surface, then blind implementers supervised by QA
+agents, then mechanistic review that can amend the slice and restart the implementer/QA pair, then docs and
+ADR sync that blocks completion on drift, with a live development and ops dashboard updated at every stage.
+The stages above are that flow; this table says which command does the checking in each. The flow diagram
+with current versus planned behaviour is `docs/sf-flow.md`. All commands run as `sf <group> ...`
+(`python -m factory.<module>` also works). Rows marked *prose* have no mechanical check yet.
+
+| Stage | Do this | Mechanical check | How it is enforced |
+|---|---|---|---|
+| 1 Research (intake) | Verbatim register (`spec-recomposition`), minesweeper sweep **plus** the core-value and best-practice pass per advanced subcategory (`skills/intake-gate`), ranked seeds (`biz-decomposer`) | `sf intake check --source S --ledger L`, `sf intake record-sweep`, `sf intake gate`, `sf intake seeds check` | CLI gate; fails when the sweep record for the current source hash is missing (proof that the sweep ran), an open Critical lacks a sign-off, or a source line has no ledger row. The sweep and research themselves are model procedure |
+| 2 Experiment | Pre-registered multi-metric comparison from a dated enumeration | `sf intake experiments check` | CLI gate; a literal candidate list with no enumeration file is rejected |
+| 3 Decide | ADR; one-way doors through `one-way-door` | `sf audit` (fails closed: exit 3 when the required verifier is unavailable) | CLI gate; the `bash_guard` hook asks a human before force-push, destructive SQL, deploys |
+| 4 Slice | `docs/slices/<id>/`: UX stories first, public acceptance criteria with IDs, tasks with two boxes, priority and depends_on (`prd-writer`, `docs/slice-format.md`) | `sf slice check DIR [--ledger L]`, `sf slice triage` | CLI gate; `check` blocks a slice whose source rows are conditioned on an open Critical |
+| 4b Structure | Map the affected area; refresh the architecture artifact | `sf structure scan|scope|model|diff`, then the dolls `check` and `build` (`skills/mermaid-nesting-dolls`) | CLI; edges are labelled resolved, syntactic or unresolved and never claimed complete |
+| 4c Contracts | Independent contracts with IDs, frame conditions, assumptions; consistency review before code (`skills/contract-verify`, `axiomatic-spec`) | `sf contracts check-contracts` | CLI gate; unsatisfiable or vacuous contracts fail |
+| 5 Tests first | Eval author writes and freezes cases from the contracts | `sf slice lock DIR` freezes criteria by hash | CLI; later changes to criteria need an additive amendment or an explicit human or Codex approval marker |
+| 6 Implement blind | `scripts/implementer-worktree.sh NAME` (protected paths absent from the tree); implementer ticks `[x]` meaning implemented | `sf slice tick ... --role implementer` | worktree plus PreToolUse hooks `blindness_guard`, `path_guard`, `secrets_guard`, `bash_guard`; the `stop_gate` hook refuses a stop with skipped or weakened tests |
+| 7 Separate runner | QA supervisor runs the suites, writes behavioural feedback in criterion terms, never test source; bounded retries, measured escalation, repeat failures become regression proposals | `sf qa init|record|next|feedback|regression-propose|verify-pass|stats` ; `scripts/bounded-pytest.sh` | CLI; the feedback leak check rejects protected material; only QA can set `verified` (`sf slice verify --role qa`) |
+| 8 Review | Deterministic first: `sf slice done`, `sf contracts verify`, `sf structure diff`, dolls `check`; then evidence-backed review with `implementation-review`, the Ponytail review rubric and the minesweeper lenses; findings amend the slice (`sf slice amend --role reviewer`) and re-kick the implementer and QA | `sf slice done DIR` | CLI gate for the deterministic part; the judgement part is prose |
+| 9 Drift | Re-derive from the verbatim source; update the ledger | `sf intake check`, `sf slice done` | CLI gate: refuses completion with an unverified task, a broken verification chain, a changed criterion, or an uncovered source line |
+| 10 Docs and dashboard | `doc-sync`; update the dashboard at every stage | `scripts/ops-stage-event.sh STAGE SLICE VERDICT`, `sf ops bundle` at commit time | CLI; historical artifacts are snapshotted per commit, runtime telemetry is 'as of now' and never part of a snapshot |
+| 11 Commit | Atomic commits, explicit paths | `sf ops bundle` | CLI |
+| 12 Inbound | Rank new items into the ledger or backlog | `sf intake gate --since SHA` for new source text | CLI for new requirement text; the ranking is prose |
+
+Retry and escalation defaults (configurable in `.sf/policy.yaml`, tuned from `sf qa stats`): 4 attempts per
+failure signature, model tier per attempt, one flake rerun, environment crashes (out of disk, out of memory,
+killed, timeout) classified separately and never consuming an attempt. At the cap QA hands the slice to the
+reviewer; a slice the reviewer cannot unblock is recorded as blocked with what it waits on and the run moves to
+the next independent slice. Never stop on a blocker.
+
+Resource limits (after the 2026-10-19 out-of-memory incident): run tests through `scripts/bounded-pytest.sh`,
+at most one heavy run at a time and at most two implementation agents at once; never build test inputs by
+doubling or repeated self-nesting. A tripped limit is a failure, never a pass.
+
+Known limits, stated so nothing reads as more than it is: the hooks are mechanical only in projects where
+`sf` has generated the project settings and agent files, and their behaviour inside a live Claude Code session
+has been exercised through the command line and simulated event streams, not yet end to end in a real session;
+the Bash and blindness guards are denylist parsers and cannot be complete, so the OS sandbox and permission
+layer remain the backstop; the solver gate covers a small pure-Python subset and everything else must route
+to tests; structure extraction is Python-only and never a complete call graph.
+
 ## Hygiene: disk and memory (runs beside the stages, not as a stage)
 
 A long run dies of a full disk or memory pressure long before it runs out of requirements. The helper
