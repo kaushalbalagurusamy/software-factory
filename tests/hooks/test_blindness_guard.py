@@ -647,7 +647,7 @@ def test_nested_commands_denied(env, cmd):
 @pytest.mark.parametrize("cmd", [
     "find src -name '*.py' -exec wc -l {} +", "find src -type f -exec grep -n foo {} \\;",
     "fd py src -x wc -l", "awk '{print $1}' src/pkg/a.py", "awk -F: '$1 > 0 || $2 { print $2 }' src/pkg/a.py",
-    "vim -c ':set number' src/pkg/a.py", "less +G src/pkg/a.py", "script -q -c 'make build' /dev/null",
+    "vim src/pkg/a.py", "less -N src/pkg/a.py", "script -q -c 'make build' /dev/null",
 ])
 def test_nested_harmless_forms_allowed(env, cmd):
     d = bash(env, cmd)
@@ -715,3 +715,55 @@ def test_in_base_patterns_without_symlink_into_protected_allowed(app, tool, ti):
     ti = {k: v.format(root=app) for k, v in ti.items()}
     d = decide(app, tool, ti)
     assert d.kind == "allow", (ti, d.reason)
+
+
+# ---- security addendum 4 ---------------------------------------------------------------------
+@pytest.mark.parametrize("cmd", [
+    # (1) '+' ends a find -exec list only right after {}; no terminator is denied
+    "find src -exec echo + cat evals/cases/c1.yaml \\;",
+    "find src -exec sh -c 'ls' +",
+    "find src -exec wc -l {}",
+    # (2) -execdir/-okdir run in an unknown folder
+    "find src -name '*.py' -execdir grep -r foo . \\;",
+    "find src -execdir find \\;",
+    "find src -okdir cat ../evals/cases/c1.yaml \\;",
+    # (3) awk extensions, program files and computed redirections
+    "awk -f prog.awk src/pkg/a.py", "gawk --file=prog.awk src/pkg/a.py", "gawk -i inplace '{print}' src/pkg/a.py",
+    "gawk -l filefuncs 'BEGIN{}'", "gawk -E prog.awk", "gawk '@include \"x.awk\"'", "gawk '@load \"rwarray\"'",
+    "gawk 'BEGIN { f = \"system\"; @f(\"ls\") }'",
+    "awk 'BEGIN { while ((getline l < (\"ev\" \"als/x\")) > 0) print l }'",
+    "awk 'BEGIN { d = \"ev\"; print 1 > d \"als/x\" }'",
+    # (4) editor and pager command options
+    "vim -c ':set number' src/pkg/a.py", "vim --cmd 'set nu' src/pkg/a.py", "vim +10 src/pkg/a.py",
+    "vim -S session.vim", "vim -s keys.txt src/pkg/a.py", "vim -u vimrc src/pkg/a.py", "vim --clean src/pkg/a.py",
+    "ex -es src/pkg/a.py", "less +G src/pkg/a.py", "nano +3 src/pkg/a.py", "view -c q src/pkg/a.py",
+])
+def test_addendum4_denied(env, cmd):
+    assert len(cmd) < 200
+    assert denied(bash(env, cmd)), cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "find src -name '*.py' -exec wc -l {} +", "find src -exec echo a + b {} \\;",
+    "find src -execdir wc -l {} \\;", "awk 'BEGIN { print \"x\" > \"build/out.txt\" }'",
+    "awk '{ if ($1 > 0) print $2 }' src/pkg/a.py", "vim src/pkg/a.py", "less src/pkg/a.py",
+])
+def test_addendum4_allowed(env, cmd):
+    d = bash(env, cmd)
+    assert d.kind == "allow", (cmd, d.reason)
+
+
+@pytest.mark.parametrize("ti", [
+    {"pattern": "{{../evals,pkg}}/*", "path": "{root}/src"},
+    {"pattern": "pkg/../../evals/*", "path": "{root}/src"},
+    {"pattern": "../src/../evals/**", "path": "{root}/src"},
+    {"pattern": "{{link,pkg}}/**", "path": "{root}/app"},
+])
+def test_glob_brace_and_parent_patterns_escape_path(app, ti):
+    ti = {k: v.format(root=app) for k, v in ti.items()}
+    assert denied(decide(app, "Glob", ti)), ti
+
+
+def test_glob_brace_pattern_inside_allowed_path(app):
+    ti = {"pattern": "{pkg,other}/*.py", "path": str(app / "src")}
+    assert decide(app, "Glob", ti).kind == "allow"

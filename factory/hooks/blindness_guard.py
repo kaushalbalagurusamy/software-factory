@@ -54,6 +54,8 @@ _ASSIGN = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)\+?=(.*)\Z", re.S)
 _SEQ_BRACE = re.compile(r"(?<!\$)\{[^{}]*\.\.[^{}]*\}")
 _WALKER = re.compile(r"\b(?:f?walk|[ri]?glob|globSync|listdir|scandir|readdir(?:Sync)?|opendir(?:Sync)?"
                      r"|iterdir)\b|File::Find|Find\.find|Dir\.(?:entries|children|each_child|\[)")
+# print/printf ... > target and getline < target, up to the end of the statement
+_AWK_REDIR = re.compile(r"(?:\bprintf?\b[^;{}\n]*?>>?|\bgetline\b[^;{}\n]*?<)([^;{}\n]*)")
 _CODE_TOKEN = re.compile(r"[^\s'\"(),;`<>|&!]+")
 _FRAG_SPLIT = re.compile(r"[/{}:=+#%,]")
 _GIT_EXEC_KEY = re.compile(r"alias\.|.*(?:pager|editor|sshcommand|fsmonitor|textconv|hookspath|askpass"
@@ -89,7 +91,7 @@ GIT_WRITES = frozenset({"checkout", "restore", "apply", "am", "reset", "stash", 
 FIND_FILTERS = frozenset({"-name", "-iname", "-path", "-ipath", "-wholename", "-iwholename", "-regex",
                           "-iregex", "-lname", "-ilname"})
 AWKS = frozenset({"awk", "gawk", "mawk", "nawk"})
-EDITORS = frozenset({"vim", "vi", "nvim", "view", "ex", "less", "more"})
+EDITORS = frozenset({"vim", "vi", "nvim", "view", "ex", "less", "more", "nano"})
 GIT_READS = frozenset({"log", "show", "blame", "annotate", "grep", "ls-files", "ls-tree", "cat-file",
                        "archive", "whatchanged", "format-patch", "diff-tree", "fast-export", "bundle"})
 _PYTEST_LONG = ("--deselect", "--ignore", "--ignore-glob", "--rootdir", "--confcutdir", "--junitxml",
@@ -823,6 +825,9 @@ class _Guard:
                             f"protected eval/held-out paths; search a specific source directory instead")
             return
         for w in words:
+            if cwd is None and not w.startswith(("/", "~")):
+                raise _Deny(f"{what} on {_show(w)!r} runs in an unknown working directory, which may hold "
+                            f"protected eval/held-out paths; use an absolute source directory")
             v = self.verdict(w, cwd, EVAL)
             if v == 2:
                 raise _Deny(f"{what} on {_show(w)!r} names a protected eval/held-out path")
@@ -869,9 +874,13 @@ class _Guard:
             # only one that escapes it (absolute, ~, ../) is checked
             base = path if os.path.isabs(path) else os.path.join(self.cwd0, path)
             joined = pat if os.path.isabs(pat) or pat.startswith("~") else os.path.join(base, pat)
-            inside = _rel(_norm(joined), _norm(base)) is not None
-            if (not inside and self.literal_verdict(joined) == 2) or (inside and self.resolves_protected(joined)):
+            inside = (_rel(_norm(joined), _norm(base)) is not None and "{" not in pat
+                      and ".." not in pat.split("/"))
+            if (not inside and self.literal_verdict(joined) == 2) or self.resolves_protected_any(joined):
                 raise _Deny(f"{tool} glob {_show(pat)!r} names protected eval/held-out paths")
+
+    def resolves_protected_any(self, pattern: str) -> bool:
+        return any(self.resolves_protected(b) for b in _braces(pattern))
 
     def resolves_protected(self, pattern: str) -> bool:
         """A pattern that stays under an allowed path is checked by what exists on disk: every
@@ -1059,7 +1068,9 @@ class _Guard:
         if name == "git":
             return self.git(args)
         if name == "find":
-            self.nested(self.exec_lists(self.raw_args, ("-exec", "-execdir", "-ok", "-okdir")), depth)
+            self.nested(self.exec_lists(self.raw_args, ("-exec", "-ok"), find=True), depth)
+            # -execdir/-okdir run in each match's folder: the working directory is unknown
+            self.nested(self.exec_lists(self.raw_args, ("-execdir", "-okdir"), find=True), depth, cwd=None)
         if name in ("fd", "fdfind"):
             self.nested(self.exec_lists(self.raw_args, ("-x", "--exec", "-X", "--exec-batch")), depth)
         if name in AWKS:
@@ -1261,25 +1272,32 @@ class _Guard:
         self.no_control(toks + list(args), self.cwd, f"{label} argument")
 
     @staticmethod
-    def exec_lists(raw: list[str], flags: tuple[str, ...]) -> list[list[str]]:
-        """The command lists of find -exec/-ok and fd -x, with ``{}`` placeholders replaced."""
+    def exec_lists(raw: list[str], flags: tuple[str, ...], find: bool = False) -> list[list[str]]:
+        """The command lists of find -exec/-ok and fd -x, with ``{}`` placeholders replaced. For
+        find, ``+`` ends a list only right after ``{}``; a list without a terminator is denied."""
         out, i = [], 0
         while i < len(raw):
             if raw[i] in flags:
                 j = i + 1
-                while j < len(raw) and raw[j] not in (";", "+"):
+                while j < len(raw) and not (raw[j] == ";" or (raw[j] == "+" and (not find or raw[j - 1] == "{}"))):
                     j += 1
+                if find and j >= len(raw):
+                    raise _Deny(f"find {raw[i]} has no terminating ';' (or '+' after {{}}); cannot analyse it safely")
                 out.append([re.sub(r"\{[^{}]*\}", "__found__", w) for w in raw[i + 1:j]])
                 i = j
             i += 1
         return out
 
-    def nested(self, lists: list[list[str]], depth: int):
+    def nested(self, lists: list[list[str]], depth: int, cwd: str | None | bool = False):
         for words in lists:
             if words:
                 saved = self.cwd
-                self.simple(_Cmd(words=words), depth + 1)
-                self.cwd = saved
+                if cwd is not False:
+                    self.cwd = cwd
+                try:
+                    self.simple(_Cmd(words=words), depth + 1)
+                finally:
+                    self.cwd = saved
 
     def program_tokens(self, code: str, label: str):
         """Every token of program text is checked like a Bash word (frag_hit and no_protected)."""
@@ -1296,6 +1314,10 @@ class _Guard:
     def awk(self, name: str, args: list[str]):
         letters, longs, pos, vals = _parse(args, "Fvfeil", ("--field-separator", "--assign", "--file",
                                                            "--source", "--include", "--load"))
+        bad = ({"f", "i", "l", "E"} & letters) or [x for x in longs if x.split("=")[0] in (
+            "--file", "--include", "--load", "--exec")]
+        if bad:
+            raise _Deny(f"{name} with program files or extensions (-f, -i, -l, -E) cannot be checked")
         progs = [v for k, v in vals if k in ("-e", "--source")]
         if not progs and not any(k in ("-f", "--file") for k, _ in vals) and pos:
             progs = [pos[0]]
@@ -1303,15 +1325,20 @@ class _Guard:
             raw = prog.replace(LIT, "$")
             if re.search(r"\bsystem\s*\(|(?<!\|)\|(?!\|)", raw):
                 raise _Deny(f"{name} program runs a command (system() or a pipe), which this guard cannot see")
+            if re.search(r"@[A-Za-z_]", raw):
+                raise _Deny(f"{name} program uses @include, @load or an indirect @call, which cannot be checked")
+            for m in _AWK_REDIR.finditer(raw):
+                if not re.fullmatch(r'\s*"[^"\\]*"\s*', m.group(1)):
+                    raise _Deny(f"{name} redirection target {_show(m.group(1).strip())!r} is built at run time")
             self.program_tokens(raw, name)
 
     def editor(self, name: str, args: list[str]):
-        cmds = [v for k, v in _parse(args, "cS", ("--cmd",))[3] if k in ("-c", "--cmd", "-S")]
-        cmds += [a[1:] for a in args if a.startswith("+")]
-        for cmd in cmds:
-            if "!" in cmd or "system(" in cmd:
-                raise _Deny(f"{name} command {_show(cmd)!r} runs a shell command, which this guard cannot see")
-            self.program_tokens(cmd, name)
+        for a in args:
+            if a == "--":
+                break
+            if (a.startswith("+") or a.split("=")[0] in ("--cmd", "--clean")
+                    or (a.startswith("-") and not a.startswith("--") and set(a[1:]) & set("cSsu"))):
+                raise _Deny(f"{name} option {_show(a)!r} runs editor commands, which a blind role may not use")
 
     # (c) test runners
     def pytest(self, args: list[str]):
