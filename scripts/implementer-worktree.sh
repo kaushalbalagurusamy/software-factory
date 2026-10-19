@@ -63,7 +63,10 @@ deny = [f"Read(./{p.rstrip('/')}/**)" for p in paths] + [f"Read(./{p.rstrip('/')
 json.dump({"permissions": {"deny": deny}}, open(out, "w"), indent=2)
 PY
 # keep the local settings out of commits without touching tracked ignore files
-git -C "$dest" rev-parse --git-path info/exclude | xargs -I{} sh -c 'mkdir -p "$(dirname "{}")"; grep -qx ".claude/settings.local.json" "{}" 2>/dev/null || echo ".claude/settings.local.json" >> "{}"'
+exclude="$(git -C "$dest" rev-parse --path-format=absolute --git-path info/exclude)"
+mkdir -p "$(dirname "$exclude")"
+grep -qxF '.claude/settings.local.json' "$exclude" 2>/dev/null \
+  || echo '.claude/settings.local.json' >> "$exclude"
 
 for p in "${protect[@]}"; do
   if [ -e "$dest/${p%/}" ]; then echo "protected path still present: $p" >&2; exit 1; fi
