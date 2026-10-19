@@ -1,9 +1,10 @@
 """The `next` decision: pure over (facts, state, policy, tier stats), plus an applying wrapper."""
+from factory.hitl import store as hitl
 from .store import AuditError
 from .stats import slice_dirs, tier_stats
 
 ACTIONS = ("retry_same_tier", "escalate_model", "propose_regression", "hand_to_reviewer", "mark_blocked",
-           "accept", "rerun_for_flake", "environment_wait")
+           "accept", "rerun_for_flake", "environment_wait", "human_stop")
 
 
 def _d(action, reason, **kw):
@@ -76,6 +77,13 @@ def decide_next(store, pol, tier_stats_=None, apply=False) -> dict:
     problems = store.audit()
     if problems:
         raise AuditError("; ".join(problems))
+    try:
+        stops = [s["name"] for s in hitl.blocking(store.root, f"slice:{store.id}")]
+        why = "an open human stop applies; nothing is retried, escalated or accepted until a human releases it"
+    except hitl.StopLedgerError as e:
+        stops, why = ["<ledger>"], f"human-stop ledger tampered or unreadable (failing closed): {e}"
+    if stops:
+        return _d("human_stop", why, stops=stops)
     stats = tier_stats_ if tier_stats_ is not None else tier_stats(slice_dirs(store.root))
     d = decide(store.facts(), store.state, pol, stats)
     if apply:

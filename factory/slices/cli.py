@@ -1,4 +1,5 @@
-"""python -m factory.slices. Exit codes: 0 ok, 1 check failure, 2 usage error, 3 gate not met, 4 refused."""
+"""python -m factory.slices. Exit codes: 0 ok, 1 check failure, 2 usage error, 3 gate not met, 4 refused,
+5 done blocked by an open human stop (or an unverifiable stop ledger; fails closed)."""
 from __future__ import annotations
 
 import argparse
@@ -7,10 +8,12 @@ import re
 import sys
 from pathlib import Path
 
+from factory.hitl import store as hitl_store
+
 from . import ops
 from .model import parse
 
-OK, CHECK_FAIL, USAGE, GATE, REFUSED = 0, 1, 2, 3, 4
+OK, CHECK_FAIL, USAGE, GATE, REFUSED, HUMAN_STOP = 0, 1, 2, 3, 4, 5
 
 
 class Usage(Exception):
@@ -148,6 +151,17 @@ def gate_reasons(p: Path) -> list[str]:
 
 def cmd_done(a) -> int:
     p = _slice_dir(a)
+    root = Path(a.root) if a.root else hitl_store.find_root(p)
+    if root is not None:
+        try:
+            stops = hitl_store.blocking(root, f"slice:{p.resolve().name}")
+        except hitl_store.StopLedgerError as e:
+            print(f"NOT DONE human-stop ledger failed verification: {e}")
+            return HUMAN_STOP
+        for s in stops:
+            print(f"NOT DONE human stop {s['name']} [{s['scope']}] is open: {s['reason']}")
+        if stops:
+            return HUMAN_STOP
     reasons = gate_reasons(p)
     for r in reasons:
         print(f"NOT DONE {r}")
@@ -182,7 +196,8 @@ def build() -> argparse.ArgumentParser:
     for k in ("added", "changed", "removed"):
         c.add_argument(f"--{k}", action="append", default=[], metavar="ID")
     c.add_argument("--approved-by"); c.set_defaults(f=cmd_amend)
-    c = sub.add_parser("done"); c.add_argument("dir"); c.set_defaults(f=cmd_done)
+    c = sub.add_parser("done"); c.add_argument("dir"); c.add_argument("--root", help="project root holding .sf/stops (default: nearest ancestor that has one)")
+    c.set_defaults(f=cmd_done)
     c = sub.add_parser("triage"); c.add_argument("--root", default="docs/slices"); c.set_defaults(f=cmd_triage)
     return ap
 
