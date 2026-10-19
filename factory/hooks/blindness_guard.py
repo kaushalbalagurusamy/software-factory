@@ -85,6 +85,11 @@ SUB_WRAPPERS = {"uv": "run", "poetry": "run", "pipenv": "run", "pdm": "run", "co
                 "hatch": "run", "pnpm": "exec", "npm": "exec"}
 _SUB_LONG = ("--with", "--python", "--extra", "--group", "--name", "--prefix", "--package", "--project",
              "--directory", "--env-file", "--index", "--from")
+GIT_WRITES = frozenset({"checkout", "restore", "apply", "am", "reset", "stash", "switch"})
+FIND_FILTERS = frozenset({"-name", "-iname", "-path", "-ipath", "-wholename", "-iwholename", "-regex",
+                          "-iregex", "-lname", "-ilname"})
+AWKS = frozenset({"awk", "gawk", "mawk", "nawk"})
+EDITORS = frozenset({"vim", "vi", "nvim", "view", "ex", "less", "more"})
 GIT_READS = frozenset({"log", "show", "blame", "annotate", "grep", "ls-files", "ls-tree", "cat-file",
                        "archive", "whatchanged", "format-patch", "diff-tree", "fast-export", "bundle"})
 _PYTEST_LONG = ("--deselect", "--ignore", "--ignore-glob", "--rootdir", "--confcutdir", "--junitxml",
@@ -145,6 +150,20 @@ def _rel(path: str, root: str) -> str | None:
 
 def _segs(glob: str) -> tuple[str, ...]:
     return tuple(p for p in glob.split("/") if p not in ("", "."))
+
+
+def _dir_segments(g: tuple[str, ...]) -> list[str]:
+    """U-2 protected directory segments of a glob: its first named segment (``evals``) and every
+    named folder in it (``held_out`` in ``tests/held_out/**``). A final segment counts only when it
+    has no ``*`` or ``.``, so a bare file name such as ``h.py`` is never one."""
+    out = []
+    for k, p in enumerate(g):
+        final = k + 1 == len(g)
+        if p == "**" or (final and ("." in p or "*" in p)):
+            continue
+        if "*" not in p or not out:  # the first named segment counts even with a wildcard (ev*/**)
+            out.append(p)
+    return list(dict.fromkeys(out))
 
 
 def _compat(a: str, g: str, wild: bool) -> bool:
@@ -605,9 +624,7 @@ class _Guard:
         ev = tuple(_segs(g) for g in (*cfg.eval_globs, *cfg.held_out))
         ct = tuple(_segs(g) for g in CONTROL_GLOBS)
         self.globs = {EVAL: tuple(g for g in ev if g), CTRL: ct}
-        # U-2: the first segment of each glob that is not "**" (such as "evals")
-        self.frags = {k: tuple(f for f in dict.fromkeys(next((p for p in g if p != "**"), "") for g in v) if f)
-                      for k, v in self.globs.items()}
+        self.frags = {k: tuple(dict.fromkeys(f for g in v for f in _dir_segments(g))) for k, v in self.globs.items()}
         self.vars: dict[str, list[str]] = {}
         self.checks = 0
         self.words = 0
@@ -697,13 +714,10 @@ class _Guard:
         if not p.startswith("~"):
             return self.verdict_path(p, cwd, kind)
         head, _, rest = p[1:].partition("/")
-        literal = self.verdict_path(p, cwd, kind)
         base = self.home if head == "" else cwd if head == "+" else None
         if base is None:  # ~- and ~user are unresolvable (A-06-3)
-            if (kind == EVAL and not rest) or self.frag_hit(rest, kind):
-                return 2
-            return literal
-        return max(literal, self.verdict_path(os.path.join(base, rest) if rest else base, cwd, kind))
+            return 2 if (kind == EVAL and not rest) or self.frag_hit(rest, kind) else 0
+        return self.verdict_path(os.path.join(base, rest) if rest else base, cwd, kind)
 
     def verdict_path(self, p: str, cwd: str | None, kind: str) -> int:
         if not os.path.isabs(p):
@@ -733,20 +747,23 @@ class _Guard:
             rel = _rel(a, root)
             if rel is not None:
                 segs = rel.split("/") if rel else []
-                return max((_match(segs, g) for g in globs), default=0)
-        if kind != EVAL:
-            return 0
+                if any(_match(segs, g) == 2 for g in globs):
+                    return 2
+                return 1 if any(self.is_ancestor(a, segs, g) for g in globs) else 0
         if a == "/" or any(r.startswith(a.rstrip("/") + "/") for r in self.roots):
             return 1  # an ancestor of the project root
-        segs = [p for p in a.split("/") if p]
-        for k in range(len(segs)):  # another checkout of the same project
-            if any(_match(segs[k:], g, wild=False) == 2 for g in globs):
-                return 2
-        if not _WILD.search(a) and os.path.isdir(a):
-            for g in globs:
-                if g[0] != "**" and "*" not in g[0] and os.path.lexists(os.path.join(a, g[0])):
-                    return 1
-        return 0
+        return 0  # outside the project: globs are project-relative (A-06-3 keeps ~/evals elsewhere allowed)
+
+    @staticmethod
+    def is_ancestor(a: str, segs: list[str], g: tuple[str, ...]) -> bool:
+        """Strict ancestor of the glob's named folders: ``**`` matches no folder here, so a leading
+        ``**`` does not make every folder an ancestor. A folder whose direct child is the glob's
+        first named segment (for ``**/held_out``: ``src`` holding ``src/held_out``) counts too."""
+        if _match(segs, tuple(p for p in g if p != "**")) == 1:
+            return True
+        lit = next((p for p in g if p != "**"), "")
+        return (g[0] == "**" and lit and "*" not in lit and not _WILD.search(a)
+                and os.path.lexists(os.path.join(a, lit)))
 
     def fs_glob(self, pattern: str) -> list[str]:
         """Concrete paths a shell glob expands to (``**`` as ``*``), so symlinks behind wildcards
@@ -841,8 +858,11 @@ class _Guard:
             raise _Deny(f"{tool} on {_show(path)!r} would search protected eval/held-out paths; search a "
                         f"specific source directory instead")
         if pat:
-            joined = pat if os.path.isabs(pat) else os.path.join(path, pat)
-            if self.literal_verdict(joined) == 2:
+            # a relative pattern that stays under an allowed path cannot reach a protected path;
+            # only one that escapes it (absolute, ~, ../) is checked
+            base = path if os.path.isabs(path) else os.path.join(self.cwd0, path)
+            joined = pat if os.path.isabs(pat) or pat.startswith("~") else os.path.join(base, pat)
+            if _rel(_norm(joined), _norm(base)) is None and self.literal_verdict(joined) == 2:
                 raise _Deny(f"{tool} glob {_show(pat)!r} names protected eval/held-out paths")
 
     def bash(self, command):
@@ -918,6 +938,7 @@ class _Guard:
         working directory it runs in."""
         words = [self.flat(w) for w in c.words]
         cwd = self.cwd
+        self.synth = False
         i, n = 0, len(words)
         for _ in range(32):
             while i < n and (_ASSIGN.match(words[i]) or words[i] in KEYWORDS):
@@ -932,6 +953,7 @@ class _Guard:
                 j, _vals = _skip_opts(words, i + 1, "wE", ("--timeout", "--conflict-exit-code"))
                 j += 1  # the lock file
                 if j < n and words[j] in ("-c", "--command"):
+                    self.synth = True
                     return ["sh", "-c", words[j + 1] if j + 1 < n else ""], cwd
                 i = j
                 continue
@@ -954,8 +976,17 @@ class _Guard:
         raise _Deny("cannot analyse the command safely (too many command wrappers); denied")
 
     def simple(self, c: _Cmd, depth: int):
-        self.no_protected(c.words + [t for _, t in c.redirs], self.cwd)
+        if depth > MAX_DEPTH:
+            raise _Deny("cannot analyse the command safely (nested too deeply); denied")
         argv, cwd = self.argv(c)
+        synthesized = self.synth
+        off = len(c.words) - len(argv)
+        self.raw_args = argv[1:] if synthesized else c.words[off + 1:]
+        skip: set[int] = set()
+        if argv and not synthesized and os.path.basename(argv[0]) == "find":
+            # -name, -path and similar take a file-name filter, not a path (QA iteration 1)
+            skip = {off + k + 1 for k in range(1, len(argv) - 1) if argv[k] in FIND_FILTERS}
+        self.no_protected([w for k, w in enumerate(c.words) if k not in skip] + [t for _, t in c.redirs], self.cwd)
         writes = [t for op, t in c.redirs if op in _WRITE_REDIRS]
         if not argv:
             self.no_control(writes, cwd, "write target")
@@ -1006,8 +1037,20 @@ class _Guard:
             self.pytest(args)
             return []
         if name == "git":
-            self.git(args)
-            return []
+            return self.git(args)
+        if name == "find":
+            self.nested(self.exec_lists(self.raw_args, ("-exec", "-execdir", "-ok", "-okdir")), depth)
+        if name in ("fd", "fdfind"):
+            self.nested(self.exec_lists(self.raw_args, ("-x", "--exec", "-X", "--exec-batch")), depth)
+        if name in AWKS:
+            self.awk(name, args)
+        if name == "script":
+            code = next((v for k, v in _parse(args, "cEeOT", ("--command", "--echo", "--log-io", "--log-out",
+                                                              "--log-timing"))[3] if k in ("-c", "--command")), None)
+            if code is not None:
+                return self.shell("sh", ["-c", code], c, depth)
+        if name in EDITORS:
+            self.editor(name, args)
         self.recursive(name, args, letters, longs)
         return self.write_targets(name, args, letters, longs)
 
@@ -1190,7 +1233,37 @@ class _Guard:
         raw = code.replace(LIT, "$")
         if _WALKER.search(raw):
             raise _Deny(f"{label} calls a directory walker, which could list protected eval/held-out paths")
-        toks = _CODE_TOKEN.findall(raw)
+        toks = self.program_tokens(raw, label)
+        for t in toks:
+            if self.frag_hit(t, CTRL):
+                raise _Deny(f"{label} argument {_show(t)!r} is under a protected factory control folder "
+                            f"(.factory/ or .claude/)")
+        self.no_control(toks + list(args), self.cwd, f"{label} argument")
+
+    @staticmethod
+    def exec_lists(raw: list[str], flags: tuple[str, ...]) -> list[list[str]]:
+        """The command lists of find -exec/-ok and fd -x, with ``{}`` placeholders replaced."""
+        out, i = [], 0
+        while i < len(raw):
+            if raw[i] in flags:
+                j = i + 1
+                while j < len(raw) and raw[j] not in (";", "+"):
+                    j += 1
+                out.append([re.sub(r"\{[^{}]*\}", "__found__", w) for w in raw[i + 1:j]])
+                i = j
+            i += 1
+        return out
+
+    def nested(self, lists: list[list[str]], depth: int):
+        for words in lists:
+            if words:
+                saved = self.cwd
+                self.simple(_Cmd(words=words), depth + 1)
+                self.cwd = saved
+
+    def program_tokens(self, code: str, label: str):
+        """Every token of program text is checked like a Bash word (frag_hit and no_protected)."""
+        toks = _CODE_TOKEN.findall(code.replace(LIT, "$"))
         self.words += len(toks)
         if self.words > MAX_WORDS:
             raise _Deny("cannot analyse the command safely (too many words); denied")
@@ -1198,11 +1271,27 @@ class _Guard:
             if self.frag_hit(t, EVAL):
                 raise _Deny(f"{label} code names a protected eval/held-out path ({_show(t)!r})")
         self.no_protected(toks, self.cwd, f"{label} code")
-        for t in toks:
-            if self.frag_hit(t, CTRL):
-                raise _Deny(f"{label} argument {_show(t)!r} is under a protected factory control folder "
-                            f"(.factory/ or .claude/)")
-        self.no_control(toks + list(args), self.cwd, f"{label} argument")
+        return toks
+
+    def awk(self, name: str, args: list[str]):
+        letters, longs, pos, vals = _parse(args, "Fvfeil", ("--field-separator", "--assign", "--file",
+                                                           "--source", "--include", "--load"))
+        progs = [v for k, v in vals if k in ("-e", "--source")]
+        if not progs and not any(k in ("-f", "--file") for k, _ in vals) and pos:
+            progs = [pos[0]]
+        for prog in progs:
+            raw = prog.replace(LIT, "$")
+            if re.search(r"\bsystem\s*\(|(?<!\|)\|(?!\|)", raw):
+                raise _Deny(f"{name} program runs a command (system() or a pipe), which this guard cannot see")
+            self.program_tokens(raw, name)
+
+    def editor(self, name: str, args: list[str]):
+        cmds = [v for k, v in _parse(args, "cS", ("--cmd",))[3] if k in ("-c", "--cmd", "-S")]
+        cmds += [a[1:] for a in args if a.startswith("+")]
+        for cmd in cmds:
+            if "!" in cmd or "system(" in cmd:
+                raise _Deny(f"{name} command {_show(cmd)!r} runs a shell command, which this guard cannot see")
+            self.program_tokens(cmd, name)
 
     # (c) test runners
     def pytest(self, args: list[str]):
@@ -1280,7 +1369,8 @@ class _Guard:
             targets = _parse(args, "tSPio", ("--target-directory", "--suffix"))[2] or ["."]
         elif name == "rsync" and (letters & {"r", "a"} or {"--recursive", "--archive"} & set(longs)):
             targets = _parse(args, "eTf", ("--exclude", "--include", "--filter", "--rsh", "--temp-dir"))[2] or ["."]
-        elif name == "tar":
+        elif name == "tar" and ({"c", "r", "u"} & letters or {"--create", "--append", "--update"} & set(longs)
+                                or (args and not args[0].startswith("-") and set(args[0]) & {"c", "r", "u"})):
             targets = _parse(args, "fCTXbHKNgV", ("--file", "--directory", "--files-from", "--exclude-from",
                                                   "--exclude"))[2] or ["."]
             targets += [v for k, v in _parse(args, "fCTXbHKNgV", ("--directory",))[3] if k in ("-C", "--directory")]
@@ -1290,7 +1380,7 @@ class _Guard:
             self.no_ancestor(targets, self.cwd, f"recursive {name}")
 
     # git (A-06-6, U-1)
-    def git(self, args: list[str]):
+    def git(self, args: list[str]) -> list[str]:
         cwd = self.cwd
         i = 0
         while i < len(args):
@@ -1311,12 +1401,14 @@ class _Guard:
             else:
                 break
         if i >= len(args):
-            return
+            return []
         sub, rest = args[i], args[i + 1:]
         if sub == "config" and any(_GIT_EXEC_KEY.match(r.lower()) for r in rest if not r.startswith("-")):
             raise _Deny("git config of an alias or command setting defines commands that this guard cannot see")
+        if sub in GIT_WRITES:
+            return [a for a in args[:i] if a != "-C"] + rest  # any pathspec or option value (C-36)
         if sub not in GIT_READS:
-            return
+            return []
         if "--" not in rest:
             raise _Deny(f"git {sub} can show protected eval/held-out files; add `-- <your paths>` with "
                         f"paths that are not protected (U-1)")
@@ -1327,12 +1419,15 @@ class _Guard:
             if s.startswith(":"):
                 raise _Deny(f"git {sub} pathspec magic {_show(s)!r} cannot be checked; use a plain path")
         self.no_ancestor(specs, cwd, f"git {sub}")
+        return []
 
     # C-36 write targets
     def write_targets(self, name: str, args: list[str], letters, longs) -> list[str]:
         if name == "tee":
             return _parse(args)[2]
-        if name in ("cp", "mv", "install", "ln", "rsync"):
+        if name in ("install", "ln"):
+            return [a for a in args if a != "--"]  # target and link path both count (C-36 addendum)
+        if name in ("cp", "mv", "rsync"):
             letters, longs, pos, vals = _parse(args, "tSmogeTf" if name in ("install", "rsync") else "tS",
                                                ("--target-directory", "--suffix", "--mode", "--owner",
                                                 "--group", "--exclude", "--include", "--filter", "--rsh"))
@@ -1355,7 +1450,33 @@ class _Guard:
             return pos if "i" in letters or any(x.startswith("--in-place") for x in longs) else []
         if name == "dd":
             return [a[3:] for a in args if a.startswith("of=")]
+        if name in ("curl", "wget"):
+            implicit = (name == "wget" and not ({"-O", "-P"} & {"-" + x for x in letters} or any(
+                x.startswith(("--output-document", "--directory-prefix")) for x in longs))) or (
+                name == "curl" and ("O" in letters or "J" in letters or "--remote-name" in longs
+                                    or "--remote-name-all" in longs))
+            return list(args) + (["."] if implicit else [])
+        if name == "tar" and ("x" in letters or {"--extract", "--get"} & set(longs)
+                              or (args and not args[0].startswith("-") and "x" in args[0])):
+            dest = [v for k, v in _parse(args, "fCTXbHKNgV", ("--file", "--directory"))[3]
+                    if k in ("-C", "--directory")] or ["."]
+            self.no_extract_over_control(dest, name)
+            return list(args)
+        if name == "unzip":
+            dest = [v for k, v in _parse(args, "dx", ("--exdir",))[3] if k in ("-d", "--exdir")] or ["."]
+            self.no_extract_over_control(dest, name)
+            return list(args)
+        if name == "sort" and ("o" in letters or any(x.startswith("--output") for x in longs)):
+            return list(args)
         return []
+
+    def no_extract_over_control(self, dests: list[str], name: str):
+        """An archive extracted into a control folder or a folder that holds one (such as the
+        project root) can overwrite control files."""
+        for d in dests:
+            if self.verdict(d, self.cwd, CTRL) >= 1:
+                raise _Deny(f"{name} extracting into {_show(d)!r} can overwrite the protected factory control "
+                            f"folders (.factory/ or .claude/)")
 
 
 # ---- entry point -----------------------------------------------------------------------------
