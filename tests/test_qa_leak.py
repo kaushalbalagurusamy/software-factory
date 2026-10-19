@@ -52,3 +52,13 @@ def test_short_trivial_lines_do_not_trigger(tmp_path):
     f = tmp_path / "p.py"
     f.write_text("import os\n}\nreturn x\n")
     assert leak_check("import os and return x", [f]) == []
+
+
+def test_protected_tree_over_cap_fails_closed(tmp_path):
+    for i in range(3):
+        (tmp_path / f"f{i}.txt").write_text("x" * 600)
+    with pytest.raises(LeakError, match="too large to check"):
+        leak_check("anything", [tmp_path], max_bytes=1000)
+    with pytest.raises(LeakError, match="too large to check"):
+        leak_check("anything", [tmp_path], max_files=2)
+    assert leak_check("anything", [tmp_path], max_bytes=5000) == []

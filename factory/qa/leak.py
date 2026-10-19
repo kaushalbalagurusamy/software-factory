@@ -10,7 +10,9 @@ from pathlib import Path
 
 WINDOW = 40
 MIN_LINE = 16
-MAX_BYTES = 5_000_000
+MAX_BYTES = 8_000_000   # total protected bytes read per check
+MAX_FILES = 5000
+MAX_TEXT = 1_000_000    # feedback size
 _GLOB = re.compile(r"[*?\[]")
 
 
@@ -58,20 +60,30 @@ def expand(protected, root=None) -> list:
 
 def _read(f: Path):
     try:
-        if f.stat().st_size > MAX_BYTES:
-            return None
         return f.read_text(encoding="utf-8")
-    except (UnicodeDecodeError, OSError):
-        return None
+    except UnicodeDecodeError:
+        return None  # binary file: no text to leak
 
 
-def leak_check(text: str, protected_paths, root=None) -> list:
+def leak_check(text: str, protected_paths, root=None, max_bytes=None, max_files=None) -> list:
+    """Memory is bounded by the feedback text (windows are hashed from it, never from protected files).
+
+    Fails closed (LeakError) when the text or the protected material exceeds the caps."""
+    max_bytes = MAX_BYTES if max_bytes is None else max_bytes
+    max_files = MAX_FILES if max_files is None else max_files
+    if len(text) > MAX_TEXT:
+        raise LeakError("feedback text too large to check")
     flat = _norm(text)
     text_lines = {_norm(l) for l in text.splitlines()}
     hashes = {hash(flat[i:i + WINDOW]) for i in range(max(0, len(flat) - WINDOW + 1))}
     found = []
     base = Path(root).resolve() if root is not None else None
-    for f in expand(protected_paths, root):
+    files = expand(protected_paths, root)
+    if len(files) > max_files:
+        raise LeakError(f"protected material too large to check: {len(files)} files > cap {max_files}")
+    if sum(f.stat().st_size for f in files) > max_bytes:
+        raise LeakError(f"protected material too large to check: more than {max_bytes} bytes")
+    for f in files:
         body = _read(f)
         if body is None:
             continue
@@ -109,8 +121,8 @@ def leak_check(text: str, protected_paths, root=None) -> list:
     return found
 
 
-def assert_no_leak(text: str, protected_paths, root=None) -> None:
-    found = leak_check(text, protected_paths, root)
+def assert_no_leak(text: str, protected_paths, root=None, **caps) -> None:
+    found = leak_check(text, protected_paths, root, **caps)
     if found:
         where = "; ".join(f"{l.path}" + (f":{l.line}" if l.line else "") + f" ({l.kind})" for l in found)
         raise LeakError(f"feedback matches protected material, refusing to write: {where}")
