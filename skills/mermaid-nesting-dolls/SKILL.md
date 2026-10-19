@@ -64,3 +64,7 @@ Alt+← back. The Coverage tab lists every status with the reasons: the honest c
 - `assets/template.html`: the viewer. `assets/vendor/`: Mermaid (version in `VERSION`, MIT licence file alongside).
 - `references/model-schema.md`: the model format and the rules the checker enforces.
 - A worked example lives in the repository that first used it: `docs/explorer/` in software-factory.
+
+## Loading a model at view time
+
+`assets/template.html` embeds the model by default. When the embedded model is empty (a viewer built with `__MODEL_JSON__` replaced by nothing, as `python -m factory.ops bundle` does for `ops/viewer.html`), it loads the model from the `?model=<url>` query parameter instead and shows the error on the page if the load fails. The normal `build` output is unchanged.

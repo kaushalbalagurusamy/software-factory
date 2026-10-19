@@ -170,9 +170,19 @@ body.present{font-size:17px}
 <script type="application/json" id="nd-model">__MODEL_JSON__</script>
 <script>/*__MERMAID__*/</script>
 <script>
+/* Model source: the embedded JSON when present; otherwise ?model=<url> (same-origin or CORS), so one viewer
+   can render any model without a rebuild. A load failure is shown on the page, never a blank screen. */
 (function(){
 "use strict";
-var MODEL = JSON.parse(document.getElementById("nd-model").textContent);
+function fail(m){document.body.insertAdjacentHTML("afterbegin",'<p role="alert" style="margin:1rem;padding:.75rem;border:2px solid #c00">Could not load the model: '+String(m).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})+"</p>")}
+var raw=document.getElementById("nd-model").textContent.trim();
+if(raw){try{boot(JSON.parse(raw))}catch(e){fail(e.message)}return}
+var q=new URLSearchParams(location.search).get("model");
+if(!q){fail("no model embedded and no ?model=<url> given");return}
+fetch(q).then(function(r){if(!r.ok)throw new Error(q+" returned HTTP "+r.status);return r.json()}).then(function(m){
+  Object.keys(m.nodes||{}).forEach(function(k){var n=m.nodes[k];if(Array.isArray(n.diagram))n.diagram=n.diagram.join("\n")});
+  boot(m)}).catch(function(e){fail(e.message)});
+function boot(MODEL){
 var N = MODEL.nodes, ROOT = MODEL.root, META = MODEL.meta || {};
 var STATUS = {built:"Built",partial:"Partial",designed:"Designed, not built",external:"Outside this repo",gap:"Gap"};
 var $ = function(id){return document.getElementById(id)};
@@ -409,6 +419,7 @@ $("ttl").innerHTML=esc(META.title||N[ROOT].title)+(META.subtitle?"<small>"+esc(M
 (function(){try{var t=localStorage.getItem("nd-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})();
 initMermaid();route();
 if(/[?&]check=1/.test(location.search))runCheck();
+}
 })();
 </script>
 </body>
