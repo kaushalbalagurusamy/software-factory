@@ -804,3 +804,82 @@ def test_glob_leading_doublestar_profile_still_sees_protected_names(env):
     src = _plain_src(env, 3)
     (src / "m1/x.secret.py").write_text("")
     assert denied(decide(env, "Glob", {"pattern": "**/*.py", "path": str(src)}, cfg=cfg))
+
+
+# ---- QA attempt 4: absolute path values for Glob and Grep --------------------------------------
+@pytest.mark.parametrize("tool,key", [("Glob", "pattern"), ("Grep", "glob")])
+@pytest.mark.parametrize("pat", ["**/*.py", "*.py", "**/*", "pkg/**/*.py"])
+def test_absolute_path_pattern_is_relative_to_path_allowed(env, tool, key, pat):
+    ti = {key: pat, "path": str(env / "src")}
+    if tool == "Grep":
+        ti["pattern"] = "x"
+    d = decide(env, tool, ti, cwd=env)
+    assert d.kind == "allow", (tool, pat, d.reason)
+    ti["path"] = str(env / "src") + "/"
+    assert decide(env, tool, ti, cwd=env).kind == "allow"
+
+
+@pytest.mark.parametrize("tool,key", [("Glob", "pattern"), ("Grep", "glob")])
+@pytest.mark.parametrize("path,pat", [
+    ("{root}/src", "../evals/**"),
+    ("{root}/src", "{{../evals,pkg}}/*"),
+    ("{root}/src", "{root}/evals/*"),
+    ("{root}/evals", "**/*.py"),
+    ("{root}", "**/*.py"),
+    ("{root}/tests", "unit/*.py"),
+    ("{root}/lib", "**/*"),
+    ("{root}/lib/link", "*"),
+])
+def test_absolute_path_pattern_deny_counterparts(env, tool, key, path, pat):
+    ti = {key: pat.format(root=env), "path": path.format(root=env)}
+    if tool == "Grep":
+        ti["pattern"] = "x"
+    assert denied(decide(env, tool, ti, cwd=env)), ti
+
+
+# ---- final addendum: symlinks in the on-disk expansion -----------------------------------------
+@pytest.fixture
+def links(env):
+    """src2/a/b/deep -> evals (reached by **), src2/hop -> lib-like folder holding a link into evals
+    (intermediate symlink), src2/c.py -> an eval file (final symlink), src2/ctl -> .factory."""
+    s = env / "src2"
+    (s / "a/b").mkdir(parents=True)
+    (s / "a/b/m.py").write_text("")
+    (env / "hopdst/inner").mkdir(parents=True)
+    os.symlink(env / "evals", env / "hopdst/inner/ev")
+    return env
+
+
+def test_symlink_to_eval_reached_by_doublestar(links):
+    os.symlink(links / "evals", links / "src2/a/b/deep")
+    for pat in ("**/*.yaml", "**/*", "**/cases/*"):
+        assert denied(decide(links, "Glob", {"pattern": pat, "path": str(links / "src2")})), pat
+
+
+def test_symlink_reached_through_intermediate_symlinked_folder(links):
+    os.symlink(links / "hopdst", links / "src2/hop")
+    assert denied(decide(links, "Glob", {"pattern": "hop/*/ev/*", "path": str(links / "src2")}))
+    assert denied(decide(links, "Glob", {"pattern": "*/inner/*/*", "path": str(links / "src2")}))
+    assert denied(decide(links, "Glob", {"pattern": "hop/**/*.yaml", "path": str(links / "src2")}))
+    assert denied(bash(links, "cat src2/h*/inner/e*/cases/c1.yaml"))
+
+
+def test_final_level_symlinked_entry_and_entries_under_followed_folder(links):
+    os.symlink(links / "evals/cases/c1.yaml", links / "src2/c.py")
+    assert denied(decide(links, "Glob", {"pattern": "*.py", "path": str(links / "src2")}))
+    os.symlink(links / "evals/cases", links / "src2/cases_link")
+    assert denied(decide(links, "Glob", {"pattern": "cases_l*/*", "path": str(links / "src2")}))
+
+
+def test_control_folder_kind_is_used_for_globs(links):
+    os.symlink(links / ".factory", links / "src2/ctl")
+    assert denied(bash(links, "touch src2/c*/new.yaml"))
+    assert denied(bash(links, "echo x > src2/ct*/profile.yaml"))
+    assert bash(links, "cat src2/c*/profile.yaml").kind == "allow"  # reads of control folders stay allowed
+
+
+def test_plain_tree_with_symlinks_elsewhere_still_allowed(links):
+    os.symlink(links / "src/pkg", links / "src2/pkg_link")  # a symlink to an allowed folder
+    for pat in ("**/*.py", "*/*.py", "**/*"):
+        d = decide(links, "Glob", {"pattern": pat, "path": str(links / "src2")})
+        assert d.kind == "allow", (pat, d.reason)
