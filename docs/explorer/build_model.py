@@ -728,9 +728,10 @@ def _reanchor(repo="."):
     for nid, n in nodes.items():
         for f in n.get("files", []):
             c, ln, p = f.get("contains"), f.get("lines"), f["path"]
-            if not c or f.get("external") or p.startswith("~"):
+            if not c:
                 continue
-            path = os.path.join(repo, p)
+            ext = f.get("external") or p.startswith("~")
+            path = os.path.expanduser(p) if ext else os.path.join(repo, p)
             if not os.path.isfile(path):
                 continue
             lines = open(path, encoding="utf-8", errors="replace").read().splitlines()

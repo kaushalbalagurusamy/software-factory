@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "56439ef",
+  "commit": "5f41579",
   "generated": "2026-10-19"
  },
  "root": "factory",
@@ -593,7 +593,7 @@
    "files": [
     {
      "path": "~/.claude/skills/sf/SKILL.md",
-     "lines": "253-294",
+     "lines": "315-356",
      "contains": "Hygiene: disk and memory",
      "external": true
     },
@@ -2727,7 +2727,7 @@
     },
     {
      "path": "~/.claude/skills/sf/SKILL.md",
-     "lines": "253-263",
+     "lines": "91-101",
      "contains": "Hygiene",
      "external": true
     }
