@@ -23,6 +23,7 @@ import builtins
 import fnmatch
 import hashlib
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -47,7 +48,16 @@ DYNAMIC_EXTERNAL = {
     "importlib.import_module": ("dynamic_import", "module imported by a runtime name via importlib"),
     "importlib.__import__": ("dynamic_import", "module imported by a runtime name via importlib"),
 }
-# Decorators that do not change which function a call reaches. Anything else is treated as possibly wrapping.
+# Decorators that do not change which function a call reaches. A decorator is trusted only when its name is
+# bound to the builtin or to an import of the stdlib object listed here; a repo-defined name never qualifies.
+TRANSPARENT_BUILTINS = {"staticmethod", "classmethod", "property"}
+TRANSPARENT_QUALIFIED = {
+    "functools.cache", "functools.lru_cache", "functools.cached_property", "functools.total_ordering",
+    "abc.abstractmethod", "typing.final", "typing.override", "typing.overload", "typing_extensions.final",
+    "typing_extensions.override", "typing_extensions.overload", "dataclasses.dataclass",
+}
+PROPERTY_ACCESSORS = {"setter", "getter", "deleter"}
+# Used only to find the `self` parameter, never to trust a decorator.
 TRANSPARENT_DECORATORS = {
     "staticmethod", "classmethod", "property", "abstractmethod", "final", "override", "overload", "dataclass",
     "setter", "getter", "deleter", "cached_property", "lru_cache", "cache", "total_ordering",
@@ -247,8 +257,10 @@ def _deco_name(d) -> str:
     return _unparse(d)
 
 
-def _transparent(d) -> bool:
-    return _deco_name(d).split(".")[-1] in TRANSPARENT_DECORATORS
+def ast_lines(text: str) -> list[str]:
+    """Lines numbered exactly as ast numbers them: only \\n, \\r\\n and \\r end a line (not \\f, \\v, \\x1c-\\x1e, \\x85, U+2028/9)."""
+    parts = re.split(r"\r\n|\r|\n", text)
+    return parts[:-1] if parts and parts[-1] == "" else parts
 
 
 # ---- extractor -------------------------------------------------------------------------------------------------
@@ -274,6 +286,10 @@ class Extractor:
         self.hash_failures: list[str] = []
         self.prefixes: set[str] = set()
         self._seen_edges: set = set()
+        self._state_parts: dict[str, list] = {}
+        self.sub_index: dict[str, set] = {}  # class id -> direct repo subclasses
+        self.attr_defs: dict[str, set] = {}  # class id -> names assigned as instance/class attributes anywhere in the repo
+        self.patched: set = set()  # (module, attr) rebound by `mod.attr = ...` somewhere in the repo
 
     # -- pass 1: parse + symbols
 
@@ -286,7 +302,7 @@ class Extractor:
             try:
                 raw = self.source.read(rel)
                 mod.tree = ast.parse(raw, filename=rel)
-                mod.nlines = len(raw.decode("utf-8", errors="replace").split("\n")) - (1 if raw.endswith(b"\n") else 0)
+                mod.nlines = len(ast_lines(raw.decode("utf-8", errors="replace")))
             except SyntaxError as e:
                 mod.error = {"path": rel, "error": f"{type(e).__name__}: {e.msg}", "line": e.lineno or 0}
             except (ValueError, RecursionError, MemoryError, UnicodeDecodeError) as e:
@@ -312,6 +328,7 @@ class Extractor:
         for sid, sym in self.symbols.items():
             if sym["kind"] == "method":
                 self.methods_by_name.setdefault(sym["name"], []).append(sid)
+        self._prepass()
         for mod in self.mods.values():
             if mod.tree is not None:
                 self._analyse_module(mod)
@@ -414,13 +431,15 @@ class Extractor:
                 return True
             return isinstance(v, ast.Call) and _unparse(v.func).split(".")[-1] in MUTABLE_CONTAINER_CALLS
 
-        def note_state(name_node, value, line, kind="module_var"):
+        def note_state(name_node, value, line, kind="module_var", stmt=None):
             sid = f"{mod.name}:{name_node.id}"
             rec = self.state.setdefault(sid, {
                 "id": sid, "kind": kind, "module": mod.name, "name": name_node.id, "path": mod.path, "start": line,
                 "end": getattr(name_node, "end_lineno", line) or line, "mutable_container": False, "assignments": 0,
             })
             rec["assignments"] += 1
+            if stmt is not None:
+                self._state_parts.setdefault(sid, []).append(_dump(stmt, stmt))
             if value is not None and is_mutable(value):
                 rec["mutable_container"] = True
 
@@ -453,11 +472,11 @@ class Extractor:
                     for t in st.targets:
                         for nm in targets(t):
                             self._bind(mod.bindings, nm.id, Binding("var", mod.name, conditional=cond, line=st.lineno))
-                            note_state(nm, st.value, st.lineno)
+                            note_state(nm, st.value, st.lineno, stmt=st)
                 elif isinstance(st, (ast.AnnAssign, ast.AugAssign)):
                     for nm in targets(st.target):
                         self._bind(mod.bindings, nm.id, Binding("var", mod.name, conditional=cond, line=st.lineno))
-                        note_state(nm, getattr(st, "value", None), st.lineno)
+                        note_state(nm, getattr(st, "value", None), st.lineno, stmt=st)
                 elif isinstance(st, (ast.For, ast.AsyncFor)):
                     for nm in targets(st.target):
                         self._bind(mod.bindings, nm.id, Binding("var", mod.name, conditional=True, line=st.lineno))
@@ -576,7 +595,26 @@ class Extractor:
             return ("unres", "module_attr_missing", f"{attr!r} is not a module or symbol under namespace {absmod!r}")
         return ("external", f"{absmod}.{attr}")
 
-    def _resolve_bindings(self, bs: list[Binding], name: str, seen: frozenset):
+    def _star_could_shadow(self, mod: Mod, bs: list[Binding], name: str) -> bool:
+        """A `from x import *` after an earlier binding of `name` may rebind it."""
+        for st in mod.star:
+            if any(b.line < st["line"] for b in bs):
+                tgt = self.mods.get(st["module"] or "")
+                if tgt is None or tgt.tree is None or tgt.star:
+                    return True  # exported names of an unscanned/unparsed/star-chained module are unknown
+                if name in tgt.bindings and not name.startswith("_"):
+                    return True
+        return False
+
+    def _resolve_bindings(self, bs: list[Binding], name: str, seen: frozenset, mod: Mod | None = None):
+        if mod is not None:
+            r = self._resolve_bindings(bs, name, seen)
+            cands = sorted({r[1]} if r[0] == "sym" else (set(r[3]) if r[0] == "unres" and len(r) > 3 else set()))
+            if (mod.name, name) in self.patched:
+                return ("unres", "module_attr_rebound", f"{mod.name}.{name} is rebound by an attribute assignment elsewhere in the repo", cands)
+            if self._star_could_shadow(mod, bs, name):
+                return ("unres", "star_import_rebinding", f"{name!r} is bound before a star import in {mod.name!r} that may rebind it", cands)
+            return r
         if len(bs) == 1 and not (bs[0].conditional and bs[0].kind in ("module", "from")):
             return self._binding_target(bs[0], name, seen)
         targets = [self._binding_target(b, name, seen) for b in bs]
@@ -590,7 +628,7 @@ class Extractor:
         m = self.mods[modname]
         bs = m.bindings.get(attr)
         if bs:
-            return self._resolve_bindings(bs, attr, seen)
+            return self._resolve_bindings(bs, attr, seen, m)
         if m.star:
             return ("unres", "star_import", f"{attr!r} may come from a star import in {modname!r}")
         return ("unres", "module_attr_missing", f"{attr!r} is not defined at module level in {modname!r}")
@@ -613,7 +651,7 @@ class Extractor:
         mod = ctx["mod"]
         bs = mod.bindings.get(name)
         if bs:
-            return self._resolve_bindings(bs, name, frozenset())
+            return self._resolve_bindings(bs, name, frozenset(), mod)
         if hasattr(builtins, name):  # a star import could shadow a builtin; that is not modelled
             return ("builtin", name)
         if mod.star:
@@ -670,6 +708,8 @@ class Extractor:
             return ("unres", "module_attr_missing", f"{attr!r} is not a module or symbol under namespace {name!r}")
         if k == "sym" and self.symbols[base[1]]["kind"] == "class":
             ids, _ = self._member(base[1], attr)
+            if len(ids) == 1 and self._attr_shadowed(base[1], attr):
+                return ("attr", f"{self.symbols[base[1]]['name']}.{attr}")
             if len(ids) == 1:
                 return ("sym", ids[0])
             if len(ids) > 1:
@@ -708,12 +748,68 @@ class Extractor:
                 return s, c
         return None, None
 
+    def _ctx_for(self, mod: Mod, sid: str) -> dict:
+        sym = self.symbols[sid]
+        chain = self._chain(sid) if sym["kind"] != "module" else []
+        self_name, class_id = self._self_info(sid) if sym["kind"] in ("method", "function") else (None, None)
+        return {"mod": mod, "chain": chain, "sid": sid, "self": self_name, "class": class_id}
+
+    def _prepass(self) -> None:
+        """Whole-repo facts needed before any edge is classified: subclasses, attribute rebinding, patched modules."""
+        for cid, sym in self.symbols.items():
+            if sym["kind"] != "class":
+                continue
+            mod = self.mods[sym["module"]]
+            pctx = {"mod": mod, "chain": self._chain(sym["parent"])}
+            for b in self.sym_node[cid].bases:
+                r = self._resolve_expr(b, pctx)
+                if r and r[0] == "sym" and self.symbols[r[1]]["kind"] == "class":
+                    self.sub_index.setdefault(r[1], set()).add(cid)
+            self.attr_defs.setdefault(cid, set()).update(self.class_vars.get(cid, ()))
+        for sid, sym in self.symbols.items():
+            mod = self.mods[sym["module"]]
+            ctx = self._ctx_for(mod, sid)
+            for n in walk_scope(self.sym_node[sid].body):
+                if not (isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))):
+                    continue
+                if isinstance(n.value, ast.Name) and ctx["self"] and n.value.id == ctx["self"] and ctx["class"]:
+                    self.attr_defs.setdefault(ctx["class"], set()).add(n.attr)
+                    continue
+                r = self._resolve_expr(n.value, ctx)
+                if r and r[0] == "module":
+                    self.patched.add((r[1], n.attr))
+                elif r and r[0] == "sym" and self.symbols[r[1]]["kind"] == "class":
+                    self.attr_defs.setdefault(r[1], set()).add(n.attr)
+
+    def _ancestors(self, cid: str) -> set:
+        out, stack = set(), [cid]
+        node_ctx = lambda c: {"mod": self.mods[self.symbols[c]["module"]], "chain": self._chain(self.symbols[c]["parent"])}
+        while stack:
+            c = stack.pop()
+            for b in self.sym_node[c].bases:
+                r = self._resolve_expr(b, node_ctx(c))
+                if r and r[0] == "sym" and self.symbols[r[1]]["kind"] == "class" and r[1] not in out:
+                    out.add(r[1])
+                    stack.append(r[1])
+        return out
+
+    def _descendants(self, cid: str) -> set:
+        out, stack = set(), [cid]
+        while stack:
+            for c in self.sub_index.get(stack.pop(), ()):
+                if c not in out:
+                    out.add(c)
+                    stack.append(c)
+        return out
+
+    def _attr_shadowed(self, cid: str, attr: str) -> bool:
+        return any(attr in self.attr_defs.get(c, ()) for c in {cid} | self._ancestors(cid))
+
     def _analyse_symbol(self, mod: Mod, sid: str) -> None:
         sym = self.symbols[sid]
         node = self.sym_node[sid]
-        chain = self._chain(sid) if sym["kind"] != "module" else []
-        self_name, class_id = self._self_info(sid) if sym["kind"] in ("method", "function") else (None, None)
-        ctx = {"mod": mod, "chain": chain, "sid": sid, "self": self_name, "class": class_id}
+        ctx = self._ctx_for(mod, sid)
+        chain = ctx["chain"]
         scope = chain[-1] if chain else Scope()
         in_module = sym["kind"] == "module"
         body = node.body
@@ -804,10 +900,24 @@ class Extractor:
             "path": mod.path, "start": node.lineno, "end": getattr(node, "end_lineno", node.lineno) or node.lineno,
         })
 
+    def _decorator_transparent(self, d, parent: str, mod: Mod) -> bool:
+        f = d.func if isinstance(d, ast.Call) else d
+        if isinstance(f, ast.Attribute) and f.attr in PROPERTY_ACCESSORS and isinstance(f.value, ast.Name) \
+                and self.symbols[parent]["kind"] == "class":
+            return any(isinstance(x, ast.Name) and x.id == "property" and self._lookup_name("property", {"mod": mod, "chain": []})[0] == "builtin"
+                       for m in self.members[parent].get(f.value.id, ()) for x in self.sym_node[m].decorator_list)
+        ctx = {"mod": mod, "chain": self._chain(parent) if self.symbols[parent]["kind"] != "module" else []}
+        r = self._resolve_expr(f, ctx)
+        if r is None:
+            return False
+        return (r[0] == "builtin" and r[1] in TRANSPARENT_BUILTINS) or (r[0] == "external" and r[1] in TRANSPARENT_QUALIFIED)
+
     def _wrapped(self, target_id: str):
         """Reason string when calls to this symbol may not reach it because of a decorator, else None."""
         sym = self.symbols[target_id]
-        bad = [d for d in sym["decorators"] if not _transparent_text(d)]
+        node = self.sym_node[target_id]
+        mod = self.mods[sym["module"]]
+        bad = [_unparse(d) for d in node.decorator_list if not self._decorator_transparent(d, sym["parent"], mod)]
         return f"decorated with {', '.join('@' + b for b in bad)}, which may wrap or replace it" if bad else None
 
     def _call(self, f, node, ctx, sid, mod, prefix=""):
@@ -821,7 +931,7 @@ class Extractor:
             if isinstance(f, ast.Attribute) and isinstance(root, ast.Name) and ctx["self"] and root.id == ctx["self"] and ctx["class"] \
                     and isinstance(f.value, ast.Name):
                 ids, unknown = self._member(ctx["class"], f.attr)
-                return self._finish_member(ids, f.attr, node, ctx, sid, mod, text)
+                return self._finish_member(ids, f.attr, node, ctx, sid, mod, text, recv=ctx["class"])
             r = self._resolve_expr(f, ctx)
             if r is None:  # attribute of a non-name expression
                 if isinstance(root, (ast.Constant, ast.JoinedStr, ast.List, ast.Dict, ast.Set, ast.Tuple, ast.ListComp, ast.DictComp, ast.SetComp, ast.GeneratorExp)):
@@ -845,7 +955,16 @@ class Extractor:
         self._record(ctx, sid, mod, node, text, "syntactic", candidates=cands,
                      reason=f"method {attr!r} on an object of unknown type; matched by name only")
 
-    def _finish_member(self, ids, attr, node, ctx, sid, mod, text):
+    def _finish_member(self, ids, attr, node, ctx, sid, mod, text, recv=None):
+        if len(ids) == 1 and recv:
+            subs = self._descendants(recv)
+            over = sorted({m for c in subs for m in self.members.get(c, {}).get(attr, ())})
+            shadow = self._attr_shadowed(recv, attr) or any(attr in self.attr_defs.get(c, ()) for c in subs)
+            if over or shadow:
+                why = (f"overridden in subclass(es) {', '.join(self.symbols[m]['parent'] for m in over)}" if over else
+                       f"{attr!r} is also assigned as an instance/class attribute, which hides the method")
+                return self._record(ctx, sid, mod, node, text, "syntactic", candidates=ids + over,
+                                    reason=f"{text}: {why}; the receiver's runtime class decides the callee")
         if len(ids) == 1:
             return self._emit_symbol(ids[0], node, ctx, sid, mod, text)
         if len(ids) > 1:
@@ -900,6 +1019,8 @@ class Extractor:
     # -- output
 
     def _result(self, files: list[str], failures: list[dict]) -> dict:
+        for sid, parts in self._state_parts.items():
+            self.state[sid]["value_hash"] = hashlib.sha256("\n".join(parts).encode("utf-8", "surrogatepass")).hexdigest()
         edges = sorted(self.edges, key=lambda e: (e["path"], e["start"], e["caller"], e["text"], e["kind"]))
         by_reason: dict[str, int] = {}
         for e in edges:
@@ -932,14 +1053,10 @@ class Extractor:
             "state": dict(sorted(self.state.items())),
             "writes": sorted(self.writes, key=lambda w: (w["path"], w["start"], w["symbol"], w["kind"], w["target"])),
             "reads": {k: sorted(v) for k, v in sorted(self.reads.items())},
+            "read_lines": {k: dict(sorted(v.items())) for k, v in sorted(self.reads.items())},
             "counts": counts,
             "limits": limits,
         }
-
-
-def _transparent_text(d: str) -> bool:
-    name = d.split("(")[0]
-    return name.split(".")[-1] in TRANSPARENT_DECORATORS
 
 
 def extract(source, exclude=(), repo=None) -> dict:

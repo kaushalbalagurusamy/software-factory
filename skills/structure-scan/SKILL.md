@@ -43,8 +43,17 @@ Every edge has a `kind`:
 | `unresolved` | dynamic or ambiguous; `reason_code` and `reason` say why | the callee is unknown. Reasons: `dynamic_attribute`, `dynamic_code`, `dynamic_import`, `call_through_variable`, `call_of_call`, `subscript_call`, `lambda_call`, `star_import`, `conditional_import`, `multiple_bindings`, `decorator_wrapped`, `unparsed_module`, `module_attr_missing` |
 
 Calls to builtins and to modules outside the scanned tree are counted in `limits.external_calls_not_recorded`
-and are not edges. A call to a function whose decorator may wrap it (anything outside a short allowlist such as
-`staticmethod`, `property`, `lru_cache`) is `unresolved` with the function as a candidate.
+and are not edges. A call to a function whose decorator may wrap it is `unresolved` (`decorator_wrapped`) with the function as a
+candidate. A decorator is trusted only when its name is bound to the builtin (`staticmethod`, `classmethod`,
+`property`) or to an import of a known stdlib object (`functools.cache`, `functools.lru_cache`,
+`abc.abstractmethod`, `dataclasses.dataclass`, `typing.final`, ...); a repo-defined or rebound name such as
+`cache` is never trusted. `@x.setter` is trusted only when `x` is a property of the same class.
+
+Other cases that are deliberately not `resolved`: a name bound before a `from x import *` that may rebind it
+(`star_import_rebinding`; unscanned star modules count as possibly rebinding anything); a module attribute
+rebound by `mod.f = ...` anywhere in the scanned repo (`module_attr_rebound`); `self.m()` where a repo subclass
+overrides `m`, or `m` is also assigned as an instance/class attribute or patched via `Cls.m = ...`
+(`syntactic`, with the candidate methods listed).
 
 Always read `limits` before relying on a result:
 
@@ -59,8 +68,9 @@ Always read `limits` before relying on a result:
 
 1. Exploration stage: `scope` around the entry symbols named by the slice. Put `callers`, `state_touched` and the
    limits into the slice notes. Unresolved edges in scope become explicit test or review obligations.
-2. After implementation: `diff base head --strict`. `changed`, `added`, `removed` and `affected_callers` (labelled
-   by edge kind) are the structural half of the change-impact gate. The per-symbol `hashes` are cache keys for a
+2. After implementation: `diff base head --strict`. `changed`, `added`, `removed`, `changed_state` and `affected_callers` (labelled
+   by edge kind: `resolved`, `syntactic`, `unresolved`, `read` for readers of a changed module-level variable,
+   `enclosing` for the function around a changed inner function) are the structural half of the change-impact gate. The per-symbol `hashes` are cache keys for a
    later verification step, but a cache must also key on dependency and contract hashes, tool versions and assumptions.
    Hashes ignore formatting and comments; docstring and constant changes do count.
 3. Refresh the architecture explorer:
@@ -79,5 +89,11 @@ Always read `limits` before relying on a result:
 
 Python only; ast only; module names come from paths relative to the scanned root (no `src/` layout or `sys.path`
 logic, so imports that rely on them look external); no type inference, so `obj.method()` stays syntactic; reads
-of module state are recorded, but reads and writes through aliases of aliases are not; container mutation is
+of module state are recorded (writers of a changed variable are not listed in `diff`), but reads and writes through aliases of aliases are not; container mutation is
 detected by method names (`append`, `update`, ...) and subscript stores, which is a heuristic.
+
+Line numbers follow Python's own numbering (only `\n`, `\r\n`, `\r` end a line). The dolls checker splits with
+`str.splitlines`, which also splits at form feed, vertical tab, `\x1c`-`\x1e`, `\x85`, U+2028/9. For a file with such
+characters the model still cites the symbol's real lines; if the quote is not visible in the checker's numbering,
+the file is listed in `meta.structure.line_numbering_mismatch_files` and the checker reports it. The fix belongs in
+the checker, not in shifted line ranges.
