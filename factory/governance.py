@@ -28,6 +28,21 @@ except ImportError:
 class DoorType(str, Enum):
     ONE_WAY = "ONE_WAY"  # Irreversible, high blast radius: requires Socratic debate and formal ADR
     TWO_WAY = "TWO_WAY"  # Reversible, local blast radius: autonomous high-velocity execution
+    UNDETERMINED = "UNDETERMINED"  # Verifier failed or was skipped and no one-way finding exists: no claim either way
+
+
+class VerifierStatus(str, Enum):
+    """Outcome of the required semantic verifier (Unity-IR + solver) for one audit."""
+
+    OK = "OK"  # Verifier ran to completion; the classification is semantic.
+    UNAVAILABLE = "UNAVAILABLE"  # Required verifier is not installed: the gate FAILED.
+    ERROR = "ERROR"  # Required verifier crashed: the gate FAILED.
+    UNVERIFIED = "UNVERIFIED"  # Caller explicitly asked for pattern-only analysis; no semantic proof.
+    NOT_APPLICABLE = "NOT_APPLICABLE"  # Non-code artifact (e.g. SQL): the pattern scan is the designed check.
+
+
+# Source suffixes that the semantic verifier is required for.
+VERIFIED_SUFFIXES = (".py", ".go")
 
 
 class RiskCategory(str, Enum):
@@ -60,16 +75,49 @@ class GovernanceReport:
     risks: List[ArchitecturalRisk] = field(default_factory=list)
     semantic_delta: Optional[Any] = None
     adr_draft: Optional[str] = None
+    verifier_status: VerifierStatus = VerifierStatus.OK
+    verifier_reason: Optional[str] = None
 
     @property
     def is_one_way_door(self) -> bool:
         return self.door_type == DoorType.ONE_WAY or any(r.door_type == DoorType.ONE_WAY for r in self.risks)
 
+    @property
+    def gate_failed(self) -> bool:
+        """True when a required verifier was unavailable or crashed. Says nothing about safety."""
+        return self.verifier_status in (VerifierStatus.UNAVAILABLE, VerifierStatus.ERROR)
+
+    @property
+    def is_unverified(self) -> bool:
+        return self.verifier_status == VerifierStatus.UNVERIFIED
+
+    @property
+    def autonomous_execution_permitted(self) -> bool:
+        """Only a verified (or non-code) TWO_WAY result permits autonomous execution."""
+        return (
+            self.verifier_status in (VerifierStatus.OK, VerifierStatus.NOT_APPLICABLE)
+            and not self.is_one_way_door
+        )
+
     def summary(self) -> str:
         lines = []
         lines.append("=" * 60)
-        lines.append(f"GOVERNANCE AUDIT REPORT: [{'ONE-WAY DOOR' if self.is_one_way_door else 'TWO-WAY DOOR'}]")
+        if self.gate_failed:
+            lines.append(f"GOVERNANCE AUDIT REPORT: [GATE FAILED: verifier {self.verifier_status.value.lower()}]")
+        elif self.is_unverified:
+            lines.append(
+                f"GOVERNANCE AUDIT REPORT: [UNVERIFIED {'ONE-WAY' if self.is_one_way_door else 'no pattern findings'}]"
+            )
+        else:
+            lines.append(f"GOVERNANCE AUDIT REPORT: [{'ONE-WAY DOOR' if self.is_one_way_door else 'TWO-WAY DOOR'}]")
         lines.append("=" * 60)
+        if self.gate_failed:
+            lines.append(f"Required verifier {self.verifier_status.value}: {self.verifier_reason}")
+            lines.append("No safe or unsafe conclusion can be drawn; the gate must be re-run with a working verifier.")
+        elif self.is_unverified:
+            lines.append(f"UNVERIFIED pattern-only analysis (not semantic proof): {self.verifier_reason}")
+        elif self.verifier_status == VerifierStatus.NOT_APPLICABLE:
+            lines.append("Pattern-only scan of a non-code artifact (heuristic, not semantic proof).")
         for r in self.risks:
             prefix = "[!] ONE-WAY" if r.door_type == DoorType.ONE_WAY else "[*] TWO-WAY"
             lines.append(f"{prefix} [{r.category.value}] {r.symbol_id or 'global'}: {r.description}")
@@ -211,29 +259,42 @@ class GovernanceEngine:
 
         return risks
 
-    def audit_source_pair(self, pre_path: Union[str, Path], post_path: Union[str, Path]) -> GovernanceReport:
-        """Audit changes between two source files using Unity and pattern analysis."""
+    def audit_source_pair(
+        self,
+        pre_path: Union[str, Path],
+        post_path: Union[str, Path],
+        pattern_only: bool = False,
+    ) -> GovernanceReport:
+        """Audit changes between two source files.
+
+        For .py/.go the Unity semantic verifier is REQUIRED: if it is missing or
+        crashes the report carries verifier_status UNAVAILABLE/ERROR (gate_failed)
+        and no harmless classification is produced. ``pattern_only=True`` is the
+        only way to skip the verifier; the report is then labelled UNVERIFIED.
+        """
         pre_p = Path(pre_path)
         post_p = Path(post_path)
 
         risks: List[ArchitecturalRisk] = []
         semantic_delta = None
+        status = VerifierStatus.NOT_APPLICABLE
+        reason: Optional[str] = None
 
-        if UNITY_AVAILABLE:
-            try:
-                semantic_delta = compute_semantic_delta(str(pre_p), str(post_p))
-                risks.extend(self.audit_semantic_delta(semantic_delta))
-            except Exception as e:
-                risks.append(
-                    ArchitecturalRisk(
-                        door_type=DoorType.TWO_WAY,
-                        category=RiskCategory.LOCAL_REFACTOR,
-                        symbol_id=None,
-                        description=f"Unity-IR lowering fallback: {e}",
-                        blast_radius="Low: Analyzed via text heuristics.",
-                        requires_adr=False,
-                    )
-                )
+        if post_p.suffix.lower() in VERIFIED_SUFFIXES:
+            if pattern_only:
+                status = VerifierStatus.UNVERIFIED
+                reason = "pattern-only mode requested; the semantic verifier (Unity-IR + solver) was not run."
+            elif not UNITY_AVAILABLE:
+                status = VerifierStatus.UNAVAILABLE
+                reason = "Unity compiler ('compiler' package) is not installed; required for semantic verification."
+            else:
+                try:
+                    semantic_delta = compute_semantic_delta(str(pre_p), str(post_p))
+                    risks.extend(self.audit_semantic_delta(semantic_delta))
+                    status = VerifierStatus.OK
+                except Exception as e:
+                    status = VerifierStatus.ERROR
+                    reason = f"{type(e).__name__}: {e}"
 
         # Non-AST heuristic scan on post content
         if post_p.exists():
@@ -252,7 +313,12 @@ class GovernanceEngine:
                         )
                     )
 
-        door_type = DoorType.ONE_WAY if any(r.door_type == DoorType.ONE_WAY for r in risks) else DoorType.TWO_WAY
+        if any(r.door_type == DoorType.ONE_WAY for r in risks):
+            door_type = DoorType.ONE_WAY
+        elif status in (VerifierStatus.UNAVAILABLE, VerifierStatus.ERROR, VerifierStatus.UNVERIFIED):
+            door_type = DoorType.UNDETERMINED
+        else:
+            door_type = DoorType.TWO_WAY
         adr_draft = None
         if door_type == DoorType.ONE_WAY:
             adr_draft = self.generate_adr_draft(
@@ -266,6 +332,8 @@ class GovernanceEngine:
             risks=risks,
             semantic_delta=semantic_delta,
             adr_draft=adr_draft,
+            verifier_status=status,
+            verifier_reason=reason,
         )
 
     def generate_adr_draft(
