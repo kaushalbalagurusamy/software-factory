@@ -414,3 +414,9 @@ def test_dolls_template_script_parses_with_node():
     js = re.findall(r"<script>(.*?)</script>", tpl, re.S)[-1]
     p = subprocess.run([node, "--check", "-"], input=js, capture_output=True, text=True)
     assert p.returncode == 0, p.stderr
+
+
+def test_shell_constrains_the_commit_selector_for_narrow_screens():
+    """The selector was sized to its longest option and made the page 781 px wide at 390 px (seen in a real browser)."""
+    html = (REPO / "ops" / "shell" / "index.html").read_text(encoding="utf-8")
+    assert "#sel{width:100%" in html and "header>div{min-width:0" in html
