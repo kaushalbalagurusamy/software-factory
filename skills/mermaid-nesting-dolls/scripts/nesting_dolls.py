@@ -89,7 +89,7 @@ def validate(model: dict, repo: Path) -> tuple[list[str], list[str]]:
 
     def read(p: Path) -> list[str]:
         if p not in cache:
-            cache[p] = p.read_text(encoding="utf-8", errors="replace").splitlines()
+            cache[p] = re.split(r"\r\n|\r|\n", p.read_text(encoding="utf-8", errors="replace"))  # Python source line numbering: not str.splitlines (form feed etc.)
         return cache[p]
 
     for nid, n in nodes.items():
