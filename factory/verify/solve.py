@@ -11,6 +11,7 @@ tests enforce that by inspecting this file.
 
 from __future__ import annotations
 
+import ast
 import importlib
 import random
 from dataclasses import dataclass, field
@@ -70,6 +71,7 @@ class ObligationResult:
     counterexample: Optional[dict] = None
     replay: Optional[dict] = None
     vacuous: bool = False
+    cached: bool = False
 
     def as_dict(self) -> dict:
         d = dict(self.__dict__)
@@ -175,6 +177,8 @@ def violated(contract: Contract, ob: Obligation, args: Dict[str, Any], outcome: 
     """Does the *real* outcome on ``args`` violate the obligation (Python semantics)?"""
     if not all(replay.holds(p.expr, args) for p in contract.preconditions):
         return False
+    if outcome.kind == "diverged":
+        return True  # the checked model and the bound function disagree: always a model failure
     if ob.kind in ("post", "inv"):
         return outcome.kind == "return" and not replay.holds(ob.clause.expr, args, outcome.value)
     if ob.kind == "err":
@@ -214,11 +218,34 @@ def _enumerate_models(z3, base, params, count: int, timeout_ms: int) -> List[Dic
 
 
 # --------------------------------------------------------------- main entry
+def signature_problem(node, contract: Contract) -> Optional[str]:
+    """Mismatch between the real signature and the contract (never routable: contract names the wrong shape)."""
+    a = node.args
+    if a.vararg or a.kwarg or a.kwonlyargs or a.posonlyargs:
+        return "signature has *args/**kwargs/keyword-only/positional-only parameters"
+    declared = dict(contract.params)
+    names = [x.arg for x in a.args]
+    if sorted(names) != sorted(declared):
+        return f"function parameters {names} differ from contract params {list(declared)}"
+    for x in a.args:
+        ann = x.annotation
+        if not (isinstance(ann, ast.Name) and ann.id == declared[x.arg]):
+            return f"parameter {x.arg!r} must be annotated {declared[x.arg]!r} to match the contract"
+    r = node.returns
+    if r is not None and not (isinstance(r, ast.Name) and r.id == contract.returns):
+        return f"return annotation differs from contract returns {contract.returns!r}"
+    return None
+
+
 def verify_contract(contract: Contract, target, *, timeout_ms: int = 5000, sample_check: bool = True) -> ContractResult:
     """Verify every obligation of ``contract`` against the real ``target`` implementation."""
     z3 = require_z3()
     res = ContractResult(contract.contract_id, contract.symbol, contract.semantics)
     res.assumptions = list(contract.assumptions) + [SEMANTIC_ASSUMPTIONS[contract.semantics]] + IMPLICIT_ASSUMPTIONS
+    if isinstance(target.node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        problem = signature_problem(target.node, contract)
+        if problem:
+            raise ExtractionError(f"{contract.symbol}: {problem}")
     obligations = obligations_of(contract)
     solver_obs: List[Obligation] = []
     for ob in obligations:
@@ -246,8 +273,6 @@ def verify_contract(contract: Contract, target, *, timeout_ms: int = 5000, sampl
         func = irgen.parse_function(target.node, contract.returns)
     except Unsupported as e:
         return unsupported_all(e.reason)
-    if dict(func.params) != dict(contract.params):
-        raise ExtractionError(f"{contract.symbol}: function parameters {list(func.params)} differ from contract params {list(contract.params)}")
 
     env, dom = irgen.make_params(z3, contract.params, contract.semantics)
     try:
@@ -325,7 +350,7 @@ def verify_contract(contract: Contract, target, *, timeout_ms: int = 5000, sampl
         else:
             args = _model_args(z3, vq.model, contract.params)
             outcome = replay.call_target(target, args, contract.semantics)
-            if violated(contract, ob, args, outcome):
+            if violated(contract, ob, args, outcome) and outcome.kind != "diverged":
                 res.obligations.append(ObligationResult(
                     ob.id, ob.kind, ob.text, Verdict.COUNTEREXAMPLE,
                     "solver model replayed on the real implementation and violates the obligation",

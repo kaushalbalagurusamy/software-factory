@@ -187,7 +187,10 @@ def test_cache_hit_then_invalidation(tmp_path):
     assert cache.exists() and json.loads(cache.read_text())["entries"]
     second = run([c], cache_path=cache)
     assert second.as_dict()["contracts"][0]["cache_hit"] and second.passed
-    assert second.as_dict()["contracts"][0]["obligations"] == first.as_dict()["contracts"][0]["obligations"]
+    strip = lambda rep: [{**o, "cached": None} for o in rep.as_dict()["contracts"][0]["obligations"]]  # noqa: E731
+    assert strip(second) == strip(first)
+    assert all(o["cached"] for o in second.as_dict()["contracts"][0]["obligations"])
+    assert not any(o["cached"] for o in first.as_dict()["contracts"][0]["obligations"])
 
     # contract changes -> miss
     c2 = make("impls_good:clamp", pre=["lo <= hi"], post=["result >= lo"])

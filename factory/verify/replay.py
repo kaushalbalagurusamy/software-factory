@@ -109,24 +109,41 @@ class _Checked(ast.NodeTransformer):
         return ast.copy_location(ast.Assign([ast.Name(n.target.id, ast.Store())], val), n)
 
 
-def checked_callable(node: ast.FunctionDef):
-    """Compile a copy of the function with int64 range checks on arithmetic."""
+def checked_callable(node: ast.FunctionDef, namespace: Optional[Dict[str, Any]] = None):
+    """Compile a copy of the function with int64 range checks, defined inside a copy of the module namespace
+    (so module-level names such as exception classes resolve exactly as in the real module)."""
     fn = copy.deepcopy(node)
     fn.decorator_list = []
     fn = _Checked().visit(fn)
     mod = ast.fix_missing_locations(ast.Module([fn], []))
-    ns: Dict[str, Any] = {"__chk": _chk, "__builtins__": builtins}
+    ns: Dict[str, Any] = dict(namespace) if namespace else {"__builtins__": builtins}
+    ns["__chk"] = _chk
     exec(compile(mod, "<int64-replay>", "exec"), ns)
     return ns[fn.name]
 
 
-def call_target(target, args: Dict[str, Any], semantics: str) -> Outcome:
-    """Run the real implementation on concrete inputs."""
-    fn = checked_callable(target.node) if semantics == "int64" else target.func
+def _run(fn, args) -> Outcome:
     try:
         return Outcome("return", fn(**args))
     except Exception as e:  # noqa: BLE001 - the exception *is* the observed outcome
         return Outcome("raise", exc=type(e).__name__)
+
+
+def call_target(target, args: Dict[str, Any], semantics: str) -> Outcome:
+    """Run the real implementation (the object Python bound) on concrete inputs.
+
+    int64: the range-checked copy decides overflow, and wherever it completes without overflow its outcome
+    must equal that of the real bound function; any difference is reported as kind ``diverged``.
+    """
+    real = _run(target.func, args)
+    if semantics != "int64":
+        return real
+    checked = _run(checked_callable(target.node, getattr(target, "namespace", None)), args)
+    if checked.kind == "raise" and checked.exc == "OverflowError":
+        return checked
+    if (checked.kind, checked.value, checked.exc) != (real.kind, real.value, real.exc):
+        return Outcome("diverged", exc=f"checked={checked.as_dict()} real={real.as_dict()}")
+    return real
 
 
 def call_symbol(symbol: str, source_file: str, args: Dict[str, Any], semantics: str = "math_int") -> Outcome:
