@@ -364,3 +364,25 @@ def load_summary(path: str | os.PathLike) -> str:
         else:
             hi = mid - 1
     return _render_summary(p, lo)[:SUMMARY_LIMIT]
+
+
+_TICKET_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+
+def current_ticket(project_root: str | os.PathLike) -> str | None:
+    """The id named by ``<project_root>/.factory/current_ticket`` (whitespace trimmed), or None
+    when the file is absent or blank. Raises :class:`LedgerError` for an id that is not a plain
+    file stem (no path separators), so it cannot point outside the ledger directory."""
+    f = Path(project_root) / ".factory" / "current_ticket"
+    try:
+        raw = f.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return None
+    except (OSError, UnicodeDecodeError) as exc:
+        raise LedgerError(f"cannot read {f}: {exc}") from None
+    tid = raw.strip()
+    if not tid:
+        return None
+    if not _TICKET_ID_RE.match(tid) or ".." in tid:
+        raise LedgerError(f"invalid ticket id in {f}: {tid!r}")
+    return tid
