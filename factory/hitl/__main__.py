@@ -1,6 +1,6 @@
 """python -m factory.hitl: human stops. Exit codes: 0 ok / no applicable open stop, 1 error,
 2 usage error, 3 an open stop applies (status), 4 ledger tampered (status fails closed),
-5 release refused (actor is not human:<ref>)."""
+5 release refused (not an interactive terminal, or actor is not human:<ref>)."""
 from __future__ import annotations
 
 import argparse
@@ -18,7 +18,7 @@ def _status(a) -> int:
         print(f"TAMPERED stop ledger (failing closed): {e}", file=sys.stderr)
         return TAMPER
     for s in stops:
-        print(f"OPEN {s['name']} [{s['scope']}] {s['reason']} (by {s['requested_by']} at {s['requested_at']})")
+        print(f"OPEN {'(legacy .sf/stops, read-only) ' if s['legacy'] else ''}{s['name']} [{s['scope']}] {s['reason']} (by {s['requested_by']} at {s['requested_at']})")
     if not stops:
         print("no open stops")
     return OPEN if stops else OK

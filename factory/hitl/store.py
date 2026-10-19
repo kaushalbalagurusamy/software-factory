@@ -1,10 +1,12 @@
-"""Human-stop ledger: ``<root>/.sf/stops/<name>.json`` plus an append-only, hash-chained ``log.jsonl``.
+"""Human-stop ledger: ``<root>/.factory/stops/<name>.json`` plus an append-only, hash-chained ``log.jsonl``.
 
 The log is the authority. An open stop is a ``request`` entry with no later ``release``. Each open
 stop must have its file, byte-identical to the hash the log recorded, and no other stop file may
 exist; any deviation (edited, deleted, forged, truncated) raises :class:`StopLedgerError` so callers
 fail closed. Limit: a hash chain proves internal consistency, not authorship; wiping the whole
-``.sf/stops`` directory leaves nothing to compare against.
+``.factory/stops`` directory leaves nothing to compare against. The store lives under ``.factory/`` so the
+control-folder protection (the implement role cannot write ``.factory/**``) covers it. Entries in the
+legacy ``<root>/.sf/stops`` are read (verified the same way) and reported, never written.
 """
 from __future__ import annotations
 
@@ -13,6 +15,7 @@ import hashlib
 import json
 import os
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -34,7 +37,19 @@ class ReleaseRefused(Exception):
 
 
 def stops_dir(root) -> Path:
+    return Path(root) / ".factory" / "stops"
+
+
+def legacy_dir(root) -> Path:
     return Path(root) / ".sf" / "stops"
+
+
+def interactive_terminal() -> bool:
+    """True when stdin and stdout are TTYs. Friction, not proof: an agent can allocate a pty."""
+    try:
+        return sys.stdin.isatty() and sys.stdout.isatty()
+    except (ValueError, AttributeError):
+        return False
 
 
 def _now() -> str:
@@ -90,7 +105,12 @@ def _open_from(entries: list[dict]) -> dict[str, dict]:
 
 
 def _verified_open(root) -> dict[str, dict]:
-    d = stops_dir(root)
+    return _verified_dir(stops_dir(root))
+
+
+def _verified_dir(d: Path) -> dict[str, dict]:
+    if os.path.lexists(d) and not d.is_dir():
+        raise StopLedgerError(f"{d} exists but is not a directory")
     open_ = _open_from(_read_log(d))
     on_disk = {p.stem for p in d.glob("*.json")} if d.is_dir() else set()
     if on_disk != set(open_):
@@ -107,9 +127,13 @@ def applies(stop: dict, scope: str | None) -> bool:
 
 def blocking(root, scope: str | None = None) -> list[dict]:
     """Open stops that apply to ``scope`` (None = all). Raises :class:`StopLedgerError`."""
-    return [{k: e[k] for k in ("name", "scope", "reason", "requested_at", "requested_by")}
-            for e in _verified_open(root).values()
-            if applies({"scope": e["scope"]}, scope)]
+    keys = ("name", "scope", "reason", "requested_at", "requested_by")
+    try:
+        found = [{**{k: e[k] for k in keys}, "legacy": False} for e in _verified_open(root).values()]
+        found += [{**{k: e[k] for k in keys}, "legacy": True} for e in _verified_dir(legacy_dir(root)).values()]
+    except (OSError, UnicodeDecodeError, KeyError) as e:
+        raise StopLedgerError(f"stop ledger unreadable: {type(e).__name__}: {e}") from None
+    return [f for f in found if applies(f, scope)]
 
 
 def _append(d: Path, entry: dict) -> None:
@@ -144,7 +168,7 @@ def request(root, name: str, reason: str, scope: str = "run", by: str = "unspeci
     d = stops_dir(root)
     with _Lock(d):
         open_ = _verified_open(root)
-        if name in open_:
+        if name in open_ or name in _verified_dir(legacy_dir(root)):
             raise StopUsageError(f"stop {name!r} is already open")
         rec = {"name": name, "scope": scope, "reason": reason, "requested_at": _now(), "requested_by": by}
         data = (json.dumps(rec, indent=2, sort_keys=True) + "\n").encode()
@@ -153,9 +177,15 @@ def request(root, name: str, reason: str, scope: str = "run", by: str = "unspeci
     return rec
 
 
-def release(root, name: str, by: str) -> None:
+def release(root, name: str, by: str, tty_probe=None) -> None:
+    if not (tty_probe or interactive_terminal)():
+        raise ReleaseRefused("a human stop is released by a person at a terminal "
+                             "(stdin and stdout must be interactive TTYs; there is no bypass flag)")
     _check_actor(by)
     d = stops_dir(root)
+    if name in _verified_dir(legacy_dir(root)):
+        raise StopUsageError(f"stop {name!r} is a legacy entry in {legacy_dir(root)}, which is read-only here; "
+                             "a person must delete that directory by hand after reviewing it")
     with _Lock(d):
         if name not in _verified_open(root):
             raise StopUsageError(f"no open stop named {name!r}")
@@ -163,10 +193,28 @@ def release(root, name: str, by: str) -> None:
         (d / f"{name}.json").unlink()
 
 
-def find_root(start) -> Path | None:
-    """Nearest ancestor of ``start`` (inclusive) holding ``.sf/stops``, else None."""
+class RootRefused(Exception):
+    """A caller-supplied root is not an ancestor of the path being checked."""
+
+
+def ledger_roots(start) -> list[Path]:
+    """EVERY ancestor of ``start`` (inclusive) that has a stop store, so an empty store planted
+    deeper cannot shadow the real one."""
     p = Path(start).resolve()
-    for c in (p, *p.parents):
-        if stops_dir(c).is_dir():
-            return c
-    return None
+    return [c for c in (p, *p.parents) if os.path.lexists(stops_dir(c)) or os.path.lexists(legacy_dir(c))]
+
+
+def check_claimed_root(start, claimed) -> None:
+    """A ``--root`` is never trusted: it must be an ancestor of ``start`` and is otherwise ignored."""
+    p, c = Path(start).resolve(), Path(claimed).resolve()
+    if c != p and c not in p.parents:
+        raise RootRefused(f"--root {claimed} is not an ancestor of {start}; the stop root is derived from the path")
+
+
+def blocking_for(start, scope: str | None = None) -> list[dict]:
+    """Open stops from every ledger above ``start`` that apply to ``scope``. Raises
+    :class:`StopLedgerError` (fail closed) if any ledger cannot be read or verified."""
+    out: list[dict] = []
+    for r in ledger_roots(start):
+        out += blocking(r, scope)
+    return out

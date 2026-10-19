@@ -151,17 +151,20 @@ def gate_reasons(p: Path) -> list[str]:
 
 def cmd_done(a) -> int:
     p = _slice_dir(a)
-    root = Path(a.root) if a.root else hitl_store.find_root(p)
-    if root is not None:
-        try:
-            stops = hitl_store.blocking(root, f"slice:{p.resolve().name}")
-        except hitl_store.StopLedgerError as e:
-            print(f"NOT DONE human-stop ledger failed verification: {e}")
-            return HUMAN_STOP
-        for s in stops:
-            print(f"NOT DONE human stop {s['name']} [{s['scope']}] is open: {s['reason']}")
-        if stops:
-            return HUMAN_STOP
+    try:
+        if a.root:  # never trusted: only validated; the stop roots are derived from the slice path
+            hitl_store.check_claimed_root(p, a.root)
+        stops = hitl_store.blocking_for(p, f"slice:{p.resolve().name}")
+    except hitl_store.RootRefused as e:
+        print(f"NOT DONE {e}")
+        return HUMAN_STOP
+    except hitl_store.StopLedgerError as e:
+        print(f"NOT DONE human-stop ledger failed verification: {e}")
+        return HUMAN_STOP
+    for s in stops:
+        print(f"NOT DONE human stop {s['name']} [{s['scope']}] is open: {s['reason']}")
+    if stops:
+        return HUMAN_STOP
     reasons = gate_reasons(p)
     for r in reasons:
         print(f"NOT DONE {r}")
@@ -196,7 +199,7 @@ def build() -> argparse.ArgumentParser:
     for k in ("added", "changed", "removed"):
         c.add_argument(f"--{k}", action="append", default=[], metavar="ID")
     c.add_argument("--approved-by"); c.set_defaults(f=cmd_amend)
-    c = sub.add_parser("done"); c.add_argument("dir"); c.add_argument("--root", help="project root holding .sf/stops (default: nearest ancestor that has one)")
+    c = sub.add_parser("done"); c.add_argument("dir"); c.add_argument("--root", help="optional; must be an ancestor of DIR and is otherwise ignored (stop roots are derived from DIR)")
     c.set_defaults(f=cmd_done)
     c = sub.add_parser("triage"); c.add_argument("--root", default="docs/slices"); c.set_defaults(f=cmd_triage)
     return ap
