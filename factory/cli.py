@@ -14,6 +14,8 @@ Tool groups (each delegates to its module and returns its exit code; run `sf <gr
   sf intake     factory.intake     ledger, sweep record, gate, seeds and experiment checks
   sf ops        factory.ops        dashboard snapshots (bundle), runtime telemetry, local server
   sf qa         factory.qa         QA supervisor loop: state, next decision, feedback, regression proposals
+  sf install    factory.install    install / uninstall / doctor: native Claude Code installation for a project
+  sf hitl       factory.hitl       human stops: request, status, release (human only)
 """
 
 from __future__ import annotations
@@ -330,6 +332,8 @@ TOOL_GROUPS = {
     "intake": "factory.intake",
     "ops": "factory.ops",
     "qa": "factory.qa",
+    "install": "factory.install",
+    "hitl": "factory.hitl",
 }
 
 

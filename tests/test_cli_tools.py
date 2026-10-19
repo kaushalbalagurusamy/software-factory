@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parent.parent
-GROUPS = ["slice", "structure", "contracts", "intake", "ops", "qa"]
+GROUPS = ["slice", "structure", "contracts", "intake", "ops", "qa", "install", "hitl"]
 
 
 def sf(*args):

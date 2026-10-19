@@ -43,6 +43,11 @@ paths:
   held_out: ["tests/held_out/**"]
   frozen_tests: ["tests/frozen/**"]
   baseline_update: ["evals/baselines/**"]
+# Releasing a human stop is a one-way door: the orchestrator is asked, every other role is denied
+# (a declaration `--by human:<ref>` alone would let an agent type it).
+one_way_door_patterns:
+  - '\\bsf\\s+hitl\\s+release\\b'
+  - '\\bfactory\\.hitl\\s+release\\b'
 """
 
 

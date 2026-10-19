@@ -383,3 +383,14 @@ def test_doctor_fails_without_sf_on_path(proj, env, monkeypatch, capsys):
 
 def test_doctor_without_project_runs_global_checks(env, capsys):
     assert main(["doctor", "--skills-dir", str(env), "--factory-root", str(REPO), "--python", sys.executable]) == 0
+
+
+def test_default_profile_makes_releasing_a_human_stop_a_one_way_door(tmp_path):
+    """A `--by human:<ref>` declaration is typeable by an agent, so the guard must ask or deny the release command."""
+    from factory.agents.profile import load_profile
+    from factory.install.core import DEFAULT_PROFILE
+
+    prof = tmp_path / "profile.yaml"
+    prof.write_text(DEFAULT_PROFILE.format(name="demo"))
+    p = load_profile(prof)
+    assert any("hitl" in pat and "release" in pat for pat in p.one_way_door_patterns)
