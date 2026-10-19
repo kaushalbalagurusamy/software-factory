@@ -1,7 +1,9 @@
 """
 Bare-Metal CLI Runner for Software Factory.
 Commands:
-  sf audit     --pre <pre_file> --post <post_file> (or git diff)
+  sf audit     --pre <pre_file> --post <post_file> [--strict] [--pattern-only [--accept-unverified]]
+               exit codes: 0 verified and permitted, 1 input error or one-way door under --strict,
+               3 GATE FAILED (required verifier unavailable or errored), 4 UNVERIFIED pattern-only
   sf verify    --repo <repo_dir> [--manifest <manifest.json>]
   sf run       --spec <spec.md> --repo <repo_dir>
   sf transpile --source <source_file> --target-lang <go|python> [--out <out_file>]
@@ -14,10 +16,16 @@ from pathlib import Path
 import sys
 from typing import List, Optional
 
-from .governance import GovernanceEngine, DoorType, RiskCategory
+from .governance import GovernanceEngine, DoorType, RiskCategory, VerifierStatus
 from .zero_trust import ZeroTrustGate, BaselineHashGuard
 from .synthesis import SynthesisEngine, SynthesisRequest
 from .transpiler import PolyglotTranspiler
+
+# `sf audit` exit-code contract
+EXIT_OK = 0
+EXIT_FINDING_OR_INPUT = 1  # bad input, or a One-Way Door under --strict
+EXIT_GATE_FAILED = 3  # required verifier unavailable or errored; says nothing about safety
+EXIT_UNVERIFIED = 4  # pattern-only analysis; not semantic proof (0 only with --accept-unverified)
 
 # Terminal ANSI color constants
 RESET = "\033[0m"
@@ -53,12 +61,28 @@ def cmd_audit(args: argparse.Namespace) -> int:
         return 1
 
     engine = GovernanceEngine()
-    report = engine.audit_source_pair(pre_path, post_path)
+    report = engine.audit_source_pair(pre_path, post_path, pattern_only=getattr(args, "pattern_only", False))
 
     print(f"\n{BOLD}Audit Target:{RESET} {pre_path.name} -> {post_path.name}")
+    print(f"{BOLD}Verifier:{RESET} {report.verifier_status.value}")
     print(f"{BOLD}Classification:{RESET} ", end="")
-    if report.door_type == DoorType.ONE_WAY:
+    if report.gate_failed:
+        what = "unavailable" if report.verifier_status == VerifierStatus.UNAVAILABLE else "errored"
+        print(f"{RED}{BOLD}GATE FAILED: required verifier {what}{RESET}")
+        print(f"  {RED}{report.verifier_reason}{RESET}")
+        print("  This is not a safety verdict: the change was neither proven safe nor found unsafe.")
+        print("  Install the verifier (scripts/dev-env.sh) and re-run, or use --pattern-only for an UNVERIFIED scan.")
+        if report.door_type == DoorType.ONE_WAY:
+            print(f"  {RED}Pattern scan alone already found One-Way Door risks (listed below).{RESET}")
+    elif report.door_type == DoorType.ONE_WAY:
         print(f"{RED}{BOLD}ONE-WAY DOOR (Requires Socratic Alignment & Ratified ADR){RESET}")
+        if report.is_unverified:
+            print(f"  {YELLOW}UNVERIFIED: pattern-only finding, not semantic proof.{RESET}")
+    elif report.is_unverified:
+        print(f"{YELLOW}{BOLD}UNVERIFIED (pattern-only analysis; no pattern findings; not semantic proof){RESET}")
+        print(f"  {YELLOW}{report.verifier_reason}{RESET}")
+    elif report.verifier_status == VerifierStatus.NOT_APPLICABLE:
+        print(f"{GREEN}{BOLD}TWO-WAY DOOR{RESET} (non-code artifact; heuristic pattern scan only, not semantic proof)")
     else:
         print(f"{GREEN}{BOLD}TWO-WAY DOOR (Autonomous Execution Permitted){RESET}")
 
@@ -107,7 +131,13 @@ def cmd_audit(args: argparse.Namespace) -> int:
         print(f"\n{MAGENTA}{BOLD}>>> Suggested Architecture Decision Record (ADR) Draft <<<{RESET}")
         print(report.adr_draft[:600] + ("\n... [truncated]" if len(report.adr_draft) > 600 else ""))
 
-    return 1 if report.door_type == DoorType.ONE_WAY and args.strict else 0
+    if report.gate_failed:
+        return EXIT_GATE_FAILED
+    if report.door_type == DoorType.ONE_WAY and args.strict:
+        return EXIT_FINDING_OR_INPUT
+    if report.is_unverified and not getattr(args, "accept_unverified", False):
+        return EXIT_UNVERIFIED
+    return EXIT_OK
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
@@ -245,7 +275,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_audit = subparsers.add_parser("audit", help="Audit semantic delta (ΔS) and classify architectural doors")
     p_audit.add_argument("--pre", help="Path to pre-change source file")
     p_audit.add_argument("--post", help="Path to post-change source file")
-    p_audit.add_argument("--strict", action="store_true", help="Exit with non-zero code on One-Way Doors")
+    p_audit.add_argument("--strict", action="store_true", help="Exit 1 on One-Way Doors")
+    p_audit.add_argument(
+        "--pattern-only",
+        action="store_true",
+        help="Skip the semantic verifier and run the heuristic pattern scan only (labelled UNVERIFIED, exit 4)",
+    )
+    p_audit.add_argument(
+        "--accept-unverified",
+        action="store_true",
+        help="With --pattern-only, exit 0 when no pattern finding (output stays labelled UNVERIFIED)",
+    )
 
     # verify
     p_verify = subparsers.add_parser("verify", help="Run Epistemic Zero-Trust Gate against baseline test manifest")
