@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 from . import __version__
 from .consistency import review_contract
 from .contracts import Contract, check_ids
-from .loader import LoadError, Target, load_target
-from .solve import (ContractResult, ExtractionError, ObligationResult, SolverUnavailable, Verdict,
+from .loader import BindingError, LoadError, Target, load_target
+from .solve import (ContractResult, ExtractionError, ObligationResult, SolverUnavailable, Verdict, obligations_of,
                     z3_version, verify_contract)
 
 EXIT_OK = 0
@@ -34,15 +34,16 @@ EXIT_TIMEOUT = 15
 EXIT_COUNTEREXAMPLE = 16
 EXIT_CONTRACT_REVIEW = 17
 EXIT_VACUOUS = 18
+EXIT_BINDING = 19
 
 _CODE_TO_EXIT = {
     "USAGE": EXIT_USAGE, "Z3_MISSING": EXIT_Z3_MISSING, "CRASH": EXIT_CRASH,
     "UNSUPPORTED_UNROUTED": EXIT_UNSUPPORTED_UNROUTED, "MODEL_MISMATCH": EXIT_MODEL_MISMATCH,
     "UNKNOWN": EXIT_UNKNOWN, "TIMEOUT": EXIT_TIMEOUT, "COUNTEREXAMPLE": EXIT_COUNTEREXAMPLE,
-    "CONTRACT_REVIEW": EXIT_CONTRACT_REVIEW, "VACUOUS": EXIT_VACUOUS,
+    "CONTRACT_REVIEW": EXIT_CONTRACT_REVIEW, "VACUOUS": EXIT_VACUOUS, "BINDING": EXIT_BINDING,
 }
 # most severe first: this decides the single process exit code; all reasons are still listed
-_PRIORITY = ["Z3_MISSING", "CRASH", "MODEL_MISMATCH", "COUNTEREXAMPLE", "CONTRACT_REVIEW", "VACUOUS",
+_PRIORITY = ["Z3_MISSING", "CRASH", "BINDING", "MODEL_MISMATCH", "COUNTEREXAMPLE", "CONTRACT_REVIEW", "VACUOUS",
              "UNSUPPORTED_UNROUTED", "TIMEOUT", "UNKNOWN", "USAGE"]
 
 
@@ -83,7 +84,7 @@ def tool_versions() -> Dict[str, Any]:
 
 # ---------------------------------------------------------------- cache
 def cache_key(contract: Contract, target: Target, assumptions: List[str], versions: dict) -> str:
-    doc = {"impl": target.impl_hash, "deps": target.dep_hashes, "contract": contract.content_hash(),
+    doc = {"impl": target.impl_hash, "deps": target.dep_hashes, "module": target.module_hash, "contract": contract.content_hash(),
            "z3": versions["z3"], "python": versions["python"], "tool": versions["factory_verify"],
            "assumptions": sorted(assumptions)}
     return hashlib.sha256(json.dumps(doc, sort_keys=True).encode()).hexdigest()
@@ -100,7 +101,7 @@ def _load_cache(path) -> dict:
 
 
 def _result_to_dict(r: ContractResult) -> dict:
-    return {"obligations": [o.as_dict() for o in r.obligations],
+    return {"obligations": [dict(o.as_dict(), cached=False) for o in r.obligations],
             "precondition_satisfiable": r.precondition_satisfiable,
             "translation_unsupported": r.translation_unsupported}
 
@@ -154,6 +155,14 @@ def run_gate(contracts: List[Contract], *, roots=(), source_files: Optional[Dict
         try:
             src = (source_files or {}).get(c.symbol)
             target = load_target(c.symbol, roots=roots, source_file=src)
+        except BindingError as e:
+            rep.add(e.code, f"refusing to verify: {e}", c.contract_id)
+            entry["error"] = str(e)
+            verdict = Verdict.MODEL_MISMATCH if e.code == "MODEL_MISMATCH" else Verdict.UNKNOWN
+            entry["obligations"] = [ObligationResult(o.id, o.kind, o.text, verdict, f"{e.code}: {e}").as_dict()
+                                    for o in obligations_of(c)]
+            rep.results.append((c, None, None))
+            continue
         except Exception as e:  # noqa: BLE001 - reported as a gate failure, not swallowed
             rep.add("CRASH", f"could not load implementation: {type(e).__name__}: {e}", c.contract_id)
             entry["error"] = str(e)
@@ -162,8 +171,18 @@ def run_gate(contracts: List[Contract], *, roots=(), source_files: Optional[Dict
         entry["hashes"] = {"implementation": target.impl_hash, "dependencies": target.dep_hashes,
                            "contract": c.content_hash()}
         entry["source_file"] = target.file
+        entry["module_hash"] = target.module_hash
         if review:
-            rr = review_contract(c)
+            try:
+                rr = review_contract(c)
+            except SolverUnavailable as e:
+                rep.add("Z3_MISSING", str(e), c.contract_id)
+                return rep
+            except Exception as e:  # noqa: BLE001 - e.g. a broken z3 at run time: crash, not a traceback
+                rep.add("CRASH", f"contract review crashed: {type(e).__name__}: {e}", c.contract_id)
+                entry["error"] = traceback.format_exc(limit=3)
+                rep.results.append((c, target, None))
+                continue
             entry["review"] = rr.as_dict()
             for f in rr.findings:
                 if f.severity == "error":
@@ -175,8 +194,10 @@ def run_gate(contracts: List[Contract], *, roots=(), source_files: Optional[Dict
         if cache is not None and key in cache["entries"]:
             try:
                 d = cache["entries"][key]
-                result = ContractResult(c.contract_id, c.symbol, c.semantics,
-                                        [ObligationResult.from_dict(o) for o in d["obligations"]],
+                obs = [ObligationResult.from_dict(o) for o in d["obligations"]]
+                for o in obs:
+                    o.cached = True  # reported as "PROVED (cached)"; a cache file is not evidence of a fresh proof
+                result = ContractResult(c.contract_id, c.symbol, c.semantics, obs,
                                         d["precondition_satisfiable"], d["translation_unsupported"], assumptions, True)
             except (KeyError, TypeError, ValueError):
                 result = None  # malformed entry: recompute

@@ -52,7 +52,9 @@ Every contract also gets the implicit obligation `no-undeclared-errors`.
    is reported `COMPARISON_UNSUPPORTED`; the tool never substitutes text equality.
 3. Implement (blind to the contract tests as usual).
 4. `python -m factory.verify verify CONTRACTS --root SRC --report out.json [--cache .sf/proofs.json]
-   [--regress-dir tests/regressions] [--source SYMBOL=FILE]` - the gate.
+   [--regress-dir tests/regressions] [--source SYMBOL=FILE]` - the gate. **Release/CI runs use `--no-cache`**;
+   `--cache` is for local speed only, because a hand-written cache file can forge a pass. Cache hits print as
+   `PROVED (cached)` and the key covers the whole module, contract, z3 version and assumptions.
 5. `python -m factory.verify report out.json` - human summary; exit code is the recorded gate code.
 
 ## Verdicts
@@ -69,13 +71,17 @@ translator bug). Vacuity is `UNKNOWN` with `vacuous: true`.
 | 0 | every obligation PROVED or visibly routed |
 | 2 | usage / malformed contract / no contracts |
 | 10 | z3 missing |
-| 11 | crash or unloadable implementation / signature mismatch |
+| 11 | crash or unloadable implementation / any signature mismatch (never routable) |
 | 12 | UNSUPPORTED with no declared route |
 | 13 | MODEL_MISMATCH |
 | 14 / 15 | UNKNOWN / TIMEOUT |
 | 16 | COUNTEREXAMPLE |
 | 17 | contract review error, duplicate/retired id |
 | 18 | vacuous obligation |
+| 19 | BINDING: target name defined/assigned more than once at module scope, or a star import |
+
+A called `abs`/`min`/`max` that the module or function rebinds is refused as exit 13 (MODEL_MISMATCH).
+The verified function is the one Python binds (module executed once, symbol resolved from its namespace).
 
 The most severe code wins; every reason is in the report. A missing verifier or a translator crash is never a
 "harmless refactor". Counterexamples: `--regress-dir` writes a pytest file that fails on the buggy code and

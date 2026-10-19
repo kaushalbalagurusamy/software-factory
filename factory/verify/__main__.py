@@ -74,7 +74,7 @@ def _render(d: dict) -> str:
     for c in d["contracts"]:
         lines.append(f"- {c['contract_id']} {c['symbol']} [{c.get('semantics')}]" + (" (cache hit)" if c.get("cache_hit") else ""))
         for o in c.get("obligations", []):
-            lines.append(f"    {o['verdict']:<14} {o['id']}: {o['text']}" + (f"  -> route {o['route']['method']}" if o.get("route") else ""))
+            lines.append(f"    {o['verdict'] + (' (cached)' if o.get('cached') else ''):<14} {o['id']}: {o['text']}" + (f"  -> route {o['route']['method']}" if o.get("route") else ""))
     for r in d["reasons"]:
         lines.append(f"! {r['code']}: {r['message']}")
     return "\n".join(lines)
@@ -90,7 +90,7 @@ def cmd_verify(a) -> int:
         sym, _, path = s.partition("=")
         sources[sym] = Path(path)
     rep = gate.run_gate(contracts, roots=a.root or [], source_files=sources, timeout_ms=a.timeout_ms,
-                        cache_path=a.cache, retired_ids=retired)
+                        cache_path=None if a.no_cache else a.cache, retired_ids=retired)
     d = rep.as_dict()
     if a.report:
         Path(a.report).write_text(json.dumps(d, indent=2, default=str), encoding="utf-8")
@@ -124,7 +124,8 @@ def main(argv: List[str] = None) -> int:
     v.add_argument("--root", action="append", help="directory searched for the contract's module (repeatable)")
     v.add_argument("--source", action="append", help="SYMBOL=FILE override of the implementation file")
     v.add_argument("--timeout-ms", type=int, default=5000)
-    v.add_argument("--cache", help="JSON proof cache file")
+    v.add_argument("--cache", help="JSON proof cache file (local speed only: a hand-written file can forge a pass)")
+    v.add_argument("--no-cache", action="store_true", help="never read or write a cache; the CI/release default")
     v.add_argument("--report", help="write the JSON report here")
     v.add_argument("--regress-dir", help="write pytest regressions for counterexamples here")
     v.add_argument("--retired")

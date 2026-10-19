@@ -62,6 +62,13 @@ class _Z:
         v, f = t.expr(expr, self.env)
         return z3.And(irgen.defined(z3, f), v)
 
+    def rdom(self, c: Contract):
+        """Under checked int64 an int result is in range, so tautologies over that range must be flagged."""
+        z3 = self.z3
+        if c.semantics == "int64" and c.returns == INT:
+            return z3.And(self.result_int >= irgen.INT64_MIN, self.result_int <= irgen.INT64_MAX)
+        return z3.BoolVal(True)
+
     def P(self, c: Contract):
         return self.z3.And(self.dom(c.semantics), *[self.pred(p.expr, c.returns) for p in c.preconditions])
 
@@ -114,16 +121,25 @@ def review_contract(c: Contract) -> ReviewReport:
             "would hold vacuously"))
         return rep
     clauses = list(c.postconditions) + list(c.invariants)
+    R = z.rdom(c)
+    if clauses and c.errors:
+        st, _ = z.sat(P, z3.Not(z.any_error(c)))
+        if st == "unsat":
+            rep.findings.append(Finding(
+                "POSTCONDITIONS_NEVER_APPLY", "error",
+                "the declared errors cover every input the preconditions allow, so no postcondition or "
+                "invariant can ever be exercised"))
+            return rep
     for cl in clauses:
         q = z.pred(cl.expr, c.returns)
-        st, _ = z.sat(z3.Not(q))
+        st, _ = z.sat(R, z3.Not(q))
         if st == "unknown":
             _unknown(rep, "validity of a postcondition", cl.id)
         elif st == "unsat":
             rep.findings.append(Finding("VACUOUS_POSTCONDITION", "error",
                                         f"{cl.id} ({cl.text!r}) is valid on its own: it constrains nothing", cl.id))
             continue
-        st, _ = z.sat(P, z3.Not(q))
+        st, _ = z.sat(R, P, z3.Not(q))
         if st == "unknown":
             _unknown(rep, "implication by precondition", cl.id)
         elif st == "unsat":
@@ -131,7 +147,7 @@ def review_contract(c: Contract) -> ReviewReport:
                                         f"{cl.id} ({cl.text!r}) is implied by the precondition alone for every result: "
                                         "it constrains nothing about the implementation", cl.id))
     if clauses:
-        st, _ = z.sat(P, *[z.pred(cl.expr, c.returns) for cl in clauses])
+        st, _ = z.sat(R, P, *[z.pred(cl.expr, c.returns) for cl in clauses])
         if st == "unsat":
             rep.findings.append(Finding("POSTCONDITIONS_CONTRADICTORY", "error",
                                         "no result can satisfy all postconditions and invariants together under the preconditions"))

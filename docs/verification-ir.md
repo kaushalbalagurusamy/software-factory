@@ -84,6 +84,8 @@ zero) is **false**.
 
 Verdicts: `PROVED` (violation query unsat and non-vacuous), `COUNTEREXAMPLE` (sat, **and replayed**),
 `UNSUPPORTED` (reason + declared route), `UNKNOWN`, `TIMEOUT`, and `MODEL_MISMATCH`.
+Contract review also flags (before code) int64 range tautologies (the result is in range by construction) and
+postconditions that can never apply because declared errors cover every allowed input.
 Vacuous results (P unsatisfiable, unreachable paths, dead error clauses) are never `PROVED`; they are
 reported as `UNKNOWN` with `vacuous: true` and fail the gate.
 
@@ -98,6 +100,24 @@ This is a safety net against translator unsoundness, not a proof certificate.
 
 **No syntactic fallback.** `PROVED` is created in exactly one function (`_prove_from_unsat`) which requires a
 z3 `unsat`. `solve`, `irgen`, `consistency` and `gate` import no `re`/`difflib`; tests enforce both.
+
+## 3a. Binding: verifying the function Python actually runs
+
+The translator reads the AST of a `def`; soundness needs that def to be what the name is bound to at run time.
+Before anything is proved, `loader.check_binding` statically refuses (gate reason `BINDING`, exit 19, obligations
+reported `UNKNOWN`, never `UNSUPPORTED`) any module where the target name is bound other than exactly once at
+module scope (a second `def`, `f = g`, an import, a conditional def, `del`, a `global f` in some function) or that
+has a star import. If the function calls `abs`/`min`/`max` and the module (or the function itself) rebinds that
+name, the model of the builtin would differ from real execution: refused with reason `MODEL_MISMATCH` (exit 13).
+A parameter that merely happens to be called `max` and is never called is fine. The module is then executed once
+and the symbol resolved from that real namespace; its `__code__` must match the parsed def. Under `int64` the
+range-checked copy is compiled *inside a copy of that namespace* (so module-defined exception classes resolve)
+and wherever it completes without overflow its outcome must equal the real bound function's, otherwise the
+outcome is `diverged` and the obligation becomes `MODEL_MISMATCH`. Not detected: runtime monkeypatching after
+import and `builtins.x = ...`; that is an assumption.
+
+Signature (parameter names, annotations, return annotation, `*args`/`**kw`/defaults-free shape) must equal the
+contract: any mismatch is exit 11 and can never be routed away.
 
 ## 4. Recorded assumptions
 
@@ -114,8 +134,12 @@ them.
   assignments, imports), else `unresolved`; builtins are covered by the recorded Python version;
 * contract hash: SHA-256 of the canonical JSON of the contract without `observed`/`description`.
 
-Cache key = hash of (implementation, dependencies, contract, z3 version, Python version, tool version,
-assumptions). Only fully passing results (all `PROVED` or routed `UNSUPPORTED`) are stored; a corrupt cache is
+* module hash: SHA-256 of the whole module AST, so any module-level change (a redefinition, a shadowing helper,
+  a constant the function reads) invalidates every entry for that module; comments/formatting do not.
+
+Cache key = hash of (implementation, dependencies, module, contract, z3 version, Python version, tool version,
+assumptions). Cache hits are labelled (`PROVED (cached)`, `"cached": true`). The cache is for local speed only:
+a hand-written cache file can forge a pass, so release/CI runs use `--no-cache`. Only fully passing results (all `PROVED` or routed `UNSUPPORTED`) are stored; a corrupt cache is
 ignored. Nothing is stored for counterexamples, unknown, timeouts or mismatches.
 
 ## 6. Known limits
