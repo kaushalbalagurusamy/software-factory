@@ -63,3 +63,33 @@ def test_refuses_existing_destination_and_bad_name(tmp_path):
     assert again.returncode != 0
     bad = run("bash", str(SCRIPT), "../escape", "HEAD", "--root", str(tmp_path / "wt"), cwd=repo, check=False)
     assert bad.returncode != 0
+
+
+def test_protects_a_single_file_not_only_directories(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / "secret_cases.py").write_text("S = 1\n")
+    run(*GIT, "add", "secret_cases.py", cwd=repo)
+    run(*GIT, "commit", "-q", "-m", "add file", cwd=repo)
+    run("bash", str(SCRIPT), "impl5", "HEAD", "--protect", "secret_cases.py", "--root", str(tmp_path / "wt"), cwd=repo)
+    wt = tmp_path / "wt" / "impl5"
+    assert not (wt / "secret_cases.py").exists()
+    assert (wt / "src" / "app.py").exists()
+
+
+def test_failure_after_creation_removes_worktree_and_branch(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / ".claude").write_text("a tracked FILE named .claude makes the settings step fail\n")
+    run(*GIT, "add", ".claude", cwd=repo)
+    run(*GIT, "commit", "-q", "-m", "claude is a file", cwd=repo)
+    r = run("bash", str(SCRIPT), "impl6", "HEAD", "--root", str(tmp_path / "wt"), cwd=repo, check=False)
+    assert r.returncode != 0
+    assert not (tmp_path / "wt" / "impl6").exists()
+    assert "sf/impl6" not in run("git", "branch", "--list", cwd=repo).stdout
+
+
+def test_rejects_paths_outside_the_repo(tmp_path):
+    repo = make_repo(tmp_path)
+    for bad in ("../x", "/etc", "a/../../b"):
+        r = run("bash", str(SCRIPT), "impl7", "HEAD", "--protect", bad, "--root", str(tmp_path / "wt"), cwd=repo, check=False)
+        assert r.returncode == 2, bad
+        assert not (tmp_path / "wt" / "impl7").exists()

@@ -31,9 +31,25 @@ dest="$root/$name"
 [ ! -e "$dest" ] || { echo "already exists: $dest" >&2; exit 1; }
 mkdir -p "$root"
 
+for p in "${protect[@]}"; do
+  case "$p" in /*|..|../*|*/../*|*/..) echo "protected path must be relative and inside the repo: $p" >&2; exit 2 ;; esac
+done
+
+created=0
+cleanup() {  # a failed run must never leave a usable worktree that still has protected content
+  if [ "$created" = 1 ]; then
+    git -C "$repo" worktree remove --force "$dest" >/dev/null 2>&1 || true
+    git -C "$repo" branch -D "sf/$name" >/dev/null 2>&1 || true
+    echo "failed: removed $dest and branch sf/$name" >&2
+  fi
+}
+trap cleanup EXIT
+
 git -C "$repo" worktree add -q --no-checkout -b "sf/$name" "$dest" "$base"
+created=1
+# '!/path' (no trailing slash) excludes a file or a directory with its contents
 patterns=('/*')
-for p in "${protect[@]}"; do p="${p#./}"; patterns+=("!/${p%/}/"); done
+for p in "${protect[@]}"; do p="${p#./}"; patterns+=("!/${p%/}"); done
 git -C "$dest" sparse-checkout init --no-cone
 git -C "$dest" sparse-checkout set --no-cone "${patterns[@]}"
 git -C "$dest" checkout -q "sf/$name"
@@ -52,4 +68,5 @@ git -C "$dest" rev-parse --git-path info/exclude | xargs -I{} sh -c 'mkdir -p "$
 for p in "${protect[@]}"; do
   if [ -e "$dest/${p%/}" ]; then echo "protected path still present: $p" >&2; exit 1; fi
 done
+created=0
 echo "implementer worktree: $dest (branch sf/$name); absent: ${protect[*]}"
