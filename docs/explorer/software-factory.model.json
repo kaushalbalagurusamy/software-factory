@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "cfafe5d",
+  "commit": "56439ef",
   "generated": "2026-10-19"
  },
  "root": "factory",
@@ -573,7 +573,7 @@
     },
     {
      "path": ".claude/state.md",
-     "lines": "34-37",
+     "lines": "16-19",
      "contains": "no build-loop profile",
      "note": "Local, untracked state file recording the 2026-10-09 decision"
     }
@@ -1844,7 +1844,7 @@
    "files": [
     {
      "path": "factory/cli.py",
-     "lines": "279-315",
+     "lines": "281-317",
      "contains": "add_subparsers"
     },
     {
@@ -2814,7 +2814,9 @@
     "  contract-verify -->|\"frozen criteria\"| blind-worktree[\"Blind worktree<br/>evals/ absent\"]",
     "  blind-worktree --> qa-loop[\"QA loop<br/>bounded retries\"]",
     "  qa-loop -->|\"verified tasks\"| ops-dashboard[\"Dashboard<br/>snapshots + telemetry\"]",
-    "  resource-limits[\"Resource limits<br/>bounded tests\"] -.->|\"wraps every test run\"| qa-loop"
+    "  resource-limits[\"Resource limits<br/>bounded tests\"] -.->|\"wraps every test run\"| qa-loop",
+    "  resource-limits -.-> native-install[\"Native install<br/>agents, hooks, Sonnet pin\"]",
+    "  native-install -->|\"doctor executes the hooks\"| human-stop[\"Human stop<br/>sf hitl\"]"
    ],
    "children": [
     "intake-gate",
@@ -2824,7 +2826,9 @@
     "blind-worktree",
     "qa-loop",
     "ops-dashboard",
-    "resource-limits"
+    "resource-limits",
+    "native-install",
+    "human-stop"
    ]
   },
   "intake-gate": {
@@ -3028,6 +3032,52 @@
     "note": "Tested (4 tests); every test run since the incident used it.",
     "gaps": [
      "A tripped limit is a failure, not a pass; a limit that is too tight would need tuning"
+    ]
+   }
+  },
+  "native-install": {
+   "title": "Native install",
+   "summary": "sf install writes the generated agents, settings-level hooks with absolute verified commands, the Sonnet-only pin and a manifest into a project; doctor executes every hook command (a hook that cannot run fails open); uninstall restores from backups.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/install/core.py",
+     "contains": "ENV_PIN"
+    },
+    {
+     "path": "factory/install/doctor.py",
+     "contains": "def"
+    },
+    {
+     "path": "docs/native-install.md",
+     "contains": "fail"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented and unit-tested (35 tests); verified in real headless Claude Code sessions: skills, agents and hooks resolve, hooks block in subagents, the pin overrides an inherited default (docs/native-verification/2026-10-19/REPORT.md).",
+    "gaps": [
+     "Interactive (non -p) use not exercised",
+     "The user-level default model (Opus) is deliberately unchanged; sessions elsewhere without --model sonnet or a project pin still inherit it",
+     "A hook parser guard is not OS isolation"
+    ]
+   }
+  },
+  "human-stop": {
+   "title": "Human stop",
+   "summary": "sf hitl request/status/release: a hash-chained stop ledger under .factory/stops that sf slice done and sf qa next obey; release needs a person at a terminal and the release command is a one-way door.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/hitl/store.py",
+     "contains": "def release"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented and unit-tested (23+ tests); obeyed in a real session: slice done refused (exit 5), release refused, stop still open.",
+    "gaps": [
+     "Friction, not proof: a role with full Bash could allocate a terminal; no out-of-band secret"
     ]
    }
   }

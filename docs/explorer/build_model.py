@@ -713,6 +713,15 @@ N("resource-limits", "Resource limits", "Repo-root conftest.py caps address spac
   cov=C("built", "Tested (4 tests); every test run since the incident used it.", ["A tripped limit is a failure, not a pass; a limit that is too tight would need tuning"]))
 
 
+nodes["sf-toolchain"]["children"] += ["native-install", "human-stop"]
+nodes["sf-toolchain"]["diagram"] += ['  resource-limits -.-> native-install["Native install<br/>agents, hooks, Sonnet pin"]', '  native-install -->|"doctor executes the hooks"| human-stop["Human stop<br/>sf hitl"]']
+N("native-install", "Native install", "sf install writes the generated agents, settings-level hooks with absolute verified commands, the Sonnet-only pin and a manifest into a project; doctor executes every hook command (a hook that cannot run fails open); uninstall restores from backups.", kind="module",
+  files=[F("factory/install/core.py", None, "ENV_PIN"), F("factory/install/doctor.py", None, "def"), F("docs/native-install.md", None, "fail")],
+  cov=C("built", "Implemented and unit-tested (35 tests); verified in real headless Claude Code sessions: skills, agents and hooks resolve, hooks block in subagents, the pin overrides an inherited default (docs/native-verification/2026-10-19/REPORT.md).", ["Interactive (non -p) use not exercised", "The user-level default model (Opus) is deliberately unchanged; sessions elsewhere without --model sonnet or a project pin still inherit it", "A hook parser guard is not OS isolation"]))
+N("human-stop", "Human stop", "sf hitl request/status/release: a hash-chained stop ledger under .factory/stops that sf slice done and sf qa next obey; release needs a person at a terminal and the release command is a one-way door.", kind="module",
+  files=[F("factory/hitl/store.py", None, "def release")],
+  cov=C("built", "Implemented and unit-tested (23+ tests); obeyed in a real session: slice done refused (exit 5), release refused, stop still open.", ["Friction, not proof: a role with full Bash could allocate a terminal; no out-of-band secret"]))
+
 # ---- re-anchor cited line ranges to where the quoted text now is (keeps the model honest as files change)
 import os, re as _re
 def _reanchor(repo="."):
