@@ -7,3 +7,6 @@ __pycache__/
 .factory_baseline.json
 
 evals/agents/results/
+
+# runtime state of the bounded test runner and QA loop
+.sf/
