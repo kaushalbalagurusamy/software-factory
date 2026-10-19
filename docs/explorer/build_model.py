@@ -608,6 +608,8 @@ setcov("factory", "partial", "The method, the sf CLI and tool groups, the agent 
         "The Bash and blindness guards are command-text guards and cannot be complete; the OS sandbox is the backstop (see the residual-risk sections of docs/hooks/bash_guard.md and blindness_guard.md)",
         "One acceptance case is open by design pending a decision: TB06-D-035 (docs/adr/ADR-0004)",
         "The repository has a build-loop profile now (docs/development-workflow.md) but the factory is not yet run through its own loop for every change"])
+nodes["factory"]["detail"] = ["The factory is three things layered together. The method (the /sf build loop, its skills and the new sf toolchain) runs today. A deterministic engine (the sf CLI) enforces test integrity, one-way-door detection and, through factory/verify, honest solver verdicts on a small pure subset. An agent layer (seven roles, eight hooks, generator, settings emitter, ledger, walking skeleton) is implemented and acceptance-tested but not yet exercised in a live Claude Code session.",
+                              "Click any stacked box to open the diagram inside it. The Coverage tab lists what is built, partial, only designed, outside the repo, or a gap, with reasons."]
 nodes["factory"]["diagram"] += ['  build-loop -->|"stage commands, gates, records"| sf-toolchain["sf toolchain<br/>slices, intake, verify, QA, dashboard"]']
 nodes["factory"]["children"] += ["sf-toolchain"]
 

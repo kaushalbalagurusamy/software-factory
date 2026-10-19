@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "74c836a",
+  "commit": "cfafe5d",
   "generated": "2026-10-19"
  },
  "root": "factory",
@@ -13,7 +13,7 @@
    "summary": "A set of skills, rules, deterministic gates and designed agent roles that turn an AI coding assistant from a 'vibe-coder' into a disciplined engineer: requirements are verified before use, tests come before code, the implementer is blind to the tests, and verification is deterministic and independent.",
    "kind": "system",
    "detail": [
-    "The factory is three things layered together. The method (the /sf build loop and its skills) is the part that runs today. A deterministic engine (the sf CLI) enforces test integrity and one-way-door detection. An agent layer (seven roles with hooks) is specified and tested-in-advance but not implemented.",
+    "The factory is three things layered together. The method (the /sf build loop, its skills and the new sf toolchain) runs today. A deterministic engine (the sf CLI) enforces test integrity, one-way-door detection and, through factory/verify, honest solver verdicts on a small pure subset. An agent layer (seven roles, eight hooks, generator, settings emitter, ledger, walking skeleton) is implemented and acceptance-tested but not yet exercised in a live Claude Code session.",
     "Click any stacked box to open the diagram inside it. The Coverage tab lists what is built, partial, only designed, outside the repo, or a gap, with reasons."
    ],
    "design": [
