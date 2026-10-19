@@ -17,6 +17,8 @@ import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from .extract import ast_lines
+
 RESERVED = {"end", "graph", "subgraph", "flowchart", "class", "classdef", "style", "click", "default"}
 MAX_SYNTACTIC_CANDIDATES = 5
 
@@ -33,37 +35,49 @@ def label(text: str) -> str:
 
 
 class _Files:
-    """Reads sources the way the checker does (str.splitlines) so quotes are verified against the same lines."""
+    """Line ranges use ast's numbering (the symbol's real lines). The dolls checker splits with str.splitlines, which
+    also breaks at form feed, vertical tab, \\x1c-\\x1e, \\x85 and U+2028/9, so a quote is only emitted when it is
+    present in the symbol's own lines AND in the checker's view of the same line numbers; otherwise the file is listed in
+    meta.structure.line_numbering_mismatch_files and the checker is expected to flag it."""
 
     def __init__(self, ex: dict, repo: Path | None):
         self.repo = repo
-        self.cache: dict[str, list[str] | None] = {}
+        self.cache: dict[str, tuple[list[str], list[str]] | None] = {}
+        self.mismatch: set[str] = set()
 
-    def lines(self, path: str) -> list[str] | None:
+    def both(self, path: str):
         if path not in self.cache:
             try:
-                self.cache[path] = (self.repo / path).read_text(encoding="utf-8", errors="replace").splitlines() if self.repo else None
+                text = (self.repo / path).read_text(encoding="utf-8", errors="replace") if self.repo else None
             except OSError:
-                self.cache[path] = None
+                text = None
+            self.cache[path] = None if text is None else (ast_lines(text), text.splitlines())
         return self.cache[path]
 
+    def lines(self, path: str) -> list[str] | None:
+        b = self.both(path)
+        return b[0] if b else None
+
     def ref(self, path: str, lo: int, hi: int, quotes: list[str], note: str) -> dict | None:
-        """A files entry whose `contains` is verified, falling back to the whole file; None if unverifiable."""
-        ls = self.lines(path)
-        if ls is None:
+        b = self.both(path)
+        if b is None or not b[0]:
             return None  # no repo to ground against: omit rather than emit an unverified claim
-        n = len(ls)
-        if n == 0:
-            return None
-        lo, hi = max(1, min(lo, n)), max(1, min(hi, n))
-        if lo > hi:
-            lo, hi = hi, lo
-        for (a, b) in ((lo, hi), (1, n)):
-            text = "\n".join(ls[a - 1 : b])
-            for q in quotes:
-                if q and q in text and "\n" not in q:
-                    return {"path": path, "lines": f"{a}-{b}" if b > a else str(a), "contains": q, "note": note}
-        return {"path": path, "lines": f"{lo}-{hi}" if hi > lo else str(lo), "note": note}
+        mine, theirs = b
+        lo, hi = max(1, min(lo, len(mine))), max(1, min(hi, len(mine)))
+        mt, tt = "\n".join(mine[lo - 1 : hi]), "\n".join(theirs[lo - 1 : hi])
+        fallback = [ln.strip() for ln in sorted(mine[lo - 1 : hi], key=len, reverse=True) if ln.strip()]
+        rng = f"{lo}-{hi}" if hi > lo else str(lo)
+        for q in quotes + fallback:
+            if q and "\n" not in q and q in mt and q in tt:
+                return {"path": path, "lines": rng, "contains": q, "note": note}
+        # No quote is common to both numberings (form feed etc.). Cite the symbol's real lines with a quote that is
+        # true for them, and record the file: the dolls checker (splitlines numbering) will report it loudly.
+        self.mismatch.add(path)
+        for q in quotes + fallback:
+            if q and "\n" not in q and q in mt:
+                return {"path": path, "lines": rng, "contains": q,
+                        "note": f"{note} (lines follow Python's numbering; this file has line separators that str.splitlines numbers differently)"}
+        return {"path": path, "lines": rng, "note": note}
 
 
 def _git_commit(root: str) -> str:
@@ -416,6 +430,7 @@ def build_model(ex: dict, scoped: dict | None = None, repo_name: str | None = No
             "unresolved_by_reason": lim["unresolved_by_reason"],
             "parse_failures": lim["parse_failures"],
             "syntactic_edges_not_drawn": skipped_syntactic,
+            "line_numbering_mismatch_files": sorted(files.mismatch),
             "containers_truncated": truncated,
             "scoped": ({"entries": scoped["entries"], "depth": scoped["depth"], "include_syntactic": scoped["include_syntactic"]} if scoped else None),
         },
