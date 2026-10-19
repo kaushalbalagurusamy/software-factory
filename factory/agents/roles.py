@@ -86,7 +86,12 @@ def _str(role: str, field: str, v: Any) -> str:
 def _str_list(role: str, field: str, v: Any) -> tuple[str, ...]:
     if not isinstance(v, list):
         raise RoleError(role, field, "must be a list")
-    return tuple(_str(role, f"{field}[{i}]", x) for i, x in enumerate(v))
+    out = []
+    for i, x in enumerate(v):
+        if not isinstance(x, str) or not x.strip():
+            raise RoleError(role, field, f"entry {i} must be a non-empty string; got {x!r}")
+        out.append(x)
+    return tuple(out)
 
 
 def _choice(role: str, field: str, v: Any, allowed: tuple[str, ...]) -> str:
@@ -117,11 +122,14 @@ def _parse(role: str, data: Any) -> RoleSpec:
         raise RoleError(role, "mcp", "must be a list")
     mcp = []
     for i, m in enumerate(data["mcp"]):
-        f = f"mcp[{i}]"
+        where = f"entry {i}"
         if not isinstance(m, dict) or set(m) != {"server", "access"}:
-            raise RoleError(role, f, "must be a mapping with exactly server and access")
-        mcp.append(McpEntry(_str(role, f"{f}.server", m["server"]),
-                            _choice(role, f"{f}.access", m["access"], MCP_ACCESS)))
+            raise RoleError(role, "mcp", f"{where} must be a mapping with exactly server and access")
+        if not isinstance(m["server"], str) or not m["server"].strip():
+            raise RoleError(role, "mcp", f"{where} server must be a non-empty string")
+        if m["access"] not in MCP_ACCESS:
+            raise RoleError(role, "mcp", f"{where} access must be one of {', '.join(MCP_ACCESS)}; got {m['access']!r}")
+        mcp.append(McpEntry(m["server"], m["access"]))
     writes = _choice(role, "writes", data["writes"], WRITES)
     bash = _choice(role, "bash", data["bash"], BASH_MODES)
     blind = data["blind"]
@@ -130,7 +138,7 @@ def _parse(role: str, data: Any) -> RoleSpec:
     hooks = _str_list(role, "hooks", data["hooks"])
     for i, h in enumerate(hooks):
         if h not in HOOK_IDS:
-            raise RoleError(role, f"hooks[{i}]", f"unknown hook id {h!r}")
+            raise RoleError(role, "hooks", f"entry {i}: unknown hook id {h!r}")
     mt = data["max_tools"]
     if not isinstance(mt, int) or isinstance(mt, bool):
         raise RoleError(role, "max_tools", "must be an integer")
