@@ -21,13 +21,9 @@ dependencies = [
     "crosshair-tool>=0.0.110",
 ]
 
-[project.optional-dependencies]
-# Semantic verifier. Not pinned to a developer path: install it from a Unity
-# checkout with `pip install -e "$UNITY_REPO"` (scripts/dev-env.sh does this), or
-# from an index/URL of your choice with `pip install unity-ir`.
-unity = [
-    "unity-ir",
-]
+# Deliberately no `unity` extra: the semantic verifier (Unity-IR) is installed only from a trusted local
+# checkout, `pip install -e "$UNITY_REPO"` (scripts/dev-env.sh does this). A bare package name here could
+# resolve to an unrelated public package of the same name (dependency confusion).
 
 [project.scripts]
 sf = "factory.cli:main"
