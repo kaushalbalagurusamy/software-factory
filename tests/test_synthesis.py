@@ -156,6 +156,7 @@ class Ledger:
     assert "self.mu" in ledger_file.read_text()
 
 
+@pytest.mark.requires_unity  # edits a .py file: the governance gate now requires the Unity verifier (fail-closed)
 def test_synthesis_self_repair_convergence(tmp_path: Path):
     """Ensure synthesis engine reflects on test failures and converges on subsequent iteration."""
     test_dir = tmp_path / "tests"

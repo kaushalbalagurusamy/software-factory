@@ -63,7 +63,12 @@ class SynthesisResult:
             f"Modified Files: {', '.join(self.modified_files) if self.modified_files else 'None'}",
         ]
         if self.governance_report:
-            door = "ONE-WAY DOOR" if self.governance_report.is_one_way_door else "TWO-WAY DOOR"
+            if self.governance_report.gate_failed:
+                door = f"GATE FAILED (verifier {self.governance_report.verifier_status.value.lower()})"
+            elif self.governance_report.is_one_way_door:
+                door = "ONE-WAY DOOR"
+            else:
+                door = "TWO-WAY DOOR"
             lines.append(f"Governance Door: {door}")
         if self.zero_trust_report:
             zt_status = "PASSED" if self.zero_trust_report.passed else "VIOLATION DETECTED"
@@ -174,6 +179,8 @@ class SynthesisEngine:
         context: Dict[str, Any] = {
             "source_files": {},
             "unity_ir": {},
+            "unity_ir_errors": {},  # rel path -> error, so a failed extraction is visible, not swallowed
+            "read_errors": {},
             "test_files": {},
         }
 
@@ -192,7 +199,8 @@ class SynthesisEngine:
             rel = str(p.relative_to(repo_dir))
             try:
                 content = p.read_text(encoding="utf-8", errors="ignore")
-            except Exception:
+            except Exception as e:
+                context["read_errors"][rel] = f"{type(e).__name__}: {e}"
                 continue
 
             if "test" in p.name.lower() or "tests" in p.parts:
@@ -203,8 +211,8 @@ class SynthesisEngine:
                     try:
                         ir = compile_source(p, validate=False)
                         context["unity_ir"][rel] = ir
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        context["unity_ir_errors"][rel] = f"{type(e).__name__}: {e}"
 
         return context
 
@@ -359,6 +367,7 @@ class SynthesisEngine:
                 # Gate 1: Governance Matrix (One-Way Door Check)
                 one_way_detected = False
                 one_way_reasons = []
+                gate_failures: List[str] = []
                 for target_path, orig_code in backups.items():
                     if orig_code is not None and target_path.suffix in (".py", ".go") and "test" not in target_path.name.lower():
                         # Create temporary pre-change file with identical extension for Unity-IR lowering
@@ -367,6 +376,11 @@ class SynthesisEngine:
                         try:
                             gov_report = self.governance.evaluate_delta(temp_pre, target_path)
                             last_governance = gov_report
+                            if gov_report.gate_failed:
+                                gate_failures.append(
+                                    f"{target_path.name}: required verifier "
+                                    f"{gov_report.verifier_status.value.lower()}: {gov_report.verifier_reason}"
+                                )
                             if gov_report.is_one_way_door:
                                 one_way_detected = True
                                 for r in gov_report.risks:
@@ -375,6 +389,16 @@ class SynthesisEngine:
                         finally:
                             if temp_pre.exists():
                                 temp_pre.unlink()
+
+                if gate_failures:
+                    # A required verifier that is missing or crashed is a rejection, never a pass.
+                    self._rollback(backups)
+                    feedback = (
+                        "Governance Gate Failed: the required semantic verifier could not run, "
+                        "so this patch cannot be accepted (this is not a safety verdict):\n"
+                        + "\n".join(f"- {g}" for g in gate_failures)
+                    )
+                    continue
 
                 if one_way_detected:
                     self._rollback(backups)
