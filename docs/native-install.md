@@ -72,8 +72,8 @@ each skill in the repo `skills/` dir (13) the installed entry exists, is a symli
 an identical copy, and its `SKILL.md` has `name` equal to the directory and a description; `sf`
 resolves on PATH and `sf --help` runs and identifies as the factory CLI. With `--project`: valid
 `settings.json`; model and env pins; a registered hook for every id used by the roles; **every hook
-command executed** (in a scratch dir holding a copy of the profile, with the caller's `PYTHONPATH`
-removed so the command's own is proven) with a canned benign `PreToolUse` payload (must exit 0; Stop,
+command executed** (only the command the installer would generate for the `--python` and `--factory-root` given to `doctor` (defaults: this checkout and its `.venv`), never one read from the project's settings or manifest: a registered command that differs, or any extra command naming `factory.hooks`, is a FAIL and is not run; matching hooks are run as an argv list, no shell, in a scratch dir holding a copy of the profile, with `PYTHONPATH` set to the trusted
+factory root) with a canned benign `PreToolUse` payload (must exit 0; Stop,
 SubagentStop and SessionStart hooks get a canned event payload and must exit 0 or 2, the only codes
 the hooks can produce, so a non-run fails) and the deny payload (`git add -A` as role `implement`
 against `bash_guard`, must exit 2); agent files exist with an allowed model; profile validates;
@@ -82,26 +82,46 @@ that mentions `factory.` or the installed python.
 
 ## Human stop (`python -m factory.hitl`)
 
-* `request --root R --name N --reason TEXT [--scope run|slice:<id>] [--by WHO]` writes
-  `R/.sf/stops/N.json` and appends a hash-chained entry to `R/.sf/stops/log.jsonl`.
-* `status --root R [--scope S]` lists open stops. Exit 0 none applies, **3** an open stop applies
-  (a `run` stop applies to every scope), **4** the ledger fails verification (fails closed).
-* `release --root R --name N --by human:<ref>` appends a release and deletes the stop file. `--by`
-  must start with `human:` and carry a reference; `agent:`, `subagent:` and `codex:` are refused
-  with exit **5** (codex approval is not enough here).
-* Tamper detection: the log is a hash chain; each open stop's file must exist and match the hash
-  logged at request time, and no unlogged stop file may exist. Editing or deleting a stop file,
-  editing, reordering or truncating the log, or forging a release line all yield exit 4.
-* Integration: `python -m factory.slices done DIR [--root R]` exits **5** while an open stop
-  applies to `slice:<DIR name>` or the run (or the ledger is tampered); R defaults to the nearest
-  ancestor of DIR holding `.sf/stops`. `python -m factory.qa next` returns
-  `{"action": "human_stop", "stops": [...]}` (never retry, escalate or accept, and `--apply` changes
-  nothing) while a stop applies or the ledger is tampered.
+The store is `R/.factory/stops/` (`N.json` per stop plus the hash-chained `log.jsonl`), under the
+control folder so the implement role cannot write it. Entries in the legacy `R/.sf/stops` are still
+read (verified the same way), reported as `legacy`, block like any other stop, and are never
+written; a legacy stop can only be cleared by a person deleting that directory.
 
-Limits: `--by human:<ref>` is a declaration, not authentication; an agent with Bash can type it.
-The chain catches edits, not a deliberate rewrite of the whole `.sf/stops` directory. Enforcement
-against agents needs a `bash_guard` rule denying `factory.hitl release` for non-human roles (hooks
-are outside this slice).
+* `request --root R --name N --reason TEXT [--scope run|slice:<id>] [--by WHO]` writes the stop file
+  and a log entry.
+* `status --root R [--scope S]`: exit 0 none applies, **3** an open stop applies (a `run` stop
+  applies to every scope), **4** the ledger fails verification (fails closed).
+* `release --root R --name N --by human:<ref>` appends a release and deletes the stop file. It is
+  refused with exit **5** unless stdin AND stdout are interactive TTYs ("a human stop is released by
+  a person at a terminal"; there is no bypass flag), and `--by` must start with `human:` with a
+  reference (`agent:`, `subagent:`, `codex:` are refused).
+* Tamper detection: editing or deleting a stop file, editing, reordering or truncating the log, or
+  forging a release line yields exit 4.
+* Integration, root derived from the path, not from a flag: `python -m factory.slices done DIR`
+  checks **every** ancestor of the resolved DIR that has a stop store (so an empty store planted
+  deeper cannot shadow the real one). `--root` is only validated: if it is not an ancestor of DIR
+  the command exits **5** with a message; if it is, it changes nothing. An open stop that applies to
+  `slice:<DIR name>` or the run, a tampered ledger, or a stop path that is unreadable or not a
+  directory all give exit **5**. `python -m factory.qa next` applies the same ancestor search from
+  the slice state directory and returns `{"action": "human_stop", "stops": [...]}` (nothing is
+  applied) in those cases.
+* The default profile also lists one-way-door patterns (`factory\.cli\s+hitl`,
+  `\bsf\s+hitl\b.*\brelease`, `factory\.hitl`, `\.factory/stops`) so the guard asks or denies any
+  command text that names the release path or the store (including `python -c "import factory.hitl"`).
+  Plain `sf hitl status` and `sf hitl request` do not match.
+
+### Limits, stated plainly
+
+* The TTY gate is friction, not proof: an agent can allocate a pty (a test does exactly that and is
+  accepted). `--by human:<ref>` is a declaration, not authentication.
+* Text-pattern guards are bypassable by command text they cannot see. An agent role with full Bash
+  can still write any file it can reach, including `.factory/stops`, if the path guard does not
+  cover that route.
+* `qa next --root` points at a state directory the caller chooses; a fresh empty root with no
+  ledger above it cannot be detected from inside the process.
+* The chain catches edits, not a deliberate rewrite of the whole store.
+* The real guarantee needs an out-of-band secret or approval (something the agent cannot read or
+  produce). That is **not implemented**.
 
 ## Verification status
 
