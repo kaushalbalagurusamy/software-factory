@@ -25,7 +25,7 @@ MARKER = "EVAL-CONTENT-MARKER-6d1f"
 
 # Baseline updates to the golden set (evals/agents/README.md, "Baseline updates"; MECE-AUDIT P0): promoted
 # diagnostic cases and swapped-out golden cases (kept in the suite as diagnostic; their tests are unchanged).
-PROMOTED = frozenset({"TB06-D-082", "TB06-D-157"})
+PROMOTED = frozenset({"TB06-D-082", "TB06-D-134", "TB06-D-139", "TB06-D-157"})
 DEMOTED = frozenset({"TB06-G-004"})
 
 
