@@ -246,7 +246,7 @@ def verify_contract(contract: Contract, target, *, timeout_ms: int = 5000, sampl
         func = irgen.parse_function(target.node, contract.returns)
     except Unsupported as e:
         return unsupported_all(e.reason)
-    if tuple(func.params) != tuple(contract.params):
+    if dict(func.params) != dict(contract.params):
         raise ExtractionError(f"{contract.symbol}: function parameters {list(func.params)} differ from contract params {list(contract.params)}")
 
     env, dom = irgen.make_params(z3, contract.params, contract.semantics)

@@ -178,7 +178,7 @@ def compare_contracts(old: Contract, new: Contract) -> ReviewReport:
     if old.contract_id != new.contract_id:
         rep.findings.append(Finding("CONTRACT_ID_CHANGED", "error",
                                     f"contract_id changed from {old.contract_id} to {new.contract_id}; ids are stable and never reused"))
-    if tuple(old.params) != tuple(new.params) or old.returns != new.returns:
+    if dict(old.params) != dict(new.params) or old.returns != new.returns:
         _flag(rep, new, "signature", "COMPARISON_UNSUPPORTED",
               f"signature changed ({dict(old.params)} -> {old.returns} vs {dict(new.params)} -> {new.returns}); "
               "predicates over different parameters cannot be compared semantically, and text comparison is not proof")

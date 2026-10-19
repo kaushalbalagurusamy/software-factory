@@ -8,6 +8,7 @@ import importlib
 import importlib.util
 import builtins
 import itertools
+import types
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
@@ -102,10 +103,12 @@ def load_target(symbol: str, *, roots=(), source_file=None) -> Target:
     node = find_function(tree, qualname)
     if node is None:
         raise LoadError(f"{path}: no function {qualname!r}")
-    spec = importlib.util.spec_from_file_location(f"_sf_verify_{next(_counter)}_{module.replace('.', '_')}", path)
-    mod = importlib.util.module_from_spec(spec)
+    # Execute exactly the text that was parsed (no cached .pyc: a same-size edit within one mtime
+    # second would otherwise run stale bytecode while the AST describes the new source).
+    mod = types.ModuleType(f"_sf_verify_{next(_counter)}_{module.replace('.', '_')}")
+    mod.__file__ = str(path)
     try:
-        spec.loader.exec_module(mod)  # executes module top level (inherent to replaying real code)
+        exec(compile(text, str(path), "exec"), mod.__dict__)  # executes module top level (inherent to replay)
     except Exception as e:
         raise LoadError(f"{path}: importing failed: {type(e).__name__}: {e}") from e
     obj: Any = mod
