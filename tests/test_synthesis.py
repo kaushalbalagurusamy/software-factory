@@ -112,6 +112,7 @@ def test_one():
     assert "assert 2 == 2" in test_file.read_text()
 
 
+@pytest.mark.requires_unity
 def test_synthesis_governance_one_way_door_rejection(tmp_path: Path):
     """Ensure candidate that weakens concurrency locks is rejected by Governance Gate."""
     src_dir = tmp_path / "src"

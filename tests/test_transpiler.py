@@ -13,9 +13,9 @@ import pytest
 from factory.transpiler import PolyglotTranspiler, TranspilationResult
 from factory.cli import main
 
-UNITY_DIR = Path("/Users/kaushal/Projects/unity/examples/ledger")
-LEDGER_PY = UNITY_DIR / "ledger.py"
-LEDGER_GO = UNITY_DIR / "ledger.go"
+from unity_env import LEDGER_PY, LEDGER_GO  # Unity checkout located via UNITY_REPO
+
+pytestmark = pytest.mark.requires_unity  # every transpiler test needs the Unity compiler
 
 
 def test_transpiler_python_to_go_parity(tmp_path: Path):

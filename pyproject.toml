@@ -37,4 +37,7 @@ include = ["factory*"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+markers = [
+    "requires_unity: needs the Unity compiler and its examples (UNITY_REPO); fails, never skips, when absent",
+]
 

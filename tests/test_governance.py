@@ -7,9 +7,7 @@ from pathlib import Path
 import pytest
 from factory.governance import GovernanceEngine, DoorType, RiskCategory
 
-# Paths to Unity golden examples
-UNITY_EXAMPLES_DIR = Path("/Users/kaushal/Documents/Github/unity/examples/ledger")
-LEDGER_PY = UNITY_EXAMPLES_DIR / "ledger.py"
+from unity_env import LEDGER_PY  # Unity checkout located via UNITY_REPO
 
 
 @pytest.fixture
@@ -17,6 +15,7 @@ def governance_engine() -> GovernanceEngine:
     return GovernanceEngine()
 
 
+@pytest.mark.requires_unity
 def test_identical_source_is_two_way_door(governance_engine: GovernanceEngine):
     """Auditing identical files should report a Two-Way Door with zero risks."""
     report = governance_engine.audit_source_pair(LEDGER_PY, LEDGER_PY)
@@ -26,6 +25,7 @@ def test_identical_source_is_two_way_door(governance_engine: GovernanceEngine):
         assert report.semantic_delta.is_identical
 
 
+@pytest.mark.requires_unity
 def test_concurrency_lock_removal_is_one_way_door(governance_engine: GovernanceEngine, tmp_path: Path):
     """Removing threading.Lock (with self.mu) from ledger.py must trigger a critical One-Way Door."""
     orig_code = LEDGER_PY.read_text()
@@ -43,6 +43,7 @@ def test_concurrency_lock_removal_is_one_way_door(governance_engine: GovernanceE
     assert "Architectural Invariant Review" in report.adr_draft
 
 
+@pytest.mark.requires_unity
 def test_purity_degradation_is_one_way_door(governance_engine: GovernanceEngine, tmp_path: Path):
     """Mutating get_balance (pure) into a state-mutating function must trigger a One-Way Door."""
     orig_code = LEDGER_PY.read_text()

@@ -6,10 +6,10 @@ from pathlib import Path
 import pytest
 from factory.cli import main
 
-UNITY_EXAMPLES_DIR = Path("/Users/kaushal/Documents/Github/unity/examples/ledger")
-LEDGER_PY = UNITY_EXAMPLES_DIR / "ledger.py"
+from unity_env import LEDGER_PY  # Unity checkout located via UNITY_REPO
 
 
+@pytest.mark.requires_unity
 def test_cli_audit_identical_files(capsys):
     ret = main(["audit", "--pre", str(LEDGER_PY), "--post", str(LEDGER_PY)])
     assert ret == 0
@@ -18,6 +18,7 @@ def test_cli_audit_identical_files(capsys):
     assert "Autonomous Execution Permitted" in captured.out
 
 
+@pytest.mark.requires_unity
 def test_cli_audit_one_way_door(tmp_path: Path, capsys):
     orig = LEDGER_PY.read_text()
     mutated = orig.replace("with self.mu:", "if True:")
