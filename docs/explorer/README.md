@@ -14,4 +14,4 @@ python3 skills/mermaid-nesting-dolls/scripts/nesting_dolls.py build docs/explore
 
 Then open `software-factory.html?check=1`, or press **Check**, to render every diagram and confirm every child is clickable. The skill that produced this is `skills/mermaid-nesting-dolls/SKILL.md`.
 
-The model was written at commit `27bf148` on branch `agent-graph` (2026-10-19). Statuses reflect that checkout; the test result quoted in the model (31 passed, 9 failed) came from a clean virtualenv with pytest and pyyaml only, without the sibling `unity` repository.
+The model was refreshed on 2026-10-19 after the sf toolchain build (120 components, 16 diagrams). `build_model.py` is the generator: edit it and re-run it (`python3 docs/explorer/build_model.py <commit> docs/explorer/software-factory.model.json`); it re-anchors each cited line range to where the quoted text now is, so a moved line does not silently break the references. Statuses reflect that checkout and the evidence quoted in each node (4,017 unit tests and 1,497 of 1,498 eval cases pass; golden gate 141 of 141).

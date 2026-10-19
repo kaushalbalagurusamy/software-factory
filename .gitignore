@@ -13,3 +13,10 @@ evals/agents/results/
 
 # demo output
 examples/dogfood-limits/out/
+
+# dashboard output is reproducible from git (`sf ops bundle`); ops/events.jsonl and ops/shell/ are tracked
+ops/blobs/
+ops/snapshots/
+ops/index.json
+ops/runtime.json
+ops/viewer.html
