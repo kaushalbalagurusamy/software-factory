@@ -35,3 +35,10 @@ Drift check rereads the sources above line by line; it does not rely on an earli
 ## Hygiene
 - Limits are the defaults of `~/.claude/skills/sf/hygiene/hygiene.sh` (see its `DESIGN.md`): warn below 20 GB or 15% disk free, act below 10 GB or 8%, emergency below 3 GB or 3%. No repo-specific override.
 - Run `hygiene.sh scan --agents N` before fanning out more than 2 parallel agents. Agent worktrees for this repository live under `~/Projects/sf-worktrees/`.
+
+## Resource limits and concurrency (added after the 2026-10-19 OOM)
+- Incident: a test in an implementer's worktree built its input by wrapping a command in `json.dumps` 40 times; each level doubles the escaping, so the string grew as about 2^40 characters and one pytest process reached ~19 GB RSS and was OOM-killed, taking the session with it. The implementation under test was not at fault.
+- Every pytest run is bounded by the repo-root `conftest.py`: address space `SF_TEST_MEM_MB` (default 4096 MB, inherited by child processes) and a per-test wall clock `SF_TEST_TIMEOUT_S` (default 120 s). A tripped limit is a FAILURE with a `resource limit` message, never a skip or a pass; the limits are printed in the report header.
+- Heavy or whole-suite runs go through `scripts/bounded-pytest.sh [pytest args]`: memory cap, hard wall-clock kill (`SF_TEST_WALL_S`, default 900), a machine-wide lock so only ONE heavy run executes at a time, and a line per run in `.sf/resource-limits.log`.
+- Fan-out: at most two implementation agents at once while stabilising; at most one memory-heavy run. Run `hygiene.sh scan --agents N` first.
+- Test authors: never build inputs by repeated self-nesting or doubling inside a loop (escaping, quoting, `json.dumps`, `shlex.quote` all multiply); build deep nesting linearly (for example `"$(" * n + "x" + ")" * n`) and keep sizes bounded.
