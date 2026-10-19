@@ -1,6 +1,6 @@
 # Hook: path_guard (TB-05)
 
-Delivers R-06 and R-10. Module `factory/hooks/path_guard.py`, hook id `path_guard`, registered on `PreToolUse` with matcher `Write|Edit|Bash`. Contracts: `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, and clarifications A-05-1..6, U-4, C-36.
+Delivers R-06 and R-10. Module `factory/hooks/path_guard.py`, hook id `path_guard`, registered on `PreToolUse` with matcher `Write|Edit|MultiEdit|NotebookEdit|Bash`. Contracts: `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, and clarifications A-05-1..6, U-4, C-36.
 
 ## What it decides
 

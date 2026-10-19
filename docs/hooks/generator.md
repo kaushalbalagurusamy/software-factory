@@ -11,7 +11,7 @@ Frontmatter fields, in order: `name`, `description` (the role's, verbatim), `mod
 
 `tools` = `core_tools`, then per `mcp` entry the profile server's `read_tools` as `mcp__<server>__<tool>` (or `mcp__<server>` for write access), then read tools of servers added by `agents.<role>.mcp_servers`. `$deploy` resolves to `deploy.platform_server`, `$git_host` to `github`/`gitlab`; a server the profile lacks or a placeholder resolving to nothing contributes nothing. Duplicates are dropped, first occurrence kept.
 
-Hooks render as `python -m factory.hooks <hook_id>`, one entry per hook id in role order, under: `path_guard`, `secrets_guard` PreToolUse `Write|Edit|Bash`; `blindness_guard` PreToolUse `Read|Grep|Glob|Bash`; `bash_guard` PreToolUse `Bash`; `stop_gate` Stop; `subagent_stop` and `ledger_audit` SubagentStop; `session_start` SessionStart. Hooks with no matcher have no `matcher` key.
+Hooks render as `python -m factory.hooks <hook_id>`, one entry per hook id in role order, under: `path_guard`, `secrets_guard` PreToolUse `Write|Edit|MultiEdit|NotebookEdit|Bash`; `blindness_guard` PreToolUse `Read|Grep|Glob|Bash`; `bash_guard` PreToolUse `Bash`; `stop_gate` Stop; `subagent_stop` and `ledger_audit` SubagentStop; `session_start` SessionStart. Hooks with no matcher have no `matcher` key.
 
 ## Errors (`GenerationError`)
 More than `max_tools` tools; an override that carries anything beyond `model`, `extra_skills`, `mcp_servers` (write access, `writes`) or names an undeclared server; the profile's `project.name` (case-insensitive whole word) found in the body; a secret-shaped value or an absolute home path in the generated text; roles not exactly the seven ids; an unknown hook id.

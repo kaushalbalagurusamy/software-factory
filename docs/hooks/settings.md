@@ -3,7 +3,7 @@
 Produces the project-level Claude Code `hooks` registration as a reviewable change. Pure and deterministic: it never reads or writes a file, and makes no clock, network or model call (the caller loads `.claude/settings.json`, passes it as `existing`, and writes the result). It never touches user-level settings. Contract: `docs/contracts/hook-io.md`; binding clarifications A-21, A-22, A-32, A-33, A-34, A-35.
 
 ## API
-- `emit_settings(profile, roles, existing=None) -> dict`: registers the union of hook ids used by `roles` (all eight for the shipped roles), each as `python -m factory.hooks <id>`, shape `event -> [{matcher, hooks: [{type: command, command}]}]`. One entry per hook id, in canonical order. `PreToolUse`: `path_guard`, `secrets_guard` (`Write|Edit|Bash`), `blindness_guard` (`Read|Grep|Glob|Bash`), `bash_guard` (`Bash`); `SubagentStop`: `stop_gate`, `subagent_stop`, `ledger_audit`; `SessionStart`: `session_start`. Hooks with no matcher have no `matcher` key.
+- `emit_settings(profile, roles, existing=None) -> dict`: registers the union of hook ids used by `roles` (all eight for the shipped roles), each as `python -m factory.hooks <id>`, shape `event -> [{matcher, hooks: [{type: command, command}]}]`. One entry per hook id, in canonical order. `PreToolUse`: `path_guard`, `secrets_guard` (`Write|Edit|MultiEdit|NotebookEdit|Bash`), `blindness_guard` (`Read|Grep|Glob|Bash`), `bash_guard` (`Bash`); `SubagentStop`: `stop_gate`, `subagent_stop`, `ledger_audit`; `SessionStart`: `session_start`. Hooks with no matcher have no `matcher` key.
 - `diff_settings(old, new) -> str`: unified diff of the key-sorted, 2-space JSON of both objects; `""` when equal.
 - `SettingsError(ValueError)`.
 

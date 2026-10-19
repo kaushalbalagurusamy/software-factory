@@ -11,11 +11,11 @@ skills:
   - superpowers:writing-plans
 hooks:
   PreToolUse:
-    - matcher: Write|Edit|Bash
+    - matcher: Write|Edit|MultiEdit|NotebookEdit|Bash
       hooks:
         - type: command
           command: python -m factory.hooks path_guard
-    - matcher: Write|Edit|Bash
+    - matcher: Write|Edit|MultiEdit|NotebookEdit|Bash
       hooks:
         - type: command
           command: python -m factory.hooks secrets_guard

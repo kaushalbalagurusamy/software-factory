@@ -20,8 +20,8 @@ HOOK_COMMAND = "python -m factory.hooks {hook_id}"
 # hook id -> (event, matcher or None); matchers per clarification A-34, events per TB-03 item 6
 # and A-21 / A-22.
 HOOK_REGISTRATION: dict[str, tuple[str, str | None]] = {
-    "path_guard": ("PreToolUse", "Write|Edit|Bash"),
-    "secrets_guard": ("PreToolUse", "Write|Edit|Bash"),
+    "path_guard": ("PreToolUse", "Write|Edit|MultiEdit|NotebookEdit|Bash"),
+    "secrets_guard": ("PreToolUse", "Write|Edit|MultiEdit|NotebookEdit|Bash"),
     "blindness_guard": ("PreToolUse", "Read|Grep|Glob|Bash"),
     "bash_guard": ("PreToolUse", "Bash"),
     "stop_gate": ("Stop", None),

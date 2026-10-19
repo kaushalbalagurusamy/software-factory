@@ -1,6 +1,6 @@
 # Hook: `secrets_guard`
 
-Module `factory/hooks/secrets_guard.py` (TB-07; requirements R-12, R-23). Run as `python -m factory.hooks secrets_guard`. Registered for every role with matcher `Write|Edit|Bash`.
+Module `factory/hooks/secrets_guard.py` (TB-07; requirements R-12, R-23). Run as `python -m factory.hooks secrets_guard`. Registered for every role with matcher `Write|Edit|MultiEdit|NotebookEdit|Bash`.
 
 ## What it does
 Stops a secret value from being written into a file or typed into a command. It inspects, for every role:
