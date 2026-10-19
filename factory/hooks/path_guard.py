@@ -31,7 +31,9 @@ READONLY_PREFIXES: tuple[tuple[str, ...], ...] = (
 )
 # C-38.1: awk words that can write, execute or load code, matched anywhere in its arguments.
 _AWK_SUBSTRINGS = ("system", "getline", "close", "fflush", "|", ">", "@load", "@include")
-_AWK_SHORT_FLAGS = frozenset("fieElodpW")  # -f -i -E -e -l -o -d -p -W (and clusters / attached values)
+# Fail-closed allowlist of short options; F and v take a value (rest of the cluster, else next word).
+_AWK_SHORT_OK = frozenset("FvbcCghkLMnNOPrsStV")
+_AWK_SHORT_VALUE = frozenset("Fv")
 _AWK_LONG_FLAGS = ("file", "include", "source", "exec", "load", "pretty-print", "profile", "dump-variables", "debug")
 # Long options known to be harmless; with the list above they resolve like getopt_long (exact name,
 # else unique prefix). An unknown or ambiguous long option fails closed.
@@ -273,18 +275,33 @@ def _scan(command: str):
 
 
 def _awk_problem(args: list[str]) -> str | None:
+    opts = True  # becomes False after a bare ``--``
+    skip = False  # the previous word was a short option waiting for its value
     for w in args:
         low = w.lower()
         if any(t in low for t in _AWK_SUBSTRINGS) or "@" in w:
             return "awk program or option uses a write, execute, pipe or indirect-call feature"
-        if w.startswith("--") and len(w) > 2:
+        if skip:
+            skip = False
+        elif not opts or len(w) < 2 or w[0] != "-":
+            continue
+        elif w == "--":
+            opts = False
+        elif w.startswith("--"):
             name = w[2:].split("=", 1)[0]
             known = _AWK_LONG_FLAGS + _AWK_SAFE_LONG
             hits = [name] if name in known else [o for o in known if o.startswith(name)]
             if len(hits) != 1 or hits[0] in _AWK_LONG_FLAGS:
                 return f"awk {w.split('=', 1)[0]} is unknown, ambiguous, or can read code or write files"
-        elif w.startswith("-") and len(w) > 1 and any(c in _AWK_SHORT_FLAGS for c in w[1:]):
-            return f"awk {w} can read code or write files"
+        else:
+            for i, c in enumerate(w[1:], 1):
+                if c not in _AWK_SHORT_OK:
+                    return f"awk option -{c} in {w} is not in the read-only allowlist"
+                if c in _AWK_SHORT_VALUE:
+                    skip = i == len(w) - 1
+                    break
+    if skip:
+        return "awk option is missing its value"
     return None
 
 
