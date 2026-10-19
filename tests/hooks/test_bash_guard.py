@@ -413,7 +413,7 @@ def test_wrapped_commands_still_classified(cfg, cmd):
 @pytest.mark.parametrize("cmd", [
     "env -S 'ls -la'", "env --split-string='ls -la'", "env -S'ls -la'", "env -S 'FOO=1 pytest -q'",
     "env -u FOO -S 'git status'", "xargs ls", "xargs -n1 echo", "xargs -I{} cp {} /tmp/x",
-    "sudo -s 'ls'", "su -c 'ls' root", "exec -a foo ls", "find . -name x -exec grep y {} +",
+    "sudo -s 'ls'", "exec -a foo ls", "find . -name x -exec grep y {} +",
     "find . -exec rm {} \;", "env -S 'rm -rf /tmp/x'", "env -S 'git commit -m x'",
 ])
 @pytest.mark.parametrize("role", [None, "orchestrator", "test"])
@@ -423,7 +423,7 @@ def test_harmless_wrapped_allowed(cfg, cmd, role):
 
 @pytest.mark.parametrize("cmd", [
     "env -S 'git add -A", "env -S \"unterminated", "env -S", "env --split-string",
-    "env -S 'a'\"'\" 'b", "su -c",
+    "env -S 'a'\"'\" 'b",
 ])
 def test_wrapper_string_unsplittable_denied(cfg, cmd):
     assert kind(cfg, cmd, "orchestrator") == "deny"
@@ -500,8 +500,7 @@ def test_getopt_forms_classified(cfg, cmd):
     "time ls", "time -p ls", "time -f %e ls", "nohup ls", "command ls", "command -v git", "command -p ls",
     "exec ls", "exec -a x ls", "setsid ls", "stdbuf -oL ls", "stdbuf -o L ls",
     "bash -c 'ls'", "bash -lc 'ls'", "sh -ec 'ls -la'", "bash -o pipefail -c 'pytest -q'", "bash script.sh",
-    "bash", "bash -x script.sh", "su -c 'ls' root", "su -lc 'ls' root", "su - root", "su root", "su -l root",
-    "runuser -u x ls", "runuser -u x -- ls", "runuser -l x -c 'ls'", "find . -name x", "builtin echo hi",
+    "bash", "bash -x script.sh", "find . -name x", "builtin echo hi",
 ])
 @pytest.mark.parametrize("role", [None, "test"])
 def test_getopt_harmless_allowed(cfg, cmd, role):
@@ -512,7 +511,6 @@ def test_getopt_harmless_allowed(cfg, cmd, role):
     "env --zzz ls", "env --ign ls", "sudo --log ls", "env -Z ls", "env -u", "env --unset", "env --ignore-environment=1 ls",
     "env --b ls",  # ambiguous: block-signal / ... only one starts with b, so see below
     "sudo --zzz ls", "sudo -Z ls", "sudo -u", "sudo --shell=1 ls", "sudo --s ls",
-    "su -Z root", "su --zzz root", "su -g", "runuser -u", "runuser --zzz -u x ls",
     "xargs -Z ls", "xargs --zzz ls", "xargs -a", "xargs --max ls", "xargs --max-a",
     "nice -Z ls", "nice --a", "nice -n", "time -Z ls", "time --f", "timeout -Z 5 ls", "timeout -s",
     "timeout --kill", "nohup -Z ls", "nohup --zzz ls", "command -Z ls", "exec -Z ls", "exec -a",
@@ -538,15 +536,49 @@ def test_leftover_command_word_with_whitespace_denied(cfg, cmd):
 
 
 def test_getopt_unit_behaviour():
-    sh, lg = bash_guard.SU_SHORT, bash_guard.SU_LONG
-    opts, rest = bash_guard._getopt(["-lc", "cmd", "root"], sh, lg, permute=True)
-    assert [(o, v) for o, v, _k in opts] == [("l", None), ("c", "cmd")] and rest == ["root"]
-    opts, _ = bash_guard._getopt(["--comm=x"], sh, lg)
-    assert opts == [("command", "x", "cmd")]
+    sh, lg = bash_guard.ENV_SHORT, bash_guard.ENV_LONG
+    opts, rest = bash_guard._getopt(["-iS", "cmd", "root"], sh, lg)
+    assert [(o, v) for o, v, _k in opts] == [("i", None), ("S", "cmd")] and rest == ["root"]
+    opts, _ = bash_guard._getopt(["--split=x"], sh, lg)
+    assert opts == [("split-string", "x", "cmd")]
+    opts, rest = bash_guard._getopt(["a", "-i"], sh, lg, permute=True)
+    assert rest == ["a"] and [o for o, _v, _k in opts] == ["i"]
     with pytest.raises(bash_guard.ParseError):
-        bash_guard._getopt(["--s", "x"], sh, lg)  # ambiguous: shell / supp-group? no: session-command and shell
+        bash_guard._getopt(["--ignore", "x"], sh, lg)  # ambiguous: ignore-environment / ignore-signal
     with pytest.raises(bash_guard.ParseError):
-        bash_guard._getopt(["--login=1"], sh, lg)
+        bash_guard._getopt(["--null=1"], sh, lg)
+
+
+# ---- privilege/context-switching wrappers: always ask (orchestrator) / deny (others) -------------
+ALWAYS = [
+    "su", "su -", "su root", "su - root", "su -l root", "su -c ls root", "su -c 'ls' root", "su -lc 'ls' root",
+    "su user -- -c 'git add -A'", "su -- user -c cmd", "su -s /bin/sh -c cmd", "su -s /bin/sh user", "su -Z root",
+    "su --zzz root", "su -g", "su root -- ls", "su root ls", "su -- -c 'rm -rf /'", "su -c",
+    "runuser", "runuser -u u -- git add -A", "runuser -u u ls", "runuser -u x -- ls", "runuser -l x -c 'ls'",
+    "runuser -u", "runuser --zzz -u x ls", "runuser user -- -c 'git add -A'", "runuser -- u -c cmd",
+    "doas", "doas git add -A", "doas ls", "doas -u root ls", "doas -s", "doas -- ls",
+    "pkexec ls", "pkexec --user root ls", "pkexec", "machinectl shell root@host ls", "machinectl shell",
+    "nsenter -t 1 -m ls", "nsenter ls", "chroot /mnt ls", "chroot /mnt", "ssh host ls", "ssh -p 2 host 'git add -A'",
+    "ssh host", "watch ls", "watch -n1 'git add -A'", "flock /tmp/l ls", "flock -c ls /tmp/l", "parallel echo ::: a",
+    "sudo su", "sudo -u root su - x", "env su", "nice -n 1 ssh h ls", "timeout 5 watch ls", "xargs ssh h",
+    "ls && su root", "echo x | doas tee f", "bash -c 'su root'", "/usr/bin/su root", "FOO=1 ssh h ls",
+    "find . -exec ssh h ls \\;",
+]
+
+
+@pytest.mark.parametrize("cmd", ALWAYS)
+def test_unanalysable_wrappers_always_ask_or_deny(cfg, cmd):
+    d = bash_guard.decide(payload(cmd, "orchestrator"), cfg)
+    assert d.kind == "ask" and "unanalysable-wrapper" in d.reason, (cmd, d)
+    assert kind(cfg, cmd) == "ask", cmd
+    for role in ("research", "design", "audit", "implement", "test", "review"):
+        assert kind(cfg, cmd, role) == "deny", (cmd, role)
+
+
+@pytest.mark.parametrize("cmd", ["ssh-keygen -l -f k", "suspend", "watchman ls", "machinectl status", "chrootish ls",
+                                 "echo su", "echo 'ssh host ls'", "git commit -m 'su root'", "grep ssh f", "ls su"])
+def test_similar_names_not_wrappers(cfg, cmd):
+    assert kind(cfg, cmd, "test") == "allow", cmd
 
 
 # ---- bounded linear fuzzing of wrapper option clusters ----------------------------------------
@@ -569,5 +601,15 @@ def test_option_cluster_fuzz_never_hides_a_hygiene_command(cfg):
         # except when an option legitimately consumes the leaf as its value or script
         if d.kind == "allow":
             ws = cmd.split()
-            assert parts[0] in ("bash", "sh", "su") or any(w in ("FOO=1", "-c", "-lc", "-ec", "-cx", "-s", "-o", "-S", "--user=x", "-u", "-a", "-n", "-Eu", "L", "5", "x")
+            assert parts[0] in ("bash", "sh") or any(w in ("FOO=1", "-c", "-lc", "-ec", "-cx", "-s", "-o", "-S", "--user=x", "-u", "-a", "-n", "-Eu", "L", "5", "x")
                        or w.startswith(("--spl", "--sh")) for w in ws[:-3]), cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "env -- git add -A", "nice -- git add -A", "nice -n 1 -- git add -A", "timeout -- 5 git add -A",
+    "xargs -- git add -A", "exec -- git add -A", "sudo -- git add -A", "sudo -u root -- git push -f",
+    "stdbuf -oL -- git add -A", "setsid -- git add -A", "time -- git add -A", "env -i -- git reset --hard",
+])
+def test_operands_after_double_dash_are_analysed(cfg, cmd):
+    assert kind(cfg, cmd, "orchestrator") == "ask", cmd
+    assert kind(cfg, cmd, "test") == "deny", cmd
