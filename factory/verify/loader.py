@@ -118,6 +118,9 @@ class Target:
     dep_hashes: Dict[str, str]
     namespace: Dict[str, Any] = None
     module_hash: str = ""
+    imports_hash: str = ""
+    cacheable: bool = True
+    cache_note: str = ""
 
 
 def _sha(text: str) -> str:
@@ -168,6 +171,118 @@ def _find_file(module: str, roots: List[Path]) -> Optional[Path]:
     return None
 
 
+_CODE_FIELDS = ("co_code", "co_names", "co_varnames", "co_argcount", "co_posonlyargcount", "co_kwonlyargcount",
+                "co_flags", "co_freevars", "co_cellvars")
+
+
+def _code_sig(code):
+    """Comparable view of a code object; nested code objects in co_consts are compared recursively."""
+    consts = tuple(_code_sig(c) if isinstance(c, types.CodeType) else (type(c).__name__, c) for c in code.co_consts)
+    return tuple(getattr(code, f) for f in _CODE_FIELDS) + (consts,)
+
+
+def _find_code(code, qualname):
+    for c in code.co_consts:
+        if isinstance(c, types.CodeType):
+            if c.co_qualname == qualname:
+                return c
+            found = _find_code(c, qualname)
+            if found is not None:
+                return found
+    return None
+
+
+def check_bound_object(modcode, obj, node, qualname, namespace) -> None:
+    """The bound function must be exactly what compiling the parsed def produces (not a patched object)."""
+    code = getattr(obj, "__code__", None)
+    if code is None:
+        return  # not a plain function (e.g. staticmethod); parse_function rejects decorated defs anyway
+    expected = _find_code(modcode, qualname)
+    if expected is None or _code_sig(expected) != _code_sig(code):
+        raise BindingError(f"the compiled code of the bound {qualname!r} differs from the code compiled from the "
+                           "parsed def: module-level code replaced __code__ (the parsed def is not what runs)")
+    if getattr(obj, "__closure__", None) or getattr(obj, "__kwdefaults__", None) or hasattr(obj, "__wrapped__"):
+        raise BindingError(f"the bound {qualname!r} has a closure, keyword defaults or __wrapped__ that the parsed def does not")
+    if "." not in qualname and getattr(obj, "__globals__", None) is not namespace:
+        raise BindingError(f"the bound {qualname!r} was defined in a different namespace")
+    try:
+        want = tuple(ast.literal_eval(d) for d in node.args.defaults) or None
+    except ValueError:
+        raise BindingError("a parameter default is not a literal, so it cannot be compared with the bound function")
+    if (getattr(obj, "__defaults__", None) or None) != want:
+        raise BindingError(f"the defaults of the bound {qualname!r} differ from the parsed def")
+
+
+def _is_external(path: str) -> bool:
+    import sysconfig
+    roots = {sysconfig.get_paths().get(k) for k in ("stdlib", "platstdlib", "purelib", "platlib")}
+    return any(r and path.startswith(r) for r in roots)
+
+
+def imports_fingerprint(tree: ast.Module, path: Path, roots, depth: int = 6):
+    """Hash of every repo module the target imports, transitively; stdlib/site-packages are not hashed.
+
+    Returns (hash, cacheable, note).  Unresolvable imports or hitting the depth bound make it non-cacheable.
+    """
+    seen: Dict[str, str] = {}
+    problems: List[str] = []
+
+    def resolve(name: str, level: int, base: Path) -> Optional[Path]:
+        if level:
+            d = base
+            for _ in range(level - 1):
+                d = d.parent
+            f = _find_file(name, [d]) if name else d / "__init__.py"
+            return f if f and f.is_file() else None
+        f = _find_file(name, [Path(r) for r in roots] + [base])
+        if f:
+            return f
+        try:
+            spec = importlib.util.find_spec(name)
+        except (ImportError, ValueError, AttributeError):
+            return None
+        if spec is None or not spec.origin or not spec.origin.endswith(".py"):
+            return Path("<external>") if spec is not None else None
+        return Path(spec.origin)
+
+    def walk(t: ast.Module, base: Path, d: int):
+        for n in ast.walk(t):
+            if isinstance(n, ast.Import):
+                targets = [(a.name, 0) for a in n.names]
+            elif isinstance(n, ast.ImportFrom):
+                targets = [(n.module or "", n.level)] + [((n.module + "." if n.module else "") + a.name, n.level)
+                                                         for a in n.names if a.name != "*"]
+            else:
+                continue
+            for name, level in targets:
+                f = resolve(name, level, base)
+                if f is None:
+                    if not (n.__class__ is ast.ImportFrom and name != (n.module or "")):  # submodule probes may miss
+                        problems.append(f"unresolved import {name!r}")
+                    continue
+                if str(f) == "<external>" or _is_external(str(f)):
+                    continue
+                key = f"{level}:{name}"
+                if str(f) in {v[0] for v in seen.values()}:
+                    continue
+                if d <= 0:
+                    problems.append(f"import depth bound reached at {name!r}")
+                    continue
+                try:
+                    src = f.read_text(encoding="utf-8")
+                    sub = ast.parse(src)
+                    h = _sha(ast.dump(sub))
+                except (OSError, SyntaxError, UnicodeDecodeError):
+                    problems.append(f"unreadable import {name!r}")
+                    continue
+                seen[key] = (str(f), h)
+                walk(sub, f.parent, d - 1)
+
+    walk(tree, path.parent, depth)
+    digest = _sha(repr(sorted((k, v[1]) for k, v in seen.items())))
+    return digest, not problems, "; ".join(sorted(set(problems)))
+
+
 def load_target(symbol: str, *, roots=(), source_file=None) -> Target:
     module, qualname = symbol.split(":", 1)
     path = Path(source_file) if source_file else _find_file(module, [Path(r) for r in roots])
@@ -198,8 +313,9 @@ def load_target(symbol: str, *, roots=(), source_file=None) -> Target:
     # second would otherwise run stale bytecode while the AST describes the new source).
     mod = types.ModuleType(f"_sf_verify_{next(_counter)}_{module.replace('.', '_')}")
     mod.__file__ = str(path)
+    modcode = compile(text, str(path), "exec")
     try:
-        exec(compile(text, str(path), "exec"), mod.__dict__)  # executes module top level (inherent to replay)
+        exec(modcode, mod.__dict__)  # executes module top level (inherent to replay)
     except Exception as e:
         raise LoadError(f"{path}: importing failed: {type(e).__name__}: {e}") from e
     obj: Any = mod
@@ -207,9 +323,7 @@ def load_target(symbol: str, *, roots=(), source_file=None) -> Target:
         obj = getattr(obj, part, None)
     if not callable(obj):
         raise LoadError(f"{path}: {qualname!r} is not callable after import")
-    code = getattr(obj, "__code__", None)
-    first = min([d.lineno for d in getattr(node, "decorator_list", [])] + [node.lineno])
-    if code is not None and (code.co_firstlineno != first or code.co_name != node.name):
-        raise BindingError(f"{path}: the object bound to {qualname!r} is not the function defined at line {first}")
+    check_bound_object(modcode, obj, node, qualname, mod.__dict__)
+    ih, cacheable, note = imports_fingerprint(tree, path, roots)
     return Target(symbol, str(path), text, tree, node, obj, impl_hash(node), dependency_hashes(tree, node),
-                  mod.__dict__, _sha(ast.dump(tree)))
+                  mod.__dict__, _sha(ast.dump(tree)), ih, cacheable, note)
