@@ -78,7 +78,7 @@ def decide_next(store, pol, tier_stats_=None, apply=False) -> dict:
     if problems:
         raise AuditError("; ".join(problems))
     try:
-        stops = [s["name"] for s in hitl.blocking(store.root, f"slice:{store.id}")]
+        stops = [s["name"] for s in hitl.blocking_for(store.dir, f"slice:{store.id}")]
         why = "an open human stop applies; nothing is retried, escalated or accepted until a human releases it"
     except hitl.StopLedgerError as e:
         stops, why = ["<ledger>"], f"human-stop ledger tampered or unreadable (failing closed): {e}"
