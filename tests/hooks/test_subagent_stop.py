@@ -90,8 +90,18 @@ def test_research_file_path_source(tmp_path):
     assert run(tmp_path, "research", "Body.\n\n## Sources\n- research/notes/a.md\n").kind == "allow"
 
 
-def test_research_plain_label_is_not_heading_or_bold(tmp_path):
-    assert run(tmp_path, "research", "Body.\n\nSources\n- https://e.com/a\n").kind == "block"
+def test_research_plain_label_line(tmp_path):
+    msg = "Batching is supported.\n\nSources\n- https://docs.example.org/api/batching\n"
+    assert run(tmp_path, "research", msg).kind == "allow"
+
+
+def test_research_plain_label_url_must_follow(tmp_path):
+    assert run(tmp_path, "research", "See https://e.com/a.\n\nSources\nnothing\n").kind == "block"
+
+
+def test_research_sources_inside_sentence_is_not_label(tmp_path):
+    msg = "The sources of the bug are unclear.\nSources are listed in https://e.com/a\n"
+    assert run(tmp_path, "research", msg).kind == "block"
 
 
 def test_research_prose_slash_is_not_a_path(tmp_path):

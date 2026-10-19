@@ -36,6 +36,7 @@ _BULLET = re.compile(r"^(\s*)(?:[-*+]|\d+[.)])\s+(.*)$")
 _FENCE = re.compile(r"^\s*(```|~~~)")
 _SOURCES_HEADING = re.compile(r"^[ \t]{0,3}#{1,6}[ \t]+Sources[ \t]*:?[ \t]*(?:#+[ \t]*)?$", re.M)
 _SOURCES_BOLD = re.compile(r"^[ \t]*(?:\*\*|__)Sources[ \t]*:?[ \t]*(?:\*\*|__)[ \t]*:?[ \t]*", re.M)
+_SOURCES_PLAIN = re.compile(r"^[ \t]{0,3}Sources[ \t]*(?::[ \t]*|$)", re.M)  # C-16: plain `Sources` line
 _ONE_WAY = re.compile(r"one-way door:\s*yes\b", re.I)
 
 
@@ -100,9 +101,10 @@ def _sources_tail(message: str) -> str | None:
     m = _SOURCES_HEADING.search(message)
     if m:
         ends.append(m.end())
-    m = _SOURCES_BOLD.search(message)
-    if m:
-        ends.append(m.end())
+    for rx in (_SOURCES_BOLD, _SOURCES_PLAIN):
+        m = rx.search(message)
+        if m:
+            ends.append(m.end())
     return message[min(ends):] if ends else None
 
 
@@ -121,7 +123,7 @@ def _validate_research(message: str) -> list[str]:
     problems: list[str] = []
     tail = _sources_tail(message)
     if tail is None:
-        problems.append("a Sources section (a heading or bold label `Sources`) followed by at least one URL or file path")
+        problems.append("a Sources section (the label `Sources`, plain, bold or a heading) followed by at least one URL or file path")
     elif not _has_source(tail):
         problems.append("at least one URL or file path after the Sources label")
     for sentence in _SENTENCE_SPLIT.split(message):
