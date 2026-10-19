@@ -147,6 +147,48 @@ Test: `test_closure_change_lists_callers_of_the_enclosing_function`.
 `lines 1-12`, the whole file, and the check still passes.
 Test: `test_symbol_citations_are_the_symbols_own_span[True]`.
 
+## Re-test after the fixes (agent-graph 86a6a84 merged)
+
+The full suite now has **144 tests: 139 passed, 5 failed**. All 21 earlier failures pass except one, and that one
+was restated as explained below. Defects V1 to V8 and S1 to S8 are fixed as far as these tests reach. All 5
+remaining failures come from one new defect, V9.
+
+### The shadow_builtin cache case, restated (not a weakening)
+The fixed gate refuses a module that defines its own `max` when `f` calls `max`. It exits 13 with
+`builtin 'max' is rebound or shadowed`. I agree this is the sound outcome.
+- The translator models only the builtin `max`.
+- Requirement 4 allows PROVED only for obligations that were actually discharged. Proving the builtin model while a
+  different function runs would be exactly the unsound PROVED of V2.
+
+The old test's priming step expected this module to pass, so the test was wrong about the fix, not the code. The
+case is now `test_shadowed_builtin_is_refused_and_never_cached`. For both the original module and the changed one it
+asserts:
+- the run exits non-zero;
+- no obligation is PROVED;
+- there is no cache hit, and no cache entry is written.
+
+The stale-reuse assertion is kept. This is not a weakening, because the hazard the case targeted is still tested
+through V9, a construct the gate accepts.
+
+### V9. CRITICAL (new): swapping f's code object passes both the binding check and the cache key
+`check_binding` counts only Name stores of `f`. The bound-object check compares only `co_name` and
+`co_firstlineno`. Module-level code that runs
+`fn.__code__ = bad.__code__.replace(co_name=..., co_firstlineno=...)` passes both checks. A fresh run then reports
+post-1 PROVED with exit 0 under math_int and under int64, although the real `f(50) == -1`. The 200-sample
+cross-check misses x == 50.
+
+When the swap lives in another repo module (`import patchmod; patchmod.apply(f)`), the target file's bytes do not
+change. `module_hash` and `dep_hashes` cover only the target module, so a PROVED cached while `patchmod.apply` was a
+no-op is reused after `patchmod.py` changes, and the gate passes from the cache.
+
+Fixing this needs a check of the bound function's code object against the compiled parsed node, for example
+comparing `co_code`. It also needs a cache key that covers the module's transitive repo imports, or a refusal to
+cache any module with top-level side effects.
+
+Tests:
+- `verify/test_acc_verify_soundness.py::test_code_object_swap_is_not_proved[*]` (4 cases);
+- `verify/test_acc_verify_cache.py::test_stale_proof_not_reused_when_imported_module_patches_f`.
+
 ## Observations (not counted as failing tests)
 
 - **The cache is trusted.** A hand-written entry under the right key (`gate.cache_key` is public) is accepted as

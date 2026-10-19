@@ -3,6 +3,8 @@
 Each case states the expected verdicts so the case cannot silently become UNSUPPORTED; vhelp.assert_consistent
 additionally checks PROVED against a brute-force domain and replays every COUNTEREXAMPLE with plain Python.
 """
+import sys
+
 import pytest
 
 from vhelp import INT64_MAX, INT64_MIN, assert_consistent, contract_doc, real_function, run_gate, verdicts
@@ -207,3 +209,29 @@ def test_value_returning_and_mixed_constructs_are_unsupported(tmp_path, body, wh
     assert {o["verdict"] for o in vs.values()} == {"UNSUPPORTED"}, vs
     assert why in vs["post-1"]["reason"]
     assert rep.exit_code == 12
+
+
+# ------------------------------------------- code-object swap evades the binding check (found after the fixes)
+SWAP = ("    def bad(x):\n        if x == 50:\n            return -1\n        return max(x, 0)\n"
+        "    c = fn.__code__\n"
+        "    fn.__code__ = bad.__code__.replace(co_name=c.co_name, co_firstlineno=c.co_firstlineno)\n")
+CODE_SWAP = {
+    "in_module": ("def f(x: int) -> int:\n    return max(x, 0)\n\n\ndef _patch(fn):\n" + SWAP + "\n\n_patch(f)\n", None),
+    "imported_module": ("import patchmod\n\n\ndef f(x: int) -> int:\n    return max(x, 0)\n\n\npatchmod.apply(f)\n",
+                        "def apply(fn):\n" + SWAP),
+}
+
+
+@pytest.mark.parametrize("semantics", ["math_int", "int64"])
+@pytest.mark.parametrize("label", sorted(CODE_SWAP))
+def test_code_object_swap_is_not_proved(tmp_path, monkeypatch, label, semantics):
+    """CRITICAL if PROVED: module-level code replaces f.__code__ (name and first line preserved)."""
+    src, patch = CODE_SWAP[label]
+    if patch:
+        (tmp_path / "patchmod.py").write_text(patch, encoding="utf-8")
+        monkeypatch.syspath_prepend(str(tmp_path))
+        monkeypatch.delitem(sys.modules, "patchmod", raising=False)
+    rep = run_gate(tmp_path, src, contract_doc(X, post=["result >= 0"], semantics=semantics))
+    assert real_function(tmp_path / "accmod.py")(x=50) == -1, "fixture must really violate result >= 0"
+    assert verdicts(rep)["post-1"]["verdict"] != P and rep.exit_code != 0, \
+        f"unsound PROVED ({label}, {semantics}): real f(50) == -1, verdicts {verdicts(rep)}"
