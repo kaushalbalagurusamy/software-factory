@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software Factory ops</title>
+<style>
+:root{--bg:#f7f7f5;--fg:#1b1b1b;--mute:#5d5d5d;--card:#fff;--line:#d9d9d4;--acc:#0b5cad;--ok:#1a7f37;--warn:#9a6700;--bad:#c62828;--live:#1a7f37;--static:#0b5cad;--na:#6e6e6e}
+@media (prefers-color-scheme:dark){:root{--bg:#121316;--fg:#ececec;--mute:#a0a0a8;--card:#1b1c21;--line:#33353d;--acc:#6cb2ff;--ok:#56d364;--warn:#e3b341;--bad:#ff7b72;--live:#56d364;--static:#6cb2ff;--na:#9a9aa2}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:.75rem 1rem;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between}
+h1{font-size:1.1rem;margin:0}
+h2{font-size:1.05rem;margin:1.25rem 0 .5rem}
+nav{display:flex;gap:.25rem;overflow-x:auto;padding:.5rem 1rem;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
+nav a{padding:.5rem .8rem;border-radius:.5rem;text-decoration:none;color:var(--fg);white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;border:1px solid transparent}
+nav a[aria-current=page]{border-color:var(--acc);color:var(--acc);font-weight:600}
+nav a.rt::after{content:" \25CF";color:var(--live);font-size:.7em}
+nav a:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+main{padding:1rem;max-width:1100px;margin:0 auto}
+#banner{margin:0;padding:.6rem 1rem;font-weight:600}
+#banner.snap{background:color-mix(in srgb,var(--warn) 18%,var(--bg));border-bottom:1px solid var(--warn)}
+#banner.rt{background:color-mix(in srgb,var(--live) 14%,var(--bg));border-bottom:1px solid var(--live)}
+#banner.err{background:color-mix(in srgb,var(--bad) 18%,var(--bg));border-bottom:1px solid var(--bad)}
+label{font-size:.9rem;color:var(--mute)}
+select,button{font:inherit;min-height:44px;padding:.3rem .6rem;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:.5rem;max-width:100%}
+.card{background:var(--card);border:1px solid var(--line);border-radius:.6rem;padding:.75rem 1rem;margin:.6rem 0;overflow-wrap:anywhere}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem}
+.badge{display:inline-block;padding:.05rem .5rem;border-radius:1rem;font-size:.78rem;font-weight:700;border:1px solid currentColor}
+.b-live{color:var(--live)}.b-static{color:var(--static)}.b-unavailable{color:var(--na)}
+.mute{color:var(--mute)}.bad{color:var(--bad)}.ok{color:var(--ok)}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:.4rem .6rem;text-align:left;vertical-align:top}
+iframe{width:100%;height:70vh;min-height:420px;border:1px solid var(--line);border-radius:.5rem;background:var(--card)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:.88em}
+.skip{position:absolute;left:-999px}.skip:focus{left:.5rem;top:.5rem;background:var(--card);padding:.5rem;z-index:9}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <h1>Software Factory: dev and ops</h1>
+  <div><label for="sel">Commit snapshot (historical tabs only)</label><br>
+  <select id="sel" aria-describedby="selnote"></select></div>
+</header>
+<p id="banner" role="status"></p>
+<nav id="nav" aria-label="Dashboard tabs"></nav>
+<main id="main" tabindex="-1"></main>
+<script>
+(function(){
+"use strict";
+var TABS=[
+ ["overview","Overview","mix"],["ops","Ops","rt"],["architecture","Architecture","hist"],["research","Research","hist"],
+ ["experiments","Experiments","hist"],["adrs","ADRs","hist"],["prd","PRD journeys","hist"],["langfuse","Langfuse","rt"],
+ ["evals","Evals & bugs","hist"],["journey","Dev journey","hist"],["git","Git history","hist"]];
+var KEY={prd:"prd_journeys",journey:"dev_journey",git:"git"};
+var $=function(i){return document.getElementById(i)};
+var S={index:null,runtime:null,runtimeErr:null,manifest:null,manifestErr:null,sha:null,cache:{}};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function getJSON(u){
+  if(S.cache[u])return S.cache[u];
+  return S.cache[u]=fetch(u,{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error(u+" returned HTTP "+r.status);return r.json()});
+}
+function parseHash(){
+  var h=location.hash.replace(/^#\/?/,""),q="",i=h.indexOf("?");
+  if(i>=0){q=h.slice(i+1);h=h.slice(0,i)}
+  var p=new URLSearchParams(q);
+  return {tab:TABS.some(function(t){return t[0]===h})?h:"overview",sha:p.get("sha")};
+}
+function setHash(tab,sha){location.hash="#/"+tab+(sha?"?sha="+encodeURIComponent(sha):"")}
+function short(s){return s&&s.length>12?s.slice(0,12):s}
+function badge(l){return '<span class="badge b-'+esc(l||"unavailable")+'">'+esc(l||"unavailable")+'</span>'}
+function errBox(m){return '<div class="card bad" role="alert"><strong>Could not load:</strong> '+esc(m)+'</div>'}
+
+function fig(name,f){
+  if(!f)return "";
+  if(!f.measured)return '<div class="card"><strong>'+esc(name)+'</strong> '+badge("unavailable")+'<br><span class="mute">not measured: '+esc(f.reason)+'</span></div>';
+  var v=typeof f.value==="object"?'<code>'+esc(JSON.stringify(f.value))+'</code>':esc(f.value);
+  return '<div class="card"><strong>'+esc(name)+'</strong> '+badge(f.label)+'<br>'+v+'<br><span class="mute">source '+esc(f.source)+', as of '+esc(f.as_of)+'</span></div>';
+}
+function runtimeHtml(){
+  if(S.runtimeErr)return errBox("ops/runtime.json: "+S.runtimeErr+". Run python -m factory.ops runtime (or serve).");
+  var r=S.runtime;if(!r)return '<p class="mute">Loading runtime telemetry...</p>';
+  var h='<p class="mute">Runtime telemetry as of <strong>'+esc(r.as_of)+'</strong>, not tied to a commit. It does not change with the snapshot selector.'+(r.note?" "+esc(r.note):"")+'</p><div class="grid">';
+  Object.keys(r.figures).forEach(function(k){h+=fig(k,r.figures[k])});
+  return h+"</div>";
+}
+function langfuseHtml(){
+  if(S.runtimeErr)return errBox("ops/runtime.json: "+S.runtimeErr);
+  var l=S.runtime&&S.runtime.langfuse;if(!l)return '<p class="mute">Loading...</p>';
+  var h='<p class="mute">Runtime, as of '+esc(S.runtime.as_of)+', not tied to a commit.</p>';
+  if(!l.applicable)return h+'<div class="card">'+badge("unavailable")+' '+esc(l.reason)+'</div>';
+  return h+'<div class="grid">'+fig("configured",l.configured)+fig("traces",l.traces)+"</div>";
+}
+
+function tabData(key){
+  var m=S.manifest;if(!m)return Promise.reject(new Error(S.manifestErr||"no snapshot selected"));
+  var t=m.tabs[key];if(!t)return Promise.reject(new Error("manifest has no tab "+key));
+  if(!t.available)return Promise.resolve({available:false,reason:t.reason});
+  return getJSON("../blobs/"+t.blob+".json");
+}
+function na(d){return '<div class="card">'+badge("unavailable")+" <strong>Not available at this commit:</strong> "+esc(d.reason)+"</div>"}
+function table(cols,rows){
+  if(!rows.length)return '<p class="mute">No rows.</p>';
+  return "<table><thead><tr>"+cols.map(function(c){return "<th scope=col>"+esc(c[1])+"</th>"}).join("")+"</tr></thead><tbody>"+
+   rows.map(function(r){return "<tr>"+cols.map(function(c){var v=r[c[0]];return "<td>"+esc(v==null?"":v)+"</td>"}).join("")+"</tr>"}).join("")+"</tbody></table>";
+}
+var HIST={
+ architecture:function(d){
+   var h="";d.items.forEach(function(it){
+     if(it.error){h+=errBox(it.path+": "+it.error);return}
+     h+='<div class="card"><strong>'+esc(it.title)+'</strong> <span class="mute">'+esc(it.path)+", "+it.nodes+" nodes, "+it.diagrams+' diagrams</span></div>'+
+     '<iframe title="Architecture explorer: '+esc(it.title)+'" src="../viewer.html?model='+encodeURIComponent("blobs/"+it.model_blob+".json")+'"></iframe>';
+   });return h},
+ research:function(d){return table([["title","Title"],["as_of","As of"],["path","File"]],d.items)},
+ experiments:function(d){return table([["name","Experiment"],["path","File"]],d.items)+d.items.map(function(i){return "<details><summary>"+esc(i.name)+"</summary><pre><code>"+esc(JSON.stringify(i.results||i.error,null,1))+"</code></pre></details>"}).join("")},
+ adrs:function(d){return table([["id","ID"],["title","Title"],["status","Status"],["date","Date"]],d.items)},
+ prd_journeys:function(d){return d.items.map(function(s){return '<div class="card"><strong>'+esc(s.title)+'</strong> <span class="mute">slice '+esc(s.slice)+", priority "+esc(s.priority||"unset")+"</span><ul>"+(s.stories.length?s.stories.map(function(x){return "<li>"+esc(x)+"</li>"}).join(""):'<li class="mute">no UX stories recorded</li>')+"</ul></div>"}).join("")},
+ dev_journey:function(d){
+   var h=table([["slice","Slice"],["t","Tasks done/total"],["v","Verified/total"],["a","Amendments"]],d.items.map(function(s){
+     return {slice:s.slice,t:s.tasks.total!=null?s.tasks.done+"/"+s.tasks.total:"n/a: "+s.tasks.reason,v:s.verification.total!=null?s.verification.verified+"/"+s.verification.total:"n/a: "+s.verification.reason,a:s.amendments.count!=null?s.amendments.count:"n/a"}}));
+   return h+"<h2>Stage events</h2>"+(d.events.length?table([["at","At"],["stage","Stage"],["slice","Slice"],["verdict","Verdict"],["sha","Commit"],["note","Note"]],d.events.slice().reverse()):'<p class="mute">No stage events recorded at this commit.</p>')},
+ evals:function(d){
+   var sm=d.summary,m=sm.membership,h="";
+   if(m)h+='<div class="card">Eval membership from GOLDEN.json: <strong>'+m.golden+"</strong> golden, <strong>"+m.diagnostic+"</strong> diagnostic-tagged.</div>";
+   if(sm.results_committed)h+='<div class="card"><details open><summary>Committed results (latest.json)</summary><pre><code>'+esc(JSON.stringify(d.items[0].results,null,1))+"</code></pre></details></div>";
+   else h+='<div class="card">'+badge("unavailable")+" No results committed. "+esc(sm.note||"")+"</div>";
+   return h},
+ bug_log:function(d){return table([["title","Title"],["status","Status"],["path","Source"]],d.items.map(function(b){return {title:b.title||b.id||b.error||"",status:b.status||"",path:b.path||""}}))},
+ git:function(d){return table([["sha","Commit"],["date","Date"],["subject","Subject"]],d.items.map(function(c){return {sha:short(c.sha),date:c.date,subject:c.subject}}))}
+};
+function histPanel(key,title){
+  return tabData(key).then(function(d){
+    if(!d.available)return "<h2>"+esc(title)+"</h2>"+na(d);
+    return "<h2>"+esc(title)+"</h2>"+HIST[key](d);
+  }).catch(function(e){return "<h2>"+esc(title)+"</h2>"+errBox(e.message)});
+}
+function snapSummary(){
+  var m=S.manifest;if(!m)return errBox(S.manifestErr||"No snapshot available. Run python -m factory.ops bundle.");
+  var h='<div class="card"><strong>Snapshot '+esc(short(m.sha))+"</strong> "+esc(m.date)+"<br>"+esc(m.subject)+'<br><span class="mute">generated '+esc(m.generated_at)+', collectors v'+esc(m.collector_version)+"</span></div><div class='grid'>";
+  Object.keys(m.tabs).forEach(function(k){var t=m.tabs[k];h+='<div class="card"><strong>'+esc(k)+"</strong><br>"+(t.available?'<span class="ok">available</span>, '+esc(JSON.stringify(t.summary)):'<span class="mute">not available: '+esc(t.reason)+"</span>")+"</div>"});
+  return h+"</div>";
+}
+
+function render(){
+  var p=parseHash(),main=$("main");
+  var nav=$("nav");
+  nav.innerHTML=TABS.map(function(t){return '<a href="#/'+t[0]+(S.sha?"?sha="+encodeURIComponent(S.sha):"")+'"'+(t[0]===p.tab?' aria-current="page"':"")+(t[2]==="rt"?' class="rt" title="runtime, not tied to a commit"':"")+">"+esc(t[1])+"</a>"}).join("");
+  var ban=$("banner"),hist=TABS.filter(function(t){return t[0]===p.tab})[0][2];
+  if(hist==="rt"){ban.className="rt";ban.textContent="Runtime telemetry, as of "+(S.runtime?S.runtime.as_of:"unknown")+", not tied to a commit. The commit selector does not apply here."}
+  else if(S.manifest){ban.className="snap";ban.textContent="Snapshot at "+short(S.manifest.sha)+" ("+S.manifest.date+")"+(hist==="mix"?". Runtime panels below are as of now, not this snapshot.":"")}
+  else{ban.className="err";ban.textContent=S.manifestErr||"No snapshot loaded"}
+  var t=p.tab,pt=function(h){if(parseHash().tab===t)main.innerHTML=h};
+  if(t==="overview"){pt("<h2>Runtime (now)</h2>"+runtimeHtml()+"<h2>Latest snapshot</h2>"+snapSummary());return}
+  if(t==="ops"){pt("<h2>Ops</h2>"+runtimeHtml());return}
+  if(t==="langfuse"){pt("<h2>Langfuse</h2>"+langfuseHtml());return}
+  main.innerHTML='<p class="mute">Loading...</p>';
+  if(t==="evals"){Promise.all([histPanel("evals","Evals"),histPanel("bug_log","Bug log")]).then(function(a){pt(a.join(""))});return}
+  var key=KEY[t]||t;
+  var titles={architecture:"Architecture",research:"Research",experiments:"Experiments",adrs:"ADRs",prd:"PRD journeys",journey:"Dev journey",git:"Git history"};
+  histPanel(key,titles[t]).then(function(h){
+    if(t==="git"){h+='<p class="mute">Pick a commit in the selector above to view every historical tab as of that commit.</p>'}
+    pt(h)});
+}
+function loadManifest(sha){
+  S.sha=sha||null;S.manifest=null;S.manifestErr=null;
+  var c=S.index&&S.index.commits;
+  if(!c||!c.length){S.manifestErr="ops/index.json lists no commits. Run python -m factory.ops bundle.";return Promise.resolve()}
+  var pick=sha&&c.filter(function(x){return x.sha===sha||x.sha.indexOf(sha)===0})[0];
+  if(sha&&!pick){S.manifestErr="Commit "+sha+" is not in ops/index.json.";return Promise.resolve()}
+  pick=pick||c[0];S.sha=sha?pick.sha:null;
+  $("sel").value=pick.sha;
+  return getJSON("../snapshots/"+pick.sha+"/manifest.json").then(function(m){S.manifest=m}).catch(function(e){S.manifestErr=e.message});
+}
+function route(){var p=parseHash();loadManifest(p.sha).then(render)}
+$("sel").addEventListener("change",function(){setHash(parseHash().tab,$("sel").value)});
+window.addEventListener("hashchange",route);
+$("sel").innerHTML='<option>loading...</option>';
+getJSON("../index.json").then(function(ix){
+  S.index=ix;
+  $("sel").innerHTML=(ix.commits||[]).map(function(c){return '<option value="'+esc(c.sha)+'">'+esc(short(c.sha))+" "+esc(c.date.slice(0,10))+" "+esc(c.subject.slice(0,60))+"</option>"}).join("")||'<option value="">no snapshots</option>';
+}).catch(function(e){S.manifestErr="ops/index.json: "+e.message;$("sel").innerHTML='<option value="">unavailable</option>'}).then(function(){
+  getJSON("../runtime.json").then(function(r){S.runtime=r}).catch(function(e){S.runtimeErr=e.message}).then(function(){route()});
+});
+setInterval(function(){delete S.cache["../runtime.json"];getJSON("../runtime.json").then(function(r){S.runtime=r;S.runtimeErr=null;var t=parseHash().tab;if(t==="ops"||t==="overview"||t==="langfuse")render()}).catch(function(){})},30000);
+})();
+</script>
+</body>
+</html>
