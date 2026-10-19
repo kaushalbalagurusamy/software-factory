@@ -1,0 +1,13 @@
+id: audit
+description: Read-only audit of existing code; catalogues findings with file and line citations in the audit folder.
+model: sonnet
+core_tools: [Read, Glob, Grep, Write, Bash]
+disallowed_tools: [Edit]
+skills: [legacy-audit, brownfield-explorer, "claude-security:scan"]
+mcp: []
+spawns: []
+writes: audit_dir
+bash: readonly
+blind: false
+hooks: [path_guard, secrets_guard, bash_guard, subagent_stop]
+max_tools: 20

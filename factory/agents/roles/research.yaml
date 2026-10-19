@@ -1,0 +1,17 @@
+id: research
+description: Gathers and grades evidence from the code base and external sources, and writes sourced findings to the research folder only.
+model: sonnet
+core_tools: [Read, Glob, Grep, WebSearch, WebFetch, Write, Bash]
+disallowed_tools: [Edit]
+skills: [grounded-research, deep-research, brownfield-explorer]
+mcp:
+  - {server: deepwiki, access: read}
+  - {server: alphaXiv, access: read}
+  - {server: firecrawl, access: read}
+  - {server: "$git_host", access: read}
+spawns: []
+writes: research_dir
+bash: readonly
+blind: false
+hooks: [path_guard, secrets_guard, bash_guard, subagent_stop]
+max_tools: 20
