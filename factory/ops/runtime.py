@@ -181,13 +181,21 @@ def make_server(root: Path, host: str, port: int) -> ThreadingHTTPServer:
         def __init__(self, *a, **k):
             super().__init__(*a, directory=str(root), **k)
 
-        def do_GET(self):
+        def _root_redirect(self) -> bool:
             if self.path in ("", "/"):
                 self.send_response(302)
                 self.send_header("Location", "/shell/index.html")
                 self.end_headers()
-                return
-            super().do_GET()
+                return True
+            return False
+
+        def do_GET(self):
+            if not self._root_redirect():
+                super().do_GET()
+
+        def do_HEAD(self):
+            if not self._root_redirect():
+                super().do_HEAD()
 
         def list_directory(self, path):
             self.send_error(404, "no directory listing")
