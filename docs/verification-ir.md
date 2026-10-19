@@ -94,8 +94,10 @@ its AST with a range check around every arithmetic operation, still ordinary Pyt
 evaluated by an independent interpreter in `replay.py` that does not use z3. If the real run does not violate
 the obligation the verdict is `MODEL_MISMATCH` (a translator bug) and the gate fails.
 
-**Cross-check of PROVED.** After solving, every `PROVED` obligation is tested on the models of `P` plus 200
-seeded random and boundary inputs against the real function; a violation downgrades it to `MODEL_MISMATCH`.
+**Cross-check of PROVED.** After solving, every `PROVED` obligation is tested against the real function on the
+models of `P`, all combinations (or per-parameter sweeps for many parameters) of boundary values taken from the
+contract's and the function's own integer constants (c-1, c, c+1, -c) plus 0, +-1, small values and the int64
+edges, and 200 seeded random inputs, so a divergence at a single point such as `x == 50` is looked for; a violation downgrades it to `MODEL_MISMATCH`.
 This is a safety net against translator unsoundness, not a proof certificate.
 
 **No syntactic fallback.** `PROVED` is created in exactly one function (`_prove_from_unsat`) which requires a
@@ -137,7 +139,12 @@ them.
 * module hash: SHA-256 of the whole module AST, so any module-level change (a redefinition, a shadowing helper,
   a constant the function reads) invalidates every entry for that module; comments/formatting do not.
 
-Cache key = hash of (implementation, dependencies, module, contract, z3 version, Python version, tool version,
+* imports hash: every repo module the target imports, transitively (depth 6; relative imports resolved from the
+  file, others from `--root`, the file's directory, then `sys.path`; stdlib and site-packages are not hashed). An
+  import that cannot be resolved, or the depth bound, makes the module **non-cacheable** (reported as
+  `cache_note`); nothing is stored or reused for it.
+
+Cache key = hash of (implementation, dependencies, module, imports, contract, z3 version, Python version, tool version,
 assumptions). Cache hits are labelled (`PROVED (cached)`, `"cached": true`). The cache is for local speed only:
 a hand-written cache file can forge a pass, so release/CI runs use `--no-cache`. Only fully passing results (all `PROVED` or routed `UNSUPPORTED`) are stored; a corrupt cache is
 ignored. Nothing is stored for counterexamples, unknown, timeouts or mismatches.

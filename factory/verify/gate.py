@@ -84,7 +84,7 @@ def tool_versions() -> Dict[str, Any]:
 
 # ---------------------------------------------------------------- cache
 def cache_key(contract: Contract, target: Target, assumptions: List[str], versions: dict) -> str:
-    doc = {"impl": target.impl_hash, "deps": target.dep_hashes, "module": target.module_hash, "contract": contract.content_hash(),
+    doc = {"impl": target.impl_hash, "deps": target.dep_hashes, "module": target.module_hash, "imports": target.imports_hash, "contract": contract.content_hash(),
            "z3": versions["z3"], "python": versions["python"], "tool": versions["factory_verify"],
            "assumptions": sorted(assumptions)}
     return hashlib.sha256(json.dumps(doc, sort_keys=True).encode()).hexdigest()
@@ -172,6 +172,10 @@ def run_gate(contracts: List[Contract], *, roots=(), source_files: Optional[Dict
                            "contract": c.content_hash()}
         entry["source_file"] = target.file
         entry["module_hash"] = target.module_hash
+        entry["imports_hash"] = target.imports_hash
+        entry["cacheable"] = target.cacheable
+        if not target.cacheable:
+            entry["cache_note"] = f"not cached: {target.cache_note}"
         if review:
             try:
                 rr = review_contract(c)
@@ -191,7 +195,8 @@ def run_gate(contracts: List[Contract], *, roots=(), source_files: Optional[Dict
         assumptions = list(c.assumptions) + [SEMANTIC_ASSUMPTIONS[c.semantics]] + IMPLICIT_ASSUMPTIONS
         key = cache_key(c, target, assumptions, rep.tool_versions)
         result: Optional[ContractResult] = None
-        if cache is not None and key in cache["entries"]:
+        use_cache = cache is not None and target.cacheable
+        if use_cache and key in cache["entries"]:
             try:
                 d = cache["entries"][key]
                 obs = [ObligationResult.from_dict(o) for o in d["obligations"]]
@@ -213,7 +218,7 @@ def run_gate(contracts: List[Contract], *, roots=(), source_files: Optional[Dict
                 entry["error"] = traceback.format_exc(limit=3)
                 rep.results.append((c, target, None))
                 continue
-            if cache is not None and _cacheable(result):
+            if use_cache and _cacheable(result):
                 cache["entries"][key] = _result_to_dict(result)
                 dirty = True
         entry.update({"cache_hit": result.cache_hit, "assumptions": result.assumptions,

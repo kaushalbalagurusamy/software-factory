@@ -93,5 +93,15 @@ Supported subset only: pure functions of int/bool with if/else, assignment, tern
 comparisons, boolean logic, `abs/min/max`, `raise`. No loops, calls, attributes, floats, containers,
 try/except, globals, mutation. `int64` is checked arithmetic (overflow is an error outcome), not wraparound.
 `PROVED` means "discharged by z3 on the modelled semantics under the listed assumptions and not contradicted
-by 200+ sampled executions", not a machine-checked certificate. Unsupported obligations must be covered by the
+by boundary-value and random executions of the real bound function", not a machine-checked certificate. Unsupported obligations must be covered by the
 declared route; the gate only checks that a route exists, not that the routed test is any good.
+
+## What the binding check does and does not detect
+
+Detected (exit 19 `BINDING`, or 13 for a called shadowed builtin): the target defined or assigned more than once,
+star imports, and any difference between the bound function and the code compiled from the parsed def (module
+level or imported-module `f.__code__ = ...`, `__defaults__`, `__kwdefaults__`, `__wrapped__`, closure, foreign
+globals). The proof cache also hashes every repo module the target imports (transitively); a module with an
+unresolvable import is never cached. **Not detected, stated assumptions:** monkeypatching after the import
+finished (e.g. by the caller at run time), `builtins.x = ...`, and edits to stdlib/site-packages code. Use
+`--no-cache` for release gates.
