@@ -7,6 +7,13 @@ Commands:
   sf verify    --repo <repo_dir> [--manifest <manifest.json>]
   sf run       --spec <spec.md> --repo <repo_dir>
   sf transpile --source <source_file> --target-lang <go|python> [--out <out_file>]
+Tool groups (each delegates to its module and returns its exit code; run `sf <group> --help`):
+  sf slice      factory.slices     tracer-bullet slices: check, lock, tick, verify, amend, done, triage
+  sf structure  factory.structure  structural scan, scope, model and diff (Python, ast; limits are reported)
+  sf contracts  factory.verify     contracts and the honest solver gate: check-contracts, verify, report
+  sf intake     factory.intake     ledger, sweep record, gate, seeds and experiment checks
+  sf ops        factory.ops        dashboard snapshots (bundle), runtime telemetry, local server
+  sf qa         factory.qa         QA supervisor loop: state, next decision, feedback, regression proposals
 """
 
 from __future__ import annotations
@@ -271,6 +278,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", help="Available factory commands")
 
+    # tool groups are delegated in main() before parsing; listed here so `sf --help` shows them
+    for name, module in TOOL_GROUPS.items():
+        subparsers.add_parser(name, help=f"{module} tools (run `sf {name} --help`)", add_help=False)
+
     # audit
     p_audit = subparsers.add_parser("audit", help="Audit semantic delta (ΔS) and classify architectural doors")
     p_audit.add_argument("--pre", help="Path to pre-change source file")
@@ -312,9 +323,37 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+TOOL_GROUPS = {
+    "slice": "factory.slices",
+    "structure": "factory.structure",
+    "contracts": "factory.verify",
+    "intake": "factory.intake",
+    "ops": "factory.ops",
+    "qa": "factory.qa",
+}
+
+
+def run_tool(group: str, argv: List[str]) -> int:
+    """Run a tool module's __main__ with its own argument parsing and return its exit code."""
+    import runpy
+
+    saved = sys.argv
+    sys.argv = [f"sf {group}", *argv]
+    try:
+        runpy.run_module(TOOL_GROUPS[group], run_name="__main__", alter_sys=True)
+    except SystemExit as e:
+        return e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
+    finally:
+        sys.argv = saved
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
+    raw = list(sys.argv[1:] if argv is None else argv)
+    if raw and raw[0] in TOOL_GROUPS:
+        return run_tool(raw[0], raw[1:])
     parser = build_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args(raw)
 
     if args.command == "audit":
         return cmd_audit(args)
