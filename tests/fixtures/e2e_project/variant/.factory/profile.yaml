@@ -1,0 +1,7 @@
+# Variant fixture: same shape, different eval paths and a different one-way-door pattern.
+schema_version: 1
+project: {name: Quillwort}
+paths:
+  eval: ["golden/**"]
+  research_dir: research
+one_way_door_patterns: ['\bpurge-tenant\b']
