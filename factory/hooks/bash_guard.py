@@ -464,16 +464,99 @@ def _base(word: str) -> str:
 
 
 MAX_SPLIT_LEN = 100_000
-# Options of transparent wrappers that take a separate value (never a command).
-WRAPPER_VALUE_OPTS = {
-    "exec": frozenset({"-a"}),
-    "time": frozenset({"-f", "-o", "--format", "--output"}),
-    "stdbuf": frozenset({"-i", "-o", "-e", "--input", "--output", "--error"}),
-}
-XARGS_VALUE_OPTS = frozenset({
-    "-a", "-d", "-E", "-I", "-J", "-L", "-n", "-P", "-R", "-S", "-s", "--arg-file", "--delimiter",
-    "--eof", "--max-args", "--max-procs", "--max-lines", "--max-chars", "--process-slot-var",
-})
+
+
+def _spec(flags: str = "", values: str = "", cmds: str = "", opts: str = "") -> dict[str, str]:
+    """Option table: letter (or long name) -> kind. ``value`` takes a value, ``cmd`` takes a COMMAND
+    STRING, ``opt`` takes an optional value (attached or after ``=`` only), ``flag`` takes none."""
+    d: dict[str, str] = {}
+    for kind, letters in (("flag", flags), ("value", values), ("cmd", cmds), ("opt", opts)):
+        for ch in (letters if isinstance(letters, (list, tuple)) else letters):
+            d[ch] = kind
+    return d
+
+
+def _lspec(flags=(), values=(), cmds=(), opts=()) -> dict[str, str]:
+    return _spec(list(flags), list(values), list(cmds), list(opts))
+
+
+def _getopt(args: list[str], short: dict[str, str], long: dict[str, str], *, permute: bool = False,
+            digits: bool = False, any_letter: bool = False, plus: bool = False
+            ) -> tuple[list[tuple[str, str | None, str]], list[str]]:
+    """Parse options the way GNU getopt_long does. Returns ([(name, value, kind)], operands).
+
+    Long options resolve by unique prefix (exactly one match, an exact name always wins); short
+    clusters are walked letter by letter, a value-taking letter consuming the rest of the cluster or
+    the next word. Anything unclassifiable (unknown option, ambiguous prefix, missing value, a value
+    given to a flag) raises :class:`ParseError`, so the caller fails closed."""
+    opts: list[tuple[str, str | None, str]] = []
+    rest: list[str] = []
+    i = 0
+    n = len(args)
+    while i < n:
+        a = args[i]
+        i += 1
+        if a == "--":
+            rest.extend(args[i:])
+            break
+        if a.startswith("--"):
+            name, eq, val = a[2:].partition("=")
+            if name in long:
+                full = name
+            else:
+                cands = [k for k in long if k.startswith(name)] if name else []
+                if len(cands) != 1:
+                    raise ParseError(f"unknown or ambiguous option --{name}")
+                full = cands[0]
+            kind = long[full]
+            if kind == "flag":
+                if eq:
+                    raise ParseError(f"option --{full} takes no value")
+                opts.append((full, None, kind))
+            elif kind == "opt":
+                opts.append((full, val if eq else None, kind))
+            else:
+                if not eq:
+                    if i >= n:
+                        raise ParseError(f"option --{full} needs a value")
+                    val = args[i]
+                    i += 1
+                opts.append((full, val, kind))
+            continue
+        if (a.startswith("-") or (plus and a.startswith("+"))) and len(a) > 1:
+            lead = a[0]
+            for k, ch in enumerate(a[1:]):
+                kind = short.get(ch)
+                if kind is None:
+                    if any_letter and ch.isalpha():
+                        kind = "flag"
+                    elif digits and ch.isdigit():
+                        kind = "flag"
+                    else:
+                        raise ParseError(f"unknown option {lead}{ch}")
+                if kind == "flag":
+                    opts.append((ch, None, kind))
+                    continue
+                tail = a[k + 2:]
+                if kind == "opt":
+                    opts.append((ch, tail or None, kind))
+                elif tail:
+                    opts.append((ch, tail, kind))
+                else:
+                    if i >= n:
+                        raise ParseError(f"option {lead}{ch} needs a value")
+                    opts.append((ch, args[i], kind))
+                    i += 1
+                break
+            continue
+        if a == "-" and "-" in short:
+            opts.append(("-", None, "flag"))
+            continue
+        rest.append(a)
+        if not permute:
+            rest.extend(args[i:])
+            break
+    return opts, rest
 
 
 def _split_command_string(value: str) -> list[str]:
@@ -486,21 +569,61 @@ def _split_command_string(value: str) -> list[str]:
         raise ParseError(f"cannot split option command string: {exc}") from None
 
 
-def _short_cluster_value(w: str, k: int, ws: list[str]) -> tuple[str, list[str]]:
-    """Value of the option letter at w[1+k]: the rest of the word, else the next word."""
-    if k < len(w) - 2:
-        return w[k + 2:], ws[1:]
-    if len(ws) < 2:
-        raise ParseError(f"option {w} needs a value")
-    return ws[1], ws[2:]
+ENV_SHORT = _spec(flags="i0v-", values="uCaP", cmds="S")
+ENV_LONG = _lspec(flags=("ignore-environment", "null", "debug", "list-signal-handling", "help", "version"),
+                  values=("unset", "chdir", "argv0"), cmds=("split-string",),
+                  opts=("block-signal", "default-signal", "ignore-signal"))
+SUDO_SHORT = _spec(flags="AbEeHiKklnPSsVvB", values="CDghpRrTtUuc")
+SUDO_LONG = _lspec(
+    flags=("askpass", "background", "bell", "edit", "set-home", "help", "login", "remove-timestamp",
+           "reset-timestamp", "list", "non-interactive", "preserve-groups", "stdin", "shell", "version",
+           "validate"),
+    values=("close-from", "chdir", "group", "host", "login-class", "prompt", "chroot", "role", "type",
+            "command-timeout", "other-user", "user"),
+    opts=("preserve-env",))
+DOAS_SHORT = _spec(flags="Lns", values="Cu")
+SU_SHORT = _spec(flags="flmpPV-", values="gGsw", cmds="c", opts="")
+SU_LONG = _lspec(flags=("login", "preserve-environment", "fast", "pty", "help", "version"),
+                 values=("group", "supp-group", "shell", "whitelist-environment"),
+                 cmds=("command", "session-command"))
+RUNUSER_SHORT = _spec(flags="flmpPV", values="ugGsw", cmds="c")
+RUNUSER_LONG = _lspec(flags=("login", "preserve-environment", "fast", "pty", "help", "version"),
+                      values=("user", "group", "supp-group", "shell", "whitelist-environment"),
+                      cmds=("command", "session-command"))
+XARGS_SHORT = _spec(flags="0oprtvx", values="adILnPsE", opts="eil")
+XARGS_LONG = _lspec(
+    flags=("null", "interactive", "no-run-if-empty", "verbose", "exit", "open-tty", "show-limits", "help",
+           "version"),
+    values=("arg-file", "delimiter", "max-args", "max-procs", "process-slot-var", "max-chars"),
+    opts=("eof", "replace", "max-lines"))
+NICE_SHORT = _spec(values="n")
+NICE_LONG = _lspec(flags=("help", "version"), values=("adjustment",))
+TIME_SHORT = _spec(flags="apqvV", values="fo")
+TIME_LONG = _lspec(flags=("append", "portability", "quiet", "verbose", "version", "help"), values=("format", "output"))
+TIMEOUT_SHORT = _spec(flags="fpv", values="ks")
+TIMEOUT_LONG = _lspec(flags=("foreground", "preserve-status", "verbose", "help", "version"),
+                      values=("kill-after", "signal"))
+NOHUP_LONG = _lspec(flags=("help", "version"))
+COMMAND_SHORT = _spec(flags="pvV")
+EXEC_SHORT = _spec(flags="cl", values="a")
+SETSID_SHORT = _spec(flags="cfwV")
+SETSID_LONG = _lspec(flags=("ctty", "fork", "wait", "help", "version"))
+STDBUF_SHORT = _spec(values="ioe")
+STDBUF_LONG = _lspec(flags=("help", "version"), values=("input", "output", "error"))
+SHELL_SHORT = _spec(values="oO")
+SHELL_LONG = _lspec(
+    flags=("login", "noprofile", "norc", "posix", "restricted", "verbose", "version", "help", "debugger",
+           "dump-po-strings", "dump-strings", "noediting", "pretty-print", "protected"),
+    values=("rcfile", "init-file"))
 
 
 def _strip_prefix(words: list[str], scripts: list[str]) -> list[str]:
     """Drop leading reserved words, variable assignments and transparent wrappers.
 
-    Option-carried command strings are never skipped: ``env -S`` is split into words and analysed
-    as the wrapped command; ``sudo -s|-i`` and ``su -c`` strings are appended to ``scripts`` (shell
-    text for the caller to parse)."""
+    Wrapper options are parsed with a per-wrapper table (see :func:`_getopt`); an option that carries a
+    command string is never skipped: ``env -S`` is split into words and analysed as the wrapped
+    command, while ``sudo -s|-i``, ``su -c`` and ``runuser -c`` strings are appended to ``scripts``
+    (shell text for the caller to parse). An option that cannot be classified raises ParseError."""
     ws = list(words)
     for _ in range(64):
         if not ws:
@@ -513,95 +636,65 @@ def _strip_prefix(words: list[str], scripts: list[str]) -> list[str]:
             ws = ws[1:]
             continue
         name = _base(w)
-        if name in ("command", "builtin", "exec", "nohup", "time", "setsid", "stdbuf"):
-            vopts = WRAPPER_VALUE_OPTS.get(name, frozenset())
-            ws = ws[1:]
-            while ws and ws[0].startswith("-") and len(ws[0]) > 1:
-                ws = ws[2:] if ws[0] in vopts else ws[1:]
-            continue
-        if name == "xargs":
-            ws = ws[1:]
-            while ws and ws[0].startswith("-") and len(ws[0]) > 1:
-                ws = ws[2:] if ws[0] in XARGS_VALUE_OPTS else ws[1:]
-            continue
+        args = ws[1:]
         if name == "env":
-            ws = ws[1:]
-            while ws:
-                w = ws[0]
-                if w.startswith("--"):
-                    opt, eq, val = w.partition("=")
-                    if opt == "--split-string":
-                        if eq:
-                            rest = ws[1:]
-                        elif len(ws) > 1:
-                            val, rest = ws[1], ws[2:]
-                        else:
-                            raise ParseError("env --split-string needs a value")
-                        ws = _split_command_string(val) + rest
-                        break
-                    ws = ws[2:] if opt in ("--unset", "--chdir") and not eq else ws[1:]
-                elif w.startswith("-") and len(w) > 1:
-                    for k, ch in enumerate(w[1:]):
-                        if ch in "uC":
-                            _val, ws = _short_cluster_value(w, k, ws)
-                            break
-                        if ch == "S":
-                            val, rest = _short_cluster_value(w, k, ws)
-                            ws = _split_command_string(val) + rest
-                            break
-                    else:
-                        ws = ws[1:]
-                        continue
-                    if ch == "S":
-                        break
-                elif ASSIGNMENT.match(w):
-                    ws = ws[1:]
-                else:
-                    break
-            continue
-        if name in ("sudo", "doas"):
-            ws = ws[1:]
-            shell = False
-            while ws and ws[0].startswith("-") and len(ws[0]) > 1:
-                o = ws[0]
-                if o in ("-u", "-g", "-h", "-p", "-C", "-D", "-R", "-T", "-U", "-r", "-t", "--user", "--group"):
-                    ws = ws[2:]
+            while True:
+                opts, rest = _getopt(args, ENV_SHORT, ENV_LONG)
+                pre: list[str] = []
+                for _n, val, kind in opts:
+                    if kind == "cmd":
+                        pre += _split_command_string(val or "")
+                rest = pre + rest
+                while rest and ASSIGNMENT.match(rest[0]):
+                    rest = rest[1:]
+                if rest and rest[0].startswith("-") and len(rest[0]) > 1:
+                    args = rest  # conservative: options after assignments are still parsed
                     continue
-                if o in ("--shell", "--login") or (not o.startswith("--") and ("s" in o[1:] or "i" in o[1:])):
-                    shell = True
-                ws = ws[1:]
-            if shell and ws:
-                scripts.append(" ".join(ws))
+                break
+            ws = rest
+        elif name in ("sudo", "doas"):
+            sp, lg = (SUDO_SHORT, SUDO_LONG) if name == "sudo" else (DOAS_SHORT, {})
+            opts, rest = _getopt(args, sp, lg)
+            if any(o in ("s", "i", "shell", "login") for o, _v, _k in opts) and rest:
+                scripts.append(" ".join(rest))
                 return []
-            continue
-        if name in ("su", "runuser"):
-            rest = ws[1:]
-            for k, a in enumerate(rest):
-                if a in ("-c", "--command") and k + 1 < len(rest):
-                    scripts.append(rest[k + 1])
-                    return []
-                if a.startswith("--command="):
-                    scripts.append(a.partition("=")[2])
-                    return []
-                if a.startswith("-c") and not a.startswith("--") and len(a) > 2:
-                    scripts.append(a[2:])
-                    return []
+            ws = rest
+        elif name in ("su", "runuser"):
+            sp, lg = (SU_SHORT, SU_LONG) if name == "su" else (RUNUSER_SHORT, RUNUSER_LONG)
+            opts, rest = _getopt(args, sp, lg)
+            if not (name == "runuser" and any(o in ("u", "user") for o, _v, _k in opts)):
+                opts, rest = _getopt(args, sp, lg, permute=True)  # `su user -c cmd` puts options last
+            cmds = [v for _o, v, k in opts if k == "cmd"]
+            if cmds:
+                scripts.extend(c or "" for c in cmds)
+                return []
+            if name == "runuser" and any(o in ("u", "user") for o, _v, _k in opts):
+                ws = rest
+            else:
+                return ws
+        elif name == "xargs":
+            ws = _getopt(args, XARGS_SHORT, XARGS_LONG)[1]
+        elif name == "nice":
+            ws = _getopt(args, NICE_SHORT, NICE_LONG, digits=True)[1]
+        elif name == "time":
+            ws = _getopt(args, TIME_SHORT, TIME_LONG)[1]
+        elif name == "timeout":
+            rest = _getopt(args, TIMEOUT_SHORT, TIMEOUT_LONG)[1]
+            ws = rest[1:]  # the duration
+        elif name == "nohup":
+            ws = _getopt(args, {}, NOHUP_LONG)[1]
+        elif name == "builtin":
+            ws = _getopt(args, {}, {})[1]
+        elif name == "command":
+            ws = _getopt(args, COMMAND_SHORT, {})[1]
+        elif name == "exec":
+            ws = _getopt(args, EXEC_SHORT, {})[1]
+        elif name == "setsid":
+            ws = _getopt(args, SETSID_SHORT, SETSID_LONG)[1]
+        elif name == "stdbuf":
+            ws = _getopt(args, STDBUF_SHORT, STDBUF_LONG)[1]
+        else:
             return ws
-        if name == "nice":
-            ws = ws[1:]
-            if ws and ws[0] == "-n":
-                ws = ws[2:]
-            elif ws and re.fullmatch(r"-\d+|--adjustment=.*", ws[0]):
-                ws = ws[1:]
-            continue
-        if name == "timeout":
-            ws = ws[1:]
-            while ws and ws[0].startswith("-") and len(ws[0]) > 1:
-                ws = ws[2:] if ws[0] in ("-s", "-k", "--signal", "--kill-after") else ws[1:]
-            if ws:
-                ws = ws[1:]  # the duration
-            continue
-        return ws
     raise ParseError("command wrapping is too deep")
 
 
@@ -850,6 +943,8 @@ def _analyse(cmds: list[Cmd], cfg: HookConfig, depth: int = 0) -> list[Finding]:
             findings += _analyse(parse(sc, depth + 1), cfg, depth + 1)
         if not words:
             continue
+        if re.search(r"\s", words[0]):
+            raise ParseError("command word contains whitespace after unwrapping")
         name = _base(words[0])
         args = words[1:]
         is_git = name == "git"
@@ -924,24 +1019,9 @@ def _analyse(cmds: list[Cmd], cfg: HookConfig, depth: int = 0) -> list[Finding]:
 
 def _shell_script(args: list[str]) -> str | None:
     """The string passed to ``sh -c`` style invocations, or None when there is none."""
-    has_c = False
-    i = 0
-    while i < len(args):
-        a = args[i]
-        if a == "--":
-            i += 1
-            break
-        if a in ("-o", "+o", "-O", "+O"):
-            i += 2
-            continue
-        if a.startswith(("-", "+")) and len(a) > 1:
-            if not a.startswith("--") and "c" in a[1:]:
-                has_c = True
-            i += 1
-            continue
-        break
-    if has_c and i < len(args):
-        return args[i]
+    opts, rest = _getopt(args, SHELL_SHORT, SHELL_LONG, any_letter=True, plus=True)
+    if any(o == "c" for o, _v, _k in opts) and rest:
+        return rest[0]
     return None
 
 

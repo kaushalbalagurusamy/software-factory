@@ -14,15 +14,16 @@ Module `factory/hooks/bash_guard.py`, hook id `bash_guard`, event PreToolUse, to
 - One-way doors (ask for orchestrator, deny otherwise): `DROP TABLE|DATABASE|COLUMN`, `TRUNCATE`, `DELETE FROM` with no `WHERE` (case-insensitive, A-08-3; also through here-documents and `echo ... | psql`); `terraform|tofu destroy`, `kubectl delete`, `gh repo delete`; `rm` with recursive and force flags (any spelling or order) on any target not under `/tmp` and not at any depth a `node_modules` or `.venv` (A-08-5; `/tmp` itself is not exempt; paths are normalised so `/tmp/../etc` is not exempt; unresolved `$VAR` or `~` targets are not exempt); any command whose words start with `profile.deploy.route`; any command matching a regex in `profile.one_way_door_patterns` (searched in the joined words and the raw segment text).
 
 ## Wrappers and option-carried command strings
-An option that carries a command is parsed as a command, never skipped. Checked wrappers:
-- `env`: `-S X`, `-SX`, `--split-string X`, `--split-string=X` (also inside clusters such as `-iS`) are split with shlex and analysed as the words after `env`; an unsplittable, missing or over-long (100000 chars) value is denied. `-u`/`--unset`/`-C`/`--chdir` values are skipped as values, not commands. Nested wrappers are bounded (64 unwrap steps).
-- `sudo`/`doas`: `-s`, `-i`, `--shell`, `--login` make the remaining text a shell command line, parsed like `sh -c`; other value options (`-u -g ...`) are skipped.
-- `su`/`runuser`: `-c X`, `-cX`, `--command X`, `--command=X` are parsed as shell commands.
-- `xargs`: its options are skipped (value options listed) and the rest is the wrapped command.
-- `find`: the words after `-exec`, `-execdir`, `-ok`, `-okdir` up to `;` or `+` are analysed as a command.
-- `exec` (`-a name` takes a value), `time` (`-f`, `-o`), `stdbuf` (`-i -o -e`), `timeout` (`-s`, `-k`, duration), `nice` (`-n`), `command`, `builtin`, `nohup`, `setsid`: only plain values are skipped, none carries a command string.
-- `bash|sh|zsh|dash|ksh|ash -c X` (including `-lc`) and `eval X` are parsed as shell text.
-Not interpreted: `ssh host cmd`, `watch`, `flock`, `parallel`, `chroot`, `ionice`.
+Wrapper options are parsed table-driven, as GNU getopt does (`_getopt` in the module). Each wrapper has a small table of its short and long options, marked `flag`, `value`, `opt` (optional value, attached only) or `cmd` (carries a COMMAND STRING). Long options resolve by unique prefix against the table (exactly one match, an exact name always wins); short clusters are walked letter by letter, a value or command letter consuming the rest of the cluster or else the next word (`-lc CMD`, `-cCMD`, `-Eu root`, `-0I{}`, `-SX`). An unknown option, an ambiguous prefix, a missing value or a value given to a flag is unclassifiable: the whole command is denied for every role, never skipped.
+- `env`: `-S`/`--split-string` (and any unique prefix such as `--split`, `--spl`, or a cluster such as `-iS`) is split with shlex and analysed as the words after `env` (unsplittable, missing or over 100000 characters: deny). `-u -C -a -P` take values. Options after assignments are still parsed (conservative).
+- `sudo`/`doas`: `-s`, `-i`, `--shell`, `--login` (also in clusters, `-sE`, `-si`) turn the remaining words into a shell command line parsed like `sh -c`; value options (`-u -g -h -p -C -D -R -r -T -t -U`) are consumed.
+- `su`/`runuser`: `-c`, `--command`, `--session-command` (any unique prefix, attached or clustered) strings are parsed as shell commands; `runuser -u USER [--] CMD` analyses CMD.
+- `xargs`, `nice`, `time`, `timeout`, `nohup`, `command`, `builtin`, `exec`, `setsid`, `stdbuf`: tables of flags and value options; none carries a command string, the rest is the wrapped command (`timeout` drops its duration).
+- `bash|sh|zsh|dash|ksh|ash`: any letter cluster, `-o`/`-O`/`+o` values, a table of long options; `-c` makes the first operand a script, parsed. `eval X` and `find -exec|-execdir|-ok|-okdir ... ;|+` are parsed the same way.
+- Defence in depth: after unwrapping, a command word that contains whitespace is treated as unparseable and denied.
+- Not interpreted: `ssh host cmd`, `watch`, `flock`, `parallel`, `chroot`, `ionice`.
+
+**Limits.** A command-line parser cannot be complete: shells, wrappers and their option grammars are open-ended, and this guard only recognises what its tables list. It is a best-effort filter in front of the real controls. The OS sandbox and the Claude Code permission layer remain the backstop; do not rely on this hook alone to prevent an irreversible action.
 
 ## Recorded example payloads
 Run with `python -m factory.hooks bash_guard` and a profile containing `deploy: {route: "railway up"}`.
