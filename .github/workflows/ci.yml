@@ -49,3 +49,7 @@ jobs:
       - name: Run Deterministic Eval Template Tests
         run: |
           python3 templates/deterministic-eval-template.py
+
+      - name: Run unit tests (Unity-dependent tests are deselected; CI has no Unity checkout)
+        run: |
+          python -m pytest tests -m "not requires_unity"
