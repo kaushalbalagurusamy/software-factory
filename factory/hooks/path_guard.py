@@ -16,6 +16,9 @@ import re
 from factory.agents.roles import RoleSpec, load_roles
 from factory.hooks.core import Decision, HookConfig, Payload
 
+# Write tools and the tool_input field naming the file they write (C-38.4).
+WRITE_TARGET_FIELDS = {"Write": "file_path", "Edit": "file_path", "MultiEdit": "file_path",
+                       "NotebookEdit": "notebook_path"}
 FREEZE_MARKER = ".factory/frozen"
 # Folders the implement role may never write (C-36 and A-05-5), project-relative.
 CONTROL_DIRS: tuple[str, ...] = (".factory", ".claude")
@@ -26,6 +29,14 @@ READONLY_PREFIXES: tuple[tuple[str, ...], ...] = (
     ("ls",), ("cat",), ("head",), ("tail",), ("wc",), ("grep",), ("rg",), ("find",), ("tree",),
     ("sf", "audit"), ("sed", "-n"), ("awk",),
 )
+# C-38.1: awk words that can write, execute or load code, matched anywhere in its arguments.
+_AWK_SUBSTRINGS = ("system", "getline", "close", "fflush", "|", ">", "@load", "@include")
+_AWK_SHORT_FLAGS = frozenset("fieElodp")  # -f -i -E -e -l -o -d -p (and clusters / attached values)
+_AWK_LONG_FLAGS = ("file", "include", "source", "exec", "load", "pretty-print", "profile", "dump-variables")
+# C-38.2: the only sed scripts a read-only role may run (with ``sed -n``).
+_SED_ADDR = r"(?:\d+|\$|/(?:[^/\\\n]|\\.)*/)"
+_SED_PRINT = re.compile(rf"(?:{_SED_ADDR}(?:,{_SED_ADDR})?)?p\Z")
+_SED_FLAGS = re.compile(r"[gpiI0-9]*\Z")
 DENIED_COMMANDS = frozenset({"rm", "mv", "cp", "chmod", "tee"})
 _FIND_FORBIDDEN = frozenset({"-delete", "-exec", "-execdir", "-ok", "-okdir",
                              "-fprint", "-fprint0", "-fprintf", "-fls"})
@@ -256,6 +267,54 @@ def _scan(command: str):
     return segments, redirect, subst
 
 
+def _awk_problem(args: list[str]) -> str | None:
+    for w in args:
+        low = w.lower()
+        if any(t in low for t in _AWK_SUBSTRINGS):
+            return "awk program or option uses a write, execute or pipe feature"
+        if w.startswith("--") and len(w) > 2:
+            name = w[2:].split("=", 1)[0]
+            if any(opt.startswith(name) for opt in _AWK_LONG_FLAGS):
+                return f"awk {w.split('=', 1)[0]} can read code or write files"
+        elif w.startswith("-") and len(w) > 1 and any(c in _AWK_SHORT_FLAGS for c in w[1:]):
+            return f"awk {w} can read code or write files"
+    return None
+
+
+def _sed_script_ok(script: str) -> bool:
+    if _SED_PRINT.match(script):
+        return True
+    if len(script) < 2 or script[0] != "s":
+        return False
+    d = script[1]
+    if d.isalnum() or d.isspace() or d in "\\":
+        return False
+    parts, cur, i = [], [], 2
+    while i < len(script) and len(parts) < 2:
+        c = script[i]
+        if c == "\\" and i + 1 < len(script):
+            cur.append(script[i:i + 2])
+            i += 2
+            continue
+        if c == d:
+            parts.append("".join(cur))
+            cur = []
+        else:
+            cur.append(c)
+        i += 1
+    return len(parts) == 2 and bool(_SED_FLAGS.match(script[i:]))
+
+
+def _sed_problem(words: list[str]) -> str | None:
+    if len(words) < 3 or words[1] != "-n":
+        return "sed is only allowed as sed -n <print or substitution script> [file...]"
+    if not _sed_script_ok(words[2]):
+        return "sed script is not a plain print or substitution"
+    if any(w.startswith("-") and w != "-" or _sed_script_ok(w) for w in words[3:]):
+        return "sed option or second script word after the script"
+    return None
+
+
 def _segment_problem(words: list[str]) -> str | None:
     head = words[0]
     if head in DENIED_COMMANDS:
@@ -267,8 +326,14 @@ def _segment_problem(words: list[str]) -> str | None:
         bad = [w for w in words if w in _FIND_FORBIDDEN]
         if bad:
             return f"find {bad[0]} can modify files"
-    if prefix[0] == "git" and any(w == "--output" or w.startswith("--output=") for w in words):
-        return "git --output writes a file"
+    if prefix[0] == "git" and any(w.split("=", 1)[0].startswith("--ou") for w in words):
+        return "git --output (or an abbreviation) writes a file"
+    if prefix[0] == "awk":
+        return _awk_problem(words[1:])
+    if prefix[0] == "sed":
+        problem = _sed_problem(words)
+        if problem:
+            return problem
     if prefix[0] == "sed" and any(
             w.startswith("-") and not w.startswith("--") and "i" in w[1:] or w.startswith("--in-place")
             for w in words):
@@ -321,8 +386,9 @@ def decide(payload: Payload, cfg: HookConfig) -> Decision:
         return Decision("deny", "path_guard: PreToolUse payload has no tool_name")
     role = cfg.role_for(payload)
     spec = _roles().get(role)
-    if tool in ("Write", "Edit"):
-        return _decide_write(role, spec, payload.tool_input.get("file_path"), payload, cfg)
+    tool_input = payload.tool_input if isinstance(payload.tool_input, dict) else {}
+    if tool in WRITE_TARGET_FIELDS:
+        return _decide_write(role, spec, tool_input.get(WRITE_TARGET_FIELDS[tool]), payload, cfg)
     if tool == "Bash":
-        return _decide_bash(role, spec, payload.tool_input.get("command"), cfg)
+        return _decide_bash(role, spec, tool_input.get("command"), cfg)
     return Decision("allow")

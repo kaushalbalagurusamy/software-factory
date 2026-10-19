@@ -157,8 +157,8 @@ def test_max_tools_boundary_ok(roles):
 
 
 EXPECTED_HOOKS = {
-    "path_guard": ("PreToolUse", "Write|Edit|Bash"),
-    "secrets_guard": ("PreToolUse", "Write|Edit|Bash"),
+    "path_guard": ("PreToolUse", "Write|Edit|MultiEdit|NotebookEdit|Bash"),
+    "secrets_guard": ("PreToolUse", "Write|Edit|MultiEdit|NotebookEdit|Bash"),
     "blindness_guard": ("PreToolUse", "Read|Grep|Glob|Bash"),
     "bash_guard": ("PreToolUse", "Bash"),
     "stop_gate": ("Stop", None),

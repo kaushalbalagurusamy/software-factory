@@ -39,8 +39,8 @@ def test_registers_all_eight(profile, roles):
         "path_guard", "blindness_guard", "secrets_guard", "bash_guard",
         "stop_gate", "subagent_stop", "ledger_audit", "session_start"])
     by = {c.split()[-1]: (ev, m) for ev, m, c in got}
-    assert by["path_guard"] == ("PreToolUse", "Write|Edit|Bash")
-    assert by["secrets_guard"] == ("PreToolUse", "Write|Edit|Bash")
+    assert by["path_guard"] == ("PreToolUse", "Write|Edit|MultiEdit|NotebookEdit|Bash")
+    assert by["secrets_guard"] == ("PreToolUse", "Write|Edit|MultiEdit|NotebookEdit|Bash")
     assert by["blindness_guard"] == ("PreToolUse", "Read|Grep|Glob|Bash")
     assert by["bash_guard"] == ("PreToolUse", "Bash")
     assert by["stop_gate"] == ("SubagentStop", None)

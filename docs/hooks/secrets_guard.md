@@ -1,6 +1,6 @@
 # Hook: `secrets_guard`
 
-Module `factory/hooks/secrets_guard.py` (TB-07; requirements R-12, R-23). Run as `python -m factory.hooks secrets_guard`. Registered for every role with matcher `Write|Edit|Bash`.
+Module `factory/hooks/secrets_guard.py` (TB-07; requirements R-12, R-23). Run as `python -m factory.hooks secrets_guard`. Registered for every role with matcher `Write|Edit|MultiEdit|NotebookEdit|Bash`.
 
 ## What it does
 Stops a secret value from being written into a file or typed into a command. It inspects, for every role:
@@ -9,9 +9,11 @@ Stops a secret value from being written into a file or typed into a command. It 
 |---|---|
 | Write | `content` |
 | Edit | `new_string` |
-| Bash | `command` |
+| Bash | `command` (scanned as written and in a de-quoted form, C-39.3) |
+| MultiEdit | `edits[*].new_string` (C-38.4) |
+| NotebookEdit | `new_source` (C-38.4) |
 
-Other tools are allowed. A missing field is allowed; a field that is present but not a string is denied (`hook error: ...`). Malformed stdin is denied by the core adapter (`hook error:`, exit 2).
+Other tools are allowed. A missing field is allowed; a field that is present but not a string (or `edits` that is not a list of objects) is denied; text over 2,000,000 characters (all MultiEdit edits together) is denied with a reason saying it is too large to scan (C-39.2) (`hook error: ...`). Malformed stdin is denied by the core adapter (`hook error:`, exit 2).
 
 ## Denied values
 `sk-or-v1-` + 20 or more hex; `sk-ant-` + 20 or more URL-safe; `sk-` + 32 or more alphanumerics; `ghp_`, `gho_`, `ghs_`, `github_pat_` + 20 or more alphanumerics or `_`; `glpat-` + 20 or more (`A-Za-z0-9_-`); `AKIA` + 16 uppercase alphanumerics; `xox[baprs]-` + 10 or more (`A-Za-z0-9-`); `AIza` + 35 or more URL-safe; a PEM header `-----BEGIN ... PRIVATE KEY-----`; and an assignment (`=`, `:`, `:=`, `=>`, quoted or unquoted name) of a quoted value of 16 or more characters to a name containing `api_key`, `apikey`, `secret`, `token` or `password` (case-insensitive).
@@ -19,8 +21,11 @@ Other tools are allowed. A missing field is allowed; a field that is present but
 ## Allowed
 - References by name: `$NAME`, `${NAME}`, `os.environ["NAME"]`, `process.env.NAME`, and a quoted value that is exactly a variable reference (`"${X}"`, `"$X"`; clarification A-07-2).
 - Bare mentions of a key's shape or name without a value.
-- Placeholders. The text inspected is the whitespace- or quote-delimited token containing the match (A-07-3), the match, and the part after the fixed prefix (for assignments, the quoted value). It is a placeholder if it is one repeated character, contains `xxxx`, `example`, `placeholder`, `your`, `changeme`, `<` or `>` (any case, A-07-4), or ends in `...`.
-- Values matching any regex in `profile.secret_allow_patterns` (`re.search` against the matched value or its token).
+- Placeholders (C-39.1, supersedes A-07-3/A-07-4). Only a WHOLE value is exempt: for a prefixed key the whole body after the prefix, for an assignment the whole quoted value. The placeholder forms are an angle-bracket form `<...>` spanning the value, one repeated character, or a `$VAR` / `${VAR}` reference. Placeholder words (`your`, `example`, `xxxx`, ...), a trailing `...` and words elsewhere in the surrounding token no longer exempt anything.
+- Values matching any regex in `profile.secret_allow_patterns` (`re.search` against the matched value only).
+
+## Bounded scanning and quoting (C-39.2, C-39.3)
+Scanning is linear: the sensitive word is located first, the rest of the assignment is matched anchored there, and a failed name run is skipped once, so hostile input (a 1.9 MB run of `password`, spaces or quotes) takes about a second. `dequote()` removes quotes and backslash escapes and unescapes `$'...'`, so `"sk-""ant-..."` is caught in a Bash command.
 
 ## Output and privacy
 A deny reason names the pattern kind and line number(s), never the value: `secret value in Bash command (anthropic key at line 2). Reference it by variable name ...`. The module exports only `decide`; it has no `record`, logs nothing and persists nothing. No network or model call.
@@ -47,8 +52,7 @@ secret value in Bash command (anthropic key at line 2). Reference it by variable
 Replacing the key with `$ANTHROPIC_API_KEY` gives exit 0 and empty stdout.
 
 ## Known limits
-- Placeholder detection is token-based per the clarification, so a real value sharing a token with a placeholder word (for example `your_key=<real value>` with no spaces) is allowed. Not verified against any eval.
-- Prefixes are matched without a word boundary. Unquoted assignments (`TOKEN=value`) are not caught unless the value has a known key shape.
-- A value that is all one repeated character after its prefix is treated as a placeholder (reading of A-07-3 for `sk-000...0`; unverified).
+- Prefixes are matched without a word boundary. Unquoted assignments (`TOKEN=value`) are not caught unless the value has a known key shape; the de-quoted view drops quotes, so a quote-split assignment name is not caught unless the value has a key shape.
+- The reason for an oversize payload does not scan it, so a key inside is not named.
 
-Unit tests: `tests/hooks/test_secrets_guard.py` (`python -m pytest tests/hooks/test_secrets_guard.py`).
+Unit tests: `tests/hooks/test_secrets_guard.py` (`scripts/bounded-pytest.sh tests/hooks/test_secrets_guard.py`).

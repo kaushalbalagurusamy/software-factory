@@ -1,6 +1,6 @@
 # Hook: path_guard (TB-05)
 
-Delivers R-06 and R-10. Module `factory/hooks/path_guard.py`, hook id `path_guard`, registered on `PreToolUse` with matcher `Write|Edit|Bash`. Contracts: `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, and clarifications A-05-1..6, U-4, C-36.
+Delivers R-06 and R-10. Module `factory/hooks/path_guard.py`, hook id `path_guard`, registered on `PreToolUse` with matcher `Write|Edit|MultiEdit|NotebookEdit|Bash`. Contracts: `docs/contracts/hook-io.md`, `docs/contracts/profile.md`, and clarifications A-05-1..6, U-4, C-36, C-38.
 
 ## What it decides
 
@@ -17,13 +17,13 @@ The role is `payload.agent_type`, or the profile's `main_session_role` when abse
 
 - Target paths are resolved against `cwd`, normalised, and symlinks are resolved; for a path that does not exist the nearest existing ancestor is resolved and the remaining segments appended (A-05-6). A path outside the project root is denied for every role.
 - A glob also covers everything under a folder it matches (`evals/**` matches `evals` itself). `*` does not cross `/`; `**` does.
-- Bash for a role whose `bash` mode is `full` is not inspected (A-05-1). For `readonly` roles (research, design, audit, review) every pipeline segment (split on `|`, `;`, `&`, newline) must start with one of `git log|diff|show|status|blame`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `rg`, `find`, `tree`, `sf audit`, `sed -n`, `awk`. Denied: any `>` redirection outside quotes (so `2>&1` is denied too), `tee`, `rm`, `mv`, `cp`, `chmod`, `find -delete/-exec` (and `-execdir`, `-ok`, `-okdir`, `-fprint*`, `-fls`), and command substitution (`$(`, backticks, `<(`) unless inside single quotes (A-05-3). Extra hardening beyond the PRD list: `sed -i`, `git ... --output`, `tree -o`, `rg --pre`, unparseable (unterminated quote) commands.
-- Read, Grep, Glob and every other tool are allowed (blindness is TB-06). Malformed input (missing or non-string `file_path` or `command`, no `tool_name`) is denied.
+- Bash for a role whose `bash` mode is `full` is not inspected (A-05-1). For `readonly` roles (research, design, audit, review) every pipeline segment (split on `|`, `;`, `&`, newline) must start with one of `git log|diff|show|status|blame`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `rg`, `find`, `tree`, `sf audit`, `sed -n`, `awk`. Denied: any `>` redirection outside quotes (so `2>&1` is denied too), `tee`, `rm`, `mv`, `cp`, `chmod`, `find -delete/-exec` (and `-execdir`, `-ok`, `-okdir`, `-fprint*`, `-fls`), and command substitution (`$(`, backticks, `<(`) unless inside single quotes (A-05-3). C-38 restrictions: `awk` is allowed only when no argument contains `system`, `getline`, `close`, `fflush`, `|`, `>` (so `$1 > 5` is over-blocked on purpose), `@load`, `@include`, or an option that reads program text, loads code, includes files or writes a profile (`-f -i -E -e -l -o -d -p`, `--file --include --source --exec --load --pretty-print --profile --dump-variables` and their abbreviations); `sed` is allowed only as `sed -n <one script> [file...]` where the script is a print (`p` with optional line/`$`/`/regex/` addresses) or `s<d>pat<d>repl<d>flags` with flags from `g p i I` and digits, and no later word is an option or another script; any git option word starting `--ou` is denied. Extra hardening beyond the PRD list: `sed -i`, `git ... --output`, `tree -o`, `rg --pre`, unparseable (unterminated quote) commands.
+- Write, Edit, MultiEdit (`file_path`) and NotebookEdit (`notebook_path`) are all write tools and follow the table above (C-38.4). Read, Grep, Glob and every other tool are allowed (blindness is TB-06). Malformed input (missing or non-string `file_path` or `command`, no `tool_name`) is denied.
 - Every deny reason names the role, the path or command, and the allowed folders.
 
 ## Documented gaps
 
-Redirection inside an awk program (A-05-2); anything a script file does when run; Bash writes by full-mode roles (A-05-1); `sed` script commands such as `w`.
+anything a script file does when run; Bash writes by full-mode roles (A-05-1).
 
 ## Recorded example
 
