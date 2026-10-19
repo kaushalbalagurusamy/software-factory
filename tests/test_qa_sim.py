@@ -47,7 +47,11 @@ def run_slice(store, pol, impl, max_steps=60):
 FAIL = ("fail", "AssertionError: expected 401 got 500")
 
 
-def slice_(tmp_path, name, flake=0):
+def slice_(tmp_path, name, flake=0, ladder=None):
+    if ladder:  # explicit opt-in for non-default models
+        (tmp_path / ".sf").mkdir(exist_ok=True)
+        extra = sorted(set(ladder) - {"sonnet"})
+        (tmp_path / ".sf" / "policy.yaml").write_text(f"tiers: {ladder}\nallow_non_default_models: {extra}\n".replace("'", ""))
     st = SliceStore(tmp_path, name)
     st.init(["AC-1"])
     pol = load_policy(tmp_path)
@@ -71,7 +75,7 @@ def test_recurring_signature_triggers_regression_proposal(tmp_path):
 
 
 def test_cap_escalates_then_reviewer_then_blocked_and_run_proceeds(tmp_path):
-    a, pol = slice_(tmp_path, "stuck")
+    a, pol = slice_(tmp_path, "stuck", ladder=["sonnet", "sonnet", "opus", "opus"])
     b, _ = slice_(tmp_path, "independent")
     impl_a = FakeImplementer([FAIL] * 4)
     trace_a = run_slice(a, pol, impl_a)

@@ -11,6 +11,9 @@ from factory.qa.store import SliceStore
 
 @pytest.fixture
 def env(tmp_path):
+    (tmp_path / ".sf").mkdir()  # explicit opt-in ladder: escalation tests need a second model
+    (tmp_path / ".sf" / "policy.yaml").write_text(
+        "tiers: [sonnet, sonnet, opus, opus]\nallow_non_default_models: [opus]\n")
     st = SliceStore(tmp_path, "s1")
     st.init(["AC-1"])
     return st, load_policy(tmp_path)
@@ -178,3 +181,33 @@ def test_measured_escalation_early_when_tier_performs_badly(env):
     d = decide(st.facts(), st.state, pol, good)
     assert d["action"] == "retry_same_tier" and d["tier"] == "sonnet"
     assert decide(st.facts(), st.state, pol, {})["action"] == "escalate_model"
+
+
+def test_all_sonnet_default_never_escalates_and_attaches_diagnosis(tmp_path):
+    st = SliceStore(tmp_path, "d")
+    st.init(["AC-1"])
+    pol = load_policy(tmp_path)
+    object.__setattr__(pol, "flake_reruns", 0)
+    seen = []
+    for _ in range(4):
+        d = nxt(st, pol)
+        if d["action"] == "propose_regression":
+            st.note_proposal(d["signature"], "p.md")
+            d = nxt(st, pol)
+        seen.append(d)
+        fail(st, pol)
+    assert [d["action"] for d in seen] == ["retry_same_tier"] * 4
+    assert all(d["tier"] == "sonnet" for d in seen)
+    assert "AC-1" in seen[1]["diagnosis"] and "wrong status" in seen[1]["diagnosis"]
+    assert nxt(st, pol)["action"] == "hand_to_reviewer"
+
+
+def test_measured_escalation_needs_a_different_tier(tmp_path):
+    st = SliceStore(tmp_path, "m")
+    st.init(["AC-1"])
+    pol = load_policy(tmp_path)
+    object.__setattr__(pol, "flake_reruns", 0)
+    fail(st, pol)
+    bad = {"sonnet": {"attempts": 10, "successes": 0, "success_rate": 0.0}}
+    d = decide(st.facts(), st.state, pol, bad)
+    assert d["action"] == "retry_same_tier" and d["tier"] == "sonnet"

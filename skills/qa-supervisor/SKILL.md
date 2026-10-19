@@ -27,7 +27,7 @@ feedback in contract terms. Full schemas and exit codes: `docs/qa-loop.md`.
    [--tokens N --cost USD --commit SHA]`. Use `--rerun` for a requested flake rerun. Environment crashes are
    classified automatically (or `--environment`); they consume no attempt and the gate stays failed.
 3. `next [--apply]` returns one action:
-   - `retry_same_tier` / `escalate_model`: write `feedback`, relaunch the implementer at `tier`.
+   - `retry_same_tier` / `escalate_model` (the latter only if an opted-in different tier exists; `diagnosis` is attached): write `feedback`, relaunch the implementer at `tier`.
    - `rerun_for_flake`: rerun the gate unchanged, `record --rerun`.
    - `environment_wait`: fix or wait for the environment, rerun; nothing is counted.
    - `propose_regression`: `regression-propose` (the signature recurred after a claimed fix), then `next` again.
@@ -44,8 +44,8 @@ the attempt number and what changed. Never test source, assertion text, protecte
 match. Do not paraphrase around it by pasting assertions; describe the behaviour.
 
 ## Retry policy and tuning
-Defaults in `.sf/policy.yaml` (see the doc): 4 attempts per signature, tiers sonnet, sonnet, opus, opus, 10
+Defaults in `.sf/policy.yaml` (see the doc): 4 attempts per signature, tiers sonnet x4 (Sonnet-only; another model needs an explicit `allow_non_default_models` opt-in in the policy), 10
 attempts per slice, 1 flake rerun. Run `stats` for per-tier success rate and mean duration; the decision escalates
 early when a tier has at least `min_samples` attempts and a rate below `escalate_below`, and holds a tier whose
-rate is at least `hold_above`. Change the ladder or caps in the policy file only from `stats` evidence, and never
+rate is at least `hold_above` (both only when a different tier exists in the ladder). Change the ladder or caps in the policy file only from `stats` evidence, and never
 raise a cap to hide a failing gate.

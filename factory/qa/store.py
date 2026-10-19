@@ -194,4 +194,6 @@ class SliceStore:
                 f["last_tier_by_sig"][sig] = l.get("tier")
                 if l["seq"] > amend_at.get(sig, 0):
                     f["fails_by_sig"].setdefault(sig, []).append(l["seq"])
+        for l in self.read("failures.jsonl"):
+            f["sig_info"].setdefault(l["signature"], {})["error_norm"] = l.get("error_norm", "")
         return f
