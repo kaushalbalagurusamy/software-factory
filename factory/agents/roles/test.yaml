@@ -1,0 +1,15 @@
+id: test
+description: Authors evals before implementation and runs the suites; never edits application code.
+model: opus
+core_tools: [Read, Glob, Grep, Write, Edit, Bash]
+disallowed_tools: []
+skills: [eval-designer, deploy-verify, "superpowers:verification-before-completion", langfuse]
+mcp:
+  - {server: playwright, access: read}
+  - {server: "$deploy", access: read}
+spawns: []
+writes: eval_paths
+bash: full
+blind: false
+hooks: [path_guard, secrets_guard, bash_guard]
+max_tools: 20

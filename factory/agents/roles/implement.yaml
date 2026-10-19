@@ -1,0 +1,13 @@
+id: implement
+description: Blind implementer; builds one slice from the brief and published contracts and never sees the evals.
+model: sonnet
+core_tools: [Read, Glob, Grep, Write, Edit, LSP, Bash]
+disallowed_tools: [Agent]
+skills: ["superpowers:test-driven-development", "superpowers:systematic-debugging", claude-api, "frontend-design:frontend-design"]
+mcp: []
+spawns: []
+writes: app
+bash: full
+blind: true
+hooks: [path_guard, blindness_guard, secrets_guard, bash_guard, stop_gate]
+max_tools: 20

@@ -1,0 +1,15 @@
+id: review
+description: Independent read-only reviewer; checks the diff and evidence and returns an APPROVE or REJECT verdict with citations.
+model: opus
+core_tools: [Read, Glob, Grep, Bash, "Agent(pr-review-toolkit:silent-failure-hunter, pr-review-toolkit:pr-test-analyzer, feature-dev:code-reviewer)"]
+disallowed_tools: [Write, Edit]
+skills: [implementation-review, "code-review:code-review"]
+mcp:
+  - {server: "$git_host", access: read}
+  - {server: "$deploy", access: read}
+spawns: ["pr-review-toolkit:silent-failure-hunter", "pr-review-toolkit:pr-test-analyzer", "feature-dev:code-reviewer"]
+writes: none
+bash: readonly
+blind: false
+hooks: [path_guard, secrets_guard, bash_guard, subagent_stop]
+max_tools: 20
