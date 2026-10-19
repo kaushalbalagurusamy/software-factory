@@ -19,6 +19,8 @@ fi
 "$VENV/bin/python" -m pip install --quiet --upgrade pip
 "$VENV/bin/python" -m pip install --quiet -r "$ROOT/requirements.txt"
 echo "Installed base requirements from requirements.txt"
+"$VENV/bin/python" -m pip install --quiet -e "$ROOT[skills]"
+echo "Installed factory CLI and supporting skill schema dependencies"
 
 if [ -d "$UNITY_REPO" ] && [ -f "$UNITY_REPO/pyproject.toml" ]; then
   "$VENV/bin/python" -m pip install --quiet -e "$UNITY_REPO"

@@ -29,6 +29,10 @@ dependencies = [
 sf = "factory.cli:main"
 factory = "factory.cli:main"
 
+[project.optional-dependencies]
+# The minesweeper skill imports these directly for its source/register schemas.
+skills = ["jsonschema>=4.18", "referencing>=0.30"]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["factory*"]
