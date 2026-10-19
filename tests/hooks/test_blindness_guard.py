@@ -217,6 +217,7 @@ DENY_NAMES = [
     "timeout 5 cat evals/cases/c1.yaml",
     "cp evals/cases/c1.yaml /tmp/x",
     "ln -s evals/cases src/e",
+    "ln -s ../evals src/e",
     "cat evals/$NAME",
 ]
 
@@ -616,10 +617,10 @@ def test_downloads_into_cwd_allowed_outside_control(env):
 
 # ---- security addendum 2: nested commands ----------------------------------------------------
 DENY_NESTED = [
-    "find src -exec sh -c 'cat evals/cases/c1.yaml' \;",
+    "find src -exec sh -c 'cat evals/cases/c1.yaml' \\;",
     "find src -type f -exec bash -c 'grep -r x .' {} +",
-    "find src -execdir python -c 'import os; os.walk(\".\")' \;",
-    "find src -ok sh -c 'echo x > .factory/y' \;",
+    "find src -execdir python -c 'import os; os.walk(\".\")' \\;",
+    "find src -ok sh -c 'echo x > .factory/y' \\;",
     "fd py src -x sh -c 'cat tests/held_out/h.py'",
     "fd py src --exec-batch eval ls",
     "awk 'BEGIN { system(\"cat x\") }'",
@@ -644,7 +645,7 @@ def test_nested_commands_denied(env, cmd):
 
 
 @pytest.mark.parametrize("cmd", [
-    "find src -name '*.py' -exec wc -l {} +", "find src -type f -exec grep -n foo {} \;",
+    "find src -name '*.py' -exec wc -l {} +", "find src -type f -exec grep -n foo {} \\;",
     "fd py src -x wc -l", "awk '{print $1}' src/pkg/a.py", "awk -F: '$1 > 0 || $2 { print $2 }' src/pkg/a.py",
     "vim -c ':set number' src/pkg/a.py", "less +G src/pkg/a.py", "script -q -c 'make build' /dev/null",
 ])
@@ -657,3 +658,60 @@ def test_nested_exec_depth_is_bounded(env):
     inner = "find src -exec " * (bg.MAX_DEPTH + 3) + "true" + " ;" * (bg.MAX_DEPTH + 3)
     assert len(inner) < 400
     assert denied(bash(env, inner))
+
+
+# ---- QA iteration 2: written parent forms (PRD 4a) versus ~ expansion (A-06-3) ---------------
+@pytest.mark.parametrize("cmd", ["ln -s ../evals src/e", "cat ../evals/x", "cat ./../evals/x",
+                                 "cat ../../evals/x", "cat ../proj2/../evals/cases/c1.yaml",
+                                 "ls ../tests/held_out", "cat \"../ev\"als/x"])
+def test_written_parent_form_leaving_project_denied(env, cmd):
+    assert denied(bash(env, cmd)), cmd
+
+
+def test_written_parent_form_from_subfolder(env):
+    assert denied(bash(env, "cat ../../../evals/x", cwd=env / "src/pkg"))
+    assert denied(decide(env, "Read", {"file_path": "../../evals/x"}, cwd=env / "src"))
+
+
+@pytest.mark.parametrize("cmd", ["cat /etc/evals/x", "cat ../other/x", "cat ../evals_old/x", "ls ..",
+                                 "cat ~/evals/case_a.py"])
+def test_outside_paths_without_written_parent_match_allowed(env, tmp_path, monkeypatch, cmd):
+    monkeypatch.setenv("HOME", str(tmp_path / "elsewhere"))
+    assert bash(env, cmd).kind == "allow", cmd
+
+
+# ---- security addendum 3: symlinks under a searched path -------------------------------------
+@pytest.fixture
+def app(env):
+    (env / "app/pkg").mkdir(parents=True)
+    (env / "app/pkg/m.py").write_text("")
+    os.symlink("../evals", env / "app/link")
+    os.symlink("../evals/cases/c1.yaml", env / "app/c.yaml")
+    return env
+
+
+@pytest.mark.parametrize("tool,ti", [
+    ("Glob", {"pattern": "**/*.yaml", "path": "{root}/app"}),
+    ("Glob", {"pattern": "*/*", "path": "{root}/app"}),
+    ("Glob", {"pattern": "link/**", "path": "{root}/app"}),
+    ("Glob", {"pattern": "l*/cases/*", "path": "app"}),
+    ("Glob", {"pattern": "*.yaml", "path": "{root}/app"}),
+    ("Glob", {"pattern": "**/*.py", "path": "{root}/app"}),
+    ("Grep", {"pattern": "x", "path": "{root}/app", "glob": "link/*"}),
+    ("Grep", {"pattern": "x", "path": "{root}/app/link"}),
+])
+def test_symlink_under_searched_path_denied(app, tool, ti):
+    ti = {k: v.format(root=app) for k, v in ti.items()}
+    assert denied(decide(app, tool, ti)), ti
+
+
+@pytest.mark.parametrize("tool,ti", [
+    ("Glob", {"pattern": "pkg/*.py", "path": "{root}/app"}),
+    ("Glob", {"pattern": "**/*.py", "path": "{root}/app/pkg"}),
+    ("Grep", {"pattern": "x", "path": "{root}/app", "glob": "*.py"}),
+    ("Glob", {"pattern": "**/*.py", "path": "{root}/src"}),
+])
+def test_in_base_patterns_without_symlink_into_protected_allowed(app, tool, ti):
+    ti = {k: v.format(root=app) for k, v in ti.items()}
+    d = decide(app, tool, ti)
+    assert d.kind == "allow", (ti, d.reason)

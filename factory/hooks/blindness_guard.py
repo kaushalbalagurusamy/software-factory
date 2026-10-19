@@ -727,6 +727,13 @@ class _Guard:
         if p.count("/") > MAX_SEGMENTS:
             raise _Deny("cannot analyse the command safely (path too long); denied")
         lex = _norm(p)
+        if kind == EVAL and ".." in p.split("/") and all(_rel(lex, r) is None for r in self.roots):
+            # PRD 4a parent form: "../evals" written in the argument and leaving the project is
+            # denied when its trailing segments match a protected glob (a sibling checkout).
+            # ~ and $HOME expansions alone never reach here with "..", so A-06-3 is unaffected.
+            segs = [x for x in lex.split("/") if x]
+            if any(_match(segs[k:], g, wild=False) == 2 for k in range(len(segs)) for g in self.globs[EVAL]):
+                return 2
         best = 0
         for cand in dict.fromkeys((lex, _resolve(p), _resolve(lex))):
             best = max(best, self.verdict_abs(cand, kind))
@@ -862,8 +869,21 @@ class _Guard:
             # only one that escapes it (absolute, ~, ../) is checked
             base = path if os.path.isabs(path) else os.path.join(self.cwd0, path)
             joined = pat if os.path.isabs(pat) or pat.startswith("~") else os.path.join(base, pat)
-            if _rel(_norm(joined), _norm(base)) is None and self.literal_verdict(joined) == 2:
+            inside = _rel(_norm(joined), _norm(base)) is not None
+            if (not inside and self.literal_verdict(joined) == 2) or (inside and self.resolves_protected(joined)):
                 raise _Deny(f"{tool} glob {_show(pat)!r} names protected eval/held-out paths")
+
+    def resolves_protected(self, pattern: str) -> bool:
+        """A pattern that stays under an allowed path is checked by what exists on disk: every
+        existing prefix is resolved through symlinks, and wildcards are expanded (``**`` as one
+        folder level and as none), so ``src/link -> ../evals`` is caught while plain ``src``
+        content is not widened by the pattern's wildcards."""
+        lex = _norm(pattern)
+        for variant in dict.fromkeys((lex, _norm(lex.replace("/**/", "/").replace("**/", "")))):
+            hits = self.fs_glob(variant) if _WILD.search(variant) else [variant]
+            if any(self.verdict_abs(_resolve(h), EVAL) == 2 for h in hits):
+                return True
+        return False
 
     def bash(self, command):
         if not isinstance(command, str) or not command.strip():
