@@ -28,7 +28,7 @@ EVENT = {"path_guard": "PreToolUse", "blindness_guard": "PreToolUse", "secrets_g
          "stop_gate": "SubagentStop", "session_start": "SessionStart"}
 SECRET_RE = re.compile(r"(sk-(ant|or)-[A-Za-z0-9_-]{8,}|ghp_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
                        r"|AKIA[0-9A-Z]{16}|xox[bp]-[A-Za-z0-9-]{10,})")
-MATCHER = {"path_guard": "Write|Edit|Bash", "secrets_guard": "Write|Edit|Bash",
+MATCHER = {"path_guard": "Write|Edit|MultiEdit|NotebookEdit|Bash", "secrets_guard": "Write|Edit|MultiEdit|NotebookEdit|Bash",
            "blindness_guard": "Read|Grep|Glob|Bash", "bash_guard": "Bash"}
 HOME_RE = re.compile(r"(/Users/[^/\s\"]+|/home/[^/\s\"]+)")
 PREFIX = "python -m factory.hooks"
@@ -166,8 +166,9 @@ def test_g007_stale_factory_entry_removed(tmp_path):
 
 @case("TB13-D-001", "diagnostic")
 def test_d001_guard_matchers(tmp_path):
-    """Behaviour 1 + [A-34]: guard matchers are exactly path_guard and secrets_guard `Write|Edit|Bash`,
-    blindness_guard `Read|Grep|Glob|Bash`, bash_guard `Bash`."""
+    """Behaviour 1 + [A-34] as amended by [C-38] item 4: guard matchers are exactly path_guard and secrets_guard
+    `Write|Edit|MultiEdit|NotebookEdit|Bash` (was `Write|Edit|Bash`), blindness_guard `Read|Grep|Glob|Bash`,
+    bash_guard `Bash`."""
     p, roles, st = inputs(tmp_path)
     s = st.emit_settings(p, roles)
     for hid in set(MATCHER):

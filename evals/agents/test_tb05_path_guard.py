@@ -346,7 +346,8 @@ CLAR_BASH = [
     case("TB05-D-124", "orchestrator", "cp src/app.py src/b.py", "allow", "[A-05-1] orchestrator is full mode"),
     case("TB05-D-125", "implement", "rm -rf build && mv a b", "allow", "[A-05-1] implement is full mode"),
     case("TB05-D-126", "test", "chmod +x run.sh | tee log.txt", "allow", "[A-05-1] test is full mode"),
-    case("TB05-D-127", "audit", "awk '{print > \"out.txt\"}' src/app.py", "allow", "[A-05-2] only shell redirection is checked for awk"),
+    # Superseded by [C-38] item 1 (was "allow" under [A-05-2]): redirection inside an awk program is now denied.
+    case("TB05-D-127", "audit", "awk '{print > \"out.txt\"}' src/app.py", "deny", "[C-38] item 1 supersedes [A-05-2]: awk with > in the program is denied"),
     case("TB05-D-128", "research", 'grep "$(whoami)" src/app.py', "deny", "[A-05-3] double quotes do not exempt $(...)"),
     case("TB05-D-129", "research", 'grep "`whoami`" src/app.py', "deny", "[A-05-3] double quotes do not exempt backticks"),
     case("TB05-D-130", "review", "grep '`whoami`' src/app.py", "allow", "[A-05-3] backticks inside single quotes are exempt"),
@@ -355,7 +356,8 @@ CLAR_BASH = [
 
 @pytest.mark.parametrize("agent,command,expected,clause", CLAR_BASH)
 def test_bash_clarified(tmp_path, agent, command, expected, clause):
-    """clarifications [A-05-1], [A-05-2], [A-05-3] for Bash (clause per case)."""
+    """clarifications [A-05-1], [A-05-3] for Bash (clause per case). TB05-D-127 follows [C-38] item 1, which supersedes
+    [A-05-2]: 'Redirection inside the program text is therefore denied'."""
     d = _run(tmp_path, "base", agent, "Bash", {"command": command})
     assert d.kind == expected, clause
     if expected != "allow":

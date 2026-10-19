@@ -113,7 +113,8 @@ def _check(d, expected, clause):
     case("TB07-G-004", "Write", _w(doc(f'api_key = "{V20}"')), "implement", "base", "deny", "B2 quoted value >=16 assigned to api_key"),
     case("TB07-G-005", "Bash", {"command": f"export ANTHROPIC_API_KEY={K['ant']}"}, "orchestrator", "base", "deny", "B1 Bash command inspected; B2 sk-ant-"),
     case("TB07-G-006", "Write", _w(doc('key = "$OPENROUTER_API_KEY"')), "implement", "base", "allow", "B3 references by variable name allowed"),
-    case("TB07-G-007", "Write", _w(doc('api_key = "your-api-key-goes-here"')), "implement", "base", "allow", "B4 placeholder containing 'your'"),
+    # Superseded by [C-39] item 1 (was "allow", B4 placeholder word 'your'): only a whole-value placeholder is exempt.
+    case("TB07-G-007", "Write", _w(doc('api_key = "your-api-key-goes-here"')), "implement", "base", "deny", "[C-39] item 1 supersedes B4: a placeholder word inside the value no longer exempts it"),
     case("TB07-G-008", "Write", _w(doc('api_key = "FIXTURE-KEY-12345678901"')), "implement", "alt", "allow", "B5 value matching profile.secret_allow_patterns (alt)"),
     case("TB07-G-010", "Edit", {"file_path": "src/app.py", "old_string": "a", "new_string": doc(f"k = {K['sk']}")}, "review", "base", "deny", "B1 Edit new_string, every role; B2 sk- + >=32"),
 ])
@@ -221,13 +222,7 @@ ALLOW = [
     case("TB07-D-057", doc('api_key = "xxxxxxxxxxxxxxxxxxxx"'), "B4 single repeated character / contains xxxx"),
     case("TB07-D-058", doc('api_key = "aaaaaaaaaaaaaaaaaaaa"'), "B4 single repeated character"),
     case("TB07-D-059", doc('token = "0000000000000000"'), "B4 single repeated character"),
-    case("TB07-D-060", doc('api_key = "example-key-1234567890"'), "B4 contains example"),
-    case("TB07-D-061", doc('secret = "placeholder-value-12345"'), "B4 contains placeholder"),
-    case("TB07-D-062", doc('password = "changeme-changeme-123"'), "B4 contains changeme"),
     case("TB07-D-063", doc('api_key = "<insert-real-key-here>"'), "B4 contains < or >"),
-    case("TB07-D-064", doc(f"blob {j('gh', 'p_', 'xxxx', mix(24))} end"), "B4 key-shaped value containing xxxx"),
-    case("TB07-D-066", doc('token = "your-token-goes-here-123"'), "B4 contains your"),
-    case("TB07-D-067", doc(f"blob {j('sk-', 'ant-', 'your-key-', mix(20))} end"), "B4 key-shaped value containing your"),
 ]
 
 
@@ -235,6 +230,27 @@ ALLOW = [
 def test_allowed_content(tmp_path, content, clause):
     """TB-07 B2 near misses, B3 references and mentions, B4 placeholders: all allowed."""
     _check(_run(tmp_path, "Write", _w(content)), "allow", clause)
+
+
+# Cases that expected "allow" under TB-07 behaviour 4 (a placeholder word anywhere in the value) and now expect "deny":
+# [C-39] item 1: 'A matched secret is exempt only when the whole matched value (for a prefixed key, the whole body after
+# the prefix; for an assignment, the whole assigned value) is itself a placeholder form ... A placeholder word elsewhere
+# in the surrounding token or text no longer exempts a real key.' Same ids as before; only the expectation changed.
+C39_SUPERSEDED = [
+    case("TB07-D-060", doc('api_key = "example-key-1234567890"'), "[C-39] item 1 supersedes B4: 'example' inside the value is not a whole-value placeholder"),
+    case("TB07-D-061", doc('secret = "placeholder-value-12345"'), "[C-39] item 1 supersedes B4: 'placeholder' inside the value"),
+    case("TB07-D-062", doc('password = "changeme-changeme-123"'), "[C-39] item 1 supersedes B4: 'changeme' inside the value"),
+    case("TB07-D-064", doc(f"blob {j('gh', 'p_', 'xxxx', mix(24))} end"), "[C-39] item 1 supersedes B4: 'xxxx' followed by a real body is not a repeated-character body"),
+    case("TB07-D-066", doc('token = "your-token-goes-here-123"'), "[C-39] item 1 supersedes B4: 'your' inside the value"),
+    case("TB07-D-067", doc(f"blob {j('sk-', 'ant-', 'your-key-', mix(20))} end"), "[C-39] item 1 supersedes B4: 'your-key-' prefix on a real body"),
+]
+
+
+@pytest.mark.parametrize("content,clause", C39_SUPERSEDED)
+def test_old_placeholder_words_now_denied(tmp_path, content, clause):
+    """[C-39] item 1 (supersedes TB-07 behaviour 4 and [A-07-3]): a placeholder word inside a real-looking value no
+    longer exempts it, so these formerly allowed values are denied."""
+    _check(_run(tmp_path, "Write", _w(content)), "deny", clause)
 
 
 # ---------------------------------------------------------------- behaviour 5: profile allow patterns
@@ -371,16 +387,16 @@ CLAR = [
     case("TB07-D-105", doc('"token": "${GITHUB_TOKEN_FOR_CI}"'), "allow", "[A-07-1]+[A-07-2] colon form with a variable reference"),
     case("TB07-D-106", doc(f'password = "${{X}}{V20}"'), "deny", "[A-07-2] only a value that is exactly a reference is exempt"),
     # [A-07-3] token-level placeholder rule
-    case("TB07-D-107", doc(f"blob {j('sk', '-', mix(40))}... end"), "allow", "[A-07-3] token ending in ... is a placeholder"),
+    case("TB07-D-107", doc(f"blob {j('sk', '-', mix(40))}... end"), "deny", "[C-39] item 1 supersedes [A-07-3]: a trailing ... is not a whole-value placeholder"),
     case("TB07-D-108", doc(f"blob {j('sk', '-', '0' * 40)} end"), "allow", "[A-07-3] sk-000...0 is a placeholder"),
     case("TB07-D-109", doc(f"blob {j('gh', 'p_', '0' * 36)} end"), "allow", "[A-07-3] repeated-character body is a placeholder"),
-    case("TB07-D-110", doc(f"k = \"{j('sk', '-', mix(40))}...\""), "allow", "[A-07-3] quote-delimited token ending in ..."),
+    case("TB07-D-110", doc(f"k = \"{j('sk', '-', mix(40))}...\""), "deny", "[C-39] item 1 supersedes [A-07-3]: a trailing ... is not a whole-value placeholder"),
     # [A-07-4] case-insensitive placeholder words
-    case("TB07-D-111", doc('api_key = "EXAMPLE-KEY-1234567890"'), "allow", "[A-07-4] EXAMPLE"),
-    case("TB07-D-112", doc('token = "YOUR-TOKEN-GOES-HERE-1"'), "allow", "[A-07-4] YOUR"),
-    case("TB07-D-113", doc('password = "CHANGEME-CHANGEME-123"'), "allow", "[A-07-4] CHANGEME"),
-    case("TB07-D-114", doc('secret = "PlaceHolder-Value-12345"'), "allow", "[A-07-4] PlaceHolder"),
-    case("TB07-D-115", doc(f"blob {j('gh', 'p_', 'XXXX', mix(24))} end"), "allow", "[A-07-4] XXXX"),
+    case("TB07-D-111", doc('api_key = "EXAMPLE-KEY-1234567890"'), "deny", "[C-39] item 1 supersedes [A-07-4]: placeholder word EXAMPLE inside a longer value no longer exempts it"),
+    case("TB07-D-112", doc('token = "YOUR-TOKEN-GOES-HERE-1"'), "deny", "[C-39] item 1 supersedes [A-07-4]: placeholder word YOUR inside a longer value no longer exempts it"),
+    case("TB07-D-113", doc('password = "CHANGEME-CHANGEME-123"'), "deny", "[C-39] item 1 supersedes [A-07-4]: placeholder word CHANGEME inside a longer value no longer exempts it"),
+    case("TB07-D-114", doc('secret = "PlaceHolder-Value-12345"'), "deny", "[C-39] item 1 supersedes [A-07-4]: placeholder word PlaceHolder inside a longer value no longer exempts it"),
+    case("TB07-D-115", doc(f"blob {j('gh', 'p_', 'XXXX', mix(24))} end"), "deny", "[C-39] item 1 supersedes [A-07-4]: placeholder word XXXX inside a longer value no longer exempts it"),
     # [A-07-5] AIza 35 or more
     case("TB07-D-116", doc(f"blob {j('AI', 'za', mix(40, URLSAFE))} end"), "deny", "[A-07-5] AIza + 40"),
     case("TB07-D-117", doc(f"blob {j('AI', 'za', mix(36, URLSAFE))} end"), "deny", "[A-07-5] AIza + 36"),
@@ -389,7 +405,10 @@ CLAR = [
 
 @pytest.mark.parametrize("content,expected,clause", CLAR)
 def test_clarified_content(tmp_path, content, expected, clause):
-    """clarifications [A-07-1] to [A-07-5] for Write content (clause per case)."""
+    """clarifications [A-07-1] to [A-07-5] for Write content (clause per case). Cases D-107, D-110 and D-111 to D-115
+    expected "allow" under [A-07-3] / [A-07-4] and now expect "deny": [C-39] item 1 supersedes the token-level
+    placeholder rule ('A matched secret is exempt only when the whole matched value ... is itself a placeholder
+    form'). D-108 and D-109 stay allow (the whole body is one repeated character)."""
     _check(_run(tmp_path, "Write", _w(content)), expected, clause)
 
 

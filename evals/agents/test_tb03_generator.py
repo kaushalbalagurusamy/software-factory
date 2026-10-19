@@ -23,7 +23,7 @@ GUARD_TOOLS = {"path_guard": ["Write", "Edit"], "blindness_guard": ["Read", "Gre
                "secrets_guard": ["Write", "Edit", "Bash"], "bash_guard": ["Bash"]}
 SECRET_RE = re.compile(r"(sk-(ant|or)-[A-Za-z0-9_-]{8,}|ghp_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
                        r"|AKIA[0-9A-Z]{16}|xox[bp]-[A-Za-z0-9-]{10,})")
-MATCHER = {"path_guard": "Write|Edit|Bash", "secrets_guard": "Write|Edit|Bash",
+MATCHER = {"path_guard": "Write|Edit|MultiEdit|NotebookEdit|Bash", "secrets_guard": "Write|Edit|MultiEdit|NotebookEdit|Bash",
            "blindness_guard": "Read|Grep|Glob|Bash", "bash_guard": "Bash"}
 HEADINGS = ["## Purpose", "## You may write", "## You must never", "## Skills"]
 HOME_RE = re.compile(r"(/Users/[^/\s]+|/home/[^/\s]+)")
@@ -357,8 +357,9 @@ def test_d010_project_name_in_template_raises(tmp_path):
 
 @case("TB03-D-011", "diagnostic", reqs=("R-04",))
 def test_d011_guard_hooks_pretooluse_matchers(tmp_path):
-    """Behaviour 6 + [A-34]: guards render under PreToolUse with matcher exactly path_guard and secrets_guard
-    `Write|Edit|Bash`, blindness_guard `Read|Grep|Glob|Bash`, bash_guard `Bash`."""
+    """Behaviour 6 + [A-34] as amended by [C-38] item 4: guards render under PreToolUse with matcher exactly
+    path_guard and secrets_guard `Write|Edit|MultiEdit|NotebookEdit|Bash` (was `Write|Edit|Bash`), blindness_guard
+    `Read|Grep|Glob|Bash`, bash_guard `Bash`."""
     _, roles, _ = mods()
     rs = roles.load_roles()
     out = generate(tmp_path)
