@@ -72,6 +72,21 @@ Everything above applies, and the model calls add:
 - **Privacy.** Prompts, completions and personal data stay in the trace store; the page shows counts, ids and links only.
 - **No model call.** State "not applicable: the product calls no model" on the cost and traces rows, and still build the logs, latency, cost and key-metrics panels in full. Do not leave the rest blank because the model rows are not applicable.
 
+## Live development dashboard: tabs, snapshots and the two data classes
+
+The dashboard is also the project's open development brain: it shows how the product was built, kept live with the repository. Implemented in `factory/ops/` and `ops/shell/index.html`.
+
+**Tab set.** Overview; Ops; Architecture (the `mermaid-nesting-dolls` viewer loading a model blob through `viewer.html?model=<url>`); Research (`research/*.md`); Experiments (`experiments/*/results.json`); ADRs (`docs/adr/`); PRD journeys (every slice's UX stories on one page, from `docs/slices/*/proposal.md`); Langfuse; Evals and bug log; Dev journey (`docs/slices/*/tasks.md` checkbox counts, `verification.json` verified counts, `amendments.md`, and `ops/events.jsonl` stage events); Git history with the commit selector.
+
+**Historical versus runtime (structural, not cosmetic).**
+- Historical development artifacts (ADRs, research, experiments, architecture model, PRD journeys, evals, bug log, dev journey, git history) are read from the git object database at a sha, written as content-addressed blobs under `ops/blobs/`, and referenced by `ops/snapshots/<sha>/manifest.json`. `python -m factory.ops bundle` can rebuild any past commit. The commit selector swaps every historical tab to that manifest and shows "Snapshot at <sha> (<date>)".
+- Runtime telemetry (app health, deployed commit, CI status, last test summary, Langfuse) is "as of now": `python -m factory.ops runtime` writes `ops/runtime.json` from `ops/config.json`. A manifest never references it, and the selector never changes it. The Ops and Langfuse tabs carry "as of <time>, not tied to a commit".
+- A missing historical artifact is `{available:false, reason}` for its tab, never an empty success (for example "no slices at this commit").
+
+**Measured or not measured.** Every runtime figure is `{measured:true, value, source, as_of, label}` or `{measured:false, reason}`. The label is `live` (fetched this run), `static` (from a file or config) or `unavailable`. Absent config gives `measured:false` with the reason. The Langfuse tab says "not applicable" unless the config declares `langfuse.llm_features`. `ops/config.json` keys: `health_url`, `deployed_version` and `expected_version` (`{url|file, json_path}`), `ci` (`{repo}`; uses `gh run list` when authenticated), `test_summary_file`, `langfuse` (`{llm_features, host}`). No secrets in config or output; URLs are reported as scheme and host only.
+
+**Stage-update rule.** At every `/sf` stage boundary call `scripts/ops-stage-event.sh <stage> <slice> <verdict> [note]`; it appends one JSON line `{at, stage, slice, sha, verdict, note}` to `ops/events.jsonl` (append-only, never rewritten), so the Dev journey updates at each stage, not only at commit time. At stage 11 run `python -m factory.ops bundle` (add `--backfill N` the first time) and commit `ops/index.json`, `ops/snapshots/` and `ops/blobs/` if small. Serve locally with `python -m factory.ops serve --port N --refresh-seconds S` (binds 127.0.0.1, GET only, no command endpoints).
+
 ## Output
 
 In the spec: the list of emitted evals, error traces, logs and spans for the slice. In the docs-update pass: the new dashboard rows, each measured or marked not live. The full set covers: panel list and each panel's data source; the golden gate set and floors; the span and metadata schema; and the check that proves traces arrive. Then tests for the dashboard's data builder (absence stays absence).
