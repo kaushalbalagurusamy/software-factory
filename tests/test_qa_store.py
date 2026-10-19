@@ -26,7 +26,7 @@ def test_init_layout(env):
 def test_records_are_chained_and_audit_clean(env):
     st, pol = env
     record_run(st, pol, status="fail", case="AC-1", error="boom 1", tier="sonnet", duration_s=3)
-    record_run(st, pol, status="pass", tier="sonnet", duration_s=2)
+    record_run(st, pol, status="pass", tier="sonnet", duration_s=2, rerun=True)
     lines = [json.loads(l) for l in (st.dir / "attempts.jsonl").read_text().splitlines()]
     assert [l["seq"] for l in lines] == [1, 2]
     assert lines[1]["prev"] == lines[0]["hash"]
@@ -37,7 +37,7 @@ def test_records_are_chained_and_audit_clean(env):
 def test_rewritten_line_detected(env):
     st, pol = env
     record_run(st, pol, status="fail", case="AC-1", error="a", tier="sonnet")
-    record_run(st, pol, status="fail", case="AC-1", error="a", tier="sonnet")
+    record_run(st, pol, status="fail", case="AC-1", error="a", tier="sonnet", rerun=True)
     f = st.dir / "attempts.jsonl"
     f.write_text(f.read_text().replace('"fail"', '"pass"', 1))
     assert any("hash" in p or "chain" in p for p in st.audit())
@@ -45,6 +45,7 @@ def test_rewritten_line_detected(env):
 
 def test_deleted_tail_and_deleted_line_detected(env):
     st, pol = env
+    object.__setattr__(pol, "flake_reruns", 0)
     for _ in range(3):
         record_run(st, pol, status="fail", case="AC-1", error="a", tier="sonnet")
     f = st.dir / "attempts.jsonl"
@@ -65,8 +66,6 @@ def test_consistently_recomputed_chain_still_caught_by_state_head(env):
 
 def test_stats_per_tier_from_attempts(env):
     st, pol = env
-    record_run(st, pol, status="fail", case="AC-1", error="x", tier="sonnet", duration_s=10, flaky_off=True) \
-        if False else None
     record_run(st, pol, status="fail", case="AC-1", error="x", tier="sonnet", duration_s=10, rerun=False)
     record_run(st, pol, status="fail", case="AC-1", error="x", tier="sonnet", duration_s=20, rerun=True)
     record_run(st, pol, status="pass", tier="opus", duration_s=30)

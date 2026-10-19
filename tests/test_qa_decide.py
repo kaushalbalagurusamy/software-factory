@@ -51,7 +51,6 @@ def test_failure_then_retry_same_tier_then_escalate_then_reviewer(env):
     assert nxt(st, pol)["action"] == "rerun_for_flake"
     fail(st, pol, rerun=True)           # confirmed attempt 1
     d = nxt(st, pol)
-    assert d["action"] == "propose_regression" if False else True
     assert d["action"] == "retry_same_tier" and d["tier"] == "sonnet"
     for _ in range(2):  # attempts 2 and 3 (each needs its confirming rerun)
         fail(st, pol); fail(st, pol, rerun=True)
@@ -175,6 +174,7 @@ def test_measured_escalation_early_when_tier_performs_badly(env):
     good = {"sonnet": {"attempts": 10, "successes": 9, "success_rate": 0.9}}
     for _ in range(2):
         fail(st, pol)
+    st.note_proposal(st.facts()["current_sig"], "p.md")
     d = decide(st.facts(), st.state, pol, good)
     assert d["action"] == "retry_same_tier" and d["tier"] == "sonnet"
     assert decide(st.facts(), st.state, pol, {})["action"] == "escalate_model"
