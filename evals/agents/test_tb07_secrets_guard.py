@@ -423,3 +423,169 @@ def test_docs_hooks_secrets_guard_md():
     assert doc_path.is_file()
     text = doc_path.read_text()
     assert any(s in text for s in ("hook_event_name", "decide(", "python -m factory.hooks")), "one example payload or call"
+
+
+# ================================================================ clarifications C-38 item 4 and C-39 (secrets guard)
+
+def _multi(*new_strings):
+    return {"file_path": "src/app.py", "edits": [{"old_string": f"o{i}", "new_string": s} for i, s in enumerate(new_strings)]}
+
+
+def _nb(source):
+    return {"notebook_path": "src/n.ipynb", "new_source": source, "edit_mode": "replace", "cell_id": "c1"}
+
+
+def _run_nb(tmp_path, tool, tool_input, agent="implement"):
+    root = lib.make_project(tmp_path, lib.profile_dict("base"), files={"src/app.py": "print('app')\n"})
+    ti = dict(tool_input)
+    for k in ("file_path", "notebook_path"):
+        if k in ti:
+            ti[k] = str(root / ti[k])
+    return lib.run_decide(HOOK, lib.payload(root, tool_name=tool, tool_input=ti, agent_type=agent), root)
+
+
+C38_TOOLS = [
+    case("TB07-D-118", "MultiEdit", _multi(doc(f"k = {K['ghp']}")), "deny", "[C-38] 4 MultiEdit edits[0].new_string is scanned"),
+    case("TB07-D-119", "MultiEdit", _multi("x = 1\n", doc(f"k = {K['akia']}")), "deny", "[C-38] 4 every MultiEdit edit is scanned (second edit)"),
+    case("TB07-D-120", "MultiEdit", _multi("x = 1\n", "y = 2\n", PEM["rsa"] + "\n"), "deny", "[C-38] 4 third MultiEdit edit, PEM header"),
+    case("TB07-D-121", "MultiEdit", _multi(doc(f'api_key = "{V20}"')), "deny", "[C-38] 4 MultiEdit assignment of a quoted value"),
+    case("TB07-D-122", "MultiEdit", _multi("x = 1\n", doc('key = os.environ["OPENROUTER_API_KEY"]')), "allow", "[C-38] 4 MultiEdit clean edits allowed"),
+    case("TB07-D-123", "MultiEdit", {"file_path": "src/app.py", "edits": [{"old_string": doc(f"k = {K['sk']}"), "new_string": "k = None\n"}]},
+         "allow", "[C-38] 4 only new_string is scanned (old_string removing a secret is fine)"),
+    case("TB07-D-124", "NotebookEdit", _nb(doc(f"k = {K['ghs']}")), "deny", "[C-38] 4 NotebookEdit new_source is scanned"),
+    case("TB07-D-125", "NotebookEdit", _nb(f'token = "{V20}"\n'), "deny", "[C-38] 4 NotebookEdit assignment of a quoted value"),
+    case("TB07-D-126", "NotebookEdit", _nb(PEM["openssh"] + "\n"), "deny", "[C-38] 4 NotebookEdit PEM header"),
+    case("TB07-D-127", "NotebookEdit", _nb("import os\nkey = os.environ['OPENROUTER_API_KEY']\n"), "allow", "[C-38] 4 NotebookEdit clean source allowed"),
+]
+
+
+@pytest.mark.parametrize("tool,tool_input,expected,clause", C38_TOOLS)
+def test_multiedit_notebookedit_scanned(tmp_path, tool, tool_input, expected, clause):
+    """[C-38] item 4: 'secrets_guard scans MultiEdit edits[*].new_string and NotebookEdit new_source'."""
+    _check(_run_nb(tmp_path, tool, tool_input), expected, clause)
+
+
+@pytest.mark.parametrize("agent", [case("TB07-D-128", "review"), case("TB07-D-129", None)])
+def test_multiedit_every_role(tmp_path, agent):
+    """[C-38] item 4 + TB-07 B1 (every role): MultiEdit is scanned for the review role and the main session too."""
+    _check(_run_nb(tmp_path, "MultiEdit", _multi(doc(f"k = {K['glpat']}")), agent), "deny", "every role")
+
+
+@pytest.mark.parametrize("tool,tool_input,line", [
+    case("TB07-D-130", "MultiEdit", _multi("a\n", f"b\nk = {K['ghp']}\n"), 2),
+    case("TB07-D-131", "NotebookEdit", _nb(f"a\nb\nk = {K['akia']}\n"), 3),
+])
+def test_multiedit_reason_no_value(tmp_path, tool, tool_input, line):
+    """[C-38] item 4 + TB-07 B6: the reason names a line number and never the matched value."""
+    d = _run_nb(tmp_path, tool, tool_input)
+    assert d.kind == "deny"
+    assert re.search(rf"(?<!\d){line}(?!\d)", d.reason)
+    for v in (K["ghp"], K["akia"]):
+        assert v not in d.reason and v[-12:] not in d.reason
+
+
+# ---- C-39 item 1: whole-value placeholders
+
+C39_PLACEHOLDER = [
+    # denied: a placeholder word elsewhere in the token or text never exempts a real key
+    case("TB07-G-011", doc(f"your_key={K['ghp']}"), "deny", "[C-39] 1 'your_key=<real key>' is denied"),
+    case("TB07-D-132", doc(f"your_key = {K['sk']}"), "deny", "[C-39] 1 placeholder word in the name, real sk- key"),
+    case("TB07-D-133", doc(f"# example: {K['glpat']}"), "deny", "[C-39] 1 'example' next to a real key"),
+    case("TB07-D-134", doc(f"changeme {K['xoxb']} placeholder"), "deny", "[C-39] 1 placeholder words around a real key"),
+    case("TB07-D-135", doc(f"<{K['ghp']}>"), "deny", "[C-39] 1 angle brackets around a real key do not make the matched value a placeholder"),
+    case("TB07-D-136", doc(f"blob {j('sk-', 'ant-', 'xxxx', mix(30))} end"), "deny", "[C-39] 1 prefixed key whose body merely contains xxxx"),
+    case("TB07-D-137", doc(f'api_key = "{j("your-", V20)}"'), "deny", "[C-39] 1 assigned value starting with 'your-' then a real value"),
+    case("TB07-D-138", doc(f'token = "{j(V20, "-example")}"'), "deny", "[C-39] 1 assigned value ending in -example"),
+    case("TB07-D-139", doc(f'password = "{j(V16, "...")}"'), "deny", "[C-39] 1 assigned value ending in ... is not a placeholder form"),
+    case("TB07-D-140", doc(f"export TOKEN=YOUR_{K['ghp']}"), "deny", "[C-39] 1 YOUR_ glued before a real key"),
+    # allowed: the whole value is a placeholder form
+    case("TB07-D-141", doc('api_key = "<paste-your-key-here-please>"'), "allow", "[C-39] 1 whole assigned value is <...>"),
+    case("TB07-D-142", doc('secret = "<' + V20 + '>"'), "allow", "[C-39] 1 whole value spanning <...>"),
+    case("TB07-D-143", doc('token = "zzzzzzzzzzzzzzzzzzzz"'), "allow", "[C-39] 1 whole value is one repeated character"),
+    case("TB07-D-144", doc(f"blob {j('sk-', 'ant-', 'z' * 30)} end"), "allow", "[C-39] 1 prefixed key whose whole body is one repeated character"),
+    case("TB07-D-145", doc('password = "$DATABASE_PASSWORD_VALUE"'), "allow", "[C-39] 1 whole value is $VAR"),
+    case("TB07-D-146", doc('api_key = "${SERVICE_API_KEY_VALUE}"'), "allow", "[C-39] 1 whole value is ${VAR}"),
+]
+
+
+@pytest.mark.parametrize("content,expected,clause", C39_PLACEHOLDER)
+def test_c39_whole_value_placeholders(tmp_path, content, expected, clause):
+    """[C-39] item 1: 'A matched secret is exempt only when the whole matched value ... is itself a placeholder form:
+    an angle-bracket form <...> spanning the value, a single repeated character, or a $VAR / ${VAR} reference.'"""
+    _check(_run(tmp_path, "Write", _w(content)), expected, clause)
+
+
+@pytest.mark.case("TB07-D-147", tier="diagnostic", tb=TB, reqs=list(REQS))
+def test_c39_allow_patterns_match_value_only(tmp_path):
+    """[C-39] item 1: 'secret_allow_patterns from the profile still apply and are matched against the matched value
+    only': a value matching an allow regex stays allowed (alt profile FIXTURE-KEY-<digits>)."""
+    _check(_run(tmp_path, "Write", _w(doc('api_key = "FIXTURE-KEY-12345678901"')), profile="alt"), "allow", "[C-39] 1 allow pattern")
+
+
+@pytest.mark.case("TB07-D-148", tier="diagnostic", tb=TB, reqs=list(REQS))
+def test_c39_allow_pattern_text_elsewhere_does_not_exempt(tmp_path):
+    """[C-39] item 1: allow patterns are matched against the matched value only, so a FIXTURE-KEY token elsewhere on the
+    line does not exempt a real key."""
+    _check(_run(tmp_path, "Write", _w(doc(f"FIXTURE-KEY-123 {K['ghp']}")), profile="alt"), "deny", "[C-39] 1 value only")
+
+
+# ---- C-39 item 2: bounded scanning
+
+LIMIT = 2_000_000
+_LINE = "abc def\n"                       # 8 characters, no key shape; 250,000 lines = exactly 2,000,000 characters
+_AT_LIMIT = _LINE * (LIMIT // len(_LINE))
+
+
+@pytest.mark.case("TB07-D-149", tier="diagnostic", tb=TB, reqs=list(REQS))
+def test_c39_over_limit_write_denied_too_large(tmp_path):
+    """[C-39] item 2: 'Text longer than 2,000,000 characters is denied (fail closed) with a reason saying the content
+    is too large to scan.'"""
+    assert len(_AT_LIMIT) == LIMIT
+    d = _run(tmp_path, "Write", _w(_AT_LIMIT + "x"))
+    assert d.kind == "deny"
+    assert "too large" in d.reason.lower()
+
+
+@pytest.mark.case("TB07-D-150", tier="diagnostic", tb=TB, reqs=list(REQS))
+def test_c39_exactly_at_limit_allowed(tmp_path):
+    """[C-39] item 2: only text LONGER than 2,000,000 characters is denied, so exactly 2,000,000 clean characters pass."""
+    _check(_run(tmp_path, "Write", _w(_AT_LIMIT)), "allow", "[C-39] 2 boundary")
+
+
+@pytest.mark.case("TB07-D-151", tier="diagnostic", tb=TB, reqs=list(REQS))
+def test_c39_over_limit_bash_denied(tmp_path):
+    """[C-39] item 2: the bound applies to Bash commands too."""
+    d = _run(tmp_path, "Bash", {"command": "echo " + _AT_LIMIT})
+    assert d.kind == "deny"
+    assert "too large" in d.reason.lower()
+
+
+@pytest.mark.case("TB07-D-152", tier="diagnostic", tb=TB, reqs=list(REQS))
+def test_c39_over_limit_multiedit_denied(tmp_path):
+    """[C-39] item 2 + [C-38] item 4: an oversized MultiEdit new_string is denied as too large."""
+    d = _run_nb(tmp_path, "MultiEdit", _multi("x = 1\n", _AT_LIMIT + "x"))
+    assert d.kind == "deny"
+    assert "too large" in d.reason.lower()
+
+
+# ---- C-39 item 3: quoting does not hide a key in Bash
+
+_ANT = j("ant-", "api03-", mix(40, URLSAFE))
+C39_BASH = [
+    case("TB07-D-153", f'export ANTHROPIC_API_KEY="sk-""{_ANT}"', "deny", "[C-39] 3 key split by adjacent double-quoted literals"),
+    case("TB07-D-154", f"export K='sk-''{_ANT}'", "deny", "[C-39] 3 key split by adjacent single-quoted literals"),
+    case("TB07-D-155", f"echo gh\\p_{mix(36)}", "deny", "[C-39] 3 backslash escape inside the prefix"),
+    case("TB07-D-156", f"echo $'\\x67hp_{mix(36)}'", "deny", "[C-39] 3 ANSI-C $'...' escape unescaped before scanning"),
+    case("TB07-D-157", f'echo "gh"p_{mix(36)}', "deny", "[C-39] 3 quoted fragment joined to a plain fragment"),
+    case("TB07-D-158", f"echo 'AK'\"IA\"{mix(16, UPPER)}", "deny", "[C-39] 3 AKIA split across mixed quote styles"),
+    case("TB07-D-159", 'echo "hello" \'world\' && ls -la "src dir"', "allow", "[C-39] 3 an ordinary quoted command stays allowed"),
+    case("TB07-D-160", 'git commit -m "fix: handle empty input" && git status', "allow", "[C-39] 3 a harmless command with quotes stays allowed"),
+    case("TB07-D-161", 'pytest -q "tests/unit" -k \'not slow\'', "allow", "[C-39] 3 another harmless quoted command stays allowed"),
+]
+
+
+@pytest.mark.parametrize("command,expected,clause", C39_BASH)
+def test_c39_dequoted_bash_scan(tmp_path, command, expected, clause):
+    """[C-39] item 3: 'the command is scanned both as written and in a de-quoted form (single and double quotes and
+    backslash escapes removed, $'...' sequences unescaped, adjacent literals joined)'."""
+    _check(_run(tmp_path, "Bash", {"command": command}, agent="orchestrator"), expected, clause)
