@@ -95,3 +95,76 @@ def test_stats_and_next_and_audit(proj, capsys):
 def test_policy_command(proj, capsys):
     assert qa(proj, "policy") == OK
     assert json.loads(capsys.readouterr().out)["attempts_per_signature"] == 4
+
+
+# --- written-file hardening: signature validation and full-content leak check -------------------------
+
+SECRET = "the-protected-marker-line-number-one-for-leak-tests"
+
+
+@pytest.fixture
+def prot(proj):
+    (proj / "evals" / "marker.txt").write_text(SECRET + "\n")
+    qa(proj, "init", "--criteria", "AC-1")
+    return proj
+
+
+def reg(proj, **over):
+    a = {"signature": "abc123", "criterion": "AC-1", "input-class": "wrong password",
+         "expected": "401 invalid-credentials", "recurred": "attempts 2 and 3"}
+    a.update(over)
+    args = ["regression-propose"]
+    for k, v in a.items():
+        args += [f"--{k}", v]
+    return qa(proj, *args)
+
+
+def fb(proj, **over):
+    a = {"criterion": "AC-1", "observed": "HTTP 500", "expected": "HTTP 401", "repro": "curl localhost:3000/login"}
+    a.update(over)
+    args = ["feedback"]
+    for k, v in a.items():
+        args += [f"--{k}", v]
+    return qa(proj, *args)
+
+
+@pytest.mark.parametrize("sig", ["a/b", "..", "../x", "a\nb", "a" * 65, "", "a b", "a.md"])
+def test_bad_signature_rejected_for_proposals_and_feedback(prot, sig, capsys):
+    assert reg(prot, signature=sig) == USAGE
+    assert "signature" in capsys.readouterr().err
+    assert fb(prot, signature=sig) == USAGE
+    assert not (prot / ".sf/slices/demo-login/regression-proposals").exists()
+    assert not (prot / ".sf/slices/demo-login/qa-feedback").exists()
+    assert not list(prot.rglob("*.md.md")) and not (prot / ".sf/slices/x.md").exists()
+
+
+def test_good_signature_accepted(prot):
+    assert reg(prot, signature="Ab_9-" + "c" * 59) == OK
+
+
+@pytest.mark.parametrize("field", ["criterion", "input-class", "expected", "recurred"])
+def test_protected_material_in_any_proposal_field_rejected(prot, field):
+    assert reg(prot, **{field: f"see {SECRET}"}) == LEAK
+    assert not (prot / ".sf/slices/demo-login/regression-proposals").exists()
+
+
+@pytest.mark.parametrize("field", ["criterion", "observed", "expected", "repro"])
+def test_protected_material_in_any_feedback_field_rejected(prot, field):
+    assert fb(prot, **{field: f"see {SECRET}"}) == LEAK
+    assert not (prot / ".sf/slices/demo-login/qa-feedback").exists()
+
+
+def test_protected_material_in_header_position_rejected(prot):
+    # the file header is built from the signature; the whole file content is checked, and so is a title-like field
+    assert reg(prot, criterion=f"# {SECRET}") == LEAK
+
+
+def test_clean_criterion_level_report_passes(prot):
+    assert reg(prot) == OK and fb(prot) == OK
+
+
+def test_reviewer_note_is_leak_checked_and_signature_validated(prot):
+    base = ["reviewer-verdict", "--verdict", "unresolved"]
+    assert qa(prot, *base, "--signature", "abc123", "--note", f"x {SECRET}") == LEAK
+    assert qa(prot, *base, "--signature", "../x", "--note", "ok") == USAGE
+    assert qa(prot, *base, "--signature", "abc123", "--note", "AC-1 contract ambiguous") == OK

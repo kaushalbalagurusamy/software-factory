@@ -14,6 +14,14 @@ from pathlib import Path
 ZERO = "0" * 64
 COUNTED = ("pass", "fail")
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+_SIG = re.compile(r"^[A-Za-z0-9_-]{1,64}\Z")
+
+
+def check_signature(sig) -> str:
+    """Signatures become file names and headers; accept only [A-Za-z0-9_-]{1,64}."""
+    if not isinstance(sig, str) or not _SIG.match(sig):
+        raise ValueError("invalid signature: must match ^[A-Za-z0-9_-]{1,64}$")
+    return sig
 
 
 class AuditError(Exception):
@@ -67,11 +75,13 @@ class SliceStore:
         return st
 
     def note_proposal(self, sig: str, path: str) -> None:
+        check_signature(sig)
         st = self.state
         st["proposals"][sig] = path
         self._save(st)
 
     def set_reviewer_verdict(self, sig: str, verdict: str, note: str) -> None:
+        check_signature(sig)
         if verdict not in ("amended", "unresolved"):
             raise ValueError("verdict must be amended or unresolved")
         st = self.state
