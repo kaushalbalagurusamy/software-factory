@@ -19,8 +19,14 @@ HOOK = "factory.hooks.path_guard"
 REQS = ("R-06", "R-10")
 
 
+# Baseline updates to the golden set (evals/agents/README.md, "Baseline updates"; MECE-AUDIT P0): promoted
+# diagnostic cases and swapped-out golden cases (kept in the suite as diagnostic; their tests are unchanged).
+PROMOTED = frozenset({"TB05-D-004", "TB05-D-005"})
+DEMOTED = frozenset()
+
+
 def case(cid: str, *values, reqs=REQS):
-    tier = "golden" if "-G-" in cid else "diagnostic"
+    tier = lib.tier_of(cid, PROMOTED, DEMOTED)
     return pytest.param(*values, marks=pytest.mark.case(cid, tier=tier, tb=TB, reqs=list(reqs)), id=cid)
 
 
@@ -392,3 +398,53 @@ def test_docs_hooks_path_guard_md():
     assert doc_path.is_file()
     text = doc_path.read_text()
     assert any(s in text for s in ("hook_event_name", "decide(", "python -m factory.hooks")), "one example payload or call"
+
+
+# ================================================================ clarification C-36: control files (MECE audit P0-4)
+
+C36_WRITE = [
+    case("TB05-G-011", "base", "implement", "Edit", "ROOT/.claude/settings.json", "deny", {},
+         "[C-36] implement may not Edit .claude/settings.json (it would remove its own hooks)"),
+    case("TB05-D-135", "base", "implement", "Write", "ROOT/.claude/agents/implement.md", "deny", {}, "[C-36] .claude/agents/** is write-protected"),
+    case("TB05-D-136", "base", "implement", "Write", "ROOT/.claude/settings.local.json", "deny", {}, "[C-36] .claude/** is write-protected"),
+    case("TB05-D-137", "base", "implement", "Write", "ROOT/.claude/hooks/new/deep/x.sh", "deny", {}, "[C-36] a nonexistent chain under .claude/ is still under it ([A-05-6])"),
+    case("TB05-D-138", "base", "implement", "Edit", "ROOT/src/../.claude/settings.json", "deny", {}, "[C-36] path normalised before the check (B4)"),
+    case("TB05-D-139", "base", "implement", "Write", "ROOT/.factory/state/stop_gate_x", "deny", {}, "[C-36] .factory/** hook state is write-protected"),
+    case("TB05-D-140", "base", "implement", "Edit", "ROOT/.factory/baseline.json", "deny", {}, "[C-36] .factory/** baseline is write-protected"),
+    case("TB05-D-141", "alt", "implement", "Edit", "ROOT/.claude/settings.json", "deny", {}, "[C-36] independent of the profile (alt)"),
+    case("TB05-D-142", "base", "implement", "Write", "ROOT/.claude_notes/a.md", "allow", {}, "[C-36] sibling name .claude_notes is not under .claude/"),
+    case("TB05-D-143", "base", "implement", "Write", "ROOT/src/.claude/x.py", "allow", {}, "[C-36] only the project-root .claude/ is protected"),
+    case("TB05-D-144", "base", "implement", "Write", "ROOT/src/app.py", "allow", {}, "[C-36] negative control: app code is still writable"),
+]
+
+
+@pytest.mark.parametrize("profile,agent,tool,path,expected,setup,clause", C36_WRITE)
+def test_write_edit_control_files(tmp_path, profile, agent, tool, path, expected, setup, clause):
+    """clarification [C-36] item 1: 'Write and Edit to any path under .factory/ or .claude/ is denied by the path guard' for implement."""
+    ti = _write(path) if tool == "Write" else _edit(path)
+    d = _run(tmp_path, profile, agent, tool, ti, setup)
+    assert d.kind == expected, clause
+    if expected != "allow":
+        assert d.reason
+
+
+@pytest.mark.parametrize("agent,tool,tool_input,clause", [
+    case("TB05-D-145", "implement", "Read", {"file_path": "ROOT/.claude/settings.json"}, "[C-36] item 3: reads are not affected"),
+    case("TB05-D-146", "implement", "Read", {"file_path": "ROOT/.factory/profile.yaml"}, "[C-36] item 3: reads are not affected"),
+])
+def test_control_files_reads_allowed(tmp_path, agent, tool, tool_input, clause):
+    """clarification [C-36] item 3: this clarification adds no read protection."""
+    root, outside = _build(tmp_path, "base", {})
+    ti = {k: _path(v, root, outside) for k, v in tool_input.items()}
+    pl = lib.payload(root, tool_name=tool, tool_input=ti, agent_type=agent)
+    assert lib.run_decide(HOOK, pl, root).kind == "allow", clause
+
+
+@pytest.mark.parametrize("agent,command,expected,clause", [
+    case("TB05-D-147", "orchestrator", "echo 1 > .factory/state/routing", "allow", "[C-36] item 4: the orchestrator keeps writing .factory state (full-mode Bash, [A-05-1])"),
+    case("TB05-D-148", "test", "echo 1 > .claude/x", "allow", "[C-36] item 4: other roles' Bash is unchanged by this hook ([A-05-1])"),
+])
+def test_control_files_other_roles_bash(tmp_path, agent, command, expected, clause):
+    """clarification [C-36] item 4: other roles are unaffected."""
+    d = _run(tmp_path, "base", agent, "Bash", {"command": command})
+    assert d.kind == expected, clause

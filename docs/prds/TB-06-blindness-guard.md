@@ -31,3 +31,5 @@ Graded by golden and diagnostic evals you cannot see. Write your own unit tests 
 
 ## Out of scope
 Sandbox configuration, other roles' reads.
+
+See also clarification [C-36]: for `implement`, Bash write targets and interpreter one-liner arguments under `.factory/` or `.claude/` are denied.

@@ -31,3 +31,5 @@ Graded by golden and diagnostic evals you cannot see. Write your own unit tests 
 
 ## Out of scope
 Read restrictions, secrets, git rules.
+
+See also clarification [C-36]: `.claude/**` joins `.factory/**` as write-protected for `implement`.
