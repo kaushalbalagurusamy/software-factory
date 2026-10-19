@@ -1,0 +1,36 @@
+{
+  "label": "ACTUAL HARNESS (real headless Claude Code sessions)",
+  "checks": [
+    {
+      "check": "install succeeds",
+      "pass": true,
+      "detail": ".factory/profile.yaml: created"
+    },
+    {
+      "check": "second install is idempotent ('unchanged')",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "doctor passes (hook commands executed as subprocesses)",
+      "pass": true,
+      "detail": "exit 0"
+    },
+    {
+      "check": "S5 control: with no project pin the inherited user default applies (a haiku stand-in)",
+      "pass": true,
+      "detail": "['claude-haiku-5-5']"
+    },
+    {
+      "check": "S5 pinned: the main session runs Sonnet although the user-level default is something else",
+      "pass": true,
+      "detail": "['claude-sonnet-5-5']"
+    },
+    {
+      "check": "S5 pinned: the subagent runs Sonnet although its own definition says haiku (forced)",
+      "pass": true,
+      "detail": "['claude-sonnet-5-5']"
+    }
+  ],
+  "sessions": {}
+}

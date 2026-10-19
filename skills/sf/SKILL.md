@@ -289,6 +289,22 @@ Resource limits (after the 2026-10-19 out-of-memory incident): run tests through
 at most one heavy run at a time and at most two implementation agents at once; never build test inputs by
 doubling or repeated self-nesting. A tripped limit is a failure, never a pass.
 
+Human stops (explicit human-in-the-loop points): at the start of every stage run `sf hitl status --root .`.
+Exit 3 means an open stop applies: do nothing further except report it. Open one with `sf hitl request --name N --reason R`
+before any owner-gated or irreversible action and at artifact-only stopping points. While a stop is open, `sf slice done`
+refuses (exit 5) and `sf qa next` returns `human_stop`; the stop ledger lives under `.factory/stops/` (a control folder the
+blind implementer cannot write) and is hash-chained. Releasing a stop is a person's act at a terminal
+(`sf hitl release --name N --by human:<ref>`): an agent never releases one, the release command is a one-way door
+(the orchestrator is asked, every other role is denied) and it requires an interactive terminal. This is friction, not proof:
+a role with full Bash could still allocate a terminal, so the stop is a procedure the run obeys, not an unforgeable barrier.
+
+Sonnet-only routing: sessions for this work start with `--model sonnet`; `sf install install --project DIR` pins
+`"model": "sonnet"` and forces every subagent to Sonnet (`CLAUDE_CODE_SUBAGENT_MODEL=sonnet`, `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`)
+in that project's settings, so an inherited user-level default of another model does not apply (checked in a real session:
+`docs/native-verification/2026-10-19/REPORT.md`). The QA retry ladder is Sonnet-only unless the policy explicitly opts in
+(`sf qa policy`). Do not escalate to another model on your own. Check an installation with `sf install doctor --project DIR`
+(it executes the generated hook commands and fails if one cannot run, because a hook that cannot run fails open).
+
 Known limits, stated so nothing reads as more than it is: the hooks are mechanical only in projects where
 `sf` has generated the project settings and agent files, and their behaviour inside a live Claude Code session
 has been exercised through the command line and simulated event streams, not yet end to end in a real session;

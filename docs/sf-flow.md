@@ -77,6 +77,10 @@ Notes on the colours: `impl` is yellow because the guards are tested through the
 | 11 | Commit and snapshot | Clean tree | Atomic commits; `ops/snapshots/<sha>/` | `sf ops bundle`, `sf ops runtime` | At every commit | Snapshots are reproducible from git (`--backfill`); runtime telemetry is separate and never part of a snapshot |
 | 12 | Inbound | Task list, backlog, new text | Ranked ledger rows | `sf intake gate --since`, `progress-briefing` | End of every slice | "Nothing new" is stated explicitly |
 
+## Native installation (how this flow runs inside Claude Code)
+
+`sf install install --project DIR` writes the generated agents, the settings-level hooks (absolute, verified commands), the Sonnet-only pin and a manifest; `sf install doctor` executes the hook commands and fails if one cannot run, because a hook that cannot run fails open. The human stop (`sf hitl`) is checked at every stage start. Real headless sessions verified skill resolution, `/sf`, hook enforcement in subagents, a failing gate and its repair, a human stop and the Sonnet pin; the evidence and the stage-by-stage table are in `docs/native-verification/2026-10-19/REPORT.md`, and what that did not cover is listed there.
+
 ## What is new and what already existed
 
 Existing before this build (prose or partial): the twelve stages, the minesweeper skill and its stage hooks, `one-way-door`, `doc-sync`, the ops-dashboard-design skill, the `sf audit/verify/run/transpile` commands.
