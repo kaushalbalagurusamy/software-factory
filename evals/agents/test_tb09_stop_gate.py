@@ -19,8 +19,15 @@ HOOK = "factory.hooks.stop_gate"
 R = ["R-15"]
 
 
+# Baseline updates to the golden set (evals/agents/README.md, "Baseline updates"; MECE-AUDIT P0): promoted
+# diagnostic cases and swapped-out golden cases (kept in the suite as diagnostic; their tests are unchanged).
+PROMOTED = frozenset({"TB09-D-028", "TB09-D-029"})
+DEMOTED = frozenset({"TB09-G-002"})
+
+
 def case(cid: str, tier: str = "diagnostic", reqs=None):
-    return pytest.mark.case(cid, tier=tier, tb="09", reqs=reqs or R)
+    return pytest.mark.case(
+        cid, tier=lib.tier_of(cid, PROMOTED, DEMOTED) if tier == "diagnostic" or cid in DEMOTED else tier, tb="09", reqs=reqs or R)
 
 
 # ---------------------------------------------------------------- fixtures
