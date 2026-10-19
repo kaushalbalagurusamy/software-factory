@@ -187,13 +187,60 @@ def violated(contract: Contract, ob: Obligation, args: Dict[str, Any], outcome: 
     return outcome.kind == "raise" and not declared
 
 
-def _sample_inputs(contract: Contract, extra: List[Dict[str, Any]], n: int = 200) -> List[Dict[str, Any]]:
+def _constants(contract: Contract, target) -> List[int]:
+    """Integers mentioned by the contract and by the function itself, with their neighbours."""
+    found = set()
+
+    def from_ir(e):
+        if isinstance(e, ir.Const) and isinstance(e.value, int) and not isinstance(e.value, bool):
+            found.add(e.value)
+        for v in getattr(e, "__dict__", {}).values():
+            for x in (v if isinstance(v, tuple) else (v,)):
+                if hasattr(x, "__dataclass_fields__"):
+                    from_ir(x)
+
+    for cl in contract.preconditions + contract.postconditions + contract.invariants:
+        from_ir(cl.expr)
+    for er in contract.errors:
+        from_ir(er.when)
+    for n in ast.walk(target.node):
+        if isinstance(n, ast.Constant) and isinstance(n.value, int) and not isinstance(n.value, bool):
+            found.add(n.value)
+    out = set()
+    for c in found:
+        out.update({c - 1, c, c + 1, -c})
+    return sorted(out)
+
+
+def _sample_inputs(contract: Contract, extra: List[Dict[str, Any]], consts: Optional[List[int]] = None,
+                   n: int = 200, cap: int = 4000) -> List[Dict[str, Any]]:
+    """Solver models, boundary values (contract + function constants) and seeded random inputs."""
+    import itertools
     rng = random.Random(0xC0FFEE)
     hi = INT64_MAX if contract.semantics == "int64" else 10**6
     pool = [-3, -2, -1, 0, 1, 2, 3, 7, -7, 10, 100, -100]
     if contract.semantics == "int64":
         pool += [INT64_MAX, INT64_MIN, INT64_MAX - 1, INT64_MIN + 1, 2**32, -(2**32)]
+    bounds = sorted(set(pool + list(consts or [])))
+    if contract.semantics == "int64":
+        bounds = [b for b in bounds if INT64_MIN <= b <= INT64_MAX]
     out = list(extra)
+    per = [[False, True] if ty == BOOL else bounds for _, ty in contract.params]
+    names = [nm for nm, _ in contract.params]
+    total = 1
+    for p in per:
+        total *= len(p)
+    if total <= cap // 2:
+        out += [dict(zip(names, combo)) for combo in itertools.product(*per)]
+    else:  # vary one parameter over all its boundaries, others from a small base set; plus random mixes
+        for i, p in enumerate(per):
+            for v in p:
+                for base in (0, 1, -1):
+                    args = {nm: (False if ty == BOOL else base) for nm, ty in contract.params}
+                    args[names[i]] = v
+                    out.append(args)
+        for _ in range(cap // 4):
+            out.append({nm: rng.choice(per[i]) for i, nm in enumerate(names)})
     for _ in range(n):
         args = {}
         for name, ty in contract.params:
@@ -364,7 +411,7 @@ def verify_contract(contract: Contract, target, *, timeout_ms: int = 5000, sampl
 
     if proved and sample_check:
         extra = _enumerate_models(z3, P, contract.params, 8, timeout_ms)
-        for args in _sample_inputs(contract, extra):
+        for args in _sample_inputs(contract, extra, _constants(contract, target)):
             outcome = None
             for ob, r in proved:
                 if r.verdict is not Verdict.PROVED:
