@@ -81,12 +81,19 @@ class WorkTreeSource(GitSource):
     def paths(self) -> list[str]:
         if self._paths is None:
             out = _git(self.repo, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
-            self._paths = sorted({p for p in out.decode("utf-8", "replace").split("\0") if p and (self.repo / p).is_file()})
+            self._paths = sorted({p for p in out.decode("utf-8", "replace").split("\0") if p and (self.repo / p).is_file() and not (self.repo / p).is_symlink()})
         return self._paths
 
     def read(self, path: str) -> bytes | None:
         f = self.repo / path
-        return f.read_bytes() if f.is_file() else None
+        # never follow a symlink out of the repository (a planted link must not expose other files)
+        if f.is_symlink() or not f.is_file():
+            return None
+        try:
+            f.resolve().relative_to(self.repo.resolve())
+        except ValueError:
+            return None
+        return f.read_bytes()
 
 
 def unavailable(reason: str) -> dict:

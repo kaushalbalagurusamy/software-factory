@@ -22,8 +22,25 @@ def canonical(obj) -> bytes:
     return json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
 
-def _atomic(path: Path, data: bytes) -> None:
+def _check_inside(path: Path, root: Path) -> None:
+    """Refuse to write through a symlink or outside the output root (a planted link must not redirect a write)."""
+    root_abs = Path(os.path.abspath(root))
+    target = Path(os.path.abspath(path))
+    if root_abs != target and root_abs not in target.parents:
+        raise ValueError(f"refusing to write outside the output root: {path}")
+    cur = target
+    while True:
+        if cur.is_symlink():
+            raise ValueError(f"refusing to write through a symlink: {cur}")
+        if cur == root_abs or cur.parent == cur:
+            break
+        cur = cur.parent
+
+
+def _atomic(path: Path, data: bytes, root: Path) -> None:
+    _check_inside(path, root)
     path.parent.mkdir(parents=True, exist_ok=True)
+    _check_inside(path, root)
     tmp = path.with_name(path.name + f".tmp{os.getpid()}")
     tmp.write_bytes(data)
     os.replace(tmp, path)
@@ -34,7 +51,7 @@ def put_blob(out: Path, obj) -> str:
     h = hashlib.sha256(data).hexdigest()
     p = out / "blobs" / f"{h}.json"
     if not p.exists():
-        _atomic(p, data)
+        _atomic(p, data, out)
     return h
 
 
@@ -46,7 +63,7 @@ def build_viewer(out: Path) -> Path:
     html = tpl.replace("/*__MERMAID__*/", lib).replace("__MODEL_JSON__", "")
     dest = out / "viewer.html"
     if not dest.exists() or dest.read_text(encoding="utf-8") != html:
-        _atomic(dest, html.encode("utf-8"))
+        _atomic(dest, html.encode("utf-8"), out)
     return dest
 
 
@@ -55,7 +72,7 @@ def install_shell(out: Path) -> None:
     src = REPO_ROOT / "ops" / "shell" / "index.html"
     dest = out / "shell" / "index.html"
     if src.exists() and src.resolve() != dest.resolve():
-        _atomic(dest, src.read_bytes())
+        _atomic(dest, src.read_bytes(), out)
 
 
 def _commit_meta(repo: Path, sha: str) -> dict:
@@ -94,7 +111,7 @@ def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
             "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "collector_version": COLLECTOR_VERSION, "kind": "historical", "tabs": tabs_out,
         }
-        _atomic(mpath, json.dumps(manifest, indent=1, sort_keys=True).encode("utf-8"))
+        _atomic(mpath, json.dumps(manifest, indent=1, sort_keys=True).encode("utf-8"), out)
     # latest stage event, from the dev_journey blob of this very snapshot
     latest = None
     dj = manifest["tabs"].get("dev_journey", {})
@@ -114,7 +131,7 @@ def update_index(out: Path, entries: list[dict]) -> dict:
         if e["sha"] != "worktree":
             by[e["sha"]] = e
     idx["commits"] = sorted(by.values(), key=lambda c: (c["date"], c.get("n", 0)), reverse=True)
-    _atomic(ip, json.dumps(idx, indent=1).encode("utf-8"))
+    _atomic(ip, json.dumps(idx, indent=1).encode("utf-8"), out)
     return idx
 
 

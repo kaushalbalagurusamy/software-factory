@@ -189,12 +189,29 @@ def make_server(root: Path, host: str, port: int) -> ThreadingHTTPServer:
                 return True
             return False
 
+        def _allowed(self) -> bool:
+            """Only the dashboard's own artifacts are served: never config.json, dotfiles or other files."""
+            host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]").lower()
+            if host not in ("127.0.0.1", "localhost", "::1"):
+                self.send_error(403, "unexpected Host header")  # blocks DNS rebinding
+                return False
+            path = self.path.split("?", 1)[0].split("#", 1)[0]
+            parts = [x for x in path.split("/") if x]
+            if any(x.startswith(".") or x == ".." for x in parts) or "\\" in path or "%2e" in path.lower():
+                self.send_error(404)
+                return False
+            ok = bool(parts) and (parts[0] in ("shell", "blobs", "snapshots") or
+                                  (len(parts) == 1 and parts[0] in ("index.json", "runtime.json", "viewer.html")))
+            if not ok:
+                self.send_error(404)
+            return ok
+
         def do_GET(self):
-            if not self._root_redirect():
+            if not self._root_redirect() and self._allowed():
                 super().do_GET()
 
         def do_HEAD(self):
-            if not self._root_redirect():
+            if not self._root_redirect() and self._allowed():
                 super().do_HEAD()
 
         def list_directory(self, path):

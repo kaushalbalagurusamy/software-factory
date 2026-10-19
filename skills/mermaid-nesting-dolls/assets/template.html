@@ -179,12 +179,27 @@ var raw=document.getElementById("nd-model").textContent.trim();
 if(raw){try{boot(JSON.parse(raw))}catch(e){fail(e.message)}return}
 var q=new URLSearchParams(location.search).get("model");
 if(!q){fail("no model embedded and no ?model=<url> given");return}
-fetch(q).then(function(r){if(!r.ok)throw new Error(q+" returned HTTP "+r.status);return r.json()}).then(function(m){
+var mu;try{mu=new URL(q,location.href)}catch(e){fail("bad model URL");return}
+if(mu.origin!==location.origin||!/\.json$/i.test(mu.pathname)){fail("the model must be a same-origin .json file");return}
+fetch(mu.href,{credentials:"omit"}).then(function(r){if(!r.ok)throw new Error(mu.pathname+" returned HTTP "+r.status);return r.json()}).then(function(m){
   Object.keys(m.nodes||{}).forEach(function(k){var n=m.nodes[k];if(Array.isArray(n.diagram))n.diagram=n.diagram.join("\n")});
   boot(m)}).catch(function(e){fail(e.message)});
 function boot(MODEL){
 var N = MODEL.nodes, ROOT = MODEL.root, META = MODEL.meta || {};
 var STATUS = {built:"Built",partial:"Partial",designed:"Designed, not built",external:"Outside this repo",gap:"Gap"};
+/* A model may come from a URL, so it is validated before any HTML is built from it: ids end up inside attributes. */
+(function(){
+  var ID=/^[A-Za-z][\w\/-]*$/;
+  function bad(m){fail(m);throw new Error(m)}
+  if(!N||typeof N!=="object"||!ID.test(String(ROOT))||!N[ROOT])bad("model has no valid root");
+  Object.keys(N).forEach(function(k){
+    var n=N[k];if(!ID.test(k))bad("unsafe node id: "+k);
+    var ch=n.children||[],list=Array.isArray(ch)?ch:Object.keys(ch).map(function(x){return ch[x]});
+    list.forEach(function(c){if(!ID.test(String(c)))bad("unsafe child id in "+k)});
+    if(n.coverage&&n.coverage.status&&!STATUS[n.coverage.status])bad("unknown coverage status in "+k);
+  });
+  if(META.repoUrl&&!/^https?:\/\//i.test(META.repoUrl))META.repoUrl="";
+})();
 var $ = function(id){return document.getElementById(id)};
 
 /* ---- model helpers ---------------------------------------------------------------------------------- */
