@@ -70,7 +70,11 @@ def decide(facts, state, pol, stats) -> dict:
         return _d("hand_to_reviewer", cap, signature=sig, criterion=info.get("criterion") or info.get("case"))
     last = facts["last_tier_by_sig"].get(sig)
     tier, why = _tier_for(k, last, pol, stats)
-    return _d("retry_same_tier" if tier == last else "escalate_model", why, signature=sig, tier=tier)
+    diagnosis = (f"signature {sig} ({info.get('criterion') or info.get('case')}) failed {k} time(s) at tier "
+                 f"{last}; last normalized error: {info.get('error_norm', '')[:300]}")
+    # escalate only when the next tier is actually a different model
+    return _d("retry_same_tier" if tier == last else "escalate_model", why, signature=sig, tier=tier,
+              diagnosis=diagnosis)
 
 
 def decide_next(store, pol, tier_stats_=None, apply=False) -> dict:

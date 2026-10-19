@@ -33,21 +33,25 @@ and ids, absolute and relative paths, and numbers, and collapses whitespace.
 ## Policy `.sf/policy.yaml` (all keys optional)
 ```yaml
 attempts_per_signature: 4
-tiers: [sonnet, sonnet, opus, opus]   # model tier names per attempt; no model is called here
+tiers: [sonnet, sonnet, sonnet, sonnet]   # model names per attempt (names only; no model is called here)
+allow_non_default_models: []          # explicit opt-in: any non-sonnet name in tiers must be listed here
 slice_attempt_cap: 10
 budget: {tokens: null, cost_usd: null} # caller reports tokens/cost per record
 flake_reruns: 1
 environment: {patterns: [...], wait_max: 5}   # ENOSPC, OOM, killed by signal, timeouts, port in use, missing tool
 escalation: {min_samples: 5, escalate_below: 0.2, hold_above: 0.8}
 ```
-`python -m factory.qa policy` prints the effective values. Unknown keys are an error.
+Sonnet-only by default: any other model in `tiers` is rejected with a clear error unless `.sf/policy.yaml` also lists
+it under `allow_non_default_models`. `python -m factory.qa policy` prints the effective values, including
+`tiers_flagged`, which marks each non-sonnet entry `(opt-in)`. Unknown keys are an error.
 
 ## Decisions (`next`)
 Order: already blocked, `environment_wait` (more than `wait_max` consecutive: `mark_blocked`),
 `rerun_for_flake`, `accept` (gate passed and every criterion verified), `propose_regression` (a signature failed
 twice or more with no proposal yet), then caps (signature, slice, budget): `hand_to_reviewer`, or `mark_blocked`
 after an `unresolved` verdict recorded since the last failure (`waits_on` names the reviewer note). Otherwise
-`retry_same_tier` or `escalate_model` with the tier from the ladder position (failures of this signature), adjusted
+`retry_same_tier` or `escalate_model` (only when the next tier is a different model; with the all-sonnet default it is
+always `retry_same_tier`, with a `diagnosis` string attached: signature, criterion, failure count, last normalized error) with the tier from the ladder position (failures of this signature), adjusted
 by measured per-tier success from `stats`. An `amended` verdict gives the signature (and slice window) a fresh
 budget while history stays. `--apply` persists `stuck`, `blocked` or `accepted`.
 

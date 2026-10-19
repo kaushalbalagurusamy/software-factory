@@ -15,13 +15,17 @@ ENV_PATTERNS = (
 
 DEFAULTS = {
     "attempts_per_signature": 4,
-    "tiers": ["sonnet", "sonnet", "opus", "opus"],
+    "tiers": ["sonnet", "sonnet", "sonnet", "sonnet"],
+    "allow_non_default_models": [],
     "slice_attempt_cap": 10,
     "budget": {"tokens": None, "cost_usd": None},
     "flake_reruns": 1,
     "environment": {"patterns": list(ENV_PATTERNS), "wait_max": 5},
     "escalation": {"min_samples": 5, "escalate_below": 0.2, "hold_above": 0.8},
 }
+
+
+DEFAULT_MODEL = "sonnet"
 
 
 class PolicyError(Exception):
@@ -32,6 +36,7 @@ class PolicyError(Exception):
 class Policy:
     attempts_per_signature: int
     tiers: tuple
+    allowed_models: tuple
     slice_attempt_cap: int
     budget_tokens: object
     budget_cost_usd: object
@@ -48,6 +53,8 @@ class Policy:
     def as_dict(self) -> dict:
         return {
             "attempts_per_signature": self.attempts_per_signature, "tiers": list(self.tiers),
+            "tiers_flagged": [t if t == DEFAULT_MODEL else f"{t} (opt-in)" for t in self.tiers],
+            "allow_non_default_models": list(self.allowed_models),
             "slice_attempt_cap": self.slice_attempt_cap,
             "budget": {"tokens": self.budget_tokens, "cost_usd": self.budget_cost_usd},
             "flake_reruns": self.flake_reruns,
@@ -105,6 +112,13 @@ def load_policy(root) -> Policy:
     tiers = d["tiers"]
     if not isinstance(tiers, list) or not tiers or not all(isinstance(t, str) and t for t in tiers):
         raise PolicyError("tiers must be a non-empty list of names")
+    allow = d["allow_non_default_models"]
+    if not isinstance(allow, list) or not all(isinstance(t, str) and t for t in allow):
+        raise PolicyError("allow_non_default_models must be a list of model names")
+    bad = sorted({t for t in tiers if t != DEFAULT_MODEL and t not in allow})
+    if bad:
+        raise PolicyError(f"tiers use non-default model(s) {', '.join(bad)} without an explicit opt-in: "
+                          f"list them under allow_non_default_models in .sf/policy.yaml")
     pats = d["environment"]["patterns"]
     if not isinstance(pats, list) or not all(isinstance(p, str) for p in pats):
         raise PolicyError("environment.patterns must be a list of regexes")
@@ -117,6 +131,7 @@ def load_policy(root) -> Policy:
     return Policy(
         attempts_per_signature=_int(d["attempts_per_signature"], "attempts_per_signature", 1),
         tiers=tuple(tiers),
+        allowed_models=tuple(allow),
         slice_attempt_cap=_int(d["slice_attempt_cap"], "slice_attempt_cap", 1),
         budget_tokens=_opt_num(d["budget"]["tokens"], "budget.tokens"),
         budget_cost_usd=_opt_num(d["budget"]["cost_usd"], "budget.cost_usd"),
