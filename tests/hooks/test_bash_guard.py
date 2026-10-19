@@ -382,3 +382,65 @@ def test_deep_nesting_fails_closed(cfg):
 
 def test_huge_but_plain_command_allowed(cfg):
     assert kind(cfg, "echo " + "a " * 5000) == "allow"
+
+
+# ---- option-carried command strings (wrappers) ---------------------------------------------------
+WRAPPED = [
+    "env -S 'git push --force origin main'", "env --split-string='git add -A'",
+    "env --split-string 'git add -A'", "env -S'rm -rf /'", "env -S 'rm -rf /'", "env -SX=1\\ rm\\ -rf\\ /",
+    "env -iS 'git reset --hard'", "env -u FOO -S 'git rebase main'", "env FOO=1 -S 'git add .'",
+    "env -S 'env -S \"git add -A\"'", "env -S 'FOO=1 git commit --amend'", "env -S 'kubectl delete ns x'",
+    "sudo env -S 'git add -A'", "env -C /tmp -S 'git push -f'", "env -S \"psql -c 'DROP TABLE t'\"",
+    "xargs git add -A", "xargs -n1 git push --force", "xargs -I{} git add .", "xargs -I {} git reset --hard",
+    "echo x | xargs rm -rf src", "xargs -0 -P 4 kubectl delete",
+    "sudo -s 'git add -A'", "sudo -i 'git push -f'", "sudo --shell 'git reset --hard'", "doas -s 'git add .'",
+    "su -c 'git add -A' root", "su root -c 'git push --force'", "su --command='git reset --hard'",
+    "runuser -u x -- true; runuser -c 'rm -rf src' x",
+    "exec -a foo git add -A", "time -f %e git push -f", "stdbuf -o L git add .", "stdbuf -oL git add -A",
+    "nice -n 5 git add -A", "timeout 5 git add -A", "timeout -s KILL 5 git push -f", "nohup git add -A",
+    "command git add -A", "find . -exec git add -A \;", "find . -execdir rm -rf src \;",
+    "find . -name x -exec git reset --hard {} +",
+]
+
+
+@pytest.mark.parametrize("cmd", WRAPPED)
+def test_wrapped_commands_still_classified(cfg, cmd):
+    assert kind(cfg, cmd, "orchestrator") == "ask", cmd
+    assert kind(cfg, cmd) == "ask", cmd
+    assert kind(cfg, cmd, "test") == "deny", cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "env -S 'ls -la'", "env --split-string='ls -la'", "env -S'ls -la'", "env -S 'FOO=1 pytest -q'",
+    "env -u FOO -S 'git status'", "xargs ls", "xargs -n1 echo", "xargs -I{} cp {} /tmp/x",
+    "sudo -s 'ls'", "su -c 'ls' root", "exec -a foo ls", "find . -name x -exec grep y {} +",
+    "find . -exec rm {} \;", "env -S 'rm -rf /tmp/x'", "env -S 'git commit -m x'",
+])
+@pytest.mark.parametrize("role", [None, "orchestrator", "test"])
+def test_harmless_wrapped_allowed(cfg, cmd, role):
+    assert kind(cfg, cmd, role) == "allow", (cmd, role)
+
+
+@pytest.mark.parametrize("cmd", [
+    "env -S 'git add -A", "env -S \"unterminated", "env -S", "env --split-string",
+    "env -S 'a'\"'\" 'b", "su -c",
+])
+def test_wrapper_string_unsplittable_denied(cfg, cmd):
+    if cmd == "su -c":
+        assert kind(cfg, cmd, "test") == "allow"  # no command string at all
+        return
+    assert kind(cfg, cmd, "orchestrator") == "deny"
+    assert kind(cfg, cmd, "test") == "deny"
+
+
+def test_env_split_string_bounds(cfg):
+    big = "echo " + "a" * 200_000
+    assert kind(cfg, f"env -S '{big}'", "test") == "deny"
+    deep = "env -S '" * 70 + "ls" + "'" * 70  # linear construction, only quote-balance matters
+    assert len(deep) < 100_000
+    assert kind(cfg, deep, "test") == "deny"  # wrapper depth exceeds the bound or cannot be split
+
+
+def test_implement_env_split_commit_denied(cfg):
+    assert kind(cfg, "env -S 'git commit -m x'", "implement") == "deny"
+    assert kind(cfg, "env -S 'git status'", "implement") == "allow"

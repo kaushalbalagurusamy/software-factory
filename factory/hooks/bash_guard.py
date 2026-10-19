@@ -463,8 +463,44 @@ def _base(word: str) -> str:
     return posixpath.basename(word) if "/" in word else word
 
 
-def _strip_prefix(words: list[str]) -> list[str]:
-    """Drop leading reserved words, variable assignments and transparent wrappers."""
+MAX_SPLIT_LEN = 100_000
+# Options of transparent wrappers that take a separate value (never a command).
+WRAPPER_VALUE_OPTS = {
+    "exec": frozenset({"-a"}),
+    "time": frozenset({"-f", "-o", "--format", "--output"}),
+    "stdbuf": frozenset({"-i", "-o", "-e", "--input", "--output", "--error"}),
+}
+XARGS_VALUE_OPTS = frozenset({
+    "-a", "-d", "-E", "-I", "-J", "-L", "-n", "-P", "-R", "-S", "-s", "--arg-file", "--delimiter",
+    "--eof", "--max-args", "--max-procs", "--max-lines", "--max-chars", "--process-slot-var",
+})
+
+
+def _split_command_string(value: str) -> list[str]:
+    """Split a command line carried by an option (``env -S``) into words; fail closed."""
+    if len(value) > MAX_SPLIT_LEN:
+        raise ParseError("option command string is too long")
+    try:
+        return shlex.split(value)
+    except ValueError as exc:
+        raise ParseError(f"cannot split option command string: {exc}") from None
+
+
+def _short_cluster_value(w: str, k: int, ws: list[str]) -> tuple[str, list[str]]:
+    """Value of the option letter at w[1+k]: the rest of the word, else the next word."""
+    if k < len(w) - 2:
+        return w[k + 2:], ws[1:]
+    if len(ws) < 2:
+        raise ParseError(f"option {w} needs a value")
+    return ws[1], ws[2:]
+
+
+def _strip_prefix(words: list[str], scripts: list[str]) -> list[str]:
+    """Drop leading reserved words, variable assignments and transparent wrappers.
+
+    Option-carried command strings are never skipped: ``env -S`` is split into words and analysed
+    as the wrapped command; ``sudo -s|-i`` and ``su -c`` strings are appended to ``scripts`` (shell
+    text for the caller to parse)."""
     ws = list(words)
     for _ in range(64):
         if not ws:
@@ -478,28 +514,79 @@ def _strip_prefix(words: list[str]) -> list[str]:
             continue
         name = _base(w)
         if name in ("command", "builtin", "exec", "nohup", "time", "setsid", "stdbuf"):
+            vopts = WRAPPER_VALUE_OPTS.get(name, frozenset())
             ws = ws[1:]
             while ws and ws[0].startswith("-") and len(ws[0]) > 1:
-                ws = ws[1:]
+                ws = ws[2:] if ws[0] in vopts else ws[1:]
+            continue
+        if name == "xargs":
+            ws = ws[1:]
+            while ws and ws[0].startswith("-") and len(ws[0]) > 1:
+                ws = ws[2:] if ws[0] in XARGS_VALUE_OPTS else ws[1:]
             continue
         if name == "env":
             ws = ws[1:]
             while ws:
-                if ws[0] in ("-u", "--unset", "-C", "--chdir", "-S", "--split-string"):
-                    ws = ws[2:]
-                elif ws[0].startswith("-") and len(ws[0]) > 1 or ASSIGNMENT.match(ws[0]):
+                w = ws[0]
+                if w.startswith("--"):
+                    opt, eq, val = w.partition("=")
+                    if opt == "--split-string":
+                        if eq:
+                            rest = ws[1:]
+                        elif len(ws) > 1:
+                            val, rest = ws[1], ws[2:]
+                        else:
+                            raise ParseError("env --split-string needs a value")
+                        ws = _split_command_string(val) + rest
+                        break
+                    ws = ws[2:] if opt in ("--unset", "--chdir") and not eq else ws[1:]
+                elif w.startswith("-") and len(w) > 1:
+                    for k, ch in enumerate(w[1:]):
+                        if ch in "uC":
+                            _val, ws = _short_cluster_value(w, k, ws)
+                            break
+                        if ch == "S":
+                            val, rest = _short_cluster_value(w, k, ws)
+                            ws = _split_command_string(val) + rest
+                            break
+                    else:
+                        ws = ws[1:]
+                        continue
+                    if ch == "S":
+                        break
+                elif ASSIGNMENT.match(w):
                     ws = ws[1:]
                 else:
                     break
             continue
         if name in ("sudo", "doas"):
             ws = ws[1:]
+            shell = False
             while ws and ws[0].startswith("-") and len(ws[0]) > 1:
-                if ws[0] in ("-u", "-g", "-h", "-p", "-C", "-D", "-R", "-T", "-U", "-r", "-t", "--user", "--group"):
+                o = ws[0]
+                if o in ("-u", "-g", "-h", "-p", "-C", "-D", "-R", "-T", "-U", "-r", "-t", "--user", "--group"):
                     ws = ws[2:]
-                else:
-                    ws = ws[1:]
+                    continue
+                if o in ("--shell", "--login") or (not o.startswith("--") and ("s" in o[1:] or "i" in o[1:])):
+                    shell = True
+                ws = ws[1:]
+            if shell and ws:
+                scripts.append(" ".join(ws))
+                return []
             continue
+        if name in ("su", "runuser"):
+            rest = ws[1:]
+            for k, a in enumerate(rest):
+                if a in ("-c", "--command") and k + 1 < len(rest):
+                    scripts.append(rest[k + 1])
+                    return []
+                if a.startswith("--command="):
+                    scripts.append(a.partition("=")[2])
+                    return []
+                if a.startswith("-c") and not a.startswith("--") and len(a) > 2:
+                    scripts.append(a[2:])
+                    return []
+            return ws
         if name == "nice":
             ws = ws[1:]
             if ws and ws[0] == "-n":
@@ -757,7 +844,10 @@ def _analyse(cmds: list[Cmd], cfg: HookConfig, depth: int = 0) -> list[Finding]:
     deploy = cfg.profile.deploy
     route = deploy.route if deploy is not None and deploy.route else None
     for idx, cmd in enumerate(cmds):
-        words = _strip_prefix(cmd.words)
+        scripts: list[str] = []
+        words = _strip_prefix(cmd.words, scripts)
+        for sc in scripts:
+            findings += _analyse(parse(sc, depth + 1), cfg, depth + 1)
         if not words:
             continue
         name = _base(words[0])
@@ -770,6 +860,18 @@ def _analyse(cmds: list[Cmd], cfg: HookConfig, depth: int = 0) -> list[Finding]:
             script = _shell_script(args)
             if script is not None:
                 findings += _analyse(parse(script, depth + 1), cfg, depth + 1)
+        elif name == "find":
+            i = 0
+            while i < len(args):
+                if args[i] in ("-exec", "-execdir", "-ok", "-okdir"):
+                    j = i + 1
+                    while j < len(args) and args[j] not in (";", "+"):
+                        j += 1
+                    sub = args[i + 1:j]
+                    if sub:
+                        findings += _analyse([Cmd(words=sub, raw=" ".join(sub))], cfg, depth + 1)
+                    i = j
+                i += 1
         elif name == "eval" and args:
             findings += _analyse(parse(" ".join(args), depth + 1), cfg, depth + 1)
 
@@ -800,7 +902,7 @@ def _analyse(cmds: list[Cmd], cfg: HookConfig, depth: int = 0) -> list[Finding]:
                     break
         # echo/printf piped into a SQL client
         if is_text and name in ("echo", "printf", "cat") and cmd.piped and idx + 1 < len(cmds):
-            nxt = _strip_prefix(cmds[idx + 1].words)
+            nxt = _strip_prefix(cmds[idx + 1].words, [])
             if nxt and _base(nxt[0]) in SQL_CLIENTS:
                 findings += _sql_findings(" ".join(args))
 
