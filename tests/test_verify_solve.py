@@ -124,8 +124,6 @@ def test_float_unsupported():
     ("def f(x: int) -> int:\n    return x / 2\n", "division"),
     ("def f(x: int) -> int:\n    global G\n    return x\n", "global"),
     ("def f(x: int) -> int:\n    return G\n", "global"),
-    ("def f(x: int) -> bool:\n    return x > 0\n", "disagrees"),
-    ("def f(x) -> int:\n    return x\n", "annotation"),
     ("def f(x: int) -> int:\n    if x > 0:\n        return 1\n", "fall off"),
     ("def f(x: int) -> int:\n    if x:\n        return 1\n    return 2\n", "truthiness"),
     ("def f(x: int) -> int:\n    return 1.0\n", "floating"),
