@@ -1,0 +1,2701 @@
+{
+ "meta": {
+  "title": "Claude Software Factory: workflow, design choices, coverage",
+  "subtitle": "Nesting-dolls explorer of the software-factory repository",
+  "repo": "software-factory",
+  "commit": "27bf148",
+  "generated": "2026-10-19"
+ },
+ "root": "factory",
+ "nodes": {
+  "factory": {
+   "title": "Claude Software Factory",
+   "summary": "A set of skills, rules, deterministic gates and designed agent roles that turn an AI coding assistant from a 'vibe-coder' into a disciplined engineer: requirements are verified before use, tests come before code, the implementer is blind to the tests, and verification is deterministic and independent.",
+   "kind": "system",
+   "detail": [
+    "The factory is three things layered together. The method (the /sf build loop and its skills) is the part that runs today. A deterministic engine (the sf CLI) enforces test integrity and one-way-door detection. An agent layer (seven roles with hooks) is specified and tested-in-advance but not implemented.",
+    "Click any stacked box to open the diagram inside it. The Coverage tab lists what is built, partial, only designed, outside the repo, or a gap, with reasons."
+   ],
+   "design": [
+    {
+     "choice": "Guard one-way doors; leave two-way doors fast",
+     "why": "Local, reversible work (UI, helpers, cache TTLs) runs autonomously; schemas, auth, public API and vector dimensions need a Socratic debate and an ADR.",
+     "alternatives": "One uniform, rigid process for every change"
+    },
+    {
+     "choice": "Verification is deterministic; models advise, they do not vote",
+     "why": "Hash baselines, AST scans and hooks cannot be talked around, which is the answer to reward hacking.",
+     "alternatives": "LLM committees grading each other's work"
+    }
+   ],
+   "files": [
+    {
+     "path": "README.md",
+     "lines": "12-41",
+     "contains": "ONE-WAY DOORS",
+     "note": "The manifesto and the two-door model"
+    },
+    {
+     "path": "RESEARCH_MANIFESTO.md",
+     "lines": "1-10",
+     "contains": "Panopticon",
+     "note": "The research argument behind the design"
+    },
+    {
+     "path": "docs/factory/METHODOLOGY.md",
+     "lines": "5-12",
+     "contains": "Requirements first",
+     "note": "Rules every agent must follow"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The method runs and the CLI engine exists; the agent layer that would enforce the method mechanically is specified, not built.",
+    "gaps": [
+     "Agent-layer hooks and roles are not implemented, so most of the method is still advice enforced by discipline",
+     "This repository has no build-loop profile, so /sf is not applied to the factory's own development"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  intake[\"Requirements intake<br/>sweep the brief\"] -->|\"verified requirements<br/>become a ledger\"| build-loop[\"Build loop<br/>/sf, 12 stages\"]",
+    "  skills-library[\"Skills library<br/>procedures per stage\"] -->|\"each stage invokes<br/>a skill\"| build-loop",
+    "  governance-docs[\"Decisions and rules<br/>ADRs, contracts, plans\"] -->|\"binding rules\"| build-loop",
+    "  governance-docs -->|\"contracts the<br/>roles implement\"| agent-layer[\"Agent layer<br/>7 roles + hooks\"]",
+    "  build-loop -->|\"split work across<br/>roles (designed)\"| agent-layer",
+    "  build-loop -->|\"run the deterministic<br/>gates\"| verification-engine[\"Verification engine<br/>factory/ and sf CLI\"]",
+    "  agent-layer -->|\"graded blind by\"| evals-gate[\"Evals and golden gate\"]",
+    "  verification-engine -->|\"routing decisions,<br/>shadow only\"| routing[\"Jev routing\"]",
+    "  build-loop -->|\"state, hygiene,<br/>owner briefings\"| ops-runtime[\"Session ops<br/>and dashboards\"]"
+   ],
+   "children": [
+    "intake",
+    "build-loop",
+    "skills-library",
+    "governance-docs",
+    "agent-layer",
+    "verification-engine",
+    "evals-gate",
+    "routing",
+    "ops-runtime"
+   ]
+  },
+  "intake": {
+   "title": "Requirements intake and sweep",
+   "summary": "Before any line of a brief becomes a requirement, it is transcribed verbatim, swept for traps (licences, provider terms, impossible guarantees, inverted rubrics), settled by research and experiments, and only then written into a PRD and a requirements ledger.",
+   "kind": "process",
+   "detail": [
+    "Every line of prose in a source brief is a requirement, including 'optional' items and out-of-scope lists. The ledger is the one summary table allowed to exist because stage 9 of the loop rebuilds its touched rows from the source every time."
+   ],
+   "design": [
+    {
+     "choice": "Sweep the brief before trusting it",
+     "why": "Briefs and rubrics can carry traps: a licence you cannot meet, a guarantee theory rules out, a rubric that rewards the wrong thing. Finding them after building is far more expensive.",
+     "alternatives": "Trusting the PRD as written"
+    },
+    {
+     "choice": "The sweep is a loop, not a one-shot gate",
+     "why": "Suspects are settled with grounded research and experiments until the loop converges; the PRD is written only after.",
+     "alternatives": "A single checklist pass"
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "99-124",
+     "contains": "Sweep the brief before trusting it",
+     "note": "Stage 1 describes the minesweeper discovery loop",
+     "external": true
+    },
+    {
+     "path": "docs/plans/2026-10-14-minesweeper-skill-proposal.md",
+     "lines": "180-182",
+     "contains": "The discovery loop"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The skills exist outside this repo and the process is written into /sf; this repository only holds the design proposal.",
+    "gaps": [
+     "The only in-repo document about the sweep still says 'Nothing is built yet', while an engine, 26 lens packs and tests exist under ~/.claude/skills/minesweeper"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  brief[\"Source brief<br/>untrusted\"] -->|\"every line becomes a row\"| spec-recomposition[\"spec-recomposition<br/>verbatim register\"]",
+    "  spec-recomposition -->|\"claims to sweep\"| minesweeper[\"minesweeper<br/>trap sweep\"]",
+    "  minesweeper -->|\"suspects\"| research-loop[\"Research and experiments<br/>grounded, deep, experiment-designer\"]",
+    "  research-loop -->|\"settled findings\"| minesweeper",
+    "  minesweeper -->|\"problem definition +<br/>trap register\"| prd-writer[\"prd-writer<br/>the real PRD\"]",
+    "  prd-writer -->|\"one row per line,<br/>trust status per row\"| req-ledger[\"Requirements ledger<br/>satisfied / partial / blocked / unserved\"]"
+   ],
+   "children": [
+    "brief",
+    "spec-recomposition",
+    "minesweeper",
+    "research-loop",
+    "prd-writer",
+    "req-ledger"
+   ]
+  },
+  "brief": {
+   "title": "Source brief",
+   "summary": "The partner brief, assignment, RFP or rubric that arrives, treated as untrusted input.",
+   "kind": "input",
+   "coverage": {
+    "status": "external",
+    "note": "Supplied per project; none lives in this repository."
+   }
+  },
+  "spec-recomposition": {
+   "title": "Spec recomposition",
+   "summary": "Transcribes an external spec verbatim, extracts every line as a categorised, linked requirement row, and verifies by script that no line was missed.",
+   "kind": "skill",
+   "files": [
+    {
+     "path": "~/.claude/skills/spec-recomposition/SKILL.md",
+     "contains": "verbatim",
+     "note": "Installed skill; not versioned in this repo",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Global skill under ~/.claude/skills, not catalogued in README.md or PROMOTIONS.md."
+   }
+  },
+  "research-loop": {
+   "title": "Research and experiments",
+   "summary": "grounded-research verifies single claims, deep-research surveys a topic, and experiment-designer pre-registers a fair comparison when two or more approaches remain.",
+   "kind": "skills",
+   "design": [
+    {
+     "choice": "Enumerate candidates from a dated source, never from recall",
+     "why": "A list written from memory stops at the training cutoff; a committed enumeration lets a reader tell 'rejected' from 'never considered'."
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "125-154",
+     "contains": "Build the candidate list from a dated enumeration",
+     "note": "Stage 2 rules",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Skills live in ~/.claude/skills."
+   }
+  },
+  "prd-writer": {
+   "title": "PRD writer",
+   "summary": "Writes the real PRD (work units with file scope, accepted ADRs, experiment verdicts) from the checked problem definition and the trap register.",
+   "kind": "skill",
+   "files": [
+    {
+     "path": "~/.claude/skills/prd-writer/SKILL.md",
+     "contains": "PRD",
+     "note": "Installed skill",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Global skill; not catalogued in this repo's skills tables."
+   }
+  },
+  "req-ledger": {
+   "title": "Requirements ledger",
+   "summary": "One row per requirement line with a status and the artifact that satisfies it or the dependency it waits on. It is what makes 'the run ends when requirements are met' measurable.",
+   "kind": "artifact",
+   "design": [
+    {
+     "choice": "Pick the next slice from the ledger, not from a queue",
+     "why": "A queue is a guess at what the requirements need and runs out first; unserved rows with no producer are the highest-value work."
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "36-63",
+     "contains": "requirements ledger",
+     "note": "The termination rule",
+     "external": true
+    },
+    {
+     "path": "docs/factory/requirements.md",
+     "lines": "1-12",
+     "contains": "Requirements register",
+     "note": "The agent layer's own register (R-01 to R-24), a worked example of the form"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The agent-layer register exists in the repo; the ledger rows for the factory as a whole do not.",
+    "gaps": [
+     "No ledger exists for the factory itself; only for the agent-layer build"
+    ]
+   }
+  },
+  "minesweeper": {
+   "title": "Minesweeper",
+   "summary": "Sweeps a brief for traps with swappable lens packs, assigns deterministic severity, and hands a checked problem definition to the PRD writer.",
+   "kind": "skill",
+   "detail": [
+    "Lenses cover licence, provider terms, privacy, regulation, hallucinated dependencies, impossible guarantees, inverted rubrics and omitted trust or threat models. An open Critical finding blocks scheduling of the rows it conditions until the owner signs off."
+   ],
+   "design": [
+    {
+     "choice": "Modular lens packs",
+     "why": "New domains and releases add a lens directory instead of rewriting the engine.",
+     "alternatives": "One monolithic checklist"
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-10-14-minesweeper-skill-proposal.md",
+     "lines": "68-80",
+     "contains": "lens.md",
+     "note": "Architecture: lens packs"
+    },
+    {
+     "path": "~/.claude/skills/minesweeper/SKILL.md",
+     "contains": "minesweeper",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Installed with an engine, lens packs and tests; not catalogued here and its proposal document is stale. Its tests were not run in this exploration.",
+    "gaps": [
+     "Proposal still says 'Nothing is built yet'",
+     "Not listed in README.md or PROMOTIONS.md"
+    ]
+   }
+  },
+  "stage-1-research": {
+   "title": "1 Research",
+   "summary": "Establish what is true now, from primary sources, seeded from the course corpus before any web search.",
+   "kind": "stage",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "99-124",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ]
+  },
+  "stage-2-experiment": {
+   "title": "2 Experiment",
+   "summary": "Produce multi-metric numbers for any choice that matters; candidate lists come from a dated enumeration.",
+   "kind": "stage",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "125-154",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ]
+  },
+  "stage-3-decide": {
+   "title": "3 Decide",
+   "summary": "Record the decision as an ADR; one-way doors go through the one-way-door skill.",
+   "kind": "stage",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "155-158",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ]
+  },
+  "stage-4-spec": {
+   "title": "4 MECE spec",
+   "summary": "One thin tracer-bullet slice, decomposed so parts neither overlap nor leave gaps; names what the dashboard must show.",
+   "kind": "stage",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "159-168",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ]
+  },
+  "stage-5-tests-first": {
+   "title": "5 Tests first",
+   "summary": "Author tests and evals before any implementation; a case may exist before its producer and then resolves to blocked.",
+   "kind": "stage",
+   "design": [
+    {
+     "choice": "Tests and evals precede implementation",
+     "why": "Scheduling tests after the feature is a defect in the plan; a case written first cannot be shaped to fit the code.",
+     "alternatives": "Tests written once the feature works"
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "169-174",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Defined in the installed /sf skill; mechanical enforcement waits on the agent layer."
+   }
+  },
+  "stage-6-implement-blind": {
+   "title": "6 Implement blind",
+   "summary": "The implementer never reads the test or eval files; it fixes against the contract.",
+   "kind": "stage",
+   "design": [
+    {
+     "choice": "Blindness by hook, not by instruction",
+     "why": "ADR-0003 says hooks enforce and prompts advise; the guard is specified in TB-06.",
+     "alternatives": "A PRD sentence saying 'do not read evals/'"
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "175-179",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Blindness is currently only by instruction: this repo has no profile and no hooks, so nothing mechanical stops an implementer reading evals/.",
+    "gaps": [
+     "MECE audit finding P0-5: this build's implementers are blind to evals/ only by instruction"
+    ]
+   }
+  },
+  "stage-7-separate-runner": {
+   "title": "7 Separate runner",
+   "summary": "A different agent runs the tests, the cheapest guard against a green result that was arranged.",
+   "kind": "stage",
+   "design": [
+    {
+     "choice": "Author and runner are different agents",
+     "why": "The party that wrote the code cannot arrange its own green."
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "180-182",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Defined in the installed /sf skill; mechanical enforcement waits on the agent layer."
+   }
+  },
+  "stage-8-review": {
+   "title": "8 Adversarial review",
+   "summary": "An independent skeptical reviewer hunts the 'third state': a pass earned for the wrong reason.",
+   "kind": "stage",
+   "design": [
+    {
+     "choice": "Different model family reviews where available",
+     "why": "Correlated blind spots between implementer and reviewer are the risk; METHODOLOGY asks for a different vendor.",
+     "alternatives": "Self-review by the implementer"
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "183-190",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Defined in the installed /sf skill; mechanical enforcement waits on the agent layer."
+   }
+  },
+  "stage-9-drift": {
+   "title": "9 Drift check",
+   "summary": "Reread the verbatim source line by line, then update the ledger rows the slice touched.",
+   "kind": "stage",
+   "design": [
+    {
+     "choice": "Re-derive from the source, never from a summary table",
+     "why": "The summary table is exactly where drift hides."
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "191-203",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ]
+  },
+  "stage-10-doc-sync": {
+   "title": "10 Doc sync",
+   "summary": "Propagate the decision into every document and dashboard that derives from it.",
+   "kind": "stage",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "204-220",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ]
+  },
+  "stage-11-commit": {
+   "title": "11 Atomic commit",
+   "summary": "One commit per logical change, as each lands.",
+   "kind": "stage",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "221-222",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ]
+  },
+  "stage-12-inbound": {
+   "title": "12 Check inbound",
+   "summary": "Look at what arrived while working, rank it into the ledger or backlog, say 'nothing new' explicitly, then brief the owner.",
+   "kind": "stage",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "223-252",
+     "note": "Stage text in the installed /sf skill (not versioned in this repo)",
+     "external": true
+    }
+   ]
+  },
+  "build-loop": {
+   "title": "Build loop (/sf)",
+   "summary": "The fixed twelve-stage loop every implementation slice follows, bound into a checklist with one todo per stage so a skipped stage is visible instead of forgotten.",
+   "kind": "process",
+   "detail": [
+    "The loop is not a variable: schedule pressure may reorder or slice work smaller but never drop a stage. The run ends when every requirement line is satisfied or recorded as blocked with what it waits on, not when a queue empties."
+   ],
+   "design": [
+    {
+     "choice": "Make the back half of the loop a checklist",
+     "why": "Research and experiments are interesting and get done; tests-first, blind implementation, separate runner, adversarial review and drift check cost time without visible progress, so they quietly vanish. A todo per stage makes a skip visible.",
+     "alternatives": "A process document consulted from memory"
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "17-35",
+     "contains": "A defined development loop decays",
+     "note": "Why the loop exists",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "95-98",
+     "contains": "Create one todo per stage",
+     "note": "The stages section",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Fully written and in daily use on other projects; absent for this repository itself.",
+    "gaps": [
+     "The installed skill is the only copy: the repository's own history does not version it"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  subgraph truth[\"Establish what is true\"]",
+    "    direction LR",
+    "    stage-1-research[\"1 Research\"] --> stage-2-experiment[\"2 Experiment\"] --> stage-3-decide[\"3 Decide\"]",
+    "  end",
+    "  subgraph prove[\"Specify and prove\"]",
+    "    direction LR",
+    "    stage-4-spec[\"4 MECE spec\"] --> stage-5-tests-first[\"5 Tests first\"] --> stage-6-implement-blind[\"6 Implement blind\"] --> stage-7-separate-runner[\"7 Separate runner\"] --> stage-8-review[\"8 Adversarial review\"]",
+    "  end",
+    "  subgraph close[\"Close the loop\"]",
+    "    direction LR",
+    "    stage-9-drift[\"9 Drift check\"] --> stage-10-doc-sync[\"10 Doc sync\"] --> stage-11-commit[\"11 Atomic commit\"] --> stage-12-inbound[\"12 Check inbound\"]",
+    "  end",
+    "  truth -->|\"decision recorded\"| prove",
+    "  prove -->|\"earned pass\"| close",
+    "  close -->|\"ledger updated\"| next-slice([\"Next slice is chosen<br/>from the ledger, not a queue\"])",
+    "  build-profile[\"Project profile<br/>.claude/build-loop.md\"] -->|\"paths, commands, reviewer\"| truth",
+    "  build-hygiene[\"Hygiene<br/>disk and memory\"] -.->|\"beside every stage\"| prove"
+   ],
+   "children": [
+    "stage-1-research",
+    "stage-2-experiment",
+    "stage-3-decide",
+    "stage-4-spec",
+    "stage-5-tests-first",
+    "stage-6-implement-blind",
+    "stage-7-separate-runner",
+    "stage-8-review",
+    "stage-9-drift",
+    "stage-10-doc-sync",
+    "stage-11-commit",
+    "stage-12-inbound",
+    "build-profile",
+    "build-hygiene"
+   ]
+  },
+  "build-profile": {
+   "title": "Project profile",
+   "summary": "A per-project file that names where verbatim requirements, ADRs, specs, tests live, the test command and the reviewer. The skill is project-independent; everything specific lives here.",
+   "kind": "config",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "85-94",
+     "contains": "Load the project profile first",
+     "external": true
+    },
+    {
+     "path": ".claude/state.md",
+     "lines": "3-6",
+     "contains": "no build-loop profile",
+     "note": "Local, untracked state file recording the 2026-10-09 decision"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "This repository deliberately has none: the owner decision on 2026-10-09 was to stand by until asked for factory changes, so the factory is not built with its own loop.",
+    "gaps": [
+     "No .claude/build-loop.md exists in this checkout"
+    ]
+   }
+  },
+  "build-hygiene": {
+   "title": "Hygiene",
+   "summary": "A deterministic script scans disk and memory before fan-out and after merges so a long run does not die of ENOSPC mid-write.",
+   "kind": "harness",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "253-294",
+     "contains": "Hygiene: disk and memory",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/sf/hygiene/hygiene.sh",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Scripts live in the installed skill directory, not in this repo."
+   }
+  },
+  "skills-library": {
+   "title": "Skills library",
+   "summary": "The reusable procedures each stage and role loads. Masters live in ~/.claude/skills (a separate local git repository), not here; this repo keeps the catalog, the retired originals and a CI check on frontmatter.",
+   "kind": "library",
+   "design": [
+    {
+     "choice": "Skills are procedures; roles sit above them",
+     "why": "ADR-0003 keeps skills as what a role loads and replaces none of them, so consolidating skills does not lose step ownership."
+    },
+    {
+     "choice": "Masters live outside the repository",
+     "why": "One shared, versioned home for personal skills across every project and for Codex via a link.",
+     "alternatives": "Copies of each skill in every repo"
+    }
+   ],
+   "files": [
+    {
+     "path": "README.md",
+     "lines": "48-60",
+     "contains": "master copy of every personal skill",
+     "note": "Skills catalog and where the masters live"
+    },
+    {
+     "path": "PROMOTIONS.md",
+     "lines": "7-31",
+     "contains": "Current state",
+     "note": "The promotion ledger"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The catalog and archive are in the repo; most of the working skill set is not.",
+    "gaps": [
+     "README.md lists 5 skills and PROMOTIONS.md about 21; minesweeper, spec-recomposition, biz-decomposer, prd-writer, doc-sync, progress-briefing, ops-dashboard-design, experiment-designer, good-night and good-morning appear in neither"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  skills-spec[\"Spec chain<br/>recompose, sweep, PRD, axioms\"] -->|\"feeds\"| skills-decide[\"Decide and review<br/>one-way-door, review\"]",
+    "  skills-decide -->|\"gates\"| skills-test[\"Tests and evals<br/>eval-designer, experiment-designer\"]",
+    "  skills-test -->|\"shipped by\"| skills-ship[\"Ship and observe<br/>deploy-verify, dashboards, doc-sync\"]",
+    "  skills-session[\"Session control<br/>sf, away-mode, good-night\"] -->|\"drives\"| skills-spec",
+    "  promotions-ledger[\"Promotion ledger<br/>PROMOTIONS.md\"] -.->|\"tracks (partially)\"| skills-decide",
+    "  skills-archive[\"Retired originals<br/>skills/_archive\"] -.->|\"history only\"| skills-decide",
+    "  skills-ci[\"CI frontmatter check\"] -->|\"validates skills/**/SKILL.md\"| skills-archive"
+   ],
+   "children": [
+    "skills-spec",
+    "skills-decide",
+    "skills-test",
+    "skills-ship",
+    "skills-session",
+    "promotions-ledger",
+    "skills-archive",
+    "skills-ci"
+   ]
+  },
+  "skills-spec": {
+   "title": "Spec chain",
+   "summary": "spec-recomposition, minesweeper, biz-decomposer, prd-writer, axiomatic-spec and brownfield-explorer turn a brief into verified, scoped, contract-level requirements.",
+   "kind": "skills",
+   "files": [
+    {
+     "path": "~/.claude/skills/axiomatic-spec/SKILL.md",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/brownfield-explorer/SKILL.md",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/biz-decomposer/SKILL.md",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Installed skills; only axiomatic-spec and brownfield-explorer are in the promotion ledger."
+   }
+  },
+  "skills-decide": {
+   "title": "Decide and review",
+   "summary": "one-way-door (door check then ADR debate), implementation-review (independent review, drift, earned passes), orchestration (division of labour, safe parallel dispatch) and plan-adherence.",
+   "kind": "skills",
+   "files": [
+    {
+     "path": "PROMOTIONS.md",
+     "lines": "7-31",
+     "contains": "one-way-door"
+    },
+    {
+     "path": "~/.claude/skills/one-way-door/SKILL.md",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/implementation-review/SKILL.md",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Merged from the retired sf-* skills on 2026-09-24; the trigger smoke checks exist for most.",
+    "gaps": [
+     "The merged one-way-door skill 'not yet run through the trigger-eval loop' per the promotion ledger"
+    ]
+   }
+  },
+  "skills-test": {
+   "title": "Tests and evals",
+   "summary": "eval-designer designs deterministic eval harnesses; experiment-designer pre-registers a fair comparison between candidate approaches.",
+   "kind": "skills",
+   "files": [
+    {
+     "path": "templates/deterministic-eval-template.py",
+     "contains": "unittest",
+     "note": "The reusable eval template CI runs"
+    },
+    {
+     "path": "~/.claude/skills/eval-designer/SKILL.md",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Installed skills; the template is in this repo and exercised by CI."
+   }
+  },
+  "skills-ship": {
+   "title": "Ship and observe",
+   "summary": "deploy-verify (gate, deploy, verify loop, Deploy Log), ops-dashboard-design, doc-sync and progress-briefing.",
+   "kind": "skills",
+   "files": [
+    {
+     "path": "~/.claude/skills/deploy-verify/SKILL.md",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/doc-sync/SKILL.md",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/ops-dashboard-design/SKILL.md",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Installed skills."
+   }
+  },
+  "skills-session": {
+   "title": "Session control",
+   "summary": "sf, away-mode, good-night and good-morning, session-handoff keep a long unattended run resumable and the owner informed.",
+   "kind": "skills",
+   "files": [
+    {
+     "path": "~/.claude/skills/away-mode/SKILL.md",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/good-night/SKILL.md",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/session-handoff/SKILL.md",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Installed skills."
+   }
+  },
+  "promotions-ledger": {
+   "title": "Promotion ledger",
+   "summary": "A table that tracks each capability's rung (skill, harness) and location, and what is pending.",
+   "kind": "doc",
+   "files": [
+    {
+     "path": "PROMOTIONS.md",
+     "lines": "7-31",
+     "contains": "Current state"
+    },
+    {
+     "path": "PROMOTIONS.md",
+     "lines": "33-37",
+     "contains": "Pending promotions"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Stale: it omits roughly ten installed skills and its own header dates from 2026-09-15 to 2026-09-24.",
+    "gaps": [
+     "Row set no longer matches ~/.claude/skills"
+    ]
+   }
+  },
+  "skills-archive": {
+   "title": "Retired originals",
+   "summary": "The five original sf-* skills (door-guard, adr-debate, interface-auditor, io-analyzer, spec-testing), kept as history after consolidation.",
+   "kind": "archive",
+   "files": [
+    {
+     "path": "skills/_archive/sf-door-guard/SKILL.md",
+     "contains": "name:"
+    },
+    {
+     "path": "docs/plans/2026-09-24-skills-consolidation-proposal.md",
+     "contains": "sf-door-guard",
+     "note": "Why they were merged"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Present and read-only history; not installed."
+   }
+  },
+  "skills-ci": {
+   "title": "CI frontmatter check",
+   "summary": "The only CI job validates that each skills/**/SKILL.md has frontmatter with a name and description, then runs the deterministic eval template.",
+   "kind": "ci",
+   "files": [
+    {
+     "path": ".github/workflows/ci.yml",
+     "lines": "11-51",
+     "contains": "Validate Skill Frontmatters"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "CI never runs tests/ or evals/agents/, so the factory's own code and golden gate are not gated.",
+    "gaps": [
+     "No pytest step in .github/workflows/ci.yml"
+    ]
+   }
+  },
+  "governance-docs": {
+   "title": "Decisions and rules",
+   "summary": "The written authority the rest of the factory obeys: three accepted ADRs, the methodology every agent must follow, the requirements register, binding contracts and the plans.",
+   "kind": "docs",
+   "design": [
+    {
+     "choice": "Rules live in the repo, not only in skills or memory",
+     "why": "Planners and reviewers from other vendors cannot load Claude skills; if a plan conflicts with METHODOLOGY the plan is wrong."
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/factory/METHODOLOGY.md",
+     "lines": "1-4",
+     "contains": "written here, not only in skills"
+    },
+    {
+     "path": "docs/adr/ADR-0003-agent-roles-above-skills.md",
+     "lines": "26-28",
+     "contains": "Decision Outcome"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Decisions are well documented; the summary documents have drifted.",
+    "gaps": [
+     "ROADMAP.md has no mention of the agent layer or ADR-0003",
+     "README says 25/25 tests pass; a bare run here gave 31 passed and 9 failed"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  adrs[\"ADRs 0001 to 0003<br/>docs/adr\"] -->|\"decisions\"| methodology[\"Methodology<br/>rules for every agent\"]",
+    "  methodology -->|\"IDs and sources\"| requirements[\"Requirements register<br/>R-01 to R-24\"]",
+    "  requirements -->|\"published as\"| contracts[\"Contracts<br/>docs/contracts\"]",
+    "  plans[\"Plans and research<br/>Austin plan, capability map\"] -->|\"inform\"| adrs",
+    "  roadmap[\"Roadmap<br/>two-repo phases\"] -.->|\"older frame\"| plans"
+   ],
+   "children": [
+    "adrs",
+    "methodology",
+    "requirements",
+    "contracts",
+    "plans",
+    "roadmap"
+   ]
+  },
+  "adrs": {
+   "title": "Architecture decision records",
+   "summary": "ADR-0001 chooses the Unity-IR dual-plane substrate, ADR-0002 the zero-trust verification substrate, ADR-0003 seven agent roles above skills.",
+   "kind": "docs",
+   "design": [
+    {
+     "choice": "Unity-IR (ADR-0001)",
+     "why": "A deterministic three-layer schema decouples reasoning from lexical syntax; reviewers audit semantic delta rather than lines.",
+     "alternatives": "Raw polyglot source in the model context"
+    },
+    {
+     "choice": "Zero-trust verification (ADR-0002)",
+     "why": "Hashed baselines, design-by-contract and symbolic exploration remove reward hacking structurally.",
+     "alternatives": "Trusting model-written tests"
+    },
+    {
+     "choice": "Roles above skills (ADR-0003)",
+     "why": "Split by context boundary, not pipeline phase; one writer per tree; hooks enforce, prompts advise.",
+     "alternatives": "A fixed seven-stage relay"
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/adr/ADR-0001-unity-invariant-substrate.md",
+     "lines": "26-28",
+     "contains": "Option 3"
+    },
+    {
+     "path": "docs/adr/ADR-0002-epistemic-zero-trust-verification.md",
+     "lines": "26-34",
+     "contains": "Cryptographic Baseline Locking"
+    },
+    {
+     "path": "docs/adr/ADR-0003-agent-roles-above-skills.md",
+     "lines": "26-40",
+     "contains": "Option 3"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "All three accepted. ADR-0002's decision lists four implementation requirements; the code implements only the first.",
+    "gaps": [
+     "deal contracts, CrossHair and hypothesis are in requirements.txt but never imported by factory/",
+     "ADR-0003 itself says roles and hooks are not built yet"
+    ]
+   }
+  },
+  "methodology": {
+   "title": "Methodology",
+   "summary": "Six rules: requirements first, contracts next, evals before features, independent MECE audit, implement blind, deterministic verification then independent review; plus roles, parallel work, gates and 'done means'.",
+   "kind": "docs",
+   "files": [
+    {
+     "path": "docs/factory/METHODOLOGY.md",
+     "lines": "5-12",
+     "contains": "Evals before features"
+    },
+    {
+     "path": "docs/factory/METHODOLOGY.md",
+     "lines": "26-35",
+     "contains": "Pause and ask a person"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "A complete, internally consistent rule set; enforcement is the agent layer's job."
+   }
+  },
+  "requirements": {
+   "title": "Requirements register",
+   "summary": "R-01 to R-24 for the agent layer, each with a source and the tracer bullets that deliver it.",
+   "kind": "docs",
+   "files": [
+    {
+     "path": "docs/factory/requirements.md",
+     "contains": "R-24"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Complete for the agent layer and traced to PRDs and golden cases by the MECE audit."
+   }
+  },
+  "contracts": {
+   "title": "Published contracts",
+   "summary": "Hook input/output, project profile, role specs and generated agent files, stage graph and ticket ledger, plus the binding clarifications that win over PRDs when they differ.",
+   "kind": "docs",
+   "files": [
+    {
+     "path": "docs/contracts/hook-io.md",
+     "lines": "16-18",
+     "contains": "Python API"
+    },
+    {
+     "path": "docs/contracts/clarifications.md",
+     "lines": "1-5",
+     "contains": "Binding clarifications"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Published; evals and implementers both depend on them and on nothing else."
+   }
+  },
+  "plans": {
+   "title": "Plans and research",
+   "summary": "The Austin-ready plan, the seven-agents design, the capability map, the skills consolidation, the minesweeper proposal and a token-saving research note.",
+   "kind": "docs",
+   "files": [
+    {
+     "path": "docs/plans/2026-09-23-austin-ready-software-factory-plan.md",
+     "lines": "36-67",
+     "contains": "flowchart TD",
+     "note": "Ticket-in, PR-out graph"
+    },
+    {
+     "path": "docs/plans/2026-09-24-agent-capability-map.md",
+     "lines": "28-30",
+     "contains": "The seven agents"
+    },
+    {
+     "path": "research/claude-code-token-saving.md",
+     "lines": "6-10",
+     "contains": "Headline"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Rich design material; several documents record 'DESIGN, nothing built' and need a status refresh as work lands."
+   }
+  },
+  "roadmap": {
+   "title": "Roadmap",
+   "summary": "The original two-repository (unity and software-factory) phased roadmap with milestone status.",
+   "kind": "docs",
+   "files": [
+    {
+     "path": "ROADMAP.md",
+     "lines": "70-81",
+     "contains": "software-factory"
+    },
+    {
+     "path": "ROADMAP.md",
+     "lines": "94-96",
+     "contains": "Phased Implementation Roadmap"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Written before the agent layer: it does not mention roles, hooks, contracts or the build loop.",
+    "gaps": [
+     "Needs an update or a pointer to the Austin plan"
+    ]
+   }
+  },
+  "agent-layer": {
+   "title": "Agent layer",
+   "summary": "Seven agent definitions (orchestrator, research, design, audit, implement, test, review) with their own models, tool allowlists and hooks, generated from a project profile so nothing names a specific project. Specified through 14 tracer-bullet PRDs; none implemented.",
+   "kind": "subsystem",
+   "detail": [
+    "Hooks enforce what prompts only advise: path ownership, implement blindness to evals, secrets, git hygiene, a stop gate against weakened tests, and a tamper-evident ticket ledger. All hooks are pure decision functions with no network or model call."
+   ],
+   "design": [
+    {
+     "choice": "Split by context boundary, not pipeline phase",
+     "why": "Phase-based splits add coordination overhead and lost accuracy on sequential tasks.",
+     "alternatives": "A seven-stage relay"
+    },
+    {
+     "choice": "Everything project-specific comes from a profile",
+     "why": "Roles, skills and hooks stay generic; the profile supplies paths, one-way-door patterns, deploy route.",
+     "alternatives": "Per-project forks of the role files"
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/adr/ADR-0003-agent-roles-above-skills.md",
+     "lines": "26-40",
+     "contains": "Option 3"
+    },
+    {
+     "path": "docs/prds/INDEX.md",
+     "lines": "1-30",
+     "contains": "TB-01"
+    },
+    {
+     "path": "docs/plans/2026-09-24-agent-layer-status.md",
+     "lines": "5-20",
+     "contains": "Not done"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The specification layer is built: requirements, 5 contracts, 14 PRDs and 1,302 pre-written eval cases. The runtime layer is not: factory/agents and factory/hooks do not exist.",
+    "gaps": [
+     "Zero of the 14 tracer bullets implemented",
+     "Paused on 2026-09-24; five P0 audit findings still unaddressed"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  profile-loader[\"Project profile<br/>TB-01\"] -->|\"roles, paths, patterns\"| role-specs[\"Seven role specs<br/>TB-02\"]",
+    "  profile-loader -->|\"stages and gates as data\"| stage-graph[\"Stage graph<br/>TB-12\"]",
+    "  role-specs -->|\"rendered to files\"| agent-generator[\"Agent file generator<br/>TB-03\"]",
+    "  profile-loader -->|\"paths and patterns\"| hooks[\"Hooks<br/>TB-04 to TB-10\"]",
+    "  hooks -->|\"audit trail\"| ticket-ledger[\"Ticket ledger<br/>TB-11\"]",
+    "  agent-generator -->|\"agents\"| settings-emitter[\"Settings emitter<br/>TB-13\"]",
+    "  hooks -->|\"hook wiring\"| settings-emitter",
+    "  settings-emitter -->|\"project settings\"| walking-skeleton[\"Walking skeleton<br/>TB-14\"]",
+    "  build-waves[\"Build waves<br/>dependency order\"] -.->|\"sequences\"| walking-skeleton"
+   ],
+   "children": [
+    "profile-loader",
+    "role-specs",
+    "stage-graph",
+    "agent-generator",
+    "hooks",
+    "ticket-ledger",
+    "settings-emitter",
+    "walking-skeleton",
+    "build-waves"
+   ]
+  },
+  "profile-loader": {
+   "title": "Project profile loader",
+   "summary": "Parses and validates the per-project profile: graph, per-role overrides, eval and held-out paths, one-way-door patterns, deploy route, git rules.",
+   "kind": "TB-01",
+   "files": [
+    {
+     "path": "docs/contracts/profile.md",
+     "contains": "profile"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-01 is a published PRD with contracts and pre-written eval cases; no implementation exists."
+   }
+  },
+  "stage-graph": {
+   "title": "Stage graph",
+   "summary": "Loads the stage graph from the profile as data: stages, gates and roles are validated, loops must be declared, small tickets may select a subset of roles.",
+   "kind": "TB-12",
+   "files": [
+    {
+     "path": "docs/contracts/graph-and-ledger.md",
+     "contains": "Ledger"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-12 is a published PRD with contracts and pre-written eval cases; no implementation exists."
+   }
+  },
+  "agent-generator": {
+   "title": "Agent file generator",
+   "summary": "Renders each role spec plus the profile into a Claude Code agent file using only supported frontmatter fields, at most 20 tools, and no platform names.",
+   "kind": "TB-03",
+   "files": [
+    {
+     "path": "docs/contracts/roles-and-generation.md",
+     "contains": "RoleSpec"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-03 is a published PRD with contracts and pre-written eval cases; no implementation exists."
+   }
+  },
+  "ticket-ledger": {
+   "title": "Ticket ledger",
+   "summary": "An append-only per-ticket Markdown ledger with fixed sections; each agent may write only its own section; a session-start loader and an audit-trail entry per sub-agent run; tampering with earlier entries is detected.",
+   "kind": "TB-11",
+   "files": [
+    {
+     "path": "docs/contracts/graph-and-ledger.md",
+     "contains": "Ledger"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-11 is a published PRD with contracts and pre-written eval cases; no implementation exists."
+   }
+  },
+  "settings-emitter": {
+   "title": "Settings emitter",
+   "summary": "Turns the profile into project-level hook and permission settings as a reviewable diff; idempotent, never touches user-level settings, never writes secrets.",
+   "kind": "TB-13",
+   "files": [
+    {
+     "path": "docs/prds/TB-13-settings-emitter.md",
+     "contains": "TB-13"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-13 is a published PRD with contracts and pre-written eval cases; no implementation exists."
+   }
+  },
+  "walking-skeleton": {
+   "title": "Walking skeleton",
+   "summary": "End to end: a fixture project's profile produces agent files and settings, and a simulated event stream with no model calls is allowed or blocked exactly as the requirements say; Jev routing is logged in shadow.",
+   "kind": "TB-14",
+   "files": [
+    {
+     "path": "docs/prds/TB-14-walking-skeleton.md",
+     "contains": "TB-14"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-14 is a published PRD with contracts and pre-written eval cases; no implementation exists.",
+    "gaps": [
+     "Whether a sub-agent's frontmatter Stop hook runs as SubagentStop is unverified (clarification C-34)"
+    ]
+   }
+  },
+  "build-waves": {
+   "title": "Build waves",
+   "summary": "Five waves from the dependency graph: TB-01 and TB-02; then TB-03, TB-04, TB-12; then seven parallel hooks in two batches; then TB-13; then TB-14. Slices in a wave are file-disjoint and run in separate worktrees.",
+   "kind": "plan",
+   "design": [
+    {
+     "choice": "Dependency graph from real inputs, not list order",
+     "why": "Items that need only committed inputs run in parallel; the orchestrator alone edits shared seams between agents."
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/prds/INDEX.md",
+     "lines": "31-35",
+     "contains": "Wave 5"
+    },
+    {
+     "path": "docs/factory/METHODOLOGY.md",
+     "lines": "20-24",
+     "contains": "dependency graph"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "Plan only; no wave has started."
+   }
+  },
+  "role-specs": {
+   "title": "Seven role specs",
+   "summary": "Orchestrator, Research, Design, Audit, Implement, Test and Review, each with a model, tools, skills, MCP servers and hooks.",
+   "kind": "TB-02",
+   "design": [
+    {
+     "choice": "Narrow tools, smallest adequate model",
+     "why": "Every subagent inherits the plugin and skill listing, so each role lists at most 20 tools and only read tools of an MCP server unless it needs more."
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-seven-core-agents.md",
+     "lines": "24-34",
+     "contains": "**Implement**"
+    },
+    {
+     "path": "docs/contracts/roles-and-generation.md",
+     "lines": "5-7",
+     "contains": "RoleSpec"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "Model choices are proposals to be measured before fixing."
+   },
+   "diagram": [
+    "flowchart LR",
+    "  role-orchestrator[\"Orchestrator<br/>sequences, no app code\"] -->|\"fan-out, read-only\"| role-research[\"Research\"]",
+    "  role-orchestrator -->|\"brief to PRD, ADR\"| role-design[\"Design\"]",
+    "  role-orchestrator -->|\"legacy read pass\"| role-audit[\"Audit\"]",
+    "  role-orchestrator -->|\"one per worktree\"| role-implement[\"Implement<br/>only writer of app code\"]",
+    "  role-design -->|\"spec\"| role-test[\"Test<br/>evals first, then frozen\"]",
+    "  role-test -.->|\"hidden from\"| role-implement",
+    "  role-implement -->|\"diff and traces\"| role-review[\"Review<br/>different vendor\"]",
+    "  role-test -->|\"verdicts\"| role-review"
+   ],
+   "children": [
+    "role-orchestrator",
+    "role-research",
+    "role-design",
+    "role-audit",
+    "role-implement",
+    "role-test",
+    "role-review"
+   ]
+  },
+  "role-orchestrator": {
+   "title": "Orchestrator",
+   "summary": "Holds state, sequences stages, dispatches, calls humans at gates and runs deploy. Writes no application code; its routing is code, not model judgement.",
+   "kind": "role",
+   "detail": [
+    "Proposed model: Opus (main session).",
+    "One-way-door hook asks a human before deploys and destructive actions."
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-seven-core-agents.md",
+     "lines": "24-34",
+     "contains": "**Orchestrator**",
+     "note": "Role table row"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "A role definition in a design table; no generated agent file exists. Model choice is a proposal."
+   }
+  },
+  "role-research": {
+   "title": "Research",
+   "summary": "Verifies facts and surveys topics; orients in a repo. Read-only fan-out; each returns a 1,000 to 2,000 token summary.",
+   "kind": "role",
+   "detail": [
+    "Proposed model: Sonnet lead, Haiku workers.",
+    "Writes only research/*.md and its ledger section."
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-seven-core-agents.md",
+     "lines": "24-34",
+     "contains": "**Research**",
+     "note": "Role table row"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "A role definition in a design table; no generated agent file exists. Model choice is a proposal."
+   }
+  },
+  "role-design": {
+   "title": "Design",
+   "summary": "Brief to PRD, axioms and contracts, one-way-door check, ADR. Runs behind gates G0, G1 and G2.",
+   "kind": "role",
+   "detail": [
+    "Proposed model: Opus.",
+    "Writes only docs/prd, docs/spec, docs/adr."
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-seven-core-agents.md",
+     "lines": "24-34",
+     "contains": "**Design**",
+     "note": "Role table row"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "A role definition in a design table; no generated agent file exists. Model choice is a proposal."
+   }
+  },
+  "role-audit": {
+   "title": "Audit",
+   "summary": "Complete read pass over legacy code before a rewrite; produces a bug catalog. Fan-out one unit per dispatch.",
+   "kind": "role",
+   "detail": [
+    "Proposed model: Sonnet per unit, Haiku for inventory.",
+    "Writes only docs/audit."
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-seven-core-agents.md",
+     "lines": "24-34",
+     "contains": "**Audit**",
+     "note": "Role table row"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "A role definition in a design table; no generated agent file exists. Model choice is a proposal."
+   }
+  },
+  "role-implement": {
+   "title": "Implement",
+   "summary": "Builds one slice against the spec; the only role that edits application code, one per worktree, in a fresh-context loop with a cap.",
+   "kind": "role",
+   "detail": [
+    "Proposed model: Sonnet; Opus after repeated failure.",
+    "Blind to eval and held-out paths by hook; cannot edit frozen tests."
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-seven-core-agents.md",
+     "lines": "24-34",
+     "contains": "**Implement**",
+     "note": "Role table row"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "A role definition in a design table; no generated agent file exists. Model choice is a proposal."
+   }
+  },
+  "role-test": {
+   "title": "Test",
+   "summary": "Writes evals first from the spec and freezes them, runs them, triages failures and runs post-deploy checks.",
+   "kind": "role",
+   "detail": [
+    "Proposed model: Opus to author, Haiku to run.",
+    "Writes eval files only before implementation exists."
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-seven-core-agents.md",
+     "lines": "24-34",
+     "contains": "**Test**",
+     "note": "Role table row"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "A role definition in a design table; no generated agent file exists. Model choice is a proposal."
+   }
+  },
+  "role-review": {
+   "title": "Review",
+   "summary": "Independent read of the diff, traces and passes; drift against requirements. Read-only; verdict only.",
+   "kind": "role",
+   "detail": [
+    "Proposed model: A different vendor from Implement where available.",
+    "Verdict must be APPROVE or REJECT with citations."
+   ],
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-seven-core-agents.md",
+     "lines": "24-34",
+     "contains": "**Review**",
+     "note": "Role table row"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "A role definition in a design table; no generated agent file exists. Model choice is a proposal.",
+    "gaps": [
+     "Cross-vendor review depends on a second billing surface; Codex roles are out of scope by owner decision"
+    ]
+   }
+  },
+  "hooks": {
+   "title": "Hooks",
+   "summary": "Seven deterministic hook specs share one core: a payload parser and decision type, then guards for paths, blindness, secrets, Bash, stop and sub-agent stop. Guards fail closed on malformed input.",
+   "kind": "TB-04..10",
+   "design": [
+    {
+     "choice": "Hooks enforce; prompts advise",
+     "why": "Each 'must never' is a hook or a missing tool, so an agent cannot talk its way past it.",
+     "alternatives": "Instructions in the role prompt"
+    },
+    {
+     "choice": "Hooks are pure decision functions with a thin protocol adapter",
+     "why": "No network, no model call, easy to test with recorded payloads.",
+     "alternatives": "Hooks that call a model to judge"
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/contracts/hook-io.md",
+     "lines": "1-30",
+     "contains": "PreToolUse"
+    },
+    {
+     "path": "docs/plans/2026-09-24-agent-capability-map.md",
+     "lines": "104-108",
+     "contains": "Secrets"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "Contract published, eval cases written, no hook code exists."
+   },
+   "diagram": [
+    "flowchart LR",
+    "  hook-core[\"Hook core<br/>payload + decision (TB-04)\"] -->|\"PreToolUse: where may this role write?\"| path-guard[\"Path guard<br/>TB-05\"]",
+    "  hook-core -->|\"PreToolUse: implement only\"| blindness-guard[\"Blindness guard<br/>TB-06\"]",
+    "  hook-core -->|\"PreToolUse: key-shaped value?\"| secrets-guard[\"Secrets guard<br/>TB-07\"]",
+    "  hook-core -->|\"PreToolUse: Bash\"| bash-guard[\"Bash guard<br/>TB-08\"]",
+    "  hook-core -->|\"Stop: implement says done\"| stop-gate[\"Stop gate<br/>TB-09\"]",
+    "  hook-core -->|\"SubagentStop\"| subagent-validators[\"Sub-agent validators<br/>TB-10\"]"
+   ],
+   "children": [
+    "hook-core",
+    "path-guard",
+    "blindness-guard",
+    "secrets-guard",
+    "bash-guard",
+    "stop-gate",
+    "subagent-validators"
+   ]
+  },
+  "hook-core": {
+   "title": "Hook core",
+   "summary": "A frozen Payload dataclass, a Decision type (allow, deny, ask) and a thin adapter that turns stdin JSON into a decision and exit code; the command-line shape every hook shares.",
+   "kind": "TB-04",
+   "files": [
+    {
+     "path": "docs/prds/TB-04-hook-core.md",
+     "contains": "TB-04"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-04 PRD and eval cases exist; no hook code."
+   }
+  },
+  "path-guard": {
+   "title": "Path guard",
+   "summary": "Each role may write only its own folders (Research under research/, Design under docs/prd, spec and adr, Audit under docs/audit, Review nowhere). Only Implement writes application code.",
+   "kind": "TB-05",
+   "files": [
+    {
+     "path": "docs/prds/TB-05-path-guard.md",
+     "contains": "TB-05"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-05 PRD and eval cases exist; no hook code.",
+    "gaps": [
+     "MECE audit P0-4: Bash writes by full-mode roles bypass the path guard, and .factory/ and .claude/ are not protected"
+    ]
+   }
+  },
+  "secrets-guard": {
+   "title": "Secrets guard",
+   "summary": "For every agent, blocks Write, Edit and Bash content containing a key-shaped value (sk-ant-, ghp_, private-key headers); allows references by variable name.",
+   "kind": "TB-07",
+   "files": [
+    {
+     "path": "docs/prds/TB-07-secrets-guard.md",
+     "contains": "TB-07"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-07 PRD and eval cases exist; no hook code."
+   }
+  },
+  "bash-guard": {
+   "title": "Bash guard",
+   "summary": "Blocks git add -A and add ., --no-verify, force push, amend and rebase without approval; asks a human before destructive SQL, resource deletion, any deploy and every profile one-way-door pattern.",
+   "kind": "TB-08",
+   "files": [
+    {
+     "path": "docs/prds/TB-08-bash-guard.md",
+     "contains": "TB-08"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-08 PRD and eval cases exist; no hook code.",
+    "gaps": [
+     "Golden set has no case with a project-specific one-way-door pattern (audit P0-1)"
+    ]
+   }
+  },
+  "stop-gate": {
+   "title": "Stop gate",
+   "summary": "Refuses 'done' from Implement if a test was skipped, xfailed, deleted or given a trivial assertion, a frozen test's hash changed, or there is no evidence of a full-suite run.",
+   "kind": "TB-09",
+   "files": [
+    {
+     "path": "docs/prds/TB-09-stop-gate.md",
+     "contains": "TB-09"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-09 PRD and eval cases exist; no hook code.",
+    "gaps": [
+     "'No evidence of a full-suite run' has no golden case (audit P0-3)"
+    ]
+   }
+  },
+  "subagent-validators": {
+   "title": "Sub-agent validators",
+   "summary": "At SubagentStop: Research must have a sources section and mark unverified claims; Audit rows need file, line and severity; Review verdict must be APPROVE or REJECT with citations.",
+   "kind": "TB-10",
+   "files": [
+    {
+     "path": "docs/prds/TB-10-subagent-stop-validators.md",
+     "contains": "TB-10"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "TB-10 PRD and eval cases exist; no hook code."
+   }
+  },
+  "blindness-guard": {
+   "title": "Blindness guard",
+   "summary": "For the implement agent only, denies Read, Grep, Glob and Bash commands that reference eval or held-out paths, including indirect forms. Every other role is never affected.",
+   "kind": "TB-06",
+   "design": [
+    {
+     "choice": "Block by hook on agent_type, not by prompt instruction",
+     "why": "A PreToolUse payload carries agent_type, so one shared hook can block a path for one agent only.",
+     "alternatives": "Read(evals/**) permission deny alone, which does not stop shell reads"
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/prds/TB-06-blindness-guard.md",
+     "lines": "14-19",
+     "contains": "Required behaviour"
+    },
+    {
+     "path": "docs/plans/2026-09-24-agent-capability-map.md",
+     "lines": "15",
+     "contains": "Blindness limits"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "PRD and eval cases exist, no hook code; known holes are listed below.",
+    "gaps": [
+     "Golden set had no allowed-Bash case, so deny-all-Bash would pass (audit P0-2)",
+     "A shell script that reads eval files without naming them is not stopped; the OS sandbox is the only backstop"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  call[\"Tool call from a sub-agent\"] -->|\"payload.agent_type\"| role-check{\"implement?\"}",
+    "  role-check -->|\"no: always allow\"| allow[\"Allow\"]",
+    "  role-check -->|\"yes\"| bi-paths[\"Protected paths<br/>paths.eval, paths.held_out\"]",
+    "  bi-paths -->|\"file_path, path, glob\"| bi-direct[\"Read, Grep, Glob\"]",
+    "  bi-paths -->|\"command text\"| bi-bash[\"Bash commands\"]",
+    "  bi-direct -->|\"normalise then match\"| bi-indirect[\"Indirect forms<br/>../ globs ~ symlinks\"]",
+    "  bi-bash -->|\"normalise then match\"| bi-indirect",
+    "  bi-indirect -.->|\"cannot see\"| bi-limits[\"Known limits<br/>scripts that read without naming\"]"
+   ],
+   "children": [
+    "bi-paths",
+    "bi-direct",
+    "bi-bash",
+    "bi-indirect",
+    "bi-limits"
+   ]
+  },
+  "bi-paths": {
+   "title": "Protected paths",
+   "summary": "paths.eval and paths.held_out from the profile, never hard-coded; a path is protected after normalising against cwd, collapsing . and .., and resolving symlinks.",
+   "kind": "rule",
+   "files": [
+    {
+     "path": "docs/prds/TB-06-blindness-guard.md",
+     "lines": "16",
+     "contains": "Protected paths"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "Specified; generality is not yet gated at golden level (audit P0-1)."
+   }
+  },
+  "bi-direct": {
+   "title": "Read, Grep, Glob",
+   "summary": "Deny a protected file_path, and deny a Grep or Glob whose path is missing, '.', or a strict ancestor of a protected path, telling the agent to search a specific subfolder instead.",
+   "kind": "rule",
+   "files": [
+    {
+     "path": "docs/prds/TB-06-blindness-guard.md",
+     "lines": "17",
+     "contains": "Read: deny"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "Specified."
+   }
+  },
+  "bi-bash": {
+   "title": "Bash commands",
+   "summary": "Deny commands that name a protected path in any argument form, run recursive searches that would reach it, or use interpreter one-liners; allow ordinary builds, tests of the agent's own directories, git diff and ls src.",
+   "kind": "rule",
+   "files": [
+    {
+     "path": "docs/prds/TB-06-blindness-guard.md",
+     "lines": "18",
+     "contains": "Bash: deny"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "Specified; a deny-all implementation would still pass the golden set until P0-2 is fixed."
+   }
+  },
+  "bi-indirect": {
+   "title": "Indirect forms",
+   "summary": "Relative, absolute, parent (../), quoted, glob (ev*/, **/evals), tilde and $VAR forms that could expand to a protected path.",
+   "kind": "rule",
+   "files": [
+    {
+     "path": "docs/prds/TB-06-blindness-guard.md",
+     "lines": "18",
+     "contains": "glob"
+    }
+   ],
+   "coverage": {
+    "status": "designed",
+    "note": "Specified in the PRD with many diagnostic cases."
+   }
+  },
+  "bi-limits": {
+   "title": "Known limits",
+   "summary": "A permissions.deny rule applies to sub-agents and best-effort to Grep and Glob, but does not stop a shell command or script that reads the files without naming them. The sandbox is the OS-level backstop.",
+   "kind": "limit",
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-agent-capability-map.md",
+     "lines": "15",
+     "contains": "does **not** stop a shell command"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "An acknowledged residual hole, recorded in the design but with no mitigation built.",
+    "gaps": [
+     "This build's own implementers are blind only by instruction until hooks exist (audit P0-5)"
+    ]
+   }
+  },
+  "verification-engine": {
+   "title": "Verification engine (sf CLI)",
+   "summary": "A small deterministic Python package behind the sf command: it classifies architectural doors, locks test baselines against reward hacking, runs a gated synthesis loop around the Claude CLI, and transpiles with a proved equivalence. About 2,000 lines.",
+   "kind": "subsystem",
+   "design": [
+    {
+     "choice": "Bare-metal CLI over a framework",
+     "why": "A lightweight Python runner that shells out to the local claude CLI; sub-70 ms invariant checks.",
+     "alternatives": "A heavier orchestration service"
+    }
+   ],
+   "files": [
+    {
+     "path": "factory/cli.py",
+     "lines": "237-293",
+     "contains": "add_subparsers",
+     "note": "Four subcommands"
+    },
+    {
+     "path": "pyproject.toml",
+     "lines": "29-31",
+     "contains": "[project.scripts]"
+    },
+    {
+     "path": "README.md",
+     "lines": "62-80",
+     "contains": "sf audit"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Code and tests exist and run here, but only 31 of 40 tests pass in a clean environment.",
+    "gaps": [
+     "9 tests fail without the sibling unity repo: tests hard-code /Users/kaushal/... paths",
+     "pyproject.toml pins unity-ir to file:///Users/kaushal/Projects/unity, so a clean install cannot resolve it",
+     "CI does not run these tests"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  sf-cli[\"sf CLI<br/>factory/cli.py\"] -->|\"sf audit\"| governance[\"Governance engine<br/>door classification\"]",
+    "  sf-cli -->|\"sf verify\"| zero-trust[\"Zero-trust substrate<br/>test integrity\"]",
+    "  sf-cli -->|\"sf run\"| synthesis[\"Synthesis engine<br/>gated patch loop\"]",
+    "  sf-cli -->|\"sf transpile\"| transpiler[\"Transpiler<br/>Python to Go\"]",
+    "  synthesis -->|\"gate 1\"| governance",
+    "  synthesis -->|\"gate 2\"| zero-trust",
+    "  synthesis -->|\"claude -p --restricted\"| claude-cli[\"Claude Code CLI<br/>external\"]",
+    "  governance -->|\"semantic delta\"| unity-ir[\"unity-ir compiler<br/>external, optional\"]",
+    "  transpiler -->|\"equivalence proof\"| unity-ir"
+   ],
+   "children": [
+    "sf-cli",
+    "governance",
+    "zero-trust",
+    "synthesis",
+    "transpiler",
+    "claude-cli",
+    "unity-ir"
+   ]
+  },
+  "sf-cli": {
+   "title": "sf CLI",
+   "summary": "Argparse entry point with four subcommands: audit, verify, run and transpile; installed as sf and as a backward-compatible factory alias.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/cli.py",
+     "lines": "237-273",
+     "contains": "add_subparsers"
+    },
+    {
+     "path": "pyproject.toml",
+     "lines": "29-31",
+     "contains": "sf = "
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented with tests in tests/test_cli.py; two of its tests need the unity repo's example files."
+   }
+  },
+  "governance": {
+   "title": "Governance engine",
+   "summary": "Classifies a change as a one-way or two-way door from the semantic delta and source patterns (lock removal, purity loss, contract violation, public API, schema, auth boundary, symbol removal) and drafts an ADR.",
+   "kind": "module",
+   "design": [
+    {
+     "choice": "Two door types with eight risk categories",
+     "why": "ONE_WAY means irreversible with high blast radius and requires debate and an ADR; TWO_WAY runs autonomously.",
+     "alternatives": "A single severity score"
+    }
+   ],
+   "files": [
+    {
+     "path": "factory/governance.py",
+     "lines": "28-43",
+     "contains": "ONE_WAY"
+    },
+    {
+     "path": "factory/governance.py",
+     "lines": "214-222",
+     "contains": "audit_source_pair"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Works through Unity when it is installed and falls back to pattern checks when it is not.",
+    "gaps": [
+     "Door tests that need the Unity compiler fail on a clean checkout"
+    ]
+   }
+  },
+  "zero-trust": {
+   "title": "Zero-trust substrate",
+   "summary": "Locks pre-existing tests by SHA-256 baseline manifest and parses the AST to catch reward hacking: dropped assertion counts, injected skip or xfail, and trivial assertions such as assert True.",
+   "kind": "module",
+   "design": [
+    {
+     "choice": "Hash the tests, scan the AST, do not ask a model",
+     "why": "Reward hacking by an agent that writes both code and tests is caught structurally.",
+     "alternatives": "LLM judging whether tests were weakened"
+    }
+   ],
+   "files": [
+    {
+     "path": "factory/zero_trust.py",
+     "lines": "73-120",
+     "contains": "class BaselineHashGuard"
+    },
+    {
+     "path": "factory/zero_trust.py",
+     "lines": "208-244",
+     "contains": "class ZeroTrustGate"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The hash and AST guard is implemented and its tests pass. The formal-proof half promised by ADR-0002 is not.",
+    "gaps": [
+     "ZeroTrustGate accepts contract_violations but synthesis never supplies them",
+     "z3, deal, crosshair and hypothesis are never imported by factory/"
+    ]
+   }
+  },
+  "transpiler": {
+   "title": "Polyglot transpiler",
+   "summary": "Synthesizes a cross-lingual anchor (for example Python to Go) and claims a certified zero semantic delta between source and target.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/transpiler.py",
+     "lines": "65-80",
+     "contains": "class PolyglotTranspiler"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Implemented; all five of its tests fail in a clean environment because they need the Unity compiler and sibling example files."
+   }
+  },
+  "claude-cli": {
+   "title": "Claude Code CLI",
+   "summary": "The synthesis step shells out to claude -p with --restricted, which removes the built-in tools that run commands or code, so the call produces text only.",
+   "kind": "external",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "151-166",
+     "contains": "--restricted"
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Verified against this machine's claude --help: --restricted exists."
+   }
+  },
+  "unity-ir": {
+   "title": "Unity-IR compiler",
+   "summary": "A sibling repository that lowers code to a canonical three-layer IR and computes semantic delta with Z3. Optional at runtime: the governance engine falls back to patterns when it is missing.",
+   "kind": "external",
+   "files": [
+    {
+     "path": "factory/governance.py",
+     "lines": "20-26",
+     "contains": "UNITY_AVAILABLE"
+    },
+    {
+     "path": "ROADMAP.md",
+     "lines": "56-68",
+     "contains": "unity"
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Separate repository, pinned in pyproject.toml to a developer's absolute path."
+   }
+  },
+  "synthesis": {
+   "title": "Synthesis engine",
+   "summary": "Gathers context, asks the Claude CLI for a candidate patch, stages it atomically, and accepts it only if three deterministic gates pass; otherwise it rolls back and retries with the failure as feedback, up to three times.",
+   "kind": "module",
+   "design": [
+    {
+     "choice": "Atomic staging with backups and rollback",
+     "why": "A rejected candidate leaves the tree exactly as it found it.",
+     "alternatives": "Applying patches in place and fixing forward"
+    },
+    {
+     "choice": "Deterministic gates, then self-repair",
+     "why": "Failure text from a gate, not model self-assessment, drives the next attempt.",
+     "alternatives": "Asking the model if its patch is good"
+    }
+   ],
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "136-150",
+     "contains": "class SynthesisEngine"
+    },
+    {
+     "path": "factory/synthesis.py",
+     "lines": "304-306",
+     "contains": "max_retries"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The loop is implemented with tests; one governance-rejection test needs Unity. The Claude call has a 600 s timeout and no cost accounting."
+   },
+   "diagram": [
+    "flowchart TD",
+    "  syn-context[\"Gather context<br/>sources, Unity-IR, tests\"] --> syn-candidate[\"Candidate patch<br/>claude -p --restricted\"]",
+    "  syn-candidate --> syn-stage[\"Stage atomically<br/>keep backups\"]",
+    "  syn-stage --> syn-gate1{\"Gate 1<br/>one-way door?\"}",
+    "  syn-gate1 -->|\"clear\"| syn-gate2{\"Gate 2<br/>tests weakened?\"}",
+    "  syn-gate2 -->|\"clear\"| syn-gate3{\"Gate 3<br/>suite passes?\"}",
+    "  syn-gate3 -->|\"pass\"| syn-receipt[\"Receipt<br/>files, iterations\"]",
+    "  syn-gate1 -->|\"fail\"| syn-repair[\"Rollback and retry<br/>feedback from gate\"]",
+    "  syn-gate2 -->|\"fail\"| syn-repair",
+    "  syn-gate3 -->|\"fail\"| syn-repair",
+    "  syn-repair -->|\"up to 3 attempts\"| syn-candidate"
+   ],
+   "children": [
+    "syn-context",
+    "syn-candidate",
+    "syn-stage",
+    "syn-gate1",
+    "syn-gate2",
+    "syn-gate3",
+    "syn-repair",
+    "syn-receipt"
+   ]
+  },
+  "syn-context": {
+   "title": "Gather context",
+   "summary": "Reads target source files, lowers them to Unity-IR where possible, and collects baseline test files and their hashes.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "168-176",
+     "contains": "extract_repo_context"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "syn-candidate": {
+   "title": "Candidate patch",
+   "summary": "Builds the prompt (spec, context, previous failure feedback) and calls the local claude CLI in restricted mode, so it returns text and takes no actions.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "151-166",
+     "contains": "_call_claude_cli"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; a dry-run mode skips the call."
+   }
+  },
+  "syn-stage": {
+   "title": "Stage atomically",
+   "summary": "Parses the response into file patches, records original contents as backups, then writes the new files.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "355-358",
+     "contains": "backups[target_path]"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "syn-gate1": {
+   "title": "Gate 1: governance",
+   "summary": "Compares each changed non-test source file with its original; any ONE_WAY risk rejects the candidate and rolls back with the risk descriptions as feedback.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "359-386",
+     "contains": "Gate 1: Governance Matrix"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Works; its test needs the Unity compiler to detect lock removal."
+   }
+  },
+  "syn-gate2": {
+   "title": "Gate 2: zero-trust",
+   "summary": "Verifies the baseline manifest and original test contents: deleted, weakened or skipped assertions reject the candidate.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "388-403",
+     "contains": "Gate 2: Epistemic Zero-Trust Gate"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; contract violations are never fed in."
+   }
+  },
+  "syn-gate3": {
+   "title": "Gate 3: run the tests",
+   "summary": "Runs the project's test suite on the staged tree; failure feeds the last 1,500 characters of output back as feedback.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "405-413",
+     "contains": "Gate 3: Test Suite Execution"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "syn-repair": {
+   "title": "Rollback and retry",
+   "summary": "Atomically restores backups and loops with the gate's failure text; after max_retries (default 3) returns a failure result with the last feedback.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "447-455",
+     "contains": "def _rollback"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "syn-receipt": {
+   "title": "Receipt",
+   "summary": "On success returns modified files, iteration count and a generated receipt of what was done.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/synthesis.py",
+     "lines": "477-495",
+     "contains": "_generate_receipt"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "evals-gate": {
+   "title": "Evals and golden gate",
+   "summary": "Evals are authored from published contracts before any implementer exists, then locked. 1,302 cases (129 golden must-pass, 1,173 diagnostic) all resolve to 'blocked' until something implements them; an independent audit found the golden gate not collectively exhaustive.",
+   "kind": "subsystem",
+   "design": [
+    {
+     "choice": "A case written early resolves to blocked, never pass",
+     "why": "lib.need() imports the producer; if it is missing the case is blocked, so a skeleton cannot earn a green.",
+     "alternatives": "Skipping cases until the feature exists"
+    },
+    {
+     "choice": "Golden membership is locked in GOLDEN.json",
+     "why": "run.py requires the golden-tagged set to equal the list exactly; changing it is a reviewed baseline update."
+    }
+   ],
+   "files": [
+    {
+     "path": "evals/agents/README.md",
+     "lines": "15-17",
+     "contains": "Golden membership"
+    },
+    {
+     "path": "evals/agents/run.py",
+     "lines": "30-50",
+     "contains": "GOLDEN VERDICT"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The suite is built and runs; its gate is not yet trustworthy.",
+    "gaps": [
+     "Golden verdict is NOT GREEN by design until implementation, and MECE fails",
+     "Eval results are gitignored (evals/agents/results/)"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  contracts-in[\"Published contracts<br/>docs/contracts\"] -->|\"expectations quoted from\"| eval-cases[\"Eval cases<br/>129 golden, 1,173 diagnostic\"]",
+    "  eval-cases -->|\"pytest + run.py\"| eval-runner[\"Runner and verdict<br/>blocked, pass, fail\"]",
+    "  eval-cases -->|\"graded as MECE by\"| mece-audit[\"Independent MECE audit<br/>verdict: FAIL\"]",
+    "  mece-audit -->|\"five blocking findings\"| golden-fix[\"Golden gate fixes<br/>not yet applied\"]",
+    "  trigger-smoke[\"Skill trigger smoke checks<br/>docs/evals/triggers\"] -.->|\"separate, skill-level\"| eval-cases"
+   ],
+   "children": [
+    "contracts-in",
+    "eval-cases",
+    "eval-runner",
+    "mece-audit",
+    "golden-fix",
+    "trigger-smoke"
+   ]
+  },
+  "contracts-in": {
+   "title": "Published contracts",
+   "summary": "Evals and implementers both depend on the contracts in docs/contracts and nothing else; expectations are quoted or paraphrased from them with the clause checked.",
+   "kind": "input",
+   "files": [
+    {
+     "path": "evals/agents/README.md",
+     "lines": "13",
+     "contains": "Expectations come only from the published contracts"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Published and used as the single source for expectations."
+   }
+  },
+  "eval-cases": {
+   "title": "Eval cases",
+   "summary": "pytest tests tagged with an id (TB05-G-001 golden or TB05-D-114 diagnostic), a tier, the tracer bullet and the requirement ids; fixture profiles base.yaml and alt.yaml vary project settings.",
+   "kind": "artifact",
+   "files": [
+    {
+     "path": "evals/agents/README.md",
+     "lines": "5-9",
+     "contains": "Case model"
+    },
+    {
+     "path": "evals/agents/GOLDEN.json",
+     "contains": "TB"
+    },
+    {
+     "path": "evals/agents/lib.py",
+     "lines": "19-22",
+     "contains": "def need"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "1,302 cases exist across TB-01 to TB-14, with per-TB coverage notes.",
+    "gaps": [
+     "All blocked: nothing under test is implemented"
+    ]
+   }
+  },
+  "eval-runner": {
+   "title": "Runner and verdict",
+   "summary": "run.py runs pytest, writes results/latest.json and prints counts per tier, per tracer bullet and per requirement; the golden verdict is green only if every golden case passes and the membership matches.",
+   "kind": "tool",
+   "files": [
+    {
+     "path": "evals/agents/run.py",
+     "lines": "30-50",
+     "contains": "GOLDEN VERDICT"
+    },
+    {
+     "path": "evals/agents/README.md",
+     "lines": "19",
+     "contains": "python evals/agents/run.py"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Runs; plain pytest does not collect evals/ (testpaths = tests)."
+   }
+  },
+  "trigger-smoke": {
+   "title": "Trigger smoke checks",
+   "summary": "A small checker that tests whether five skills' descriptions trigger on realistic prompts.",
+   "kind": "tool",
+   "files": [
+    {
+     "path": "docs/evals/triggers/trigger_check.py",
+     "contains": "def "
+    },
+    {
+     "path": "docs/evals/triggers/README.md",
+     "contains": "trigger"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Smoke-level only for five of the skills; not part of CI."
+   }
+  },
+  "golden-fix": {
+   "title": "Golden gate fixes",
+   "summary": "The remedial set from the audit: swap in cases that vary project settings, add an allowed-Bash case, add the full-suite-evidence case, protect .factory/ and .claude/, and make implementer blindness mechanical.",
+   "kind": "todo",
+   "files": [
+    {
+     "path": "docs/plans/2026-09-24-agent-layer-status.md",
+     "lines": "9-15",
+     "contains": "P0"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Not applied: the last change to evals/ is the audit itself (2026-09-24) and the status note says to fix these before any implementer starts."
+   }
+  },
+  "mece-audit": {
+   "title": "Independent MECE audit",
+   "summary": "A read-only agent that did not author the cases graded the golden gate for mutual exclusivity and exhaustiveness. Verdict: FAIL. Mostly non-redundant (4 overlaps) but a shortcut implementation passes the whole golden set.",
+   "kind": "audit",
+   "design": [
+    {
+     "choice": "The author of a gate does not grade it",
+     "why": "A separate agent checks the golden set against the requirements and the repository before implementers start.",
+     "alternatives": "The eval author self-certifying coverage"
+    }
+   ],
+   "files": [
+    {
+     "path": "evals/agents/audit/MECE-AUDIT.md",
+     "lines": "9-16",
+     "contains": "MECE: FAIL"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "The audit is complete and its findings are specific."
+   },
+   "diagram": [
+    "flowchart LR",
+    "  audit-verdict[\"Verdict: MECE FAIL\"] --> p0-generality[\"P0-1 Generality<br/>not gated at golden\"]",
+    "  audit-verdict --> p0-bash[\"P0-2 No allowed-Bash case\"]",
+    "  audit-verdict --> p0-evidence[\"P0-3 No full-suite evidence case\"]",
+    "  audit-verdict --> p0-tamper[\"P0-4 Implement can edit<br/>its own gates\"]",
+    "  audit-verdict --> p0-blind[\"P0-5 Blind by instruction only\"]"
+   ],
+   "children": [
+    "audit-verdict",
+    "p0-generality",
+    "p0-bash",
+    "p0-evidence",
+    "p0-tamper",
+    "p0-blind"
+   ]
+  },
+  "audit-verdict": {
+   "title": "Audit verdict",
+   "summary": "MECE: FAIL. Run result at audit time: 1,302 cases, 129 golden blocked, 1,173 diagnostic blocked, 0 failed, no membership problem, golden verdict NOT GREEN.",
+   "kind": "result",
+   "files": [
+    {
+     "path": "evals/agents/audit/MECE-AUDIT.md",
+     "lines": "5-16",
+     "contains": "MECE: FAIL"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Recorded with the exact run output."
+   }
+  },
+  "p0-generality": {
+   "title": "P0-1 Generality not gated",
+   "summary": "Every golden case for TB-05, 06, 08 and the TB-14 stream uses the base fixture only, so hard-coded paths and a hard-coded deploy command pass. This violates the owner's generality requirement.",
+   "kind": "finding",
+   "files": [
+    {
+     "path": "evals/agents/audit/MECE-AUDIT.md",
+     "lines": "121-125",
+     "contains": "P0-1"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Open: listed as 'fix before any implementer starts'; no later commit addresses it."
+   }
+  },
+  "p0-bash": {
+   "title": "P0-2 No allowed-Bash case",
+   "summary": "Because no golden case allows an implement Bash command, 'deny all implement Bash' passes the gate while making the agent unable to build or test.",
+   "kind": "finding",
+   "files": [
+    {
+     "path": "evals/agents/audit/MECE-AUDIT.md",
+     "lines": "126",
+     "contains": "P0-2"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Open: listed as 'fix before any implementer starts'; no later commit addresses it."
+   }
+  },
+  "p0-evidence": {
+   "title": "P0-3 No full-suite evidence case",
+   "summary": "R-15's clause 'no evidence of a full-suite run' has no golden case; every golden stop-gate case removes the checks.",
+   "kind": "finding",
+   "files": [
+    {
+     "path": "evals/agents/audit/MECE-AUDIT.md",
+     "lines": "127",
+     "contains": "P0-3"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Open: listed as 'fix before any implementer starts'; no later commit addresses it."
+   }
+  },
+  "p0-tamper": {
+   "title": "P0-4 Implement can edit its own gates",
+   "summary": "Through Bash the implement agent can rewrite .factory/profile.yaml, .factory/baseline.json or the stop-gate counter, and Write/Edit .claude/settings.json, defeating blindness and the stop gate.",
+   "kind": "finding",
+   "files": [
+    {
+     "path": "evals/agents/audit/MECE-AUDIT.md",
+     "lines": "128-138",
+     "contains": "P0-4"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Open: listed as 'fix before any implementer starts'; no later commit addresses it."
+   }
+  },
+  "p0-blind": {
+   "title": "P0-5 Blind by instruction only",
+   "summary": "This build's own implementers are barred from evals/ only by PRD text, with no profile and no hook, which contradicts 'hooks enforce, prompts advise'.",
+   "kind": "finding",
+   "files": [
+    {
+     "path": "evals/agents/audit/MECE-AUDIT.md",
+     "lines": "139",
+     "contains": "P0-5"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Open: listed as 'fix before any implementer starts'; no later commit addresses it."
+   }
+  },
+  "routing": {
+   "title": "Jev routing (shadow)",
+   "summary": "A typed-decision client that asks the Jev model to choose among options (for example a model tier), applies probability bands (act, flag, human) and logs the result next to the actual choice. It never changes routing.",
+   "kind": "subsystem",
+   "design": [
+    {
+     "choice": "Shadow mode only",
+     "why": "Thresholds are placeholders until our own labelled past tasks set them; decisions are logged beside the real choice to build that data.",
+     "alternatives": "Letting the classifier route from day one"
+    },
+    {
+     "choice": "Deterministic rules first, a typed classifier second",
+     "why": "Rules that are cheap and exact run before any model call; a Jev fault is recorded, never raised.",
+     "alternatives": "Model-only routing"
+    }
+   ],
+   "files": [
+    {
+     "path": "factory/routing/jev_client.py",
+     "lines": "152-165",
+     "contains": "def route"
+    },
+    {
+     "path": "factory/routing/jev-policy.yaml",
+     "lines": "1-12",
+     "contains": "shadow mode only"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Client, policy and recorded-response tests exist.",
+    "gaps": [
+     "Not wired into anything (promotion ledger)",
+     "Endpoint is an alpha API; thresholds are placeholders",
+     "Requires an OpenRouter key at run time"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  jev-policy[\"Policy file<br/>jev-policy.yaml\"] -->|\"decisions, bands, pinned model\"| jev-request[\"Build request<br/>build_request\"]",
+    "  jev-request -->|\"rules first, else call\"| jev-transport[\"Transport<br/>OpenRouter alpha endpoint\"]",
+    "  jev-transport -->|\"probabilities\"| jev-parse[\"Parse answer<br/>parse_answer\"]",
+    "  jev-parse -->|\"top, margin\"| jev-band[\"Band<br/>act, flag, human\"]",
+    "  jev-band --> jev-log[\"Log record<br/>shadow only\"]"
+   ],
+   "children": [
+    "jev-policy",
+    "jev-request",
+    "jev-transport",
+    "jev-parse",
+    "jev-band",
+    "jev-log"
+   ]
+  },
+  "jev-policy": {
+   "title": "Policy file",
+   "summary": "Versioned YAML: pinned model typesafe/jev-1.13 (never a floating alias), endpoint, 800 ms timeout, no retries, probability bands and per-decision rules. Wording is behaviour, so it changes through review.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/routing/jev-policy.yaml",
+     "lines": "1-30",
+     "contains": "policy_version"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Thresholds are placeholders."
+   }
+  },
+  "jev-request": {
+   "title": "Build request",
+   "summary": "Builds the decision request from the policy and the task state fields, trying deterministic rules before any network call.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/routing/jev_client.py",
+     "lines": "73-105",
+     "contains": "def build_request"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Covered by recorded-response tests."
+   }
+  },
+  "jev-transport": {
+   "title": "Transport",
+   "summary": "A default HTTP transport with an injectable replacement so tests run without the network; a fault is recorded in the result, not raised.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/routing/jev_client.py",
+     "lines": "107-128",
+     "contains": "_default_transport"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Live endpoint use is unverified here; the transport is an alpha API."
+   }
+  },
+  "jev-parse": {
+   "title": "Parse answer",
+   "summary": "Turns the response into option probabilities and checks them against the allowed options.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/routing/jev_client.py",
+     "lines": "130-143",
+     "contains": "def parse_answer"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Covered by tests."
+   }
+  },
+  "jev-band": {
+   "title": "Band",
+   "summary": "Maps top probability and margin to act (0.90 and 0.50), flag (0.70 and 0.20) or human; below flag asks a person or uses the deterministic rule.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/routing/jev_client.py",
+     "lines": "144-151",
+     "contains": "def _band"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Band numbers are placeholders."
+   }
+  },
+  "jev-log": {
+   "title": "Log record",
+   "summary": "Builds the record logged next to the actual choice, with a state digest, so routing quality can be measured later.",
+   "kind": "step",
+   "files": [
+    {
+     "path": "factory/routing/jev_client.py",
+     "lines": "196-211",
+     "contains": "def log_record"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Nothing consumes the log yet."
+   }
+  },
+  "ops-runtime": {
+   "title": "Session ops and dashboards",
+   "summary": "The harness around a long unattended run: keep-awake, overnight mode, disk and memory hygiene, owner briefings and per-project ops dashboards. It lives in the global skills directory and local state files, not in this repository.",
+   "kind": "harness",
+   "design": [
+    {
+     "choice": "Never stop on a blocker",
+     "why": "Record what it waits on and move to the next independent requirement; stop only for an operator ceiling such as budget or an irreversible action.",
+     "alternatives": "Halting the run and waiting for a human"
+    }
+   ],
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "64-84",
+     "contains": "Start away mode with the run",
+     "external": true
+    },
+    {
+     "path": ".claude/state.md",
+     "lines": "1-8",
+     "contains": "Working state",
+     "note": "Local, untracked working state for this session"
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Operational, in daily use, and outside this repository.",
+    "gaps": [
+     "Not reproducible from the repo alone: the scripts and state files are unversioned here"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  away-mode[\"Away mode<br/>keep-awake, remote control\"] -->|\"session stays reachable\"| overnight[\"Overnight mode<br/>good-night, good-morning\"]",
+    "  overnight -->|\"journal each event\"| session-state[\"Session state<br/>.claude/state.md, ledgers\"]",
+    "  ops-hygiene[\"Hygiene scan<br/>disk, memory\"] -->|\"before fan-out\"| overnight",
+    "  session-state -->|\"summarised for\"| owner-briefing[\"Owner briefing<br/>progress-briefing\"]",
+    "  ops-dashboards[\"Ops dashboards<br/>per project\"] -.->|\"fed at stage 10\"| owner-briefing"
+   ],
+   "children": [
+    "away-mode",
+    "overnight",
+    "session-state",
+    "ops-hygiene",
+    "owner-briefing",
+    "ops-dashboards"
+   ]
+  },
+  "away-mode": {
+   "title": "Away mode",
+   "summary": "Scripts that keep a session running and reachable from a phone through Remote Control; /sf starts it indefinitely.",
+   "kind": "harness",
+   "files": [
+    {
+     "path": "~/.claude/skills/away-mode/scripts/start.sh",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "64-77",
+     "contains": "Start away mode with the run",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Global skill scripts."
+   }
+  },
+  "overnight": {
+   "title": "Overnight mode",
+   "summary": "good-night opens a run that never stalls (blockers are broken with research and experiments, one-way doors queued only if owner-gated); good-morning closes it and walks the owner through queued decisions.",
+   "kind": "harness",
+   "files": [
+    {
+     "path": "~/.claude/skills/good-night/scripts/overnight.sh",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "78-84",
+     "contains": "Overnight mode",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Global skill scripts."
+   }
+  },
+  "session-state": {
+   "title": "Session state",
+   "summary": "Working notes, a snapshot, a sub-agent ledger and a run registry kept under .claude/ (the run registry is a local process list and is not cited here) so a resumed or compacted session can recover.",
+   "kind": "state",
+   "files": [
+    {
+     "path": ".claude/state.md",
+     "lines": "1-4",
+     "contains": "Working state"
+    },
+    {
+     "path": ".claude/subagent-ledger.jsonl",
+     "contains": "agent_id",
+     "note": "One line per sub-agent run"
+    }
+   ],
+   "coverage": {
+    "status": "gap",
+    "note": "Valuable and untracked: if the checkout is lost the history of owner decisions is lost with it.",
+    "gaps": [
+     ".claude/ is not in git in this repo"
+    ]
+   }
+  },
+  "ops-hygiene": {
+   "title": "Hygiene scan",
+   "summary": "hygiene.sh scans disk and memory before parallel fan-out and after merges; it never deletes branches, dirty worktrees, keys or evidence.",
+   "kind": "harness",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/hygiene/hygiene.sh",
+     "external": true
+    },
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "253-263",
+     "contains": "Hygiene",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Installed with the sf skill."
+   }
+  },
+  "owner-briefing": {
+   "title": "Owner briefing",
+   "summary": "progress-briefing keeps one private three-tab page per project: status with analogies, the research and experiment story, and an open-question survey.",
+   "kind": "skill",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "238-252",
+     "contains": "progress-briefing",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Global skill; pages are private artifacts."
+   }
+  },
+  "ops-dashboards": {
+   "title": "Ops dashboards",
+   "summary": "Each project grows a dashboard of evals, error traces, LLM traces, logs and gate status as its slices land (ops-dashboard-design).",
+   "kind": "skill",
+   "files": [
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "204-220",
+     "contains": "ops dashboard",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "external",
+    "note": "Defined by a global skill and built inside each product project."
+   }
+  }
+ }
+}
