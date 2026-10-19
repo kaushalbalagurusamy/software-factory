@@ -21,7 +21,7 @@ import yaml
 from factory.agents.generate import HOOK_REGISTRATION
 from factory.agents.roles import load_roles
 
-from .core import ENV_PIN, MANIFEST, MODEL, PROFILE, SETTINGS
+from .core import ENV_PIN, MANIFEST, MODEL, PROFILE, SETTINGS, hook_command_prefix
 
 BENIGN = {"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": "ls"},
           "agent_type": "implement", "agent_id": "doctor"}
@@ -94,60 +94,67 @@ def check_sf() -> list[Check]:
     return [("sf command", "PASS", sf)]
 
 
-def _hook_commands(settings: dict) -> dict[str, str]:
-    found = {}
+def _factory_commands(settings: dict) -> list[str]:
+    """Every registered command that names factory.hooks (the only ones doctor reports on)."""
+    found = []
     for entries in (settings.get("hooks") or {}).values():
         for e in entries if isinstance(entries, list) else []:
             for h in e.get("hooks", []) if isinstance(e, dict) else []:
                 c = h.get("command") if isinstance(h, dict) else None
-                for hid in HOOK_REGISTRATION:
-                    if isinstance(c, str) and c.endswith(f"-m factory.hooks {hid}"):
-                        found.setdefault(hid, c)
+                if isinstance(c, str) and "factory.hooks" in c:
+                    found.append(c)
     return found
 
 
-def _exec_hook(cmd: str, payload: dict, cwd: str):
+def _exec_hook(root: Path, py: str, hid: str, payload: dict, cwd: str):
+    """Run exactly [python, -m, factory.hooks, id]: no shell, trusted interpreter and root."""
     env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "FACTORY_PROFILE")}
-    return _run(cmd, shell=True, input=json.dumps({**payload, "cwd": cwd}), cwd=cwd, env=env, timeout=90)
+    env["PYTHONPATH"] = str(root)
+    return _run([py, "-m", "factory.hooks", hid], input=json.dumps({**payload, "cwd": cwd}), cwd=cwd, env=env, timeout=90)
 
 
-def check_hooks(proj: Path, settings: dict, manifest: dict | None) -> list[Check]:
+def check_hooks(proj: Path, settings: dict, manifest: dict | None, root: Path, py: str) -> list[Check]:
+    """Only the command the installer would generate (from TRUSTED root and python, never from the
+    project's manifest or settings) is run; anything else naming factory.hooks is a FAIL, not run."""
     if manifest is not None and not manifest["options"]["hooks"]:
         return [("hooks registered", "SKIP", "installed with --no-hooks")]
     needed = sorted({h for r in load_roles().values() for h in r.hooks}, key=list(HOOK_REGISTRATION).index)
-    cmds = _hook_commands(settings)
-    missing = [h for h in needed if h not in cmds]
+    prefix = hook_command_prefix(root, py)
+    expected = {h: f"{prefix} -m factory.hooks {h}" for h in needed}
+    registered = _factory_commands(settings)
+    missing = [h for h in needed if expected[h] not in registered]
     out: list[Check] = [("hooks registered", "FAIL" if missing else "PASS",
-                         f"missing: {', '.join(missing)}" if missing else f"{len(needed)} hooks")]
+                         f"no command exactly equal to the installer's for: {', '.join(missing)}" if missing
+                         else f"{len(needed)} hooks")]
+    for c in registered:
+        if c not in expected.values():
+            out.append(("hook command", "FAIL", f"{c!r} is not a command this installer generates for "
+                        f"python {py} and root {root}; NOT run"))
     prof = proj / PROFILE
     with tempfile.TemporaryDirectory(prefix="sf-doctor-") as tmp:  # hooks may write ledgers; keep it off the project
         if prof.is_file():
             (Path(tmp) / ".factory").mkdir()
             shutil.copy(prof, Path(tmp) / ".factory" / "profile.yaml")
-        denied = None
         for hid in needed:
-            if hid not in cmds:
+            if hid in missing:
+                out.append((f"hook {hid} run", "FAIL", f"registered command does not match {expected[hid]!r}; not run"))
+                if hid == "bash_guard":
+                    out.append(("hook bash_guard deny", "FAIL", "bash_guard command not verified; not run"))
                 continue
-            event = HOOK_REGISTRATION[hid][0]
-            if hid == "stop_gate":
-                event = "SubagentStop"
+            event = "SubagentStop" if hid == "stop_gate" else HOOK_REGISTRATION[hid][0]
             payload = BENIGN if event == "PreToolUse" else _EVENT_PAYLOAD.get(event, {"hook_event_name": event})
-            r = _exec_hook(cmds[hid], payload, tmp)
+            r = _exec_hook(root, py, hid, payload, tmp)
             rc = None if isinstance(r, Exception) else r.returncode
-            want = (0,) if event == "PreToolUse" else (0, 2)
-            ok = rc in want
+            ok = rc in ((0,) if event == "PreToolUse" else (0, 2))
             out.append((f"hook {hid} run", "PASS" if ok else "FAIL",
                         f"benign {event} payload exited {rc}" if ok else
-                        f"{cmds[hid]!r} did not run cleanly: {_fail_detail(r)}"))
+                        f"did not run cleanly: {_fail_detail(r)}"))
             if hid == "bash_guard":
-                d = _exec_hook(cmds[hid], DENY, tmp)
+                d = _exec_hook(root, py, hid, DENY, tmp)
                 drc = None if isinstance(d, Exception) else d.returncode
-                denied = drc == 2
-                out.append(("hook bash_guard deny", "PASS" if denied else "FAIL",
-                            "`git add -A` as role implement exited 2" if denied else
+                out.append(("hook bash_guard deny", "PASS" if drc == 2 else "FAIL",
+                            "`git add -A` as role implement exited 2" if drc == 2 else
                             f"deny payload expected exit 2, got {drc if drc is not None else _fail_detail(d)}"))
-        if "bash_guard" in needed and "bash_guard" not in cmds:
-            out.append(("hook bash_guard deny", "FAIL", "bash_guard is not registered"))
     return out
 
 
@@ -171,7 +178,7 @@ def check_agents(proj: Path, manifest: dict | None, allowed: set[str]) -> list[C
     return out
 
 
-def check_project(proj: Path, allowed: set[str]) -> tuple[list[Check], dict | None]:
+def check_project(proj: Path, allowed: set[str], root: Path, py: str) -> tuple[list[Check], dict | None]:
     out: list[Check] = []
     manifest = None
     mp = proj / MANIFEST
@@ -191,7 +198,7 @@ def check_project(proj: Path, allowed: set[str]) -> tuple[list[Check], dict | No
     env = settings.get("env") or {}
     bad = {k: env.get(k) for k, v in ENV_PIN.items() if env.get(k) != v}
     out.append(("env pin", "FAIL" if bad else "PASS", f"wrong or missing: {bad}" if bad else "subagent model forced to sonnet"))
-    out += check_hooks(proj, settings, manifest)
+    out += check_hooks(proj, settings, manifest, root, py)
     out += check_agents(proj, manifest, allowed)
     try:
         from factory.agents.profile import load_profile
@@ -211,7 +218,6 @@ def check_project(proj: Path, allowed: set[str]) -> tuple[list[Check], dict | No
                 bad.append(f"{it['path']} changed since install")
         out.append(("manifest hashes", "FAIL" if bad else "PASS", "; ".join(bad) or f"{len(manifest['items'])} items"))
     allow = (settings.get("permissions") or {}).get("allow") or []
-    py = (manifest or {}).get("python", "")
     mine = [a for a in allow if isinstance(a, str) and ("factory." in a or (py and py in a))]
     out.append(("permissions", "FAIL" if mine else "PASS",
                 f"allow entries that look installer-added: {mine}" if mine else "no installer-added permissions.allow"))
@@ -220,20 +226,13 @@ def check_project(proj: Path, allowed: set[str]) -> tuple[list[Check], dict | No
 
 def run_doctor(a) -> int:
     proj = Path(a.project).absolute() if a.project else None
-    manifest = None
-    if proj and (proj / MANIFEST).is_file():
-        try:
-            manifest = json.loads((proj / MANIFEST).read_text(encoding="utf-8"))
-        except ValueError:
-            manifest = None
-    root = Path(a.factory_root).resolve() if a.factory_root else Path(
-        (manifest or {}).get("factory", {}).get("root") or Path(__file__).resolve().parents[2])
-    py = os.path.abspath(a.python) if a.python else (manifest or {}).get("python") or str(root / ".venv/bin/python")
+    # trusted inputs only: the arguments and this checkout, never the project's manifest or settings
+    root = Path(a.factory_root).resolve() if a.factory_root else Path(__file__).resolve().parents[2]
+    py = os.path.abspath(a.python) if a.python else str(root / ".venv" / "bin" / "python")
     skills = Path(a.skills_dir) if a.skills_dir else Path.home() / ".claude" / "skills"
     checks = check_tools(py, root) + check_skills(root, skills) + check_sf()
     if proj:
-        pc, _ = check_project(proj, {MODEL, *a.allow_model})
-        checks += pc
+        checks += check_project(proj, {MODEL, *a.allow_model}, root, py)[0]
     failed = [c for c in checks if c[1] == "FAIL"]
     if a.json:
         print(json.dumps({"ok": not failed, "checks": [{"name": n, "status": s, "detail": d} for n, s, d in checks]}, indent=2))

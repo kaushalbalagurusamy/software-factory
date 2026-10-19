@@ -282,7 +282,8 @@ def env(tmp_path, monkeypatch):
 
 
 def doc(proj, skills, *extra):
-    return main(["doctor", "--project", str(proj), "--skills-dir", str(skills), *map(str, extra)])
+    return main(["doctor", "--project", str(proj), "--skills-dir", str(skills), "--factory-root", str(REPO),
+                 "--python", sys.executable, *map(str, extra)])
 
 
 def lines(capsys):
@@ -318,7 +319,7 @@ def test_doctor_fails_when_hook_command_cannot_run(proj, env, capsys):
     capsys.readouterr()
     assert doc(proj, env) == 1
     out = "\n".join(lines(capsys))
-    assert "FAIL hook bash_guard run" in out and "FAIL manifest" in out
+    assert "FAIL hook bash_guard run" in out and "FAIL manifest" in out and "NOT run" in out
 
 
 def test_doctor_fails_when_hook_missing(proj, env, capsys):
@@ -394,3 +395,54 @@ def test_default_profile_makes_releasing_a_human_stop_a_one_way_door(tmp_path):
     prof.write_text(DEFAULT_PROFILE.format(name="demo"))
     p = load_profile(prof)
     assert any("hitl" in pat and "release" in pat for pat in p.one_way_door_patterns)
+
+
+def _door_patterns(tmp_path):
+    import re
+    from factory.agents.profile import load_profile
+    from factory.install.core import DEFAULT_PROFILE
+    prof = tmp_path / "profile.yaml"
+    prof.write_text(DEFAULT_PROFILE.format(name="demo"))
+    return [re.compile(x) for x in load_profile(prof).one_way_door_patterns]
+
+
+@pytest.mark.parametrize("cmd", [
+    "python -c \"import factory.hitl.store as s; s.release('.', 'a', 'human:x')\"",
+    "python -m factory.hitl release --root . --name a --by human:x",
+    "python -m factory.cli hitl release --root . --name a --by human:x",
+    "sf hitl --x release --name a", "sf hitl release --name a", "cat > .factory/stops/log.jsonl",
+    "rm -rf .factory/stops"])
+def test_release_and_store_access_match_door_patterns(tmp_path, cmd):
+    assert any(p.search(cmd) for p in _door_patterns(tmp_path))
+
+
+@pytest.mark.parametrize("cmd", ["sf hitl status --root .", "sf hitl request --name a --reason r", "ls .factory", "cat .factory/profile.yaml"])
+def test_ordinary_hitl_commands_do_not_match(tmp_path, cmd):
+    assert not any(p.search(cmd) for p in _door_patterns(tmp_path))
+
+
+def test_doctor_never_runs_a_command_from_settings(proj, env, tmp_path, capsys):
+    inst(proj)
+    marker = tmp_path / "pwned"
+    s = settings(proj)
+    good = s["hooks"]["PreToolUse"][0]["hooks"][0]["command"]
+    s["hooks"]["PreToolUse"][0]["hooks"][0]["command"] = f"touch {marker}; {good}"
+    s["hooks"]["SessionStart"][0]["hooks"].append(
+        {"type": "command", "command": f"touch {marker} # -m factory.hooks session_start"})
+    (proj / ".claude/settings.json").write_text(json.dumps(s))
+    capsys.readouterr()
+    assert doc(proj, env) == 1
+    out = "\n".join(lines(capsys))
+    assert not marker.exists()
+    assert "FAIL hook path_guard run" in out and "FAIL hook command" in out and "NOT run" in out
+
+
+def test_doctor_trusts_arguments_not_the_manifest(proj, env, tmp_path, capsys):
+    inst(proj)
+    man = json.loads((proj / ".factory/install-manifest.json").read_text())
+    man["python"] = "/bin/false"
+    (proj / ".factory/install-manifest.json").write_text(json.dumps(man))
+    capsys.readouterr()
+    assert doc(proj, env) == 0  # a poisoned manifest python is ignored; hooks ran via the trusted argv
+    out = "\n".join(lines(capsys))
+    assert "PASS hook bash_guard deny" in out
