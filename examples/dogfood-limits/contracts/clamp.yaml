@@ -1,0 +1,24 @@
+# Independent contract, written from the requirement (not from the code).
+contract_id: C-DOGFOOD-CLAMP-001
+requirement_ids: [REQ-DOGFOOD-1]
+symbol: "limits:clamp"
+state_scope: pure
+semantics: math_int
+check_method: solver
+concurrency: none
+frame: nothing
+params: {x: int, lo: int, hi: int}
+returns: int
+assumptions:
+  - callers pass ints
+route:
+  default: test
+intended:
+  preconditions:
+    - "lo <= hi"
+  postconditions:
+    - {id: lower-bound, expr: "result >= lo"}
+    - {id: upper-bound, expr: "result <= hi"}
+    - {id: identity-inside, expr: "x < lo or x > hi or result == x"}
+  errors: []
+  invariants: []

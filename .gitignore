@@ -10,3 +10,6 @@ evals/agents/results/
 
 # runtime state of the bounded test runner and QA loop
 .sf/
+
+# demo output
+examples/dogfood-limits/out/
