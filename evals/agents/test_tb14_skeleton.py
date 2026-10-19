@@ -32,8 +32,15 @@ KEY = "ghp" + "_" + "Ab3Xy9" * 6            # built at runtime: no secret-shaped
 FIXTURE_ASSIGN = 'export API_TOKEN="FIXTURE-KEY-12345678901"'
 
 
+# Baseline updates to the golden set (evals/agents/README.md, "Baseline updates"; MECE-AUDIT P0): promoted
+# diagnostic cases and swapped-out golden cases (kept in the suite as diagnostic; their tests are unchanged).
+PROMOTED = frozenset({"TB14-D-001", "TB14-D-002"})
+DEMOTED = frozenset({"TB14-G-008"})
+
+
 def case(cid: str, tier: str = "diagnostic", reqs=None):
-    return pytest.mark.case(cid, tier=tier, tb="14", reqs=reqs or ["R-20"])
+    return pytest.mark.case(
+        cid, tier=lib.tier_of(cid, PROMOTED, DEMOTED) if tier == "diagnostic" or cid in DEMOTED else tier, tb="14", reqs=reqs or ["R-20"])
 
 
 def base_no_mcp() -> dict:

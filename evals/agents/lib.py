@@ -16,6 +16,17 @@ PROFILES = Path(__file__).parent / "profiles"
 REPO = Path(__file__).resolve().parents[2]
 
 
+def tier_of(cid: str, promoted: frozenset = frozenset(), demoted: frozenset = frozenset()) -> str:
+    """Tier of a case. The `-G-` / `-D-` infix is the original tier; `promoted` (a diagnostic id raised to golden) and
+    `demoted` (a golden id lowered to diagnostic) record reviewed baseline updates (see README, baseline updates).
+    GOLDEN.json is kept separately by hand and run.py cross-checks it, so a drift between the two is a membership problem."""
+    if cid in promoted:
+        return "golden"
+    if cid in demoted:
+        return "diagnostic"
+    return "golden" if "-G-" in cid else "diagnostic"
+
+
 def need(module: str, *attrs: str):
     """Import an implementation module (and check attributes); if absent the case is BLOCKED."""
     try:

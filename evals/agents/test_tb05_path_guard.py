@@ -19,8 +19,14 @@ HOOK = "factory.hooks.path_guard"
 REQS = ("R-06", "R-10")
 
 
+# Baseline updates to the golden set (evals/agents/README.md, "Baseline updates"; MECE-AUDIT P0): promoted
+# diagnostic cases and swapped-out golden cases (kept in the suite as diagnostic; their tests are unchanged).
+PROMOTED = frozenset({"TB05-D-004", "TB05-D-005"})
+DEMOTED = frozenset()
+
+
 def case(cid: str, *values, reqs=REQS):
-    tier = "golden" if "-G-" in cid else "diagnostic"
+    tier = lib.tier_of(cid, PROMOTED, DEMOTED)
     return pytest.param(*values, marks=pytest.mark.case(cid, tier=tier, tb=TB, reqs=list(reqs)), id=cid)
 
 

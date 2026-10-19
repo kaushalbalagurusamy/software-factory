@@ -23,8 +23,14 @@ REQS = ("R-11",)
 MARKER = "EVAL-CONTENT-MARKER-6d1f"
 
 
+# Baseline updates to the golden set (evals/agents/README.md, "Baseline updates"; MECE-AUDIT P0): promoted
+# diagnostic cases and swapped-out golden cases (kept in the suite as diagnostic; their tests are unchanged).
+PROMOTED = frozenset({"TB06-D-082", "TB06-D-157"})
+DEMOTED = frozenset({"TB06-G-004"})
+
+
 def case(cid: str, *values, reqs=REQS):
-    tier = "golden" if "-G-" in cid else "diagnostic"
+    tier = lib.tier_of(cid, PROMOTED, DEMOTED)
     return pytest.param(*values, marks=pytest.mark.case(cid, tier=tier, tb=TB, reqs=list(reqs)), id=cid)
 
 
