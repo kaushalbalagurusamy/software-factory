@@ -221,15 +221,26 @@ def test_frozen_missing_on_disk_blocks(repo):
     assert d.kind == "block" and "missing on disk" in d.reason
 
 
-def test_frozen_without_baseline_blocks(repo):
+def test_frozen_globs_matching_nothing_without_baseline_allowed(repo):
+    cfg = make_cfg(repo, paths={"frozen_tests": ["frozen/**"]})
+    write(repo, "src/app.py", "x = 9\n")
+    assert decide(repo, cfg).kind == "allow"
+
+
+def test_frozen_files_without_baseline_block_as_missing_from_manifest(repo):
     d = decide(repo, make_cfg(repo, paths={"frozen_tests": ["tests/**"]}))
-    assert d.kind == "block" and "baseline.json" in d.reason
+    assert d.kind == "block" and "tests/test_a.py" in d.reason and "missing from" in d.reason
 
 
 @pytest.mark.parametrize("bad", ["not json", "[1]", '{"a": 1}'])
-def test_frozen_malformed_baseline_blocks(repo, bad):
+def test_frozen_malformed_baseline_blocks_when_files_match(repo, bad):
     write(repo, ".factory/baseline.json", bad)
     assert decide(repo, make_cfg(repo, paths={"frozen_tests": ["tests/**"]})).kind == "block"
+
+
+def test_frozen_malformed_baseline_ignored_when_nothing_matches(repo):
+    write(repo, ".factory/baseline.json", "not json")
+    assert decide(repo, make_cfg(repo, paths={"frozen_tests": ["frozen/**"]})).kind == "allow"
 
 
 def test_no_frozen_globs_skips_hash_check(repo):

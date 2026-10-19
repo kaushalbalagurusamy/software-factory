@@ -272,18 +272,22 @@ def check_frozen(cfg: HookConfig) -> list[str]:
     if not cfg.frozen_tests:
         return []
     root = cfg.project_root
-    manifest_path = root / BASELINE_FILE
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        if not isinstance(manifest, dict) or not all(
-            isinstance(k, str) and isinstance(v, str) for k, v in manifest.items()
-        ):
-            raise ValueError("not an object mapping path to digest")
-    except (OSError, ValueError) as exc:
-        return [f"frozen tests cannot be verified: {BASELINE_FILE.as_posix()} is missing or invalid "
-                f"({type(exc).__name__})"]
     regexes = [glob_to_regex(g) for g in cfg.frozen_tests]
     on_disk = _files_matching(root, cfg.frozen_tests)
+    manifest: dict = {}
+    try:
+        loaded = json.loads((root / BASELINE_FILE).read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict) or not all(
+            isinstance(k, str) and isinstance(v, str) for k, v in loaded.items()
+        ):
+            raise ValueError("not an object mapping path to digest")
+        manifest = loaded
+    except FileNotFoundError:
+        pass  # an absent manifest only matters as "frozen file missing from the manifest"
+    except (OSError, ValueError) as exc:
+        if on_disk:
+            return [f"frozen tests cannot be verified: {BASELINE_FILE.as_posix()} is invalid "
+                    f"({type(exc).__name__})"]
     in_manifest = {k for k in manifest if _matches_any(k, regexes)}
     changed: list[str] = []
     unlisted: list[str] = []
