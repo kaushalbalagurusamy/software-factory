@@ -274,9 +274,10 @@ def test_d016_default_small_roles(tmp_path):
 def test_d017_gates_exclude_non_gates(tmp_path):
     """Behaviour 6 + [A-26]: a stage is a gate iff gate: true (role does not matter); alt reports none."""
     assert ids(valid(tmp_path, "alt").gates()) == []
+    # second project in its own subdirectory: make_project cannot create .factory twice in one directory
     gr = valid(tmp_path, with_graph({"stages": [st("a", "design", True), st("b", "implement", False),
                                                 st("c", "review", True), st("d", "design")],
-                                     "edges": [["a", "b"], ["b", "c"], ["c", "d"]]}))
+                                     "edges": [["a", "b"], ["b", "c"], ["c", "d"]]}), sub="q")
     assert ids(gr.gates()) == ["a", "c"]
 
 
