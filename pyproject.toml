@@ -15,15 +15,18 @@ dependencies = [
     "pyyaml>=6.0",
     "z3-solver>=5.1.0",
     "networkx>=3.4",
+    "hypothesis>=6.100",
+    "pytest>=8.0",
     "deal>=4.24.0",
     "crosshair-tool>=0.0.110",
-    "unity-ir @ file:///Users/kaushal/Projects/unity",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=8.0",
-    "hypothesis>=6.100",
+# Semantic verifier. Not pinned to a developer path: install it from a Unity
+# checkout with `pip install -e "$UNITY_REPO"` (scripts/dev-env.sh does this), or
+# from an index/URL of your choice with `pip install unity-ir`.
+unity = [
+    "unity-ir",
 ]
 
 [project.scripts]
