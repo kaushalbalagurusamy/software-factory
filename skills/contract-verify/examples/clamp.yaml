@@ -1,0 +1,27 @@
+# Example independent contract. Author: someone other than the implementer.
+contract_id: C-CLAMP-001            # stable, never reused (list retired ids in RETIRED.yaml)
+requirement_ids: [REQ-CLAMP-1]
+symbol: "mymodule:clamp"            # module:qualname
+state_scope: pure
+semantics: math_int                 # or int64 (checked overflow)
+check_method: solver                # solver | property | test | integration | e2e | telemetry
+concurrency: none                   # explicit; 'none' is allowed
+frame: nothing                      # what may change; 'nothing' for pure
+params: {x: int, lo: int, hi: int}
+returns: int
+assumptions:
+  - callers pass ints
+route:                              # which other check covers what the solver cannot
+  default: test
+intended:                           # what the code SHOULD do (from the PRD, not from the code)
+  preconditions:
+    - "lo <= hi"
+  postconditions:
+    - "result >= lo"
+    - {id: within-upper, expr: "result <= hi"}
+    - "x < lo or x > hi or result == x"
+  errors: []
+  invariants: []
+observed:                           # what current code happens to do; never defines intent
+  notes:
+    - "current code returns lo when x < lo (read from source, not authoritative)"
