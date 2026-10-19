@@ -56,6 +56,7 @@ The master copy of every personal skill lives in `~/.claude/skills` (a local git
 | **`orchestration`** | `~/.claude/skills/orchestration` | Division of labor across engines and model tiers, safe parallel dispatch on a shared checkout, independent review gates and routing. Merges the former `sf-hierarchical-orchestration`, `sf-parallel-integration` and `sf-jev-dispatcher`. |
 | **`deploy-verify`** | `~/.claude/skills/deploy-verify` | Pre-deploy gate, deploy, verify loop against the project's named health checks with a roll-back stop condition, and a fixed Deploy Log. Reads `docs/ops/deploy-verification.md` in the project. |
 | **`legacy-audit`** | `~/.claude/skills/legacy-audit` | Reverse-first audit of a legacy codebase before a rewrite: per-unit analyses, a severity-tagged bug catalog and route selection. Read-only, writes under `docs/audit/`. |
+| **`mermaid-nesting-dolls`** | [`skills/mermaid-nesting-dolls`](skills/mermaid-nesting-dolls/SKILL.md) (kept in this repo, linked into `~/.claude/skills`) | Builds a portable HTML explorer: a high-level Mermaid architecture diagram that opens, component by component, into nested detail diagrams, with breadcrumbs, design choices, coverage and gaps, and file references checked against the repository. Worked example: [`docs/explorer/`](docs/explorer/README.md). |
 
 ---
 
