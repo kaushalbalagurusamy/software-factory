@@ -322,6 +322,11 @@ AWK_DENIED = [
     "awk '@load \"x\"' a", "awk '@include \"x\"' a", "awk '$1 > 5' a", "awk '{print $1}' a > b",
     "awk '{print $1}' a | tee b", "awk -v x=system a", "awk '{print}' getline",
     "awk '{ prInt > \"/dev/stdout\" }' a",
+    "awk 'BEGIN{@f()}' a", "awk '@ns::f' a", "awk '{print @x}' a", "awk -v x=@y a",
+    "awk -W file=x a", "awk -Wfile=x a", "awk -W version a", "awk -W=x a", "awk -vW=1 a",
+    "awk --fil=prog a", "awk --incl x a", "awk --sour x a", "awk --exe x a", "awk --lo x a",
+    "awk --l a", "awk --li a", "awk --debug a", "awk --bogus a", "awk --p a", "awk --d a",
+    "awk --no a",
 ]
 
 
@@ -332,7 +337,8 @@ def test_awk_denied_c38(root, role, cmd):
 
 
 @pytest.mark.parametrize("cmd", ["awk '{print $1}' file", "awk 'NR==1' a b", "awk '{print $2}' a",
-                                 "awk '{print $1}' a | wc -l", "awk '{print}' -", "awk -- '{print $2}' a"])
+                                 "awk '{print $1}' a | wc -l", "awk --version", "awk --lint '{print $1}' a",
+                                 "awk --lint-old '{print}' a", "awk --posix '{print $2}' a", "awk --field-sep=: '{print $1}' a", "awk '{print}' -", "awk -- '{print $2}' a"])
 def test_awk_plain_still_allowed(root, cmd):
     assert bash(root, "audit", cmd).kind == "allow", cmd
 

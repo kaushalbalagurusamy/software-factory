@@ -31,8 +31,13 @@ READONLY_PREFIXES: tuple[tuple[str, ...], ...] = (
 )
 # C-38.1: awk words that can write, execute or load code, matched anywhere in its arguments.
 _AWK_SUBSTRINGS = ("system", "getline", "close", "fflush", "|", ">", "@load", "@include")
-_AWK_SHORT_FLAGS = frozenset("fieElodp")  # -f -i -E -e -l -o -d -p (and clusters / attached values)
-_AWK_LONG_FLAGS = ("file", "include", "source", "exec", "load", "pretty-print", "profile", "dump-variables")
+_AWK_SHORT_FLAGS = frozenset("fieElodpW")  # -f -i -E -e -l -o -d -p -W (and clusters / attached values)
+_AWK_LONG_FLAGS = ("file", "include", "source", "exec", "load", "pretty-print", "profile", "dump-variables", "debug")
+# Long options known to be harmless; with the list above they resolve like getopt_long (exact name,
+# else unique prefix). An unknown or ambiguous long option fails closed.
+_AWK_SAFE_LONG = ("field-separator", "assign", "version", "help", "posix", "traditional", "lint", "lint-old",
+                  "re-interval", "characters-as-bytes", "csv", "bignum", "optimize", "no-optimize", "sandbox",
+                  "use-lc-numeric", "non-decimal-data", "copyright", "gen-pot")
 # C-38.2: the only sed scripts a read-only role may run (with ``sed -n``).
 _SED_ADDR = r"(?:\d+|\$|/(?:[^/\\\n]|\\.)*/)"
 _SED_PRINT = re.compile(rf"(?:{_SED_ADDR}(?:,{_SED_ADDR})?)?p\Z")
@@ -270,12 +275,14 @@ def _scan(command: str):
 def _awk_problem(args: list[str]) -> str | None:
     for w in args:
         low = w.lower()
-        if any(t in low for t in _AWK_SUBSTRINGS):
-            return "awk program or option uses a write, execute or pipe feature"
+        if any(t in low for t in _AWK_SUBSTRINGS) or "@" in w:
+            return "awk program or option uses a write, execute, pipe or indirect-call feature"
         if w.startswith("--") and len(w) > 2:
             name = w[2:].split("=", 1)[0]
-            if any(opt.startswith(name) for opt in _AWK_LONG_FLAGS):
-                return f"awk {w.split('=', 1)[0]} can read code or write files"
+            known = _AWK_LONG_FLAGS + _AWK_SAFE_LONG
+            hits = [name] if name in known else [o for o in known if o.startswith(name)]
+            if len(hits) != 1 or hits[0] in _AWK_LONG_FLAGS:
+                return f"awk {w.split('=', 1)[0]} is unknown, ambiguous, or can read code or write files"
         elif w.startswith("-") and len(w) > 1 and any(c in _AWK_SHORT_FLAGS for c in w[1:]):
             return f"awk {w} can read code or write files"
     return None
