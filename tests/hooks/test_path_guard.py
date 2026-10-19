@@ -237,7 +237,7 @@ ALLOWED_CMDS = [
     "find . -name '*.py'", "tree", "sf audit", "sed -n '1,5p' a", "awk '{print $1}' a",
     "git log | head -5", "git status && ls", "ls; cat a", "cat a | grep x | wc -l",
     "grep 'a > b' f", "grep \"a > b\" f", "grep '$(x)' f", "cat 'a|b'",
-    "awk '$1 > 3' f", "grep tee f", "cat a\\>b",
+    "grep tee f", "cat a\\>b", "awk -F: '{print $1}' f", "awk -v n=3 'NR==n' f", "awk 'NR==2' f",
 ]
 
 
@@ -253,7 +253,8 @@ DENIED_CMDS = [
     "ls; rm x", "ls\nrm x", "ls & rm x", "ls || rm x",
     "find . -delete", "find . -exec rm {} ;", "find . -name x -exec cat {} +",
     "cat $(whoami)", "cat `whoami`", "cat \"$(whoami)\"", "cat \"`x`\"", "ls <(x)",
-    "awk '{print}' a > b", "git commit -m x", "git push", "git checkout x", "git -C d log",
+    "awk '{print}' a > b", "awk '$1 > 3' f",  # C-38.1 supersedes A-05-2: '>' in a program is denied
+    "git commit -m x", "git push", "git checkout x", "git -C d log",
     "lsof", "catx a", "sed -i s/a/b/ f", "sed -n -i p f", "sed 's/a/b/' f", "git diff --output=f",
     "git log --output f", "tree -o f", "rg --pre x foo", "FOO=1 ls", "(ls)", "", "   ",
     "cat 'unterminated", "ls 2>&1", "ls >/dev/null", "git", "sed",
@@ -305,3 +306,132 @@ def test_run_hook_roundtrip_and_recorded_example(root):
 def test_registry_finds_module():
     from factory.hooks import registry
     assert registry.get_hook("path_guard").decide is path_guard.decide
+
+
+# ---- C-38 hardening --------------------------------------------------------------------------
+AWK_DENIED = [
+    "awk 'BEGIN{system(\"id\")}'", "awk 'BEGIN { SYSTEM(\"id\") }'", "awk '{print > \"out\"}' a",
+    "awk '{print >> \"out\"}' a", "awk '{print | \"sh\"}' a", "awk '{\"date\" | getline x}' a",
+    "awk 'BEGIN{getline < \"f\"}'", "awk '{close(\"x\")}' a", "awk '{fflush()}' a",
+    "awk -f prog.awk a", "awk -fprog.awk a", "awk --file=prog.awk a", "awk --file prog a",
+    "awk --fi=prog a", "awk -i inplace '{print}' a", "awk -iinplace '{print}' a",
+    "awk --include=x '{print}' a", "awk --inc x '{print}' a", "awk --source '{print}' a",
+    "awk --sou '{print}' a", "awk -E prog a", "awk -e '{print}' a", "awk -l ext a",
+    "awk --load ext a", "awk --exec prog a", "awk -o a", "awk --profile=x '{print}' a",
+    "awk -p x a", "awk -d x a", "awk --dump-variables=x a", "awk --pretty-print=x a",
+    "awk '@load \"x\"' a", "awk '@include \"x\"' a", "awk '$1 > 5' a", "awk '{print $1}' a > b",
+    "awk '{print $1}' a | tee b", "awk -v x=system a", "awk '{print}' getline",
+    "awk '{ prInt > \"/dev/stdout\" }' a",
+]
+
+
+@pytest.mark.parametrize("cmd", AWK_DENIED)
+@pytest.mark.parametrize("role", ["research", "review"])
+def test_awk_denied_c38(root, role, cmd):
+    assert bash(root, role, cmd).kind == "deny", cmd
+
+
+@pytest.mark.parametrize("cmd", ["awk '{print $1}' file", "awk 'NR==1' a b", "awk '{print $2}' a",
+                                 "awk '{print $1}' a | wc -l", "awk '{print}' -", "awk -- '{print $2}' a"])
+def test_awk_plain_still_allowed(root, cmd):
+    assert bash(root, "audit", cmd).kind == "allow", cmd
+
+
+SED_ALLOWED = [
+    "sed -n p f", "sed -n 5p f", "sed -n '1,5p' f", "sed -n '$p' f", "sed -n '/foo/p' f",
+    "sed -n '/a/,/b/p' f", "sed -n '2,$p' f g", "sed -n 's/a/b/' f", "sed -n 's/a/b/gp' f",
+    "sed -n 's/a/b/2' f", "sed -n 's|a|b|Ip' f", "sed -n 's,a\\,b,c,g' f", "sed -n '/a\\/b/p' f",
+    "sed -n p", "sed -n p - ", "sed -n '/x/,5p' f",
+]
+SED_DENIED = [
+    "sed -n 'w out' f", "sed -n 'w' f", "sed -n 'W out' f", "sed -n 'e' f", "sed -n 'r x' f",
+    "sed -n 'R x' f", "sed -n '1w out' f", "sed -n 's/a/b/w out' f", "sed -n 's/a/b/e' f",
+    "sed -n 's/a/b/gw out' f", "sed -n 's/a/b/;w out' f", "sed -n p;w out f", "sed -n 'p;p' f",
+    "sed -n 'p\nw out' f", "sed -n -f s.sed f", "sed -n --file=s.sed f", "sed -n -s p f",
+    "sed -n -i p f", "sed -n --in-place p f", "sed -n -e p f", "sed -n --expression=p f",
+    "sed -n --expr p f", "sed -n p -s f", "sed -n p -i f", "sed -n p -e w f", "sed -n p p f",
+    "sed -n p -- f", "sed -n -- p f", "sed -n 'p' --file=x", "sed -n '1!p' f", "sed -n '1~2p' f",
+    "sed -n 'y/a/b/' f", "sed -n 'd' f", "sed -n '{p}' f", "sed -n 'a x' f", "sed -n 's/a/b' f",
+    "sed -n 's/a/b/x' f", "sed -n 's/a/b/ w' f", "sed -n 'sXaXbXe' f", "sed -n 's\\a\\b\\' f",
+    "sed -n 'p ' f", "sed -n 'P' f", "sed -n '/a/Ip' f", "sed -n -E p f", "sed -nE p f", "sed -n",
+    "sed -n 's/a/b/\nw out' f", "sed -n 's/a/b/gG' f",
+]
+
+
+@pytest.mark.parametrize("cmd", SED_ALLOWED)
+def test_sed_allowed_c38(root, cmd):
+    assert bash(root, "research", cmd).kind == "allow", cmd
+
+
+@pytest.mark.parametrize("cmd", SED_DENIED)
+def test_sed_denied_c38(root, cmd):
+    assert bash(root, "research", cmd).kind == "deny", cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "git log --output=f", "git log --output f", "git diff --ou=f", "git diff --out f",
+    "git diff --outp=f", "git show --outpu=f", "git log --ou", "git status --output-indicator-new=x",
+    "git log -p --output=f", "git blame --output=f x", "git log --oneline --outpu f",
+])
+def test_git_output_abbreviations_denied(root, cmd):
+    assert bash(root, "audit", cmd).kind == "deny", cmd
+
+
+@pytest.mark.parametrize("cmd", ["git log --oneline", "git diff --stat", "git log --format=%H", "git show -s"])
+def test_git_other_options_allowed(root, cmd):
+    assert bash(root, "audit", cmd).kind == "allow", cmd
+
+
+# ---- MultiEdit and NotebookEdit are write tools ----------------------------------------------
+def nb(root, role, path, cfg=None):
+    return path_guard.decide(payload(root, "NotebookEdit", role, notebook_path=str(path)), cfg or make_cfg(root))
+
+
+def test_multiedit_follows_write_rules(root):
+    for role, ok, bad in (("research", "research/n.md", "src/a.py"), ("design", "docs/spec/a.md", "src/a.py"),
+                          ("audit", "docs/audit/x.md", "src/a.py"), ("implement", "src/a.py", "evals/x.py"),
+                          ("implement", "src/a.py", ".claude/settings.json"),
+                          ("implement", "src/a.py", ".factory/profile.yaml")):
+        assert write(root, role, root / ok, "MultiEdit").kind == "allow", (role, ok)
+        assert write(root, role, root / bad, "MultiEdit").kind == "deny", (role, bad)
+    assert write(root, "review", root / "src/a.py", "MultiEdit").kind == "deny"
+    assert write(root, "orchestrator", root / "src/a.py", "MultiEdit").kind == "deny"
+    assert write(root, "nosuchrole", root / "src/a.py", "MultiEdit").kind == "deny"
+    assert write(root, "implement", root.parent / "x.py", "MultiEdit").kind == "deny"
+    assert write(root, "implement", "../x.py", "MultiEdit").kind == "deny"
+
+
+def test_notebookedit_follows_write_rules(root):
+    for role, ok, bad in (("research", "research/n.ipynb", "src/a.ipynb"),
+                          ("implement", "src/a.ipynb", "evals/x.ipynb"),
+                          ("implement", "src/a.ipynb", ".claude/x.ipynb"),
+                          ("test", "evals/golden/a.ipynb", "src/a.ipynb")):
+        assert nb(root, role, root / ok).kind == "allow", (role, ok)
+        assert nb(root, role, root / bad).kind == "deny", (role, bad)
+    assert nb(root, "review", root / "a.ipynb").kind == "deny"
+    assert nb(root, "nosuchrole", root / "a.ipynb").kind == "deny"
+    (root / ".factory").mkdir()
+    (root / ".factory" / "frozen").write_text("")
+    assert nb(root, "test", root / "evals/golden/a.ipynb").kind == "deny"
+
+
+@pytest.mark.parametrize("bad", [None, 5, ["a"], "", "  ", "a\x00b", {"p": 1}])
+def test_write_tools_malformed_target_denied(root, bad):
+    for tool, key in (("MultiEdit", "file_path"), ("NotebookEdit", "notebook_path"),
+                      ("Write", "file_path"), ("Edit", "file_path")):
+        p = payload(root, tool, "implement", **{key: bad})
+        assert path_guard.decide(p, make_cfg(root)).kind == "deny", (tool, bad)
+    assert path_guard.decide(payload(root, "NotebookEdit", "implement"), make_cfg(root)).kind == "deny"
+    # NotebookEdit does not use file_path, MultiEdit does not use notebook_path
+    p = payload(root, "NotebookEdit", "implement", file_path=str(root / "src/a.py"))
+    assert path_guard.decide(p, make_cfg(root)).kind == "deny"
+    p = payload(root, "MultiEdit", "implement", notebook_path=str(root / "src/a.py"))
+    assert path_guard.decide(p, make_cfg(root)).kind == "deny"
+
+
+def test_symlink_target_via_notebook_and_multiedit(root):
+    (root / "evals").mkdir()
+    (root / "src").mkdir()
+    (root / "src" / "link").symlink_to(root / "evals")
+    assert write(root, "implement", root / "src/link/x.py", "MultiEdit").kind == "deny"
+    assert nb(root, "implement", root / "src/link/x.ipynb").kind == "deny"
