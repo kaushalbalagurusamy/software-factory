@@ -366,3 +366,38 @@ def test_docs_hooks_bash_guard_md():
     assert doc_path.is_file()
     text = doc_path.read_text()
     assert any(s in text for s in ("hook_event_name", "decide(", "python -m factory.hooks")), "one example payload or call"
+
+
+# ================================================================ wrapper-command bypass families (independent coverage)
+# TB-08 B2/B4 and [A-08-4]: matching is on the parsed command, so a command carried by a wrapper (env -S, su -c, sudo,
+# xargs ... sh -c) is the same command. Git hygiene and one-way doors: orchestrator -> ask, every other role -> deny.
+
+_WRAPPED = [
+    ("env -S 'git add -A'", "env -S carries a command string"),
+    ("env --split-string='git add -A'", "env --split-string=... carries a command string"),
+    ("env -S'rm -rf /'", "env -S glued to its quoted value; rm -rf outside /tmp is a one-way door"),
+    ("env --spl 'git add -A'", "abbreviated long option --spl of env --split-string"),
+    ("su -lc 'git add -A'", "short option cluster -lc: c takes the command string"),
+    ("sudo -sE git add -A", "sudo short cluster -sE then the command"),
+    ("xargs -0I{} sh -c 'git add -A'", "xargs option cluster then sh -c string"),
+]
+_HARMLESS = [
+    "env FOO=1 ls",
+    "sudo -u root ls",
+    "nice -n 5 pytest",
+    "timeout 5 ls",
+    "env -S 'ls -la'",
+]
+_WRAP_CASES = []
+for _i, (_cmd, _why) in enumerate(_WRAPPED):
+    _WRAP_CASES.append(case(f"TB08-D-{180 + 2 * _i}", "orchestrator", _cmd, "ask", f"B2/B4 wrapper bypass, orchestrator -> ask: {_why}"))
+    _WRAP_CASES.append(case(f"TB08-D-{181 + 2 * _i}", "test", _cmd, "deny", f"B2/B4 wrapper bypass, other roles -> deny: {_why}"))
+for _i, _cmd in enumerate(_HARMLESS):
+    _WRAP_CASES.append(case(f"TB08-D-{194 + 2 * _i}", "orchestrator", _cmd, "allow", "B5 harmless wrapper form stays allowed"))
+    _WRAP_CASES.append(case(f"TB08-D-{195 + 2 * _i}", "test", _cmd, "allow", "B5 harmless wrapper form stays allowed"))
+
+
+@pytest.mark.parametrize("agent,command,expected,clause", _WRAP_CASES)
+def test_wrapper_commands(tmp_path, agent, command, expected, clause):
+    """TB-08 B2, B4, B5 and [A-08-4]: the command inside a wrapper is matched like a bare command."""
+    _check(_run(tmp_path, "base", agent, command), expected, clause)

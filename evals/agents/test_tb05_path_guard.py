@@ -346,7 +346,8 @@ CLAR_BASH = [
     case("TB05-D-124", "orchestrator", "cp src/app.py src/b.py", "allow", "[A-05-1] orchestrator is full mode"),
     case("TB05-D-125", "implement", "rm -rf build && mv a b", "allow", "[A-05-1] implement is full mode"),
     case("TB05-D-126", "test", "chmod +x run.sh | tee log.txt", "allow", "[A-05-1] test is full mode"),
-    case("TB05-D-127", "audit", "awk '{print > \"out.txt\"}' src/app.py", "allow", "[A-05-2] only shell redirection is checked for awk"),
+    # Superseded by [C-38] item 1 (was "allow" under [A-05-2]): redirection inside an awk program is now denied.
+    case("TB05-D-127", "audit", "awk '{print > \"out.txt\"}' src/app.py", "deny", "[C-38] item 1 supersedes [A-05-2]: awk with > in the program is denied"),
     case("TB05-D-128", "research", 'grep "$(whoami)" src/app.py', "deny", "[A-05-3] double quotes do not exempt $(...)"),
     case("TB05-D-129", "research", 'grep "`whoami`" src/app.py', "deny", "[A-05-3] double quotes do not exempt backticks"),
     case("TB05-D-130", "review", "grep '`whoami`' src/app.py", "allow", "[A-05-3] backticks inside single quotes are exempt"),
@@ -355,7 +356,8 @@ CLAR_BASH = [
 
 @pytest.mark.parametrize("agent,command,expected,clause", CLAR_BASH)
 def test_bash_clarified(tmp_path, agent, command, expected, clause):
-    """clarifications [A-05-1], [A-05-2], [A-05-3] for Bash (clause per case)."""
+    """clarifications [A-05-1], [A-05-3] for Bash (clause per case). TB05-D-127 follows [C-38] item 1, which supersedes
+    [A-05-2]: 'Redirection inside the program text is therefore denied'."""
     d = _run(tmp_path, "base", agent, "Bash", {"command": command})
     assert d.kind == expected, clause
     if expected != "allow":
@@ -448,3 +450,133 @@ def test_control_files_other_roles_bash(tmp_path, agent, command, expected, clau
     """clarification [C-36] item 4: other roles are unaffected."""
     d = _run(tmp_path, "base", agent, "Bash", {"command": command})
     assert d.kind == expected, clause
+
+
+# ================================================================ clarification C-38: awk, sed, git abbreviations, more write tools
+
+C38_BASH = [
+    # item 1: awk
+    case("TB05-D-149", "audit", "awk 'BEGIN{system(\"true\")}' src/app.py", "deny", "[C-38] 1 awk system() denied"),
+    case("TB05-D-150", "audit", "awk '{getline x < \"src/app.py\"; print x}' src/app.py", "deny", "[C-38] 1 awk getline denied"),
+    case("TB05-D-151", "audit", "awk '{print $1 | \"sort\"}' src/app.py", "deny", "[C-38] 1 awk pipe inside the program denied"),
+    case("TB05-D-152", "audit", "awk '$1 > 5' src/app.py", "deny", "[C-38] 1 awk > in the program is denied even as a comparison (accepted over-blocking)"),
+    case("TB05-D-153", "audit", "awk -f prog.awk src/app.py", "deny", "[C-38] 1 awk -f denied"),
+    case("TB05-D-154", "audit", "awk --file prog.awk src/app.py", "deny", "[C-38] 1 awk --file denied"),
+    case("TB05-D-155", "audit", "awk '{close(\"x\")}' src/app.py", "deny", "[C-38] 1 awk close denied"),
+    case("TB05-D-156", "audit", "awk '{fflush()}' src/app.py", "deny", "[C-38] 1 awk fflush denied"),
+    case("TB05-D-157", "audit", "awk -i inplace '{print}' src/app.py", "deny", "[C-38] 1 awk -i denied"),
+    case("TB05-D-158", "audit", "awk --source '{print}' src/app.py", "deny", "[C-38] 1 awk --source denied"),
+    case("TB05-D-159", "audit", "awk -E prog.awk src/app.py", "deny", "[C-38] 1 awk -E denied"),
+    case("TB05-D-160", "research", "awk '{print $1}' src/app.py", "allow", "[C-38] 1 awk '{print $1}' file stays allowed"),
+    case("TB05-D-161", "review", "awk '{print $2, $1}' src/app.py | head -3", "allow", "[C-38] 1 plain awk print in a pipeline stays allowed"),
+    # item 2: sed
+    case("TB05-D-162", "research", "sed -n 'p' src/app.py", "allow", "[C-38] 2 sed -n p allowed"),
+    case("TB05-D-163", "research", "sed -n '2,4p' src/app.py", "allow", "[C-38] 2 sed -n with a line range allowed"),
+    case("TB05-D-164", "research", "sed -n 's/a/b/gp' src/app.py", "allow", "[C-38] 2 substitution with flags g p allowed"),
+    case("TB05-D-165", "research", "sed -n '$p' src/app.py", "allow", "[C-38] 2 address $ allowed"),
+    case("TB05-D-166", "research", "sed -n '/print/p' src/app.py", "allow", "[C-38] 2 address /regex/ allowed"),
+    case("TB05-D-167", "audit", "sed -n 'w out.txt' src/app.py", "deny", "[C-38] 2 sed w command denied"),
+    case("TB05-D-168", "audit", "sed -n '1w out.txt' src/app.py", "deny", "[C-38] 2 sed addressed w denied"),
+    case("TB05-D-169", "audit", "sed -n 'e' src/app.py", "deny", "[C-38] 2 sed e command denied"),
+    case("TB05-D-170", "audit", "sed -n 'r other.txt' src/app.py", "deny", "[C-38] 2 sed r command denied"),
+    case("TB05-D-171", "audit", "sed -n 's/a/b/w out.txt' src/app.py", "deny", "[C-38] 2 sed s///w flag denied"),
+    case("TB05-D-172", "audit", "sed -n 's/a/b/e' src/app.py", "deny", "[C-38] 2 sed s///e flag denied"),
+    case("TB05-D-173", "audit", "sed -n -f script.sed src/app.py", "deny", "[C-38] 2 sed -f denied"),
+    case("TB05-D-174", "audit", "sed -n -i p src/app.py", "deny", "[C-38] 2 sed -i denied"),
+    case("TB05-D-175", "audit", "sed -n -e p src/app.py", "deny", "[C-38] 2 sed -e denied"),
+    case("TB05-D-176", "audit", "sed -n -e p -e p src/app.py", "deny", "[C-38] 2 two scripts denied"),
+    case("TB05-D-177", "audit", "sed -n --in-place p src/app.py", "deny", "[C-38] 2 sed --in-place denied"),
+    case("TB05-D-178", "audit", "sed -n --expression=p src/app.py", "deny", "[C-38] 2 sed --expression denied"),
+    case("TB05-D-179", "audit", "sed -s -n p src/app.py", "deny", "[C-38] 2 sed -s denied"),
+    case("TB05-D-180", "audit", "sed p src/app.py", "deny", "[C-38] 2 sed without -n is not the allowed form"),
+    case("TB05-D-181", "audit", "sed -n 'p;w out.txt' src/app.py", "deny", "[C-38] 2 script must be a single print or substitution"),
+    # item 3: git abbreviations
+    case("TB05-D-182", "review", "git log --output=x", "deny", "[C-38] 3 git log --output=x denied"),
+    case("TB05-D-183", "review", "git log --outp x", "deny", "[C-38] 3 abbreviation --outp denied"),
+    case("TB05-D-184", "review", "git log --ou=x", "deny", "[C-38] 3 abbreviation --ou=x denied"),
+    case("TB05-D-185", "review", "git diff --output x", "deny", "[C-38] 3 git diff --output denied"),
+    case("TB05-D-186", "review", "git log --oneline", "allow", "[C-38] 3 git log --oneline stays allowed"),
+]
+
+
+@pytest.mark.parametrize("agent,command,expected,clause", C38_BASH)
+def test_bash_readonly_c38(tmp_path, agent, command, expected, clause):
+    """[C-38] items 1 to 3: read-only roles' awk, sed and git are restricted to the safe forms."""
+    d = _run(tmp_path, "base", agent, "Bash", {"command": command})
+    assert d.kind == expected, clause
+    if expected != "allow":
+        assert d.reason
+
+
+# item 4: MultiEdit and NotebookEdit are write tools, governed exactly like Write and Edit.
+# (role, path inside the role's folders, path outside). orchestrator and review have no folders.
+_ROLE_PATHS = [
+    ("research", "ROOT/research/n.md", "ROOT/src/app.py"),
+    ("design", "ROOT/docs/prd/n.md", "ROOT/src/app.py"),
+    ("audit", "ROOT/docs/audit/n.md", "ROOT/src/app.py"),
+    ("test", "ROOT/evals/n.py", "ROOT/src/app.py"),
+    ("implement", "ROOT/src/n.py", "ROOT/evals/case.py"),
+]
+_C38_TOOL_CASES = []
+_n = 187
+for _tool in ("MultiEdit", "NotebookEdit"):
+    for _role, _in, _out in _ROLE_PATHS:
+        _C38_TOOL_CASES.append(case(f"TB05-D-{_n}", _role, _tool, _in, "allow", f"[C-38] 4 {_tool} inside {_role}'s folders allowed"))
+        _n += 1
+        if _role == "research" and _tool == "NotebookEdit":
+            _C38_TOOL_CASES.append(case("TB05-G-012", _role, _tool, _out, "deny", "[C-38] 4 NotebookEdit outside the role's folders denied"))
+        else:
+            _C38_TOOL_CASES.append(case(f"TB05-D-{_n}", _role, _tool, _out, "deny", f"[C-38] 4 {_tool} outside {_role}'s folders denied"))
+            _n += 1
+    for _role in ("orchestrator", "review"):
+        _C38_TOOL_CASES.append(case(f"TB05-D-{_n}", _role, _tool, "ROOT/src/app.py", "deny", f"[C-38] 4 read-only role {_role} may not use {_tool}"))
+        _n += 1
+_C38_TOOL_CASES.append(case(f"TB05-D-{_n}", None, "NotebookEdit", "ROOT/src/app.py", "deny", "[C-38] 4 main session (orchestrator) may not use NotebookEdit"))
+_n += 1
+_C38_TOOL_CASES.append(case(f"TB05-D-{_n}", "implement", "MultiEdit", "ROOT/.claude/settings.json", "deny", "[C-38] 4 + [C-36] MultiEdit on a control file denied"))
+_n += 1
+_C38_TOOL_CASES.append(case(f"TB05-D-{_n}", "implement", "NotebookEdit", "ROOT/.factory/profile.yaml", "deny", "[C-38] 4 + [C-36] NotebookEdit on a control file denied"))
+_n += 1
+_C38_TOOL_CASES.append(case(f"TB05-D-{_n}", "intruder", "NotebookEdit", "ROOT/src/app.py", "deny", "[C-38] 4 + B1 unknown agent types denied for NotebookEdit"))
+_n += 1
+
+
+def _tool_input(tool, path):
+    if tool == "MultiEdit":
+        return {"file_path": path, "edits": [{"old_string": "a", "new_string": "b"}]}
+    return {"notebook_path": path, "new_source": "x = 1\n", "edit_mode": "replace", "cell_id": "c1"}
+
+
+@pytest.mark.parametrize("agent,tool,path,expected,clause", _C38_TOOL_CASES)
+def test_multiedit_notebookedit(tmp_path, agent, tool, path, expected, clause):
+    """[C-38] item 4: 'MultiEdit (target file_path) and NotebookEdit (target notebook_path) are write tools:
+    path_guard applies to them exactly as to Write and Edit'."""
+    root, outside = _build(tmp_path, "base", {})
+    pl = lib.payload(root, tool_name=tool, tool_input=_tool_input(tool, _path(path, root, outside)), agent_type=agent)
+    d = lib.run_decide(HOOK, pl, root)
+    assert d.kind == expected, clause
+    if expected != "allow":
+        assert d.reason
+
+
+_BAD_TARGETS = [
+    ("MultiEdit", {"edits": [{"old_string": "a", "new_string": "b"}]}, "MultiEdit without file_path"),
+    ("MultiEdit", {"file_path": 123, "edits": [{"old_string": "a", "new_string": "b"}]}, "MultiEdit with a non-string file_path"),
+    ("NotebookEdit", {"new_source": "x", "edit_mode": "replace"}, "NotebookEdit without notebook_path"),
+    ("NotebookEdit", {"notebook_path": ["src/n.ipynb"], "new_source": "x"}, "NotebookEdit with a non-string notebook_path"),
+    ("NotebookEdit", {"notebook_path": None, "new_source": "x"}, "NotebookEdit with a null notebook_path"),
+    ("Write", {"content": "x"}, "Write without file_path"),
+    ("Edit", {"file_path": 5, "old_string": "a", "new_string": "b"}, "Edit with a non-string file_path"),
+]
+
+
+@pytest.mark.parametrize("tool,tool_input,what", [
+    case(f"TB05-D-{230 + i}", t, ti, w) for i, (t, ti, w) in enumerate(_BAD_TARGETS)
+])
+def test_write_tool_bad_target_denied(tmp_path, tool, tool_input, what):
+    """[C-38] item 4: 'A write-tool payload with a missing or non-string target is denied' (even for implement, which
+    would otherwise be allowed to write most paths)."""
+    root, _ = _build(tmp_path, "base", {})
+    d = lib.run_decide(HOOK, lib.payload(root, tool_name=tool, tool_input=tool_input, agent_type="implement"), root)
+    assert d.kind == "deny", what
+    assert d.reason

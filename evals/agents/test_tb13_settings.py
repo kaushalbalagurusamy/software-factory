@@ -28,7 +28,7 @@ EVENT = {"path_guard": "PreToolUse", "blindness_guard": "PreToolUse", "secrets_g
          "stop_gate": "SubagentStop", "session_start": "SessionStart"}
 SECRET_RE = re.compile(r"(sk-(ant|or)-[A-Za-z0-9_-]{8,}|ghp_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
                        r"|AKIA[0-9A-Z]{16}|xox[bp]-[A-Za-z0-9-]{10,})")
-MATCHER = {"path_guard": "Write|Edit|Bash", "secrets_guard": "Write|Edit|Bash",
+MATCHER = {"path_guard": "Write|Edit|MultiEdit|NotebookEdit|Bash", "secrets_guard": "Write|Edit|MultiEdit|NotebookEdit|Bash",
            "blindness_guard": "Read|Grep|Glob|Bash", "bash_guard": "Bash"}
 HOME_RE = re.compile(r"(/Users/[^/\s\"]+|/home/[^/\s\"]+)")
 PREFIX = "python -m factory.hooks"
@@ -166,8 +166,9 @@ def test_g007_stale_factory_entry_removed(tmp_path):
 
 @case("TB13-D-001", "diagnostic")
 def test_d001_guard_matchers(tmp_path):
-    """Behaviour 1 + [A-34]: guard matchers are exactly path_guard and secrets_guard `Write|Edit|Bash`,
-    blindness_guard `Read|Grep|Glob|Bash`, bash_guard `Bash`."""
+    """Behaviour 1 + [A-34] as amended by [C-38] item 4: guard matchers are exactly path_guard and secrets_guard
+    `Write|Edit|MultiEdit|NotebookEdit|Bash` (was `Write|Edit|Bash`), blindness_guard `Read|Grep|Glob|Bash`,
+    bash_guard `Bash`."""
     p, roles, st = inputs(tmp_path)
     s = st.emit_settings(p, roles)
     for hid in set(MATCHER):
@@ -412,3 +413,29 @@ def test_d024_existing_not_mutated_when_only_factory(tmp_path):
     snapshot = copy.deepcopy(first)
     st.emit_settings(p, roles, existing=first)
     assert first == snapshot
+
+
+@case("TB13-D-025", "diagnostic")
+def test_d025_guard_matchers_cover_all_write_tools(tmp_path):
+    """[C-38] item 4: the settings matcher for path_guard and secrets_guard is exactly
+    `Write|Edit|MultiEdit|NotebookEdit|Bash`; Write, Edit, MultiEdit, NotebookEdit and Bash fire it, Read, Grep and Glob do not."""
+    p, roles, st = inputs(tmp_path)
+    s = st.emit_settings(p, roles)
+    for hid in ("path_guard", "secrets_guard"):
+        ms = [m for _, m, _, c in entries(s, "PreToolUse") if c == f"{PREFIX} {hid}"]
+        assert ms == ["Write|Edit|MultiEdit|NotebookEdit|Bash"], (hid, ms)
+        for tool in ("Write", "Edit", "MultiEdit", "NotebookEdit", "Bash"):
+            assert matches(ms[0], tool), (hid, tool)
+        for tool in ("Read", "Grep", "Glob"):
+            assert not matches(ms[0], tool), (hid, tool)
+
+
+@case("TB13-D-026", "diagnostic")
+def test_d026_other_matchers_unchanged(tmp_path):
+    """[C-38] item 4: 'all other matchers in [A-34] are unchanged' (blindness_guard, bash_guard, and no matcher for the stop hooks)."""
+    p, roles, st = inputs(tmp_path)
+    s = st.emit_settings(p, roles)
+    for hid, want in (("blindness_guard", "Read|Grep|Glob|Bash"), ("bash_guard", "Bash")):
+        assert [m for _, m, _, c in entries(s, "PreToolUse") if c == f"{PREFIX} {hid}"] == [want], hid
+    for hid in ("stop_gate", "subagent_stop", "ledger_audit", "session_start"):
+        assert all(m in (None, "", "*") for _, m, _, c in entries(s) if c == f"{PREFIX} {hid}"), hid
