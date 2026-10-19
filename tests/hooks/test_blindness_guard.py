@@ -449,7 +449,7 @@ def test_glob_expansion_is_capped(env):
     big = env / "build/many"
     big.mkdir()
     for i in range(bg.MAX_GLOB_HITS + 5):
-        (big / f"f{i}").write_text("")
+        (big / f"d{i}").mkdir()  # folders: the live candidates an intermediate wildcard keeps
     assert denied(bash(env, "cat build/many/*/x"))
 
 
@@ -767,3 +767,40 @@ def test_glob_brace_and_parent_patterns_escape_path(app, ti):
 def test_glob_brace_pattern_inside_allowed_path(app):
     ti = {"pattern": "{pkg,other}/*.py", "path": str(app / "src")}
     assert decide(app, "Glob", ti).kind == "allow"
+
+
+# ---- QA iteration 3: plain ** under src is allowed, however many files src holds -------------
+def _plain_src(root, n):
+    src = root / "plainsrc"
+    for i in range(n):
+        d = src / f"m{i % 50}"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / f"f{i}.py").write_text("")
+    (src / "top.py").write_text("")
+    return src
+
+
+@pytest.mark.parametrize("n", [3, bg.MAX_GLOB_HITS + 500])
+def test_glob_doublestar_under_plain_src_allowed(env, n):
+    src = _plain_src(env, n)
+    for pat in ("**/*.py", "*.py", "**/*", "m1/*.py"):
+        d = decide(env, "Glob", {"pattern": pat, "path": str(src)})
+        assert d.kind == "allow", (pat, d.reason)
+    assert decide(env, "Grep", {"pattern": "x", "path": str(src), "glob": "**/*.py"}).kind == "allow"
+    assert bash(env, "ls plainsrc/*/*.py").kind == "allow"
+
+
+def test_glob_doublestar_reaching_symlink_into_protected_denied(env):
+    src = _plain_src(env, 3)
+    os.symlink("../../evals", src / "m1/link")
+    assert denied(decide(env, "Glob", {"pattern": "**/*.py", "path": str(src)}))
+    assert denied(decide(env, "Glob", {"pattern": "*/*/*", "path": str(src)}))
+    os.symlink("../evals/cases/c1.yaml", src / "c.py")
+    assert denied(decide(env, "Glob", {"pattern": "*.py", "path": str(src)}))
+
+
+def test_glob_leading_doublestar_profile_still_sees_protected_names(env):
+    cfg = cfg_for(env, held_out=["**/*.secret.py"])
+    src = _plain_src(env, 3)
+    (src / "m1/x.secret.py").write_text("")
+    assert denied(decide(env, "Glob", {"pattern": "**/*.py", "path": str(src)}, cfg=cfg))

@@ -38,7 +38,7 @@ MAX_ALTS = 256          # brace or variable alternatives of one word
 MAX_BRACES = 64         # "{" characters in one word
 MAX_VALUES = 64         # values recorded for one variable
 MAX_CHECKS = 50_000     # path classifications per decision
-MAX_SCAN = 20_000       # directory entries read while expanding globs
+MAX_SCAN = 100_000      # directory entries read while expanding globs
 MAX_GLOB_HITS = 2_000   # live candidates while expanding one glob
 
 LIT = "\x01"            # a literal "$" (single-quoted or escaped)
@@ -775,17 +775,51 @@ class _Guard:
                 and os.path.lexists(os.path.join(a, lit)))
 
     def fs_glob(self, pattern: str) -> list[str]:
-        """Concrete paths a shell glob expands to (``**`` as ``*``), so symlinks behind wildcards
-        are seen. A folder is checked before it is listed; a protected one is returned unlisted."""
+        """Paths a shell glob reaches on disk (``**`` as ``*``) that a lexical check cannot judge:
+        folders and symlinks at intermediate levels, symlinks (and, with a leading-``**`` glob,
+        protected names) at the last level. A plain file under an allowed folder resolves to
+        itself, which the lexical check already covers, so it is not collected (QA iteration 3:
+        a large plain ``src`` must not hit the caps). A folder is checked before it is listed; a
+        protected one is returned unlisted."""
         cur = ["/"]
         scanned = 0
-        for seg in pattern.split("/"):
-            if not seg:
-                continue
+        segs = [x for x in pattern.split("/") if x]
+        lead_star = any(g and g[0] == "**" for g in self.globs[EVAL])
+        for idx, seg in enumerate(segs):
+            final = idx == len(segs) - 1
             if not _WILD.search(seg):
                 cur = [os.path.join(c, seg) for c in cur]
                 continue
             nxt: list[str] = []
+            if seg == "**":  # zero or more folder levels: a bounded walk that never follows symlinks
+                queue = list(cur)
+                while queue:
+                    c = queue.pop()
+                    nxt.append(c)
+                    if len(nxt) > MAX_GLOB_HITS * 10:
+                        raise _Deny("cannot analyse the command safely (glob too broad); denied")
+                    rc = _resolve(c)
+                    if self.verdict_abs(rc, EVAL) == 2:
+                        return [c]
+                    if os.path.islink(c) or not os.path.isdir(c):
+                        continue
+                    try:
+                        with os.scandir(c) as it:
+                            for e in it:
+                                scanned += 1
+                                if scanned > MAX_SCAN:
+                                    raise _Deny("cannot analyse the command safely (glob too broad); denied")
+                                if e.name.startswith("."):
+                                    continue
+                                if e.is_symlink():
+                                    if self.verdict_abs(_resolve(os.path.join(c, e.name)), EVAL) == 2:
+                                        return [os.path.join(c, e.name)]
+                                elif e.is_dir(follow_symlinks=False):
+                                    queue.append(os.path.join(c, e.name))
+                    except OSError:
+                        continue
+                cur = nxt
+                continue
             pat = seg.replace("**", "*")
             for c in cur:
                 rc = _resolve(c)
@@ -802,7 +836,14 @@ class _Guard:
                             if e.name.startswith(".") and not pat.startswith("."):
                                 continue
                             if fnmatch.fnmatchcase(e.name, pat):
-                                nxt.append(os.path.join(c, e.name))
+                                hit = os.path.join(c, e.name)
+                                if final and not e.is_symlink():
+                                    if lead_star and self.verdict_abs(hit, EVAL) == 2:
+                                        return [hit]
+                                    continue
+                                if not final and not (e.is_symlink() or e.is_dir(follow_symlinks=False)):
+                                    continue
+                                nxt.append(hit)
                                 if len(nxt) > MAX_GLOB_HITS:
                                     raise _Deny("cannot analyse the command safely (glob too broad); denied")
                 except OSError:
