@@ -236,7 +236,7 @@ ALLOWED_CMDS = [
     "ls -la", "cat a.txt", "head -n 3 a", "tail -f a", "wc -l a", "grep -rn foo .", "rg foo",
     "find . -name '*.py'", "tree", "sf audit", "sed -n '1,5p' a", "awk '{print $1}' a",
     "git log | head -5", "git status && ls", "ls; cat a", "cat a | grep x | wc -l",
-    "grep 'a > b' f", "grep \"a > b\" f", "grep '$(x)' f", "echo hi | cat" if False else "cat 'a|b'",
+    "grep 'a > b' f", "grep \"a > b\" f", "grep '$(x)' f", "cat 'a|b'",
     "awk '$1 > 3' f", "grep tee f", "cat a\\>b",
 ]
 
