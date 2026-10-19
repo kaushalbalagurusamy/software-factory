@@ -222,7 +222,7 @@ def test_scope_lists_unfollowed_edges_explicitly(ex):
     assert "pkg.helpers:Worker.process" not in {c["id"] for c in u["callees"]}
     f = scope(ex, ["pkg.core:untyped"], depth=1, include_syntactic=True)
     assert "pkg.helpers:Worker.process" in {c["id"]: c for c in f["callees"]}
-    assert {c["id"]: c for c in f["callees"]}["pkg.helpers:Worker.process"]["via"] == "syntactic"
+    assert {c["id"]: c for c in f["callees"]}["pkg.helpers:Worker.process"]["kind"] == "syntactic"
 
 
 def test_scope_unknown_entry_raises(ex):
