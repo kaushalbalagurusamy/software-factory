@@ -213,8 +213,13 @@ def test_runtime_empty_json_object_config(tmp_path):
 
 
 def test_runtime_measures_live_health_and_versions(tmp_path):
-    srv = R.make_server(tmp_path, "127.0.0.1", 0)
+    # a plain stand-in for the monitored app (the dashboard server only serves its own allowlisted artifacts)
+    import functools
     import threading
+    from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+    handler = functools.partial(SimpleHTTPRequestHandler, directory=str(tmp_path))
+    handler.log_message = lambda *a, **k: None
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     (tmp_path / "health").write_text("ok")
     (tmp_path / "v.json").write_text(json.dumps({"commit": "abc123"}))
     threading.Thread(target=srv.serve_forever, daemon=True).start()
