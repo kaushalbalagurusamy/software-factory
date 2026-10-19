@@ -742,7 +742,7 @@ class _Guard:
             if best == 2:
                 return 2
         if _WILD.search(lex):
-            for hit in self.fs_glob(lex):
+            for hit in self.fs_glob(lex, kind):
                 for cand in dict.fromkeys((hit, _resolve(hit))):
                     best = max(best, self.verdict_abs(cand, kind))
                     if best == 2:
@@ -774,82 +774,108 @@ class _Guard:
         return (g[0] == "**" and lit and "*" not in lit and not _WILD.search(a)
                 and os.path.lexists(os.path.join(a, lit)))
 
-    def fs_glob(self, pattern: str) -> list[str]:
-        """Paths a shell glob reaches on disk (``**`` as ``*``) that a lexical check cannot judge:
-        folders and symlinks at intermediate levels, symlinks (and, with a leading-``**`` glob,
-        protected names) at the last level. A plain file under an allowed folder resolves to
-        itself, which the lexical check already covers, so it is not collected (QA iteration 3:
-        a large plain ``src`` must not hit the caps). A folder is checked before it is listed; a
-        protected one is returned unlisted."""
-        cur = ["/"]
+    def fs_glob(self, pattern: str, kind: str = EVAL) -> list[str]:
+        """Resolved paths a shell glob reaches on disk that a lexical check cannot judge. Each
+        candidate keeps its lexical form and its resolved folder, so later segments are joined
+        and resolved through any symlink on the way. ``**`` is a bounded walk over real folders
+        that never descends into a symlink but keeps it as a candidate for the next segment. A
+        folder is judged before it is listed and a protected eval folder is never listed. At the
+        last level a plain entry is skipped only when its folder resolves to itself and is not
+        protected (the lexical check covers it, so a large plain ``src`` stays within the caps);
+        every other entry is judged by its resolved path. Anything that resolves into a protected
+        path of ``kind`` is returned at once."""
+        cur = [("/", "/")]  # (lexical, resolved)
         scanned = 0
+        out: list[str] = []
         segs = [x for x in pattern.split("/") if x]
-        lead_star = any(g and g[0] == "**" for g in self.globs[EVAL])
+        lead_star = any(g and g[0] == "**" for g in self.globs[kind])
+
+        def protected(real: str) -> bool:
+            return self.verdict_abs(real, kind) == 2 or (kind != EVAL and self.verdict_abs(real, EVAL) == 2)
+
+        def entries(real: str):
+            nonlocal scanned
+            if self.verdict_abs(real, EVAL) == 2 or not os.path.isdir(real):
+                return  # never list a protected eval folder
+            try:
+                with os.scandir(real) as it:
+                    for e in it:
+                        scanned += 1
+                        if scanned > MAX_SCAN:
+                            raise _Deny("cannot analyse the command safely (glob too broad); denied")
+                        yield e
+            except OSError:
+                return
+
+        def grow(lst: list, item, cap: int):
+            lst.append(item)
+            if len(lst) > cap:
+                raise _Deny("cannot analyse the command safely (glob too broad); denied")
+
         for idx, seg in enumerate(segs):
             final = idx == len(segs) - 1
             if not _WILD.search(seg):
-                cur = [os.path.join(c, seg) for c in cur]
-                continue
-            nxt: list[str] = []
-            if seg == "**":  # zero or more folder levels: a bounded walk that never follows symlinks
-                queue = list(cur)
-                while queue:
-                    c = queue.pop()
-                    nxt.append(c)
-                    if len(nxt) > MAX_GLOB_HITS * 10:
-                        raise _Deny("cannot analyse the command safely (glob too broad); denied")
-                    rc = _resolve(c)
-                    if self.verdict_abs(rc, EVAL) == 2:
-                        return [c]
-                    if os.path.islink(c) or not os.path.isdir(c):
-                        continue
-                    try:
-                        with os.scandir(c) as it:
-                            for e in it:
-                                scanned += 1
-                                if scanned > MAX_SCAN:
-                                    raise _Deny("cannot analyse the command safely (glob too broad); denied")
-                                if e.name.startswith("."):
-                                    continue
-                                if e.is_symlink():
-                                    if self.verdict_abs(_resolve(os.path.join(c, e.name)), EVAL) == 2:
-                                        return [os.path.join(c, e.name)]
-                                elif e.is_dir(follow_symlinks=False):
-                                    queue.append(os.path.join(c, e.name))
-                    except OSError:
-                        continue
+                nxt = []
+                for lex, real in cur:
+                    r = _resolve(os.path.join(real, seg))
+                    if protected(r):
+                        return [r]
+                    nxt.append((os.path.join(lex, seg), r))
                 cur = nxt
                 continue
+            nxt: list[tuple[str, str]] = []
+            if seg == "**":  # zero or more folder levels
+                queue = list(cur)
+                while queue:
+                    lex, real = queue.pop()
+                    if protected(real):
+                        return [real]
+                    grow(nxt, (lex, real), MAX_GLOB_HITS * 10)
+                    for e in entries(real):  # symlinks found here go to nxt only, never the queue
+                        if e.name.startswith("."):
+                            continue
+                        elex, ereal = os.path.join(lex, e.name), os.path.join(real, e.name)
+                        if e.is_symlink():
+                            r = _resolve(ereal)
+                            if protected(r):
+                                return [r]
+                            grow(nxt, (elex, r), MAX_GLOB_HITS * 10)  # joined through, never walked
+                        elif e.is_dir(follow_symlinks=False):
+                            queue.append((elex, ereal))
+                cur = list(dict.fromkeys(nxt))
+                if final:
+                    out.extend(real for _, real in cur)
+                continue
             pat = seg.replace("**", "*")
-            for c in cur:
-                rc = _resolve(c)
-                if self.verdict_abs(rc, EVAL) == 2:
-                    return [c]
-                if not os.path.isdir(rc):
-                    continue
-                try:
-                    with os.scandir(rc) as it:
-                        for e in it:
-                            scanned += 1
-                            if scanned > MAX_SCAN:
-                                raise _Deny("cannot analyse the command safely (glob too broad); denied")
-                            if e.name.startswith(".") and not pat.startswith("."):
-                                continue
-                            if fnmatch.fnmatchcase(e.name, pat):
-                                hit = os.path.join(c, e.name)
-                                if final and not e.is_symlink():
-                                    if lead_star and self.verdict_abs(hit, EVAL) == 2:
-                                        return [hit]
-                                    continue
-                                if not final and not (e.is_symlink() or e.is_dir(follow_symlinks=False)):
-                                    continue
-                                nxt.append(hit)
-                                if len(nxt) > MAX_GLOB_HITS:
-                                    raise _Deny("cannot analyse the command safely (glob too broad); denied")
-                except OSError:
-                    continue
+            for lex, real in cur:
+                if protected(real):
+                    return [real]
+                self_resolving = _norm(lex) == real
+                for e in entries(real):
+                    if e.name.startswith(".") and not pat.startswith("."):
+                        continue
+                    if not fnmatch.fnmatchcase(e.name, pat):
+                        continue
+                    elex, ereal = os.path.join(lex, e.name), os.path.join(real, e.name)
+                    link = e.is_symlink()
+                    if link:
+                        ereal = _resolve(ereal)
+                    if final:
+                        if not link and self_resolving:
+                            if lead_star and protected(ereal):
+                                return [ereal]
+                            continue
+                        if protected(ereal):
+                            return [ereal]
+                        grow(out, ereal, MAX_GLOB_HITS)
+                    elif link or e.is_dir(follow_symlinks=False):
+                        if protected(ereal):
+                            return [ereal]
+                        grow(nxt, (elex, ereal), MAX_GLOB_HITS)
             cur = nxt
-        return cur
+        if segs and not _WILD.search(segs[-1]):
+            out.extend(real for _, real in cur)
+        return out
 
     # -- deny helpers ----------------------------------------------------------------------------
     def no_protected(self, words, cwd, what: str = "the command"):
