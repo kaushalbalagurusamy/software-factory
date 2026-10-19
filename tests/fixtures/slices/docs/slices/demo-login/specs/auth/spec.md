@@ -1,8 +1,5 @@
-## Purpose
+## ADDED Requirements
 
-Authentication behavior visible to the customer, described as acceptance criteria.
-
-## Requirements
 
 ### Requirement: AC-1 Valid credentials open a session
 The system SHALL open a session when the email and password match an account.
