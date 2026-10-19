@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "brief": {
+    "path": "docs/requirements/brief.md",
+    "sha256": "9768689e080dafefe0bd2347136af792d142f72b851e8a518dd5eb909c208b68"
+  },
+  "lenses_applied": [
+    {
+      "id": "cryptography",
+      "version": "1",
+      "why": "passwords"
+    }
+  ],
+  "claims": [
+    {
+      "id": "C-001",
+      "kind": "requirement",
+      "text": "Users sign in with email and a password.",
+      "locator": "L3"
+    },
+    {
+      "id": "C-002",
+      "kind": "requirement",
+      "text": "Passwords are stored with a fast unsalted hash for speed.",
+      "locator": "L4"
+    },
+    {
+      "id": "C-003",
+      "kind": "requirement",
+      "text": "The system must scrape competitor prices from their website.",
+      "locator": "L7"
+    },
+    {
+      "id": "C-004",
+      "kind": "omission",
+      "text": "Password hashing uses a salted memory-hard KDF",
+      "locator": "cryptography.s1"
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "brief": {
+    "path": "docs/requirements/brief.md",
+    "sha256": "9768689e080dafefe0bd2347136af792d142f72b851e8a518dd5eb909c208b68"
+  },
+  "run": {
+    "date": "2026-10-19",
+    "mode": "full",
+    "calibrated": false,
+    "lenses": [
+      {
+        "id": "cryptography",
+        "version": "1",
+        "calibrated": false
+      }
+    ]
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "claim_ids": [
+        "C-002",
+        "C-004"
+      ],
+      "lens": "cryptography",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "confirmed",
+      "route": "none",
+      "evidence": [
+        {
+          "kind": "note",
+          "ref": "research/notes/example.md",
+          "date": "2026-10-19"
+        }
+      ],
+      "severity": {
+        "tier": "high",
+        "answers": [
+          {
+            "q": "law-licence-terms-ethics",
+            "a": false
+          }
+        ]
+      },
+      "underlying_problem": "x",
+      "disposition": "reframe",
+      "spec_section": "crypto-agent-security"
+    },
+    {
+      "id": "F-002",
+      "claim_ids": [
+        "C-003"
+      ],
+      "lens": "provider-terms",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "confirmed",
+      "route": "none",
+      "evidence": [
+        {
+          "kind": "note",
+          "ref": "research/notes/example.md",
+          "date": "2026-10-19"
+        }
+      ],
+      "severity": {
+        "tier": "critical",
+        "answers": [
+          {
+            "q": "law-licence-terms-ethics",
+            "a": true
+          }
+        ]
+      },
+      "underlying_problem": "x",
+      "disposition": "ask-owner",
+      "spec_section": "legal-terms",
+      "owner_question": "Is scraping permitted by the site terms?"
+    },
+    {
+      "id": "F-003",
+      "claim_ids": [
+        "C-001"
+      ],
+      "lens": "accessibility",
+      "status": "dismissed",
+      "route": "none",
+      "evidence": [],
+      "dismissal_reason": "not applicable"
+    }
+  ],
+  "quarantine": [
+    {
+      "locator": "L7",
+      "text": "The system must scrape competitor prices from their website.",
+      "finding_ids": [
+        "F-002"
+      ],
+      "reason": "scraping likely breaches site terms"
+    }
+  ],
+  "convergence": {
+    "passes": 1,
+    "converged": true,
+    "stop_reason": "converged"
+  }
+}

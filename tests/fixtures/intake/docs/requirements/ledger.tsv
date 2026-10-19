@@ -1,0 +1,7 @@
+req_id	source_ref	text_sha	category	trust	finding_ids	disposition	status	slice_ids	artifact_or_waits_on
+R-001	brief.md:1	a13b06ba0bf388df7b2637b64657c7992e1b3d36eb5565c6e7d63bc86dbddcbe	context	trusted			context		heading, not a requirement
+R-003	brief.md:3	7a9cb95f8fd25e396fb3b13ff72671435d594c5040488bb065d6b1589111cb3b	requirement	trusted			unserved		
+R-004	brief.md:4	2d9dd2c2d33ba397f054431d18441c850e30f8d41c59dc43f21c918c6642163b	requirement	trusted			unserved		
+R-005	brief.md:5	7c2558776740474ed5a977f996df81de65c20a3f22169d014c40a3cdec6025f2	optional	trusted			unserved		
+R-006	brief.md:6	b3628c0c91d3a9302e0ad98c2e7ee84f1698e49c4559b5ef8fceeed592dce19b	out-of-scope	trusted			unserved		
+R-007	brief.md:7	4f477261fc98e6397386c97e9870f43369012a64617377662e33f84eacaa2821	requirement	trusted			unserved		
