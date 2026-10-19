@@ -9,8 +9,9 @@ mem_mb="${SF_TEST_MEM_MB:-4096}"; wall="${SF_TEST_WALL_S:-900}"; lock="${SF_TEST
 py="${SF_PYTHON:-$repo/.venv/bin/python}"; [ -x "$py" ] || py=python3
 mkdir -p "$repo/.sf"
 echo "$(date -u +%FT%TZ) cwd=$PWD mem_mb=$mem_mb wall_s=$wall args=$*" >> "$repo/.sf/resource-limits.log"
-SF_TEST_MEM_MB="$mem_mb" flock -w 1800 "$lock" \
-  prlimit --as=$((mem_mb * 1024 * 1024)) timeout --signal=KILL "$wall" "$py" -m pytest "$@"
+SF_TEST_MEM_MB="$mem_mb" PYTHONPATH="$repo${PYTHONPATH:+:$PYTHONPATH}" \
+  "$py" -m factory.resource_limits --memory-mb "$mem_mb" --wall-s "$wall" --lock "$lock" \
+  -- "$py" -m pytest "$@"
 rc=$?
 case $rc in
   137) echo "bounded-pytest: killed by the ${wall}s wall-clock limit (not a pass)" >&2 ;;

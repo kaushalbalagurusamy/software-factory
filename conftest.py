@@ -8,6 +8,9 @@ The limits in force are printed in the report header so a run records what it wa
 import os
 import resource
 import signal
+import sys
+import threading
+from pathlib import Path
 
 import pytest
 
@@ -18,12 +21,35 @@ TIMEOUT_S = int(os.environ.get("SF_TEST_TIMEOUT_S", "120"))
 def pytest_sessionstart(session):
     if MEM_MB > 0:
         limit = MEM_MB * 1024 * 1024
+        if sys.platform == "darwin":
+            # Darwin rejects RLIMIT_AS on current Python builds. Keep direct
+            # pytest invocations bounded too; the wrapper also watches children.
+            from factory.resource_limits import tree_rss
+            def watch_memory():
+                while True:
+                    try:
+                        if tree_rss(os.getpid()) > limit:
+                            # pytest may be capturing fd 2 when this trips;
+                            # retain a durable diagnostic before immediate exit.
+                            log = Path.cwd() / ".sf" / "resource-limits.log"
+                            log.parent.mkdir(parents=True, exist_ok=True)
+                            with log.open("a") as handle:
+                                handle.write(f"resource limit: pytest process-tree memory exceeded {MEM_MB} MB; exit 137 (not a pass)\n")
+                            os.write(2, b"resource limit: pytest process-tree memory exceeded (not a pass)\n")
+                            os._exit(137)
+                    except Exception as error:
+                        os.write(2, f"resource limit: memory supervisor failed: {error}\n".encode())
+                        os._exit(125)
+                    threading.Event().wait(0.2)
+            threading.Thread(target=watch_memory, daemon=True).start()
+            return
         _, hard = resource.getrlimit(resource.RLIMIT_AS)
         resource.setrlimit(resource.RLIMIT_AS, (limit if hard == resource.RLIM_INFINITY else min(limit, hard), hard))
 
 
 def pytest_report_header(config):
-    return f"resource limits: address space {MEM_MB or 'unlimited'} MB, per-test timeout {TIMEOUT_S or 'none'} s (SF_TEST_MEM_MB, SF_TEST_TIMEOUT_S)"
+    kind = "sampled process-tree RSS" if sys.platform == "darwin" else "address space"
+    return f"resource limits: {kind} {MEM_MB or 'unlimited'} MB, per-test timeout {TIMEOUT_S or 'none'} s (SF_TEST_MEM_MB, SF_TEST_TIMEOUT_S)"
 
 
 @pytest.hookimpl(hookwrapper=True)

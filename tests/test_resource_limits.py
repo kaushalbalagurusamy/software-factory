@@ -17,9 +17,16 @@ def run_pytest(tmp_path, test_src, quiet=True, **env):
 
 
 def test_memory_cap_turns_a_runaway_allocation_into_a_failure(tmp_path):
-    r = run_pytest(tmp_path, "def test_hog():\n    x = bytearray(1500 * 1024 * 1024)\n    assert len(x)\n", SF_TEST_MEM_MB=600)
+    # Touch pages: macOS may reserve a large zero-filled allocation lazily,
+    # which consumes virtual address space without exceeding an RSS limit.
+    r = run_pytest(tmp_path, "import time\ndef test_hog():\n    x = bytearray(1500 * 1024 * 1024)\n    for i in range(0, len(x), 4096):\n        x[i] = 1\n    time.sleep(2)\n    assert len(x)\n", SF_TEST_MEM_MB=600)
     assert r.returncode != 0
-    assert "MemoryError" in r.stdout and "1 failed" in r.stdout
+    if sys.platform == "darwin":
+        assert r.returncode == 137
+        assert "resource limit: pytest process-tree memory exceeded 600 MB; exit 137" in (
+            tmp_path / ".sf/resource-limits.log").read_text()
+    else:
+        assert "MemoryError" in r.stdout and "1 failed" in r.stdout
 
 
 def test_timeout_is_a_failure_with_an_explicit_message(tmp_path):
@@ -31,7 +38,8 @@ def test_timeout_is_a_failure_with_an_explicit_message(tmp_path):
 def test_limits_are_recorded_in_the_header_and_normal_tests_pass(tmp_path):
     r = run_pytest(tmp_path, "def test_ok():\n    assert 1 + 1 == 2\n", quiet=False, SF_TEST_MEM_MB=2048, SF_TEST_TIMEOUT_S=30)
     assert r.returncode == 0
-    assert "resource limits: address space 2048 MB, per-test timeout 30 s" in r.stdout
+    kind = "sampled process-tree RSS" if sys.platform == "darwin" else "address space"
+    assert f"resource limits: {kind} 2048 MB, per-test timeout 30 s" in r.stdout
 
 
 def test_wrapper_kills_on_wall_clock_records_limits_and_is_not_a_pass(tmp_path):
