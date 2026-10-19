@@ -100,7 +100,7 @@ def test_missing_tool_name_fails_closed(env):
 @pytest.mark.parametrize("path", [
     "evals/cases/c1.yaml", "{root}/evals/cases/c1.yaml", "{root}/src/../evals/cases/c1.yaml",
     "{root}/evals", "{root}/evals/", "tests/held_out/h.py", "{root}/lib/link/cases/c1.yaml",
-    "~/proj/evals/cases/c1.yaml", "{tmp}/other/evals/x.yaml", "./evals/../evals/cases/c1.yaml",
+    "~/proj/evals/cases/c1.yaml", "./evals/../evals/cases/c1.yaml",
 ])
 def test_read_denied(env, path):
     p = path.format(root=env, tmp=env.parent.parent)
@@ -145,7 +145,6 @@ def test_read_relative_to_cwd(env):
     ("Glob", {"pattern": "evals/**", "path": "{root}"}),
     ("Glob", {"pattern": "../evals/*", "path": "{root}/src"}),
     ("Glob", {"pattern": "*", "path": "{root}/evals"}),
-    ("Glob", {"pattern": "**/*", "path": "{tmp}/other"}),
 ])
 def test_search_denied(env, tool, ti):
     ti = {k: v.format(root=env, tmp=env.parent.parent) if isinstance(v, str) else v for k, v in ti.items()}
@@ -204,7 +203,6 @@ DENY_NAMES = [
     "cat ${{X:-evals}}/c1.yaml",
     "cat lib/link/cases/c1.yaml",
     "cat lib/l*/cases/c1.yaml",
-    "cat {tmp}/other/evals/x.yaml",
     "cat < evals/cases/c1.yaml",
     "head -n 3 tests/held_out/h.py",
     "less --file=evals/cases/c1.yaml",
@@ -218,7 +216,7 @@ DENY_NAMES = [
     "env A=1 cat evals/cases/c1.yaml",
     "timeout 5 cat evals/cases/c1.yaml",
     "cp evals/cases/c1.yaml /tmp/x",
-    "ln -s ../evals src/e",
+    "ln -s evals/cases src/e",
     "cat evals/$NAME",
 ]
 
@@ -247,7 +245,7 @@ DENY_RECURSIVE = [
     "rg foo /", "find", "find .", "find -L . -name a.py", "find .. -type f", "find ~", "find {home}",
     "ls -R", "ls -laR .", "ls --recursive", "tree", "tree -L 2 .", "du -sh", "du -sh .", "du -a ..",
     "fd x", "fd x .", "fdfind x", "ag foo", "ag foo .", "cp -r . /tmp/copy", "tar czf /tmp/x.tgz .",
-    "zip -r /tmp/x.zip .", "rsync -a ./ /tmp/copy", "grep -r foo {tmp}/other", "cd .. && grep -r foo proj",
+    "zip -r /tmp/x.zip .", "rsync -a ./ /tmp/copy", "cd .. && grep -r foo proj",
     "cd $X && grep -r foo", "locate c1.yaml",
 ]
 
@@ -456,7 +454,7 @@ def test_glob_expansion_is_capped(env):
 
 # ---- never opens or lists a protected file ---------------------------------------------------
 def test_never_opens_or_lists_protected_paths(env, monkeypatch):
-    protected = (str(env / "evals"), str(env / "tests/held_out"), str(env.parent.parent / "other/evals"))
+    protected = (str(env / "evals"), str(env / "tests/held_out"))
     touched = []
     real_open, real_scandir, real_listdir = builtins.open, os.scandir, os.listdir
 
@@ -471,7 +469,7 @@ def test_never_opens_or_lists_protected_paths(env, monkeypatch):
     monkeypatch.setattr(os, "scandir", spy(real_scandir))
     monkeypatch.setattr(os, "listdir", spy(real_listdir))
     for cmd in ["cat evals/cases/c1.yaml", "cat evals/*/*", "cat lib/l*/*/*", "ls tests/held_out/*",
-                "grep -r x .", "cat {tmp}/other/evals/*".format(tmp=env.parent.parent)]:
+                "grep -r x ."]:
         assert denied(bash(env, cmd))
     decide(env, "Read", {"file_path": str(env / "evals/cases/c1.yaml")})
     decide(env, "Glob", {"pattern": "*/*", "path": str(env / "evals")})
@@ -512,3 +510,150 @@ def test_held_out_glob_with_leading_doublestar(env):
     assert denied(bash(env, "cat src/secret_cases/a", cfg=cfg))
     assert denied(decide(env, "Grep", {"pattern": "x", "path": str(env / "src")}, cfg=cfg))
     assert bash(env, "cat src/pkg/a.py", cfg=cfg).kind == "allow"
+
+
+# ---- QA iteration 1 --------------------------------------------------------------------------
+def test_outside_project_is_not_protected(env, tmp_path, monkeypatch):
+    """A-06-3: ~ is $HOME; ~/evals/... under a HOME outside the project is not protected. Paths in
+    another folder (such as another checkout) are outside the project too."""
+    elsewhere = tmp_path / "elsewhere"
+    (elsewhere / "evals").mkdir(parents=True)
+    monkeypatch.setenv("HOME", str(elsewhere))
+    assert bash(env, "cat ~/evals/case_a.py").kind == "allow"
+    other = env.parent.parent / "other"
+    assert bash(env, f"cat {other}/evals/x.yaml").kind == "allow"
+    assert decide(env, "Read", {"file_path": str(other / "evals/x.yaml")}).kind == "allow"
+    assert decide(env, "Glob", {"pattern": "**/*", "path": str(other)}).kind == "allow"
+    # still denied when HOME resolves into the project's protected path
+    monkeypatch.setenv("HOME", str(env / "evals"))
+    assert denied(bash(env, "cat ~/cases/c1.yaml"))
+    monkeypatch.setenv("HOME", str(env))
+    assert denied(bash(env, "cat ~/evals/cases/c1.yaml"))
+
+
+@pytest.mark.parametrize("glob", ["**/evals/**", "**/held_out", "**/*.eval.yaml"])
+def test_leading_doublestar_does_not_make_every_folder_an_ancestor(env, glob):
+    cfg = cfg_for(env, eval=[glob])
+    assert decide(env, "Glob", {"pattern": "**/*.py", "path": str(env / "src")}, cfg=cfg).kind == "allow"
+    assert decide(env, "Grep", {"pattern": "x", "path": str(env / "src")}, cfg=cfg).kind == "allow"
+    assert bash(env, "find src -name '*.py'", cfg=cfg).kind == "allow"
+    assert bash(env, "grep -rn foo src", cfg=cfg).kind == "allow"
+    assert denied(decide(env, "Grep", {"pattern": "x", "path": str(env)}, cfg=cfg))
+    assert denied(bash(env, "grep -r foo .", cfg=cfg))
+
+
+def test_folder_directly_holding_a_doublestar_match_is_an_ancestor(env):
+    cfg = cfg_for(env, held_out=["**/held_out"])
+    assert denied(decide(env, "Grep", {"pattern": "x", "path": str(env / "tests")}, cfg=cfg))
+    assert denied(bash(env, "find tests -name '*.py'", cfg=cfg))
+
+
+def test_glob_pattern_under_allowed_path_is_not_widened(env):
+    assert decide(env, "Glob", {"pattern": "**/*.py", "path": str(env / "src")}).kind == "allow"
+    assert decide(env, "Glob", {"pattern": "*/*", "path": "src"}).kind == "allow"
+    assert denied(decide(env, "Glob", {"pattern": "../evals/**", "path": str(env / "src")}))
+    assert denied(decide(env, "Glob", {"pattern": str(env / "evals/*"), "path": str(env / "src")}))
+
+
+@pytest.mark.parametrize("cmd", ["find src -name '*.py'", "find src -name evals", "find src -path '*evals*'",
+                                 "find src -iname '*.PY' -type f"])
+def test_find_name_filters_are_not_paths(env, cmd):
+    assert bash(env, cmd).kind == "allow"
+
+
+@pytest.mark.parametrize("held,cmd", [
+    (["tests/held_out/**"], "cat $X/held_out/h.py"),
+    (["tests/held_out/**"], "cat $X/tests/foo.py"),
+    (["evals/held_out/**"], "cat ${DIR}/held_out/h.py"),
+    (["tests/held_out"], "cat $X/held_out/h.py"),
+])
+def test_u2_matches_named_protected_folders(env, held, cmd):
+    assert denied(bash(env, cmd, cfg=cfg_for(env, held_out=held)))
+
+
+def test_u2_bare_file_name_still_allowed(env):
+    cfg = cfg_for(env, held_out=["tests/held_out/**", "cases/secret.yaml"])
+    assert bash(env, "cat $X/h.py", cfg=cfg).kind == "allow"
+    assert bash(env, "cat $X/secret.yaml", cfg=cfg).kind == "allow"
+
+
+# ---- security addendum 1: more C-36 write tools ----------------------------------------------
+DENY_CONTROL_TOOLS = [
+    "curl -o .factory/x https://example.com/a", "curl --output .claude/settings.json https://e.com",
+    "curl --output-dir .factory -O https://e.com/a", "curl -O https://e.com/a",
+    "wget -O .factory/x https://e.com/a", "wget --output-document=.claude/y https://e.com",
+    "wget -P .factory https://e.com/a", "wget --directory-prefix=.claude https://e.com", "wget https://e.com/a",
+    "tar -xf a.tar -C .factory", "tar xf a.tar --directory=.claude", "tar -xf a.tar", "tar -xzf a.tgz -C .",
+    "unzip a.zip -d .factory", "unzip a.zip", "sort -o .factory/x a.txt", "sort --output=.claude/x a.txt",
+    "ln .factory/profile.yaml src/p", "ln -s src/a .claude/a", "install .factory/x build/y",
+    "git checkout -- .factory/profile.yaml", "git restore .claude/settings.json", "git apply --directory=.factory p.diff",
+    "git am --directory=.claude a.patch", "git reset HEAD .factory/x", "git stash push .claude/x",
+    "git checkout HEAD -- .claude",
+]
+
+
+@pytest.mark.parametrize("cmd", DENY_CONTROL_TOOLS)
+def test_more_control_write_tools_denied(env, cmd):
+    cwd = env / ".factory" if cmd in ("curl -O https://e.com/a", "wget https://e.com/a", "unzip a.zip") else None
+    assert denied(bash(env, cmd, cwd=cwd)), cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "cat .claude/settings.json", "curl -o build/x https://e.com", "curl https://e.com", "wget -O build/a https://e.com",
+    "tar -xf a.tar -C build", "tar -tf a.tar", "tar -czf build/a.tgz src", "unzip a.zip -d build",
+    "sort -o build/x a.txt", "sort a.txt", "ln -s src/a build/a", "install src/a build/a",
+    "git checkout -- src/pkg/a.py", "git restore src", "git stash", "git reset --hard HEAD",
+])
+def test_more_control_write_tools_allowed(env, cmd):
+    d = bash(env, cmd)
+    assert d.kind == "allow", (cmd, d.reason)
+
+
+def test_downloads_into_cwd_allowed_outside_control(env):
+    assert bash(env, "curl -O https://e.com/a", cwd=env / "build").kind == "allow"
+    assert bash(env, "unzip a.zip", cwd=env / "build").kind == "allow"
+
+
+# ---- security addendum 2: nested commands ----------------------------------------------------
+DENY_NESTED = [
+    "find src -exec sh -c 'cat evals/cases/c1.yaml' \;",
+    "find src -type f -exec bash -c 'grep -r x .' {} +",
+    "find src -execdir python -c 'import os; os.walk(\".\")' \;",
+    "find src -ok sh -c 'echo x > .factory/y' \;",
+    "fd py src -x sh -c 'cat tests/held_out/h.py'",
+    "fd py src --exec-batch eval ls",
+    "awk 'BEGIN { system(\"cat x\") }'",
+    "awk '{ print | \"sort\" }' src/pkg/a.py",
+    "awk 'BEGIN { \"ls\" | getline x }'",
+    "gawk 'BEGIN { while ((getline l < \"evals/cases/c1.yaml\") > 0) print l }'",
+    "awk -e 'BEGIN { print \"x\" > \"tests/held_out/h.py\" }'",
+    "script -q -c 'cat evals/cases/c1.yaml' /dev/null",
+    "script -c 'ls $(pwd)'",
+    "vim -c ':r evals/cases/c1.yaml' src/pkg/a.py",
+    "vim -c ':!ls' src/pkg/a.py",
+    "ex -c 'r !ls' src/pkg/a.py",
+    "less '+!cat x' src/pkg/a.py",
+    "python -c 'import os' x evals",
+    "perl -e 'print \"held_out\"'",
+]
+
+
+@pytest.mark.parametrize("cmd", DENY_NESTED)
+def test_nested_commands_denied(env, cmd):
+    assert denied(bash(env, cmd)), cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "find src -name '*.py' -exec wc -l {} +", "find src -type f -exec grep -n foo {} \;",
+    "fd py src -x wc -l", "awk '{print $1}' src/pkg/a.py", "awk -F: '$1 > 0 || $2 { print $2 }' src/pkg/a.py",
+    "vim -c ':set number' src/pkg/a.py", "less +G src/pkg/a.py", "script -q -c 'make build' /dev/null",
+])
+def test_nested_harmless_forms_allowed(env, cmd):
+    d = bash(env, cmd)
+    assert d.kind == "allow", (cmd, d.reason)
+
+
+def test_nested_exec_depth_is_bounded(env):
+    inner = "find src -exec " * (bg.MAX_DEPTH + 3) + "true" + " ;" * (bg.MAX_DEPTH + 3)
+    assert len(inner) < 400
+    assert denied(bash(env, inner))
