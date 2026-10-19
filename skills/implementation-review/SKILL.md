@@ -31,3 +31,13 @@ Dispatch a dedicated subagent (Opus) defined like `openemr-base-clean/.claude/ag
 - The reviewer is on the grading side: it may read cases and fixtures, and must never edit implementation, tests, or cases.
 
 Full protocol with the reasoning per stage: `ai-sidecar/docs/how-to/implementation-review.md` in the OpenEMR Clinical Co-Pilot repository.
+
+## Mechanical phase first, then judgement (added with the sf toolchain)
+
+Before the protocol above, run the deterministic checks and hand their output to the reviewer; the reviewer does not re-derive what a command already proved.
+
+1. `sf slice done <slice>` (every task implemented and QA-verified, verification chain intact, criteria lock verified, slice check passes); `sf intake check` (every source line covered, hashes current).
+2. `sf contracts verify` on the changed symbols (verdicts PROVED / COUNTEREXAMPLE / UNSUPPORTED / UNKNOWN / TIMEOUT; a missing solver or unrouted unsupported obligation fails the gate); `sf structure diff base head` for changed symbols and callers by edge kind; the dolls `check` on the refreshed model.
+3. Then the judgement review: read callers of every changed function (the Ponytail review rubric: logic, safety, load, untested risky code, speed, necessity; every finding with a concrete case; end with `Verdict:` and a `Not checked:` line) and give the reviewer the open `minesweeper` findings and the relevant lens packs (networking, cryptography, performance, ethics, and the rest) as a hunting list. The architecture explorer lets the reviewer open exactly the component under review.
+4. **Findings go back into the slice, not into a report nobody reads.** For each confirmed finding: `sf slice amend <slice> --role reviewer` adds a triaged task (priority, depends_on) or a criterion (additive only), which re-opens the implementer and QA pair. Weakening or removing a criterion needs an explicit human or Codex approval marker. Record the verdict per task in the slice, and update the docs and ADRs the finding touches (`doc-sync`) before approving completion.
+5. Approval requires `sf slice done` to pass again after the amendments; a review that finds nothing says so and lists what it did not check.
