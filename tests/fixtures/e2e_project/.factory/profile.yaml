@@ -1,0 +1,8 @@
+# Base fixture for the TB-14 walking skeleton: a small profile, no MCP servers.
+schema_version: 1
+project: {name: Lanternfish}
+paths:
+  eval: ["evals/**"]
+  held_out: ["held_out/**"]
+  research_dir: research
+one_way_door_patterns: ['\bdropdb\b']
