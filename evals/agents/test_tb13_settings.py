@@ -413,3 +413,29 @@ def test_d024_existing_not_mutated_when_only_factory(tmp_path):
     snapshot = copy.deepcopy(first)
     st.emit_settings(p, roles, existing=first)
     assert first == snapshot
+
+
+@case("TB13-D-025", "diagnostic")
+def test_d025_guard_matchers_cover_all_write_tools(tmp_path):
+    """[C-38] item 4: the settings matcher for path_guard and secrets_guard is exactly
+    `Write|Edit|MultiEdit|NotebookEdit|Bash`; Write, Edit, MultiEdit, NotebookEdit and Bash fire it, Read, Grep and Glob do not."""
+    p, roles, st = inputs(tmp_path)
+    s = st.emit_settings(p, roles)
+    for hid in ("path_guard", "secrets_guard"):
+        ms = [m for _, m, _, c in entries(s, "PreToolUse") if c == f"{PREFIX} {hid}"]
+        assert ms == ["Write|Edit|MultiEdit|NotebookEdit|Bash"], (hid, ms)
+        for tool in ("Write", "Edit", "MultiEdit", "NotebookEdit", "Bash"):
+            assert matches(ms[0], tool), (hid, tool)
+        for tool in ("Read", "Grep", "Glob"):
+            assert not matches(ms[0], tool), (hid, tool)
+
+
+@case("TB13-D-026", "diagnostic")
+def test_d026_other_matchers_unchanged(tmp_path):
+    """[C-38] item 4: 'all other matchers in [A-34] are unchanged' (blindness_guard, bash_guard, and no matcher for the stop hooks)."""
+    p, roles, st = inputs(tmp_path)
+    s = st.emit_settings(p, roles)
+    for hid, want in (("blindness_guard", "Read|Grep|Glob|Bash"), ("bash_guard", "Bash")):
+        assert [m for _, m, _, c in entries(s, "PreToolUse") if c == f"{PREFIX} {hid}"] == [want], hid
+    for hid in ("stop_gate", "subagent_stop", "ledger_audit", "session_start"):
+        assert all(m in (None, "", "*") for _, m, _, c in entries(s) if c == f"{PREFIX} {hid}"), hid

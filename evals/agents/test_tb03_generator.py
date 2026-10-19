@@ -661,3 +661,39 @@ def test_d037_profile_built_in_code_generates_same(tmp_path):
     lib.need("factory.agents.profile", "parse_profile")
     d = lib.profile_dict("alt")
     assert gen.generate_agents(prof.parse_profile(d), roles.load_roles()) == generate(tmp_path, "alt")
+
+
+@case("TB03-D-038", "diagnostic", reqs=("R-04",))
+def test_d038_guard_matchers_cover_all_write_tools(tmp_path):
+    """[C-38] item 4: the generated matcher for path_guard and secrets_guard is exactly
+    `Write|Edit|MultiEdit|NotebookEdit|Bash`, so each of those five tools fires the hook and Read, Grep and Glob do not."""
+    _, roles, _ = mods()
+    rs = roles.load_roles()
+    out = generate(tmp_path)
+    seen = 0
+    for r in ROLES:
+        entries = hook_entries(split(out[f".claude/agents/{r}.md"])[0])
+        for hid in ("path_guard", "secrets_guard"):
+            if hid not in set(get(rs[r], "hooks")):
+                continue
+            ms = [m for e, m, _, c in entries if e == "PreToolUse" and c == cmd(hid)]
+            assert ms == ["Write|Edit|MultiEdit|NotebookEdit|Bash"], (r, hid, ms)
+            for tool in ("Write", "Edit", "MultiEdit", "NotebookEdit", "Bash"):
+                assert matches(ms[0], tool), (r, hid, tool)
+            for tool in ("Read", "Grep", "Glob"):
+                assert not matches(ms[0], tool), (r, hid, tool)
+            seen += 1
+    assert seen, "at least one role lists path_guard or secrets_guard"
+
+
+@case("TB03-D-039", "diagnostic", reqs=("R-04",))
+def test_d039_other_matchers_unchanged(tmp_path):
+    """[C-38] item 4: 'all other matchers in [A-34] are unchanged': blindness_guard `Read|Grep|Glob|Bash`, bash_guard `Bash`."""
+    _, roles, _ = mods()
+    rs = roles.load_roles()
+    out = generate(tmp_path)
+    for r in ROLES:
+        entries = hook_entries(split(out[f".claude/agents/{r}.md"])[0])
+        for hid, want in (("blindness_guard", "Read|Grep|Glob|Bash"), ("bash_guard", "Bash")):
+            if hid in set(get(rs[r], "hooks")):
+                assert [m for e, m, _, c in entries if e == "PreToolUse" and c == cmd(hid)] == [want], (r, hid)
