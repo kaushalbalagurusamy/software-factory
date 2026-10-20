@@ -233,3 +233,7 @@ Binding for `docs/prds/SFN-07-eli12-docs.md`. Each finding line is `path:line: c
 ## C-47 (2026-10-20, SFN-07): where a reference points
 
 In `Used by` and `Depends on`, the `path:line` of an entry is the line where the call or reference happens (the call site), so that clicking it in an editor lands on the use. A symbol is listed once per caller with its first call-site line. Scaffolded placeholders have the shape a finished line must have: `TODO` stands in for each word to be written, so a parameter line is `name (TODO): TODO` and a return line is `TODO: TODO` when the type is not annotated; replacing every `TODO` with plain words must give a line that passes `check`.
+
+## C-48 (2026-10-20, SFN-07): which place each reference opens
+
+Refines C-47. In `Used by`, `path:line` is the call site in the caller (where the use happens). In `Depends on`, `path:line` is where the depended-on symbol is defined (so the entry opens the thing being relied on); a `(maybe)` dependency that resolves to no definition cites the call site in this symbol. Every finding that concerns one symbol (`stale-signature`, `stale-dependencies`, `too-long`, `bad-param`, `format`, `todo`, `missing-entry`, `orphan-entry`) names that symbol, with its short name or dotted name, in its message text.
