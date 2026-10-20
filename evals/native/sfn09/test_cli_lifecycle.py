@@ -77,7 +77,7 @@ def test_D2_hash_is_stable_for_identical_proposals(inited):
 
 
 @pytest.mark.parametrize("kind", ["missing", "directory", "outside", "symlink_outside", "over_1mib"])
-def test_D2_unhashable_artifacts_hash_as_null_sha(inited, kind):
+def test_D2_request_with_unhashable_artifact_is_refused_and_opens_nothing(inited, kind):
     outside = inited.tmp / "outside.md"
     outside.write_text("secret\n")
     path = {"missing": "docs/none.md", "directory": "docs", "outside": str(outside),
@@ -87,9 +87,32 @@ def test_D2_unhashable_artifacts_hash_as_null_sha(inited, kind):
         os.symlink(outside, inited.repo / "link.md")
     if kind == "over_1mib":
         inited.write("big.md", b"a" * (1024 * 1024 + 1))
+    before = inited.stop_lines()
     p = ask(inited, "pick", ["A", "B"], artifacts=[path])
-    assert p.returncode == 0, out(p)
-    assert inited.stop("pick")["proposal_hash"] == canon_hash("Which one?", ["A", "B"], [(path, None)])
+    assert p.returncode != 0, out(p)
+    assert inited.stop_lines() == before and inited.stop("pick") is None
+    assert inited.run("hitl", "status").returncode == 0
+
+
+@pytest.mark.parametrize("kind", ["missing", "directory", "outside", "over_1mib"])
+def test_D2_checkpoint_with_unhashable_artifact_still_opens_with_unbound(inited, kind):
+    outside = inited.tmp / "outside.md"
+    outside.write_text("secret\n")
+    path = {"missing": "docs/none.md", "directory": "docs", "outside": str(outside), "over_1mib": "big.md"}[kind]
+    inited.write("docs/keep.md", "k\n")
+    if kind == "over_1mib":
+        inited.write("big.md", b"a" * (1024 * 1024 + 1))
+    inited.phase("start", "4-prd", 0)
+    assert inited.phase("end", "4-prd", 5, "--ask", "Ship?", "--artifact", path).returncode == 0
+    s = inited.stop("4-prd-review")
+    assert s["state"] == "asked"
+    assert s["proposal_hash"] == canon_hash("Ship?", [], [(path, "unbound")])
+
+
+def test_D2_unbound_checkpoint_can_still_be_released(inited):
+    inited.phase("start", "4-prd", 0)
+    inited.phase("end", "4-prd", 5, "--artifact", "docs/none.md")
+    assert inited.run("hitl", "release", "4-prd-review").returncode == 0
 
 
 def test_D2_exactly_1mib_artifact_is_still_hashed(inited):
@@ -168,20 +191,15 @@ def test_D3_second_release_of_an_answered_stop_is_refused(inited):
     assert inited.stop_lines() == before and inited.stop("pick")["answer"] == "Alpha"
 
 
-@pytest.mark.parametrize("mutation", ["edit", "delete", "created_late", "append"])
+@pytest.mark.parametrize("mutation", ["edit", "delete", "append"])
 def test_D3_artifact_drift_blocks_release_and_releases_nothing(inited, mutation):
-    if mutation == "created_late":
-        art = "docs/late.md"
-    else:
-        art = "docs/adr.md"
-        inited.write(art, "v1\n")
+    art = "docs/adr.md"
+    inited.write(art, "v1\n")
     ask_ok(inited, "pick", ["Alpha", "Beta"], artifacts=[art])
     if mutation == "edit":
         inited.write(art, "v2\n")
     elif mutation == "delete":
         (inited.repo / art).unlink()
-    elif mutation == "created_late":
-        inited.write(art, "now exists\n")
     else:
         with open(inited.repo / art, "a") as f:
             f.write("x")

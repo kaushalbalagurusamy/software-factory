@@ -147,15 +147,33 @@ def test_D4_second_release_is_a_client_error_and_not_double_recorded(world):
     assert len(world.rig.stop_lines()) == n and api_stop(world, "pick")["answer"] == "Alpha"
 
 
-def test_D4_checkpoint_stop_must_also_carry_its_hash(inited, serve):
+def test_D4_stop_without_options_accepts_a_hashless_body(inited, serve):
     inited.phase("start", "0-intake", 0)
     inited.phase("end", "0-intake", 5)
     srv = serve(inited)
-    h = api_stop(srv, "0-intake-review")["proposal_hash"]
-    assert re.fullmatch(r"[0-9a-f]{64}", h)
-    assert post_release(srv, {"name": "0-intake-review", "note": ""})[0] == 400
-    assert state_of(inited, "0-intake-review") == "asked"
-    assert post_release(srv, {"name": "0-intake-review", "note": "", "proposal_hash": h})[0] == 200
+    assert re.fullmatch(r"[0-9a-f]{64}", api_stop(srv, "0-intake-review")["proposal_hash"])
+    r = post_release(srv, {"name": "0-intake-review", "note": ""})
+    assert r[0] == 200, msg(r)
+    assert state_of(inited, "0-intake-review") == "answered"
+
+
+def test_D4_optionless_stop_with_a_wrong_hash_is_still_409(inited, serve):
+    ask_ok(inited, "plain", ())
+    srv = serve(inited)
+    before = inited.stop_lines()
+    assert post_release(srv, {"name": "plain", "note": "", "proposal_hash": STALE})[0] == 409
+    assert inited.stop_lines() == before
+
+
+def test_D4_optionless_stop_hashless_body_still_hits_the_drift_check(inited, serve):
+    inited.write("docs/adr.md", "v1\n")
+    ask_ok(inited, "plain", (), artifacts=["docs/adr.md"])
+    srv = serve(inited)
+    inited.write("docs/adr.md", "v2\n")
+    before = inited.stop_lines()
+    r = post_release(srv, {"name": "plain", "note": ""})
+    assert r[0] == 409 and "proposal changed" in msg(r)
+    assert inited.stop_lines() == before
 
 
 def test_D4_stop_without_options_releases_with_its_hash_and_no_answer(inited, serve):
@@ -227,6 +245,10 @@ def test_D9_banner_is_outside_the_tab_panels(page):
     first_tab = min([p for p in (page.find("data-tab"), page.find("role=\"tabpanel\""), page.find("tabpanel")) if p >= 0]
                     or [len(page)])
     assert i < first_tab or "banner" in page[max(0, i - 400):i + 200].lower()
+
+
+def test_D9_dashboard_shows_the_word_unbound(page):
+    assert "unbound" in page
 
 
 def test_D9_dashboard_stays_self_contained(page):
