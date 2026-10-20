@@ -7,6 +7,7 @@ Standard library only, Python 3.9+, no network, no model calls.
 """
 import argparse
 import ast
+import builtins
 import hashlib
 import json
 import os
@@ -152,13 +153,13 @@ def params_of(s, symmap):
     for i, p in enumerate(pos):
         if i == 0 and skip:
             continue
-        out.append((p.arg, ast.unparse(p.annotation) if p.annotation else "any"))
+        out.append((p.arg, ast.unparse(p.annotation) if p.annotation else "TODO"))
     if a.vararg:
-        out.append(("*" + a.vararg.arg, ast.unparse(a.vararg.annotation) if a.vararg.annotation else "any"))
+        out.append(("*" + a.vararg.arg, ast.unparse(a.vararg.annotation) if a.vararg.annotation else "TODO"))
     for p in a.kwonlyargs:
-        out.append((p.arg, ast.unparse(p.annotation) if p.annotation else "any"))
+        out.append((p.arg, ast.unparse(p.annotation) if p.annotation else "TODO"))
     if a.kwarg:
-        out.append(("**" + a.kwarg.arg, ast.unparse(a.kwarg.annotation) if a.kwarg.annotation else "any"))
+        out.append(("**" + a.kwarg.arg, ast.unparse(a.kwarg.annotation) if a.kwarg.annotation else "TODO"))
     return out
 
 
@@ -187,7 +188,7 @@ class Project:
             if s.cls:
                 self.methods.setdefault(s.qual.split(".")[-1], []).append(s)
         self._tables = {}
-        self.certain, self.maybe = {}, {}
+        self.certain, self.maybe, self.unres = {}, {}, {}
         self._edges()
 
     def resolve_mod(self, name):
@@ -267,23 +268,29 @@ class Project:
                 locs.add(n.id)
             elif isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n is not node:
                 locs.add(n.name)
-        cert, may = set(), set()
+        cert, may, unres = {}, {}, {}
+
+        def put(d, k, n):
+            d[k] = min(d.get(k, n.lineno), n.lineno)
         called = {id(n.func) for n in ast.walk(node) if isinstance(n, ast.Call)}
         for n in ast.walk(node):
             if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load):
                 r = self._resolve(n, m, cls, locs, selfname)
                 if r and r[0] == "sym":
-                    cert.add((r[1], r[2]))
+                    put(cert, (r[1], r[2]), n)
+                elif (r is None or r == ("unk",)) and id(n) in called and n.id not in locs \
+                        and not hasattr(builtins, n.id) and not (cls and n.id == selfname):
+                    put(unres, n.id, n)  # called, but nothing in the project (or imports) explains it
             elif isinstance(n, ast.Attribute):
                 r = self._resolve(n, m, cls, locs, selfname)
                 if r and r[0] == "sym":
-                    cert.add((r[1], r[2]))
+                    put(cert, (r[1], r[2]), n)
                     continue
                 b = self._resolve(n.value, m, cls, locs, selfname)
                 if id(n) in called and (b is None or (b[0] == "self" and r is None)):
                     for s in self.methods.get(n.attr, ()):
-                        may.add(s.key)
-        return cert, may
+                        put(may, s.key, n)
+        return cert, may, unres
 
     def _edges(self):
         for m in self.mods.values():
@@ -294,35 +301,39 @@ class Project:
                 if s.cls and not s.is_static:
                     pos = list(s.node.args.posonlyargs) + list(s.node.args.args)
                     selfname = pos[0].arg if pos else None
-                cert, may = self._refs(s.node, m, s.cls, selfname)
-                self._store(s.key, cert, may)
+                cert, may, unres = self._refs(s.node, m, s.cls, selfname)
+                self._store(s.key, cert, may, unres)
             top = ast.Module(body=[n for n in m.tree.body if not isinstance(
                 n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))], type_ignores=[])
-            cert, may = self._refs(top, m, None, None)
-            self._store((m.name, "<module>"), cert, may, line_path=m.path)
+            cert, may, unres = self._refs(top, m, None, None)
+            self._store((m.name, "<module>"), cert, may, unres, line_path=m.path)
 
-    def _store(self, src, cert, may, line_path=None):
+    def _store(self, src, cert, may, unres, line_path=None):
         def inside_src(t):
             return t[0] == src[0] and (t[1] == src[1] or t[1].startswith(src[1] + "."))
-        cert = {t for t in cert if not inside_src(t)}
-        may = {t for t in may if not inside_src(t) and t not in cert}
+        cert = {t: n for t, n in cert.items() if not inside_src(t)}
+        may = {t: n for t, n in may.items() if not inside_src(t) and t not in cert}
         self.certain[src] = cert
         self.maybe[src] = may
+        self.unres[src] = unres
         if line_path:
             self.symmap[src] = _ModSym(src, line_path)
 
     def lists(self, s):
-        """(used_by, depends_on) display lists for symbol s."""
-        dep = sorted([self.symmap[t].shown() for t in self.certain.get(s.key, ()) if t in self.symmap]
-                     + [self.symmap[t].shown() + " (maybe)" for t in self.maybe.get(s.key, ()) if t in self.symmap])
+        """(used_by, depends_on) display lists; every line number is the call site."""
+        def shown(key, path, line, tag=""):
+            return "%s.%s (%s:%d)%s" % (key[0], key[1], path, line, tag)
+        dep = [shown(t, s.path, n) for t, n in self.certain.get(s.key, {}).items() if t in self.symmap]
+        dep += [shown(t, s.path, n, " (maybe)") for t, n in self.maybe.get(s.key, {}).items() if t in self.symmap]
+        dep += ["%s (%s:%d) (maybe)" % (k, s.path, n) for k, n in self.unres.get(s.key, {}).items()]
         used = []
         for src, targets in self.certain.items():
             if s.key in targets and src in self.symmap:
-                used.append(self.symmap[src].shown())
+                used.append(shown(src, self.symmap[src].path, targets[s.key]))
         for src, targets in self.maybe.items():
             if s.key in targets and src in self.symmap:
-                used.append(self.symmap[src].shown() + " (maybe)")
-        return sorted(used), dep
+                used.append(shown(src, self.symmap[src].path, targets[s.key], " (maybe)"))
+        return sorted(used), sorted(dep)
 
 
 class _ModSym:
@@ -456,7 +467,7 @@ def scaffold_entry(proj, s, old):
     elif s.node.returns is not None:
         blocks.append("**Gives back:** %s: TODO" % ast.unparse(s.node.returns))
     else:
-        blocks.append("**Gives back:** TODO")
+        blocks.append("**Gives back:** TODO: TODO")
     blocks += ["", render_list("Used by", used), "", render_list("Depends on", dep), ""]
     if "Watch out" in human:
         blocks += [render_labelled("Watch out", human["Watch out"]), ""]
@@ -492,12 +503,29 @@ def scaffold_module(proj, m):
 
 
 def write_text(root, rel, text):
+    """Write root/rel without ever following a symlink (any component) or leaving the root."""
     full = os.path.join(root, rel)
-    if not inside(root, os.path.dirname(full)):
+    d = os.path.dirname(full)
+    cur = os.path.abspath(root)
+    for part in os.path.relpath(full, cur).split(os.sep):
+        cur = os.path.join(cur, part)
+        if os.path.islink(cur):
+            raise UsageError("refusing to write through a symlink: %s" % rel)
+    if not inside(root, d):
         raise UsageError("%s resolves outside the root" % rel)
-    os.makedirs(os.path.dirname(full), exist_ok=True)
-    with open(full, "w", encoding="utf-8", newline="\n") as f:
-        f.write(text)
+    os.makedirs(d, exist_ok=True)
+    tmp = "%s.tmp%d" % (full, os.getpid())
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(tmp, flags, 0o644)
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
+            f.write(text)
+        if os.path.islink(full):
+            raise UsageError("refusing to write through a symlink: %s" % rel)
+        os.replace(tmp, full)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
 
 
 def doc_files(root):
