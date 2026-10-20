@@ -100,7 +100,8 @@ def _choice(role: str, field: str, v: Any, allowed: tuple[str, ...]) -> str:
     return v
 
 
-def _parse(role: str, data: Any, allow_models: frozenset[str] = frozenset()) -> RoleSpec:
+def _parse(role: str, data: Any, allow_models: frozenset[str] = frozenset(),
+           check_model: bool = True) -> RoleSpec:
     if not isinstance(data, dict):
         raise RoleError(role, "id", "role file must be a mapping")
     for f in _FIELDS:
@@ -114,7 +115,7 @@ def _parse(role: str, data: Any, allow_models: frozenset[str] = frozenset()) -> 
         raise RoleError(role, "id", f"id {rid!r} does not match file name {role!r}")
     description = _str(role, "description", data["description"])
     model = _str(role, "model", data["model"])
-    if model != "sonnet" and model not in allow_models:
+    if check_model and model != "sonnet" and model not in allow_models:
         raise RoleError(role, "model", f"must be sonnet unless the profile allows it via allow_models; got {model!r}")
     core_tools = _str_list(role, "core_tools", data["core_tools"])
     disallowed = _str_list(role, "disallowed_tools", data["disallowed_tools"])
@@ -154,10 +155,11 @@ def _parse(role: str, data: Any, allow_models: frozenset[str] = frozenset()) -> 
                     spawns, writes, bash, blind, hooks, mt)
 
 
-def load_roles(dir: str | Path | None = None, allow_models=None) -> dict[str, RoleSpec]:
+def load_roles(dir: str | Path | None = None, allow_models=None, *, check_model: bool = True) -> dict[str, RoleSpec]:
     """Load and validate all eight role specs from `dir` (default: the shipped data).
 
-    `allow_models` names models allowed beyond sonnet (the profile's `allow_models`)."""
+    `allow_models` names models allowed beyond sonnet. `check_model=False` skips only that model
+    policy (for runtime hook lookups, which must never fail on a role's model); every other check stays."""
     if isinstance(allow_models, str):
         allow_models = [allow_models]
     allowed = frozenset(allow_models or ())
@@ -171,7 +173,7 @@ def load_roles(dir: str | Path | None = None, allow_models=None) -> dict[str, Ro
             raise RoleError(role, "id", f"invalid YAML: {exc}") from exc
         if role not in ROLE_IDS:
             raise RoleError(role, "id", "not one of the eight role ids")
-        found[role] = _parse(role, data, allowed)
+        found[role] = _parse(role, data, allowed, check_model)
     for role in ROLE_IDS:
         if role not in found:
             raise RoleError(role, "id", f"missing role file {role}.yaml")

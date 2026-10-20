@@ -217,3 +217,54 @@ def test_doctor_missing_role_file_does_not_raise(skills, tmp_path, capsys):
     (root / "factory/agents/roles/qa.yaml").unlink()
     assert doctor.run_doctor(_args(root, skills)) == 1
     assert "FAIL role qa file" in capsys.readouterr().out
+
+
+def test_loader_check_model_false_skips_only_the_model_policy(tmp_path):
+    from factory.agents.roles import RoleError, load_roles
+    root = _bad_root(tmp_path)
+    rdir = root / "factory/agents/roles"
+    assert load_roles(rdir, check_model=False)["qa"].model == "opus"
+    with pytest.raises(RoleError):
+        load_roles(rdir)
+    p = rdir / "qa.yaml"
+    p.write_text(p.read_text().replace("max_tools: 20", "max_tools: 99"))
+    with pytest.raises(RoleError):  # other validation stays
+        load_roles(rdir, check_model=False)
+
+
+def test_runtime_hooks_ignore_a_roles_model(tmp_path, monkeypatch):
+    from factory.agents import roles as roles_mod
+    from factory.hooks import blindness_guard, path_guard
+    root = _bad_root(tmp_path, old="model: sonnet", new="model: opus", role="research")
+    monkeypatch.setattr(roles_mod, "DEFAULT_DIR", root / "factory/agents/roles")
+    path_guard._roles.cache_clear()
+    assert path_guard._roles()["research"].model == "opus"
+    for name in dir(blindness_guard):
+        f = getattr(blindness_guard, name)
+        if callable(f) and hasattr(f, "cache_clear") and name.startswith("_role"):
+            f.cache_clear()
+            assert f()["research"].model == "opus"
+    path_guard._roles.cache_clear()
+
+
+def test_doctor_hooks_run_with_non_sonnet_role_only_role_line_fails(skills, tmp_path, capsys):
+    froot = tmp_path / "froot"
+    shutil.copytree(REPO / "factory", froot / "factory", ignore=shutil.ignore_patterns("__pycache__"))
+    shutil.copytree(REPO / "docs", froot / "docs", ignore=shutil.ignore_patterns("explorer", "native-verification"))
+    shutil.copytree(REPO / "scripts", froot / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
+    shutil.copytree(REPO / "skills", froot / "skills", ignore=shutil.ignore_patterns("_archive"))
+    r = froot / "factory/agents/roles/research.yaml"
+    r.write_text(r.read_text().replace("model: sonnet", "model: opus"))
+    proj = tmp_path / "p"
+    proj.mkdir()
+    assert main(["install", "--project", str(proj), "--factory-root", str(froot), "--python", sys.executable,
+                 "--allow-model", "opus"]) == 0
+    capsys.readouterr()
+
+    def run(*allow):
+        doctor.run_doctor(_args(froot, skills, *allow, project=str(proj)))
+        return [l for l in capsys.readouterr().out.splitlines() if l.startswith("FAIL") and ("opus" in l or l.startswith("FAIL hook"))]
+
+    assert run("opus") == []
+    fails = run()
+    assert fails and all(l.startswith(("FAIL role research model", "FAIL agent research")) for l in fails)
