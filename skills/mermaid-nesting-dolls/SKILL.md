@@ -62,7 +62,7 @@ Alt+← back. The Coverage tab lists every status with the reasons: the honest c
 
 Each file in a node's detail panel is a link that opens your editor at the first line of its range, next to a `Copy path` button.
 Set it at build time with `build model.json -o out.html --workspace-root /abs/checkout --editor vscode`, or at view time with
-`?editor=vscode&root=/abs/checkout` (the query overrides the model; an invalid root is ignored). Editors: vscode, cursor, windsurf, zed, idea,
+`?editor=vscode&root=/abs/checkout` (the query overrides the model; an invalid root is ignored). Editors: vscode, cursor, windsurf, antigravity-ide, zed, idea,
 sublime, textmate, or `none`. With no editor or root only `Copy path` and a hint are shown. Leave both unset for a portable file.
 `assets/editor-links.js` is the single source of the link builder; its text between `/* editor-links:begin */` and `/* editor-links:end */` is inlined into
 `assets/template.html` and `ops/shell/index.html`, and `check --assets [--repo DIR]` fails if a copy drifts.

@@ -31,7 +31,7 @@ MAX_FILES = 20000
 MAX_FILE_API = 1024 * 1024
 MAX_NOTE = 2000
 SKIP_DIRS = (".git", "node_modules", ".venv")
-EDITORS = ["vscode", "cursor", "windsurf", "zed", "idea", "sublime", "textmate", "none"]
+EDITORS = ["vscode", "cursor", "windsurf", "antigravity-ide", "zed", "idea", "sublime", "textmate", "none"]
 GROUPS = ("align", "review", "build")
 PHASES = [
     ("0-intake", "align"), ("1-sweep", "align"), ("2-research", "align"), ("3-experiments", "align"),

@@ -29,7 +29,7 @@ Rollback: the Git tab has a **Rollback** button per commit (confirm in the page)
 ## Start
 
 1. `lsf doctor` and fix any FAIL.
-2. `lsf init` (add `--minutes N`, `--checkpoints align|all|none`, `--editor vscode|cursor|zed|idea|none|...`). `lsf init --strict-hitl` makes `hitl release` and `hitl repair` refuse unless they run in a real terminal.
+2. `lsf init` (add `--minutes N`, `--checkpoints align|all|none`, `--editor vscode|cursor|antigravity-ide|zed|idea|none|...`). `lsf init --strict-hitl` makes `hitl release` and `hitl repair` refuse unless they run in a real terminal.
 3. **The human starts the dashboard**, in their own terminal: `lsf serve --open`. The agent must never run `lsf serve`, never read or print the token (the `#token=...` part of the URL), and never call the release route. If the dashboard is not running, ask the owner to start it.
 4. `lsf hooks install --project .` shows a diff; add `--apply` only when the owner agrees. It adds automatic telemetry (subagent stops, session stops, `git commit`) and a PreToolUse guard that denies `hitl release`, `hitl repair`, and writes to `.lsf/stops*`. The guard is friction, not proof. Hooks write only into a project that already has `.lsf` (found by walking up from the hook's directory); elsewhere they do nothing.
 

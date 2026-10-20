@@ -6,7 +6,7 @@ var SFEditorLinks = (function (root, factory) {
   return api;
 })(typeof window !== "undefined" ? window : null, function () {
   var MAX_PATH = 4096, MAX_LINE = 10000000;
-  var EDITORS = ["vscode", "cursor", "windsurf", "zed", "idea", "sublime", "textmate"];
+  var EDITORS = ["vscode", "cursor", "windsurf", "antigravity-ide", "zed", "idea", "sublime", "textmate"];
   function encSeg(s) { return s.split("/").map(encodeURIComponent).join("/"); }
   function encRoot(r) {
     var m = /^([A-Za-z]:)(\/.*)?$/.exec(r);
