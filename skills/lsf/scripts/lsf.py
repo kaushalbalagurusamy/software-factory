@@ -1159,6 +1159,55 @@ def resolve_sha(root, sha):
     return out.decode().strip()
 
 
+# ---------------------------------------------------------------- rollback (a revert commit; history only grows)
+def _vc(root, *args):
+    try:
+        p = subprocess.run(["git", "-C", root] + list(args), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        raise Fail("version control command failed: %s" % e)
+    return p.returncode, p.stdout.decode("utf-8", "replace"), p.stderr.decode("utf-8", "replace")
+
+
+def rollback_plan(root, sha):
+    """Validate every refusal in D-14 and return (full sha, subject, changed files). Changes nothing."""
+    try:
+        full = resolve_sha(root, sha)
+    except Usage:
+        raise Fail("%s does not resolve to a commit" % sha)
+    code, dirty, _ = _vc(root, "status", "--porcelain", "--untracked-files=no")
+    if code != 0:
+        raise Fail("cannot read the working tree status")
+    if dirty.strip():
+        raise Fail("working tree is not clean (tracked or staged changes); commit or discard them first")
+    if _vc(root, "merge-base", "--is-ancestor", full, "HEAD")[0] != 0:
+        raise Fail("%s is not an ancestor of HEAD" % full[:8])
+    parents = _vc(root, "rev-list", "--parents", "-n1", full)[1].split()[1:]
+    if not parents:
+        raise Fail("%s is the root commit and cannot be reverted" % full[:8])
+    if len(parents) > 1:
+        raise Fail("%s is a merge commit and cannot be reverted" % full[:8])
+    subject = _vc(root, "log", "-n1", "--format=%s", full)[1].strip()
+    files = [f for f in _vc(root, "diff-tree", "--no-commit-id", "--name-only", "-r", full)[1].splitlines() if f]
+    return full, subject, files
+
+
+def rollback(root, sha, confirm_sha=None):
+    with locked(root):
+        full, subject, files = rollback_plan(root, sha)
+        if confirm_sha is not None and confirm_sha != full:
+            raise Fail("confirm_sha does not match the resolved commit %s" % full)
+        code, _, err = _vc(root, "revert", "--no-edit", full)
+        if code != 0:
+            _vc(root, "revert", "--abort")
+            if "conflict" in err.lower():
+                raise Fail("revert conflicts; resolve by hand")
+            raise Fail("revert failed: %s" % (err.strip().splitlines() or ["unknown error"])[-1][:200])
+        new = head_sha(root)
+        emit_event(root, "rollback", "reverted", "reverted %s as %s" % (full[:8], (new or "")[:8]),
+                   extra={"reverted": full, "new_head": new}, force=True)
+    return {"ok": True, "reverted": full, "new_head": new}
+
+
 # ---------------------------------------------------------------- runtime state for status, serve
 def read_events(root, limit=1000):
     return read_jsonl(lpath(root, "events.jsonl"), tail=True)[-limit:]
@@ -1320,6 +1369,19 @@ def cmd_event(a, root):
     op = open_phase(phase_rows(root))
     emit_event(root, a.stage, a.verdict, a.note or "", source=a.source, phase=a.phase or (op["phase"] if op else None),
                slice_=a.slice, role=a.role)
+    return 0
+
+
+def cmd_rollback(a, root):
+    full, subject, files = rollback_plan(root, a.sha)
+    if not a.yes:
+        out("would revert %s: %s" % (full[:8], subject))
+        out("files changed (%d): %s" % (len(files), ", ".join(files[:20]) + (" ..." if len(files) > 20 else "")))
+        out("this adds a new commit that undoes it; history is kept. Re-run with --yes to do it.")
+        return 2
+    require_tty_if_strict(root, "rollback")
+    r = rollback(root, full, full)
+    out("reverted %s; new commit %s (history is kept)" % (full[:8], (r["new_head"] or "")[:8]))
     return 0
 
 
@@ -1987,6 +2049,10 @@ def build_parser():
     p.add_argument("--slice")
     p.add_argument("--phase")
     p.add_argument("--source", choices=["lsf", "hook", "agent"], default="agent")
+
+    p = mk("rollback", cmd_rollback, "revert a commit with a new commit (never rewrites history)")
+    p.add_argument("sha")
+    p.add_argument("--yes", action="store_true", help="do it; without this only show what would be reverted")
 
     p = mk("hitl", cmd_hitl, "human decisions: request, status, release, recorded, applied")
     hs = p.add_subparsers(dest="action", metavar="request|status|release|recorded|applied|repair")
