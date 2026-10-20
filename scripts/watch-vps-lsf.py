@@ -88,7 +88,8 @@ def install(sha):
     subprocess.run(['tar', '-xf', str(archive), '-C', str(staging)], check=True, timeout=60)
     archive.unlink()
     # Keep the independently tested launcher while importing the native workflow.
-    shutil.copy2(ROOT / 'skills/lsf/scripts/launch.py', staging / 'skills/lsf/scripts/launch.py')
+    for relative in ('scripts/launch.py', 'LAUNCH.md'):
+        shutil.copy2(ROOT / 'skills/lsf' / relative, staging / 'skills/lsf' / relative)
     checks = ['tests/lsf']
     for suite in ('evals/native/sfn09',):
         if (staging / suite).exists():
