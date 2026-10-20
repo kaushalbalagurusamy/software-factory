@@ -23,9 +23,12 @@ WRITE_TARGET_FIELDS = {"Write": "file_path", "Edit": "file_path", "MultiEdit": "
 FREEZE_MARKER = ".factory/frozen"
 # Folders the implement role may never write (C-36 and A-05-5), project-relative.
 CONTROL_DIRS: tuple[str, ...] = (".factory", ".claude")
-# C-41.2: the only paths a `qa_paths` role may write; the hook configuration may override them
-# with a `qa_paths` attribute.
-QA_PATHS: tuple[str, ...] = ("**/qa-notes.md", "**/qa-feedback/**", ".sf/qa/**")
+# C-41.2 as tightened by the SFN-02 review: the only paths a `qa_paths` role may write (the hook
+# configuration may override the globs with a `qa_paths` attribute), only with these extensions and
+# never through a path segment that holds code, tests, evals or control files.
+QA_PATHS: tuple[str, ...] = ("docs/slices/*/qa-notes.md", "docs/slices/*/qa-feedback/*.md", ".sf/slices/**")
+QA_EXTENSIONS = frozenset({".md", ".json", ".jsonl", ".txt", ".tsv"})
+QA_FORBIDDEN_SEGMENTS = frozenset({"tests", "evals", "src", ".git", ".factory", ".claude"})
 
 # Read commands a read-only role may start a pipeline segment with (PRD behaviour 5).
 READONLY_PREFIXES: tuple[tuple[str, ...], ...] = (
@@ -205,6 +208,12 @@ def _decide_write(role: str, spec: RoleSpec | None, raw_path, payload: Payload, 
             hit = _matches(rel, globs) or (lex_rel is not None and _matches(lex_rel, globs))
             if hit:
                 return _deny(role, subject, allowed, f"the path is in the protected {label} paths ({hit})")
+        segs = set(rel.split("/")) | set((lex_rel or "").split("/"))
+        bad = segs & QA_FORBIDDEN_SEGMENTS
+        if bad:
+            return _deny(role, subject, allowed, f"the path has a {sorted(bad)[0]!r} segment, which role {role} may not write")
+        if os.path.splitext(rel)[1].lower() not in QA_EXTENSIONS:
+            return _deny(role, subject, allowed, f"role {role} may write only {', '.join(sorted(QA_EXTENSIONS))} files")
         # the resolved path must itself match: a symlink named qa-notes.md cannot reach app code
         if any(_glob_regex(g).match(rel) for g in _qa_globs(cfg)):
             return Decision("allow")
@@ -396,7 +405,87 @@ def _segment_problem(words: list[str]) -> str | None:
     return None
 
 
-def _decide_bash(role: str, spec: RoleSpec | None, command, cfg: HookConfig) -> Decision:
+_QA_FD_DUP = re.compile(r"\d*>&\d+|&>/dev/null")
+_QA_PY_WRITE = re.compile(r"open\s*\([^)]*,\s*['\"][^'\"]*[wax+]|mode\s*=\s*['\"][^'\"]*[wax+]|write_text|write_bytes|"
+                          r"unlink|rmtree|rename|os\.(?:remove|system|popen|replace)|shutil|subprocess|\bexec\b|__import__")
+_QA_SHELLS = frozenset({"sh", "bash", "dash", "zsh"})
+
+
+def _qa_command_problem(command: str, role: str, spec: RoleSpec, payload: Payload, cfg: HookConfig,
+                        depth: int = 0) -> str | None:
+    """Best-effort text parse of the writes a qa command makes; the first target outside the
+    qa paths, or a write the text cannot resolve, is returned as the problem."""
+    if depth > 3:
+        return "nested shell commands are too deep to inspect"
+
+    def target_problem(t: str) -> str | None:
+        if t == "/dev/null":
+            return None
+        if not t or any(c in t for c in "$`*?[{~") or t.startswith("-"):
+            return f"write target {t!r} cannot be resolved"
+        d = _decide_write(role, spec, t, payload, cfg)
+        return None if d.kind == "allow" else f"write target {t} is outside the QA paths"
+
+    try:
+        segments, redirect, _ = _scan(_QA_FD_DUP.sub(" ", command))
+    except ValueError as exc:
+        return f"unparseable command ({exc})"
+    for words in segments:
+        # redirections: ``>f``, ``>> f``, ``2>f``, ``&>f``
+        skip_next = False
+        for i, w in enumerate(words):
+            if skip_next:
+                skip_next = False
+                continue
+            if redirect and ">" in w:
+                tgt = w[w.rindex(">") + 1:]
+                if not tgt:
+                    if i + 1 >= len(words):
+                        return "redirection without a resolvable target"
+                    tgt, skip_next = words[i + 1], True
+                problem = target_problem(tgt)
+                if problem:
+                    return problem
+        plain = [w for w in words if not (redirect and ">" in w)]
+        if not plain:
+            continue
+        head = os.path.basename(plain[0])
+        args = plain[1:]
+        nonopt = [a for a in args if not a.startswith("-")]
+        if head == "tee":
+            targets = nonopt
+        elif head in ("cp", "install", "ln"):
+            tdir = next((args[i + 1] for i, a in enumerate(args[:-1]) if a in ("-t", "--target-directory")), None)
+            targets = [tdir] if tdir else nonopt[-1:]
+        elif head in ("mv", "rm", "rmdir", "touch", "truncate", "mkdir", "unlink", "chmod", "chown"):
+            targets = nonopt
+        elif head == "dd":
+            targets = [a[3:] for a in args if a.startswith("of=")]
+        elif head == "sed" and any(a == "--in-place" or a.startswith("--in-place=") or
+                                   (a.startswith("-") and not a.startswith("--") and "i" in a[1:]) for a in args):
+            has_script_opt = any(a in ("-e", "-f") or a.startswith("--expression") or a.startswith("--file") for a in args)
+            targets = nonopt if has_script_opt else nonopt[1:]
+        elif head.startswith(("python", "perl", "ruby", "node")) and any(a in ("-c", "-e", "-p") for a in args):
+            prog = " ".join(args)
+            if _QA_PY_WRITE.search(prog):
+                return f"{head} program may write files"
+            targets = []
+        elif head in _QA_SHELLS and "-c" in args and args.index("-c") + 1 < len(args):
+            inner = _qa_command_problem(args[args.index("-c") + 1], role, spec, payload, cfg, depth + 1)
+            if inner:
+                return inner
+            targets = []
+        else:
+            targets = []
+        for t in targets:
+            problem = target_problem(t)
+            if problem:
+                return f"{head}: {problem}"
+    return None
+
+
+def _decide_bash(role: str, spec: RoleSpec | None, command, cfg: HookConfig,
+                 payload: Payload | None = None) -> Decision:
     shown = command if isinstance(command, str) else repr(command)
     if len(shown) > 200:
         shown = shown[:200] + "..."
@@ -414,6 +503,9 @@ def _decide_bash(role: str, spec: RoleSpec | None, command, cfg: HookConfig) -> 
                 return _deny(role, subject, allowed, "missing or malformed command")
             if findings:  # every bash_guard finding is a deny for a non-orchestrator role
                 return _deny(role, subject, allowed, f"{findings[0].what} (QA may not change the git state)")
+            problem = _qa_command_problem(command, role, spec, payload, cfg)
+            if problem:
+                return _deny(role, subject, allowed, f"{problem} (QA Bash may write only the QA paths)")
         return Decision("allow")  # A-05-1: Bash writes are not inspected for other full-mode roles
     if spec.bash == "none":
         return _deny(role, subject, allowed, f"role {role} has no Bash access")
@@ -450,5 +542,5 @@ def decide(payload: Payload, cfg: HookConfig) -> Decision:
     if tool in WRITE_TARGET_FIELDS:
         return _decide_write(role, spec, tool_input.get(WRITE_TARGET_FIELDS[tool]), payload, cfg)
     if tool == "Bash":
-        return _decide_bash(role, spec, tool_input.get("command"), cfg)
+        return _decide_bash(role, spec, tool_input.get("command"), cfg, payload)
     return Decision("allow")

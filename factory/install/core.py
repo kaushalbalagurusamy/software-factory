@@ -365,8 +365,9 @@ def uninstall(project, out=print, err=None) -> bool:
     return True
 
 
-def pin_external(skills_dir, factory_root, yes, out=print) -> int:
-    """Rewrite docs/external-skills.json from the installed copies; 0 written, 2 without `yes`."""
+def pin_external(skills_dir, factory_root, yes, out=print, accept_changed=()) -> int:
+    """Rewrite docs/external-skills.json from the installed copies; 0 written, 2 without `yes` or
+    while a skill that differs from its existing pin is not named in `accept_changed`."""
     sdir = Path(skills_dir) if skills_dir else Path.home() / ".claude" / "skills"
     root = Path(factory_root).resolve() if factory_root else Path(__file__).resolve().parents[2]
     pins = {}
@@ -380,6 +381,17 @@ def pin_external(skills_dir, factory_root, yes, out=print) -> int:
     target = root / EXTERNAL_PINS
     old = target.read_bytes() if target.is_file() else None
     out(_diff(EXTERNAL_PINS, old, new).rstrip("\n") if old != new else "unchanged")
+    try:
+        old_pins = json.loads(old)["skills"] if old else {}
+    except (ValueError, KeyError, TypeError):
+        old_pins = {}
+    # a changed (or vanished) pin is never accepted silently: each needs --accept-changed NAME
+    changed = sorted(n for n, v in old_pins.items() if pins.get(n) != v)
+    unaccepted = [n for n in changed if n not in set(accept_changed)]
+    if unaccepted:
+        out("changed since pinned: " + ", ".join(unaccepted)
+            + " (review the diff, then re-run with " + " ".join(f"--accept-changed {n}" for n in unaccepted) + ")")
+        return 2
     if not yes:
         out("not written: re-run with --yes to write the pins")
         return 2

@@ -15,7 +15,7 @@ import yaml
 from factory.agents.roles import MAX_TOOLS_LIMIT, ROLE_IDS, RoleSpec
 
 # Mirrors docs/hooks/roles.md `qa_paths`.
-QA_PATHS = ("**/qa-notes.md", "**/qa-feedback/**", ".sf/qa/**")
+QA_PATHS = ("docs/slices/*/qa-notes.md", "docs/slices/*/qa-feedback/*.md", ".sf/slices/**")
 AGENT_PATH = ".claude/agents/{role}.md"
 HOOK_COMMAND = "python -m factory.hooks {hook_id}"
 
