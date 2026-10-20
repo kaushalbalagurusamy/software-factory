@@ -14,7 +14,7 @@ import yaml
 
 from evals.agents import lib
 
-ROLES = ["orchestrator", "research", "design", "audit", "implement", "test", "review"]
+ROLES = ["orchestrator", "research", "design", "audit", "implement", "qa", "test", "review"]
 DEFAULT_GRAPH = lib.REPO / "factory" / "agents" / "default_graph.yaml"
 
 
@@ -100,7 +100,7 @@ def test_g003_back_reference_in_loops_accepted(tmp_path):
 
 @case("TB12-G-004", "golden")
 def test_g004_unknown_role_rejected_naming_stage(tmp_path):
-    """Behaviour 1 + contract: every stage's role is one of the seven; the error names the offending stage."""
+    """Behaviour 1 + contract: every stage's role is one of the eight; the error names the offending stage."""
     msg = rejection(tmp_path, {"stages": [st("alpha", "design"), st("magicstage", "wizard")],
                                "edges": [["alpha", "magicstage"]]})
     assert "magicstage" in msg
@@ -118,8 +118,8 @@ def test_g005_select_reconnects_across_removed_stage(tmp_path):
 
 @case("TB12-G-006", "golden")
 def test_g006_default_graph_and_small_subset(tmp_path):
-    """Behaviour 5: the shipped default seven-role graph validates, and its `small` subset (orchestrator,
-    implement, test, review) selects and validates."""
+    """Behaviour 5: the shipped default eight-role graph validates, and its `small` subset (orchestrator,
+    implement, qa, test, review) selects and validates."""
     gr = valid(tmp_path, with_graph(default_graph_data()))
     small = gr.select("small")
     small.validate()
@@ -250,8 +250,8 @@ def test_d014_select_removing_everything(tmp_path):
 
 
 @case("TB12-D-015", "diagnostic")
-def test_d015_default_graph_covers_seven_roles(tmp_path):
-    """Behaviour 5: the default graph is a seven-role graph (every role has a stage)."""
+def test_d015_default_graph_covers_eight_roles(tmp_path):
+    """Behaviour 5: the default graph is an eight-role graph (every role has a stage)."""
     data = default_graph_data()
     valid(tmp_path, with_graph(data))
     roles = {s["role"] for s in data["stages"]}
@@ -260,13 +260,13 @@ def test_d015_default_graph_covers_seven_roles(tmp_path):
 
 @case("TB12-D-016", "diagnostic")
 def test_d016_default_small_roles(tmp_path):
-    """Behaviour 5: the default small subset is orchestrator, implement, test, review; the selected graph keeps
+    """Behaviour 5: the default small subset is orchestrator, implement, qa, test, review; the selected graph keeps
     only stages with those roles."""
     data = default_graph_data()
-    assert sorted(data["subsets"]["small"]) == sorted(["orchestrator", "implement", "test", "review"])
+    assert sorted(data["subsets"]["small"]) == sorted(["orchestrator", "implement", "qa", "test", "review"])
     gr = valid(tmp_path, with_graph(data))
     kept = set(gr.select("small").order())
-    expected = {s["id"] for s in data["stages"] if s["role"] in {"orchestrator", "implement", "test", "review"}}
+    expected = {s["id"] for s in data["stages"] if s["role"] in {"orchestrator", "implement", "qa", "test", "review"}}
     assert kept == expected
 
 
@@ -283,7 +283,7 @@ def test_d017_gates_exclude_non_gates(tmp_path):
 
 @case("TB12-D-018", "diagnostic")
 def test_d018_every_role_accepted(tmp_path):
-    """Negative control: a chain with one stage per role of the seven validates."""
+    """Negative control: a chain with one stage per role of the eight validates."""
     stages = [st(f"s{i}", r) for i, r in enumerate(ROLES)]
     edges = [[f"s{i}", f"s{i + 1}"] for i in range(len(ROLES) - 1)]
     assert list(valid(tmp_path, with_graph({"stages": stages, "edges": edges})).order()) == [s["id"] for s in stages]

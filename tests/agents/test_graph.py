@@ -21,11 +21,13 @@ def chain():
                  [("a", "b"), ("b", "c")])
 
 
-def test_default_graph_validates_with_seven_roles():
+def test_default_graph_validates_with_eight_roles():
     g = load_graph(profile_with())
     assert {s.role for s in g.stages} == {"orchestrator", "research", "design", "audit",
-                                          "implement", "test", "review"}
-    assert len(g.stages) == 7
+                                          "implement", "qa", "test", "review"}
+    assert len(g.stages) == 8
+    assert g.order() == ["orchestrate", "research", "design", "audit", "implement", "qa", "test", "review"]
+    assert set(g.loops) == {("qa", "implement"), ("review", "implement")}
 
 
 def test_profile_graph_is_used():
@@ -97,8 +99,8 @@ def test_default_gates():
 def test_small_subset_selects_and_validates():
     g = default_graph().select("small")
     g.validate()
-    assert {s.role for s in g.stages} == {"orchestrator", "implement", "test", "review"}
-    assert g.order() == ["orchestrate", "implement", "test", "review"]
+    assert {s.role for s in g.stages} == {"orchestrator", "implement", "qa", "test", "review"}
+    assert g.order() == ["orchestrate", "implement", "qa", "test", "review"]
     assert ("orchestrate", "implement") in g.edges
 
 

@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import shutil
 import stat
 import sys
 from pathlib import Path
@@ -12,8 +13,8 @@ import yaml
 from factory.install.__main__ import main
 
 REPO = Path(__file__).resolve().parent.parent
-ROLES_WITH_OPUS = ("orchestrator", "design", "review", "test")
-ROLE_IDS = ("orchestrator", "research", "design", "audit", "implement", "test", "review")
+SHIPPED_ROLES = REPO / "factory" / "agents" / "roles"
+ROLE_IDS = ("orchestrator", "research", "design", "audit", "implement", "qa", "test", "review")
 
 
 def inst(proj, *extra, expect=0):
@@ -105,12 +106,31 @@ def test_model_pin_env_and_agent_models(proj):
         assert agent_model(proj, r) == "sonnet"
 
 
-def test_roles_really_propose_opus():
+def test_every_shipped_role_declares_sonnet():
     from factory.agents.roles import load_roles
-    assert {r for r, s in load_roles().items() if s.model == "opus"} == set(ROLES_WITH_OPUS)
+    assert {r: s.model for r, s in load_roles().items()} == {r: "sonnet" for r in ROLE_IDS}
 
 
-def test_allow_model_widens_explicitly(proj):
+@pytest.fixture
+def opus_orchestrator(tmp_path, monkeypatch):
+    """The installer loads roles from a copy in which orchestrator declares opus (C-40.1 rejection cases)."""
+    import shutil
+    from factory.agents import roles as roles_mod
+    from factory.install import core
+    d = tmp_path / "roles"
+    shutil.copytree(SHIPPED_ROLES, d)
+    f = d / "orchestrator.yaml"
+    f.write_text(f.read_text().replace("model: sonnet", "model: opus"))
+    monkeypatch.setattr(core, "load_roles", lambda allow_models=None: roles_mod.load_roles(d, allow_models=allow_models))
+
+
+def test_disallowed_model_is_rejected_and_nothing_written(proj, opus_orchestrator, capsys):
+    assert main(["install", "--project", str(proj), "--factory-root", str(REPO), "--python", sys.executable]) == 1
+    assert "orchestrator" in capsys.readouterr().err
+    assert snapshot(proj) == {}
+
+
+def test_allow_model_widens_explicitly(proj, opus_orchestrator):
     inst(proj, "--allow-model", "opus")
     assert agent_model(proj, "orchestrator") == "opus"
     assert agent_model(proj, "implement") == "sonnet"
@@ -264,13 +284,49 @@ def test_uninstall_leaves_existing_profile(proj):
 
 # ---- doctor
 
+def _stock_role_and_external_skills(tmp_path, skills):
+    """Make the role-skill and external-pin doctor checks pass for the right reason: minimal SKILL.md stubs
+    for every external or non-repo skill a role names, plugin stubs under a throwaway HOME, and a pin file
+    (returned) that pins exactly the external stubs."""
+    from factory.agents.roles import load_roles
+    from factory.install.core import EXTERNAL_SKILLS
+    home = tmp_path / "home"
+    plugin_root = home / ".claude/plugins/cache/m"
+    registry = {}
+    names = set(EXTERNAL_SKILLS)
+    for spec in load_roles().values():
+        for sk in spec.skills:
+            plugin, sep, skill = sk.partition(":")
+            if sep:
+                pdir = plugin_root / plugin / "1"
+                (pdir / "skills" / skill).mkdir(parents=True, exist_ok=True)
+                (pdir / "skills" / skill / "SKILL.md").write_text(f"---\nname: {skill}\n---\nstub\n")
+                registry[f"{plugin}@m"] = [{"installPath": str(pdir)}]
+            elif sk != "claude-api" and not (REPO / "skills" / sk / "SKILL.md").is_file():
+                names.add(sk)
+    (home / ".claude/plugins").mkdir(parents=True, exist_ok=True)
+    (home / ".claude/plugins/installed_plugins.json").write_text(json.dumps({"version": 2, "plugins": registry}))
+    for n in sorted(names):
+        if not (skills / n).exists():
+            (skills / n).mkdir()
+            (skills / n / "SKILL.md").write_text(f"---\nname: {n}\n---\nstub\n")
+    pins = {n: {"sha256": hashlib.sha256((skills / n / "SKILL.md").read_bytes()).hexdigest()}
+            for n in sorted(EXTERNAL_SKILLS)}
+    pin_file = tmp_path / "external-skills.json"
+    pin_file.write_text(json.dumps({"schema": 1, "skills": pins}))
+    return pin_file
+
+
 @pytest.fixture
 def env(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
     skills = tmp_path / "skills"
     skills.mkdir()
     for d in (REPO / "skills").iterdir():
         if d.is_dir() and (d / "SKILL.md").is_file() and not d.name.startswith("_"):
             (skills / d.name).symlink_to(d)
+    pin_file = _stock_role_and_external_skills(tmp_path, skills)
+    monkeypatch.setattr("factory.install.doctor.EXTERNAL_PINS", str(pin_file))  # absolute: root / abs == abs
     bindir = tmp_path / "bin"
     bindir.mkdir()
     sf = bindir / "sf"
@@ -297,7 +353,7 @@ def test_doctor_all_pass(proj, env, capsys):
     out = lines(capsys)
     assert all(l.startswith(("PASS", "SKIP")) for l in out), out
     joined = "\n".join(out)
-    assert "hook bash_guard deny" in joined and joined.count("PASS skill ") == 13
+    assert "hook bash_guard deny" in joined and joined.count("PASS skill ") == 15  # one per repo skill (ls skills/*/SKILL.md)
 
 
 def test_doctor_json(proj, env, capsys):
@@ -332,7 +388,7 @@ def test_doctor_fails_when_hook_missing(proj, env, capsys):
     assert "FAIL hooks registered" in "\n".join(lines(capsys))
 
 
-def test_doctor_fails_on_non_sonnet_agent_unless_allowed(proj, env, capsys):
+def test_doctor_fails_on_non_sonnet_agent_unless_allowed(proj, env, opus_orchestrator, capsys):
     inst(proj, "--allow-model", "opus")
     capsys.readouterr()
     assert doc(proj, env) == 1
@@ -446,3 +502,35 @@ def test_doctor_trusts_arguments_not_the_manifest(proj, env, tmp_path, capsys):
     assert doc(proj, env) == 0  # a poisoned manifest python is ignored; hooks ran via the trusted argv
     out = "\n".join(lines(capsys))
     assert "PASS hook bash_guard deny" in out
+
+
+def test_doctor_reports_role_skills_and_external_pins(proj, env, capsys):
+    inst(proj)
+    capsys.readouterr()
+    assert doc(proj, env) == 0
+    joined = "\n".join(lines(capsys))
+    assert "PASS role qa skill qa-supervisor" in joined
+    assert "PASS role review skill minesweeper" in joined
+    assert "PASS role design skill prd-writer" in joined
+    assert "PASS external minesweeper: matches pin" in joined
+
+
+def test_doctor_fails_on_unresolved_role_skill(proj, env, capsys):
+    inst(proj)
+    shutil.rmtree(env / "legacy-audit")
+    capsys.readouterr()
+    assert doc(proj, env) == 1
+    assert "FAIL role audit skill legacy-audit" in "\n".join(lines(capsys))
+
+
+def test_doctor_warns_on_changed_external_pin_and_fails_on_missing(proj, env, capsys):
+    inst(proj)
+    (env / "minesweeper/SKILL.md").write_text("edited\n")
+    capsys.readouterr()
+    assert doc(proj, env) == 0  # a changed pin is a WARN, never a failure
+    out = "\n".join(lines(capsys))
+    assert "WARN external minesweeper" in out and "changed since pinned" in out
+    shutil.rmtree(env / "good-night")
+    capsys.readouterr()
+    assert doc(proj, env) == 1
+    assert "FAIL external good-night" in "\n".join(lines(capsys))
