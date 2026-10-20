@@ -334,3 +334,11 @@ def decide(payload: Payload, cfg: HookConfig) -> Decision:
     else:
         problems = _validate_design(cfg)
     return _block(role, problems)
+
+
+def record(payload: Payload, cfg: HookConfig) -> None:
+    """Leave a stage event for the stop; telemetry only, the decision above is already made."""
+    from factory.ops.events import emit
+
+    if payload.event == "SubagentStop":
+        emit(cfg.project_root, "subagent-stop", "-", "stopped", source="hook", role=payload.agent_type)

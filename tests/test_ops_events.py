@@ -105,3 +105,42 @@ def test_shell_script_goes_through_emit(tmp_path):
     (e,) = lines(tmp_path)
     assert (e["stage"], e["slice"], e["verdict"], e["note"]) == ("10-docs", "sl", "done", "hi")
     assert subprocess.run([str(REPO / "scripts" / "ops-stage-event.sh"), "x"], capture_output=True).returncode == 2
+
+
+# ---- hook events -----------------------------------------------------------------------------------------
+
+def _hook_cfg(root):
+    from factory.agents.profile import parse_profile
+    from factory.hooks.core import HookConfig
+    return HookConfig.from_profile(parse_profile(
+        {"schema_version": 1, "project": {"name": "demo"}, "paths": {"eval": ["evals/**"]}}), root)
+
+
+def _stop(agent_type="research"):
+    from factory.hooks.core import parse_payload
+    return parse_payload(json.dumps({"session_id": "s", "cwd": "/x", "hook_event_name": "SubagentStop",
+                                     "permission_mode": "default", "agent_type": agent_type, "agent_id": "a",
+                                     "last_assistant_message": "m"}))
+
+
+@pytest.mark.parametrize("mod", ["subagent_stop", "ledger_audit"])
+def test_hooks_record_subagent_stop_event(tmp_path, mod):
+    import importlib
+    m = importlib.import_module(f"factory.hooks.{mod}")
+    m.record(_stop("review"), _hook_cfg(tmp_path))  # no ticket, no ledger: the event is still written
+    (e,) = lines(tmp_path)
+    assert (e["stage"], e["verdict"], e["source"], e["role"]) == ("subagent-stop", "stopped", "hook", "review")
+
+
+@pytest.mark.parametrize("mod", ["subagent_stop", "ledger_audit"])
+def test_hook_event_failure_is_swallowed(tmp_path, mod, capsys):
+    import importlib
+    (tmp_path / "ops").write_text("blocks the directory")
+    importlib.import_module(f"factory.hooks.{mod}").record(_stop(), _hook_cfg(tmp_path))
+    assert "event not recorded" in capsys.readouterr().err
+
+
+def test_registry_exposes_subagent_stop_record():
+    from factory.hooks import subagent_stop
+    from factory.hooks.registry import get_hook
+    assert get_hook("subagent_stop").record is subagent_stop.record
