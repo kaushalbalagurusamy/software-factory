@@ -810,11 +810,11 @@ class Source(object):
         return None if b is None else b.decode("utf-8", "replace")
 
     def commits(self, limit=200):
-        out_ = git(self.root, "log", "-n%d" % limit, "--format=%H%x1f%cI%x1f%s", self.sha) or b""
+        out_ = git(self.root, "log", "-n%d" % limit, "--format=%H%x1f%cI%x1f%s%x1f%P", self.sha) or b""
         rows = []
         for line in out_.decode("utf-8", "replace").splitlines():
-            h, d, s_ = (line.split("\x1f") + ["", ""])[:3]
-            rows.append({"sha": h, "date": d, "subject": s_})
+            h, d, s_, par = (line.split("\x1f") + ["", "", ""])[:4]
+            rows.append({"sha": h, "date": d, "subject": s_, "parents": len(par.split())})
         return rows
 
 
@@ -1915,6 +1915,19 @@ def make_handler(root, token, assets_html):
                         return self._send(200, text, "text/html; charset=utf-8",
                                           {"Content-Security-Policy": "sandbox allow-scripts"})
                     return self._send(200, text, "text/plain; charset=utf-8")
+                if path == "/api/commit":
+                    try:
+                        full, subject, files = rollback_plan(root, qs.get("sha", ""))
+                        why = None
+                    except Fail as e:  # still describe the commit when it cannot be rolled back
+                        why = str(e)
+                        try:
+                            full = resolve_sha(root, qs.get("sha", ""))
+                        except (Usage, Fail) as e2:
+                            return self._err(400, str(e2))
+                        subject = (_vc(root, "log", "-n1", "--format=%s", full)[1]).strip()
+                        files = [f for f in _vc(root, "diff-tree", "--no-commit-id", "--name-only", "-r", full)[1].splitlines() if f]
+                    return self._send(200, json.dumps({"sha": full, "subject": subject, "files": files, "refusal": why}, default=_jd))
                 if path == "/api/at":
                     try:
                         full = resolve_sha(root, qs.get("sha", ""))
