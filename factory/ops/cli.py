@@ -31,10 +31,25 @@ def _need_commit(repo: Path) -> str | None:
     return head
 
 
+def _exclude_events(repo: Path) -> None:
+    """List ops/events.jsonl in the repository's local exclude file (never a tracked .gitignore); idempotent."""
+    p = _git(repo, "rev-parse", "--git-path", "info/exclude")
+    if p is None:
+        return
+    path = Path(p) if Path(p).is_absolute() else repo / p
+    line = "ops/events.jsonl"
+    text = path.read_text(encoding="utf-8") if path.exists() else ""
+    if line in (x.strip() for x in text.splitlines()):
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text + ("" if not text or text.endswith("\n") else "\n") + line + "\n", encoding="utf-8")
+
+
 def _init(dirp: Path) -> int:
     dirp = dirp.resolve()
     if _need_commit(dirp) is None:
         return 2
+    _exclude_events(dirp)
     out = dirp / "ops"
     for rel, data in (("config.json", b"{}\n"), ("events.jsonl", b"")):
         path = out / rel
@@ -113,8 +128,8 @@ def _block() -> str:
     return f"""{BEGIN}
 __sf_autobundle() {{
   T=""; command -v timeout >/dev/null 2>&1 && T="timeout 120"
-  if command -v sf >/dev/null 2>&1; then SF_EVENTS=off $T sf ops bundle --sha HEAD
-  else SF_EVENTS=off PYTHONPATH='{root}' $T '{sys.executable}' -m factory.cli ops bundle --sha HEAD; fi
+  if command -v sf >/dev/null 2>&1; then $T sf ops bundle --sha HEAD
+  else PYTHONPATH='{root}' $T '{sys.executable}' -m factory.cli ops bundle --sha HEAD; fi
 }}
 ( __sf_autobundle ) >/dev/null 2>&1 &
 {END}
@@ -144,6 +159,7 @@ def _autobundle(action: str, repo: Path) -> int:
             hook.parent.mkdir(parents=True, exist_ok=True)
             hook.write_text(new, encoding="utf-8")
         os.chmod(hook, hook.stat().st_mode | 0o111)
+        _exclude_events(repo)
         print(f"installed: {hook}")
         return 0
     if has:  # uninstall: drop the block and the blank line install put before it

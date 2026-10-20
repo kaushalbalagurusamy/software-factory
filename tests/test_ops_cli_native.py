@@ -252,12 +252,10 @@ def test_viewer_has_staleness_banner_texts():
 
 
 def test_autobundle_commit_leaves_tree_clean(proj):
-    commit(proj, files={".gitignore": "ops/\n"})
-    (proj / "ops").mkdir()
-    (proj / "ops" / "events.jsonl").write_text("")
+    commit(proj, files={".gitignore": "ops/*\n!ops/events.jsonl\n"})  # events.jsonl is only kept out by the local exclude
     assert sf("ops", "autobundle", "install", cwd=proj).returncode == 0
     env = {**os.environ, "PYTHONPATH": str(REPO)}
-    env.pop("SF_EVENTS", None)  # the owner's shell does not switch events off
+    env.pop("SF_EVENTS", None)
     (proj / "f.txt").write_text("x")
     subprocess.run(["git", "add", "f.txt"], cwd=proj, check=True)
     subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "hooked"],
@@ -265,9 +263,42 @@ def test_autobundle_commit_leaves_tree_clean(proj):
     import time
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=proj, capture_output=True, text=True).stdout.strip()
     for _ in range(150):
-        if (proj / "ops" / "snapshots" / head / "manifest.json").exists():
+        if events(proj) and (proj / "ops" / "snapshots" / head / "manifest.json").exists():
             break
         time.sleep(0.1)
     assert (proj / "ops" / "snapshots" / head / "manifest.json").exists()
-    assert (proj / "ops" / "events.jsonl").read_text() == ""
-    assert subprocess.run(["git", "status", "--porcelain"], cwd=proj, capture_output=True, text=True).stdout == ""
+    assert [e["stage"] for e in events(proj)] == ["11-commit"]
+    st = subprocess.run(["git", "status", "--porcelain"], cwd=proj, capture_output=True, text=True).stdout
+    assert "events.jsonl" not in st and "f.txt" not in st
+
+
+def exclude_lines(repo):
+    p = subprocess.run(["git", "-C", str(repo), "rev-parse", "--git-path", "info/exclude"], capture_output=True,
+                       text=True).stdout.strip()
+    p = Path(p) if os.path.isabs(p) else Path(repo) / p
+    return p.read_text().splitlines() if p.exists() else []
+
+
+def test_exclude_is_idempotent_for_init_and_autobundle(proj):
+    commit(proj)
+    ex = proj / ".git" / "info" / "exclude"
+    ex.parent.mkdir(exist_ok=True)
+    ex.write_text("keep-me")  # no trailing newline
+    sf("ops", "init", cwd=proj)
+    sf("ops", "autobundle", "install", cwd=proj)
+    sf("ops", "init", cwd=proj)
+    sf("ops", "autobundle", "install", cwd=proj)
+    assert exclude_lines(proj) == ["keep-me", "ops/events.jsonl"]
+    assert not (proj / ".gitignore").exists()
+
+
+def test_exclude_in_linked_worktree_and_missing_file(proj, tmp_path_factory):
+    commit(proj)
+    (proj / ".git" / "info" / "exclude").unlink(missing_ok=True)
+    wt = tmp_path_factory.mktemp("wt") / "w"
+    subprocess.run(["git", "-C", str(proj), "worktree", "add", "-q", str(wt), "-b", "other"], check=True)
+    assert sf("ops", "init", "--dir", str(wt), cwd=wt).returncode == 0
+    assert sf("ops", "autobundle", "install", "--repo", str(wt), cwd=wt).returncode == 0
+    assert exclude_lines(wt) == ["ops/events.jsonl"] and exclude_lines(proj) == ["ops/events.jsonl"]
+    assert "events.jsonl" not in subprocess.run(["git", "status", "--porcelain"], cwd=wt, capture_output=True,
+                                                text=True).stdout
