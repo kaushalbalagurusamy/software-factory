@@ -37,3 +37,25 @@ terminal and keeps it open. The local dashboard carries reports and checkpoint
 approvals. Agents must not open its approval URL or release checkpoints.
 Remote Control shares the Claude session; it does not expose this loopback-only
 dashboard to a phone. No hosted Claude artifact is created by this launcher.
+
+## One-shot VPS update watcher
+
+`scripts/watch-vps-lsf.py` waits for the VPS coordinator's explicit ready marker
+at `~/.cache/lsf-ready-for-codex-20261020.json` with `ready: true` and the full
+40-character `commit`. It requires that exact clean HEAD, archives committed
+content, runs LSF and SFN-09 acceptance tests under a 4 GiB process-tree / 300 s
+limit, rechecks readiness, then installs LSF and links its supporting ELI12 and
+nesting-dolls skills. It preserves this branch's launcher. It exits after one
+successful import; it does not continuously deploy subsequent edits.
+
+Status, exact installed commit and test logs are under
+`~/.claude/lsf-vps-sync/`. Failed tests leave the current installed skill in place.
+Network interruptions retry; a verification/install failure stops with a failed
+status for review. `--once` checks readiness once instead of polling.
+
+For this interview setup, the watcher runs as the user LaunchAgent
+`com.kaushal.lsf-vps-import`. Stop it with:
+
+```sh
+launchctl bootout "gui/$(id -u)/com.kaushal.lsf-vps-import"
+```
