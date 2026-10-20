@@ -268,3 +268,97 @@ def test_doctor_hooks_run_with_non_sonnet_role_only_role_line_fails(skills, tmp_
     assert run("opus") == []
     fails = run()
     assert fails and all(l.startswith(("FAIL role research model", "FAIL agent research")) for l in fails)
+
+
+def test_empty_skill_md_does_not_resolve(skills, tmp_path):
+    (skills / "away-mode/SKILL.md").write_text("")
+    (skills / "good-night/SKILL.md").write_text("  \n")
+    assert doctor._skill_resolves("away-mode", REPO, skills) is None
+    assert doctor._skill_resolves("good-night", REPO, skills) is None
+    assert doctor._skill_resolves("minesweeper", REPO, skills)
+
+
+@pytest.mark.parametrize("name", ["../skills/sf", "a/b", "..", "x:../y", "x:y/z", ""])
+def test_skill_names_that_leave_their_directory_never_resolve(skills, name):
+    assert doctor._skill_resolves(name, REPO, skills) is None
+
+
+def test_disabled_plugin_skill_does_not_resolve(skills, tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    ip = home / ".claude/plugins/cache/m/pl/1"
+    (ip / "skills/s1").mkdir(parents=True)
+    (ip / "skills/s1/SKILL.md").write_text("x")
+    (home / ".claude/plugins/installed_plugins.json").write_text(
+        json.dumps({"version": 2, "plugins": {"pl@m": [{"installPath": str(ip)}]}}))
+    monkeypatch.setenv("HOME", str(home))
+    assert doctor._skill_resolves("pl:s1", REPO, skills)
+    (home / ".claude/settings.json").write_text(json.dumps({"enabledPlugins": {"pl@m": True}}))
+    assert doctor._skill_resolves("pl:s1", REPO, skills)
+    (home / ".claude/settings.json").write_text(json.dumps({"enabledPlugins": {"pl@m": False}}))
+    assert doctor._skill_resolves("pl:s1", REPO, skills) is None
+
+
+def test_unhashable_model_is_a_fail_line(skills, tmp_path):
+    root = _bad_root(tmp_path, new="model: [sonnet]")
+    by = {n: s for n, s, _ in doctor.check_roles(root, skills, {"sonnet"})}
+    assert by["role qa model"] == "FAIL" and by["role review model"] == "PASS"
+
+
+def test_profile_model_override_is_policed(skills, tmp_path):
+    proj = tmp_path / "p"
+    (proj / ".factory").mkdir(parents=True)
+    (proj / ".factory/profile.yaml").write_text(
+        "schema_version: 1\nproject: {name: X}\npaths:\n  eval: [e/**]\nagents:\n  review: {model: opus}\n")
+    assert inst(proj, "--allow-model", "opus") == 0
+    for allowed, expect in (({"sonnet"}, "FAIL"), ({"sonnet", "opus"}, None)):
+        out = doctor.check_project(proj, allowed, REPO, sys.executable, skills)[0]
+        fails = [n for n, s, d in out if s == "FAIL" and n == "role review model"]
+        assert bool(fails) == (expect == "FAIL")
+
+
+def test_agent_file_missing_role_skills_fails(skills, tmp_path):
+    proj = tmp_path / "p"
+    proj.mkdir()
+    assert inst(proj) == 0
+    f = proj / ".claude/agents/review.md"
+    f.write_text(f.read_text().replace("- minesweeper\n", ""))
+    out = {n: s for n, s, _ in doctor.check_agents(proj, None, {"sonnet"}, REPO, skills)}
+    assert out["agent review skills"] == "FAIL"
+
+
+def test_pin_external_changed_skill_needs_accept_changed(skills, tmp_path):
+    root = tmp_path / "r"
+    root.mkdir()
+    out = []
+    assert pin_external(skills, root, True, out.append) == 0
+    pinned = (root / "docs/external-skills.json").read_bytes()
+    (skills / "minesweeper/SKILL.md").write_text("poisoned")
+    out.clear()
+    assert pin_external(skills, root, True, out.append) == 2
+    assert (root / "docs/external-skills.json").read_bytes() == pinned
+    assert any("changed since pinned: minesweeper" in o for o in out)
+    assert any(o.startswith("---") or "minesweeper" in o and "sha256" in o for o in out)  # diff shown
+    assert pin_external(skills, root, True, out.append, accept_changed=["away-mode"]) == 2
+    assert pin_external(skills, root, False, out.append, accept_changed=["minesweeper"]) == 2
+    assert (root / "docs/external-skills.json").read_bytes() == pinned
+    assert pin_external(skills, root, True, out.append, accept_changed=["minesweeper"]) == 0
+    assert (root / "docs/external-skills.json").read_bytes() != pinned
+
+
+def test_pin_external_vanished_skill_needs_accept_changed(skills, tmp_path):
+    root = tmp_path / "r"
+    root.mkdir()
+    assert pin_external(skills, root, True, lambda *_: None) == 0
+    shutil.rmtree(skills / "good-night")
+    assert pin_external(skills, root, True, lambda *_: None) == 2
+    assert pin_external(skills, root, True, lambda *_: None, accept_changed=["good-night"]) == 0
+
+
+def test_cli_accept_changed_flag(skills, tmp_path):
+    root = tmp_path / "r"
+    root.mkdir()
+    base = ["pin-external", "--skills-dir", str(skills), "--factory-root", str(root)]
+    assert main([*base, "--yes"]) == 0
+    (skills / "away-mode/SKILL.md").write_text("changed")
+    assert main([*base, "--yes"]) == 2
+    assert main([*base, "--yes", "--accept-changed", "away-mode"]) == 0
