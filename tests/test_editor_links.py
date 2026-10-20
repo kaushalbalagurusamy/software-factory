@@ -119,3 +119,14 @@ def test_single_trailing_slash_on_root_is_stripped():
     assert url("vscode", "/home/me/", "a.py", 1) == "vscode://file/home/me/a.py:1"
     assert url("vscode", "C:/Users/me/", "a.py", 1) == "vscode://file/C:/Users/me/a.py:1"
     assert url("vscode", "/", "a.py", 1) == "vscode://file/a.py:1"
+
+
+@pytest.mark.parametrize("bad", ["\ud800", "\udc00", "a\ud83dz", "z\ude00"])
+def test_lone_surrogates_return_null_not_throw(bad):
+    for ed in ["vscode", "idea", "sublime"]:
+        assert url(ed, "/r/" + bad, "a.py", 1) is None
+        assert url(ed, "/r", "d/" + bad + ".py", 1) is None
+
+
+def test_valid_astral_character_encodes():
+    assert url("vscode", "/r", "\U0001F600.py", 2) == "vscode://file/r/%F0%9F%98%80.py:2"
