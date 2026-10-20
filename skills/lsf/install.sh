@@ -43,6 +43,18 @@ else
   changed=1
 fi
 
+LAUNCH=$BIN/claude-lsf
+LAUNCH_WANT="#!/bin/sh
+exec python3 \"$DEST/scripts/launch.py\" \"\$@\""
+if [ -f "$LAUNCH" ] && [ "$(cat "$LAUNCH")" = "$LAUNCH_WANT" ]; then
+  echo "launcher: already up to date at $LAUNCH"
+else
+  printf '%s\n' "$LAUNCH_WANT" > "$LAUNCH"
+  chmod +x "$LAUNCH"
+  echo "launcher: wrote $LAUNCH"
+  changed=1
+fi
+
 case ":$PATH:" in
   *":$BIN:"*) ;;
   *) echo "note: $BIN is not on your PATH; add it, or run $WRAP directly" ;;

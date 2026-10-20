@@ -18,6 +18,10 @@ def test_install_twice_and_backup(tmp_path):
     assert r.returncode == 0 and (skills / "lsf" / "SKILL.md").is_file() and (bindir / "lsf").is_file()
     wrapper = (bindir / "lsf").read_text()
     assert len(wrapper.splitlines()) <= 15 and "python3" in wrapper and "lsf.py" in wrapper
+    launcher = bindir / "claude-lsf"
+    assert launcher.is_file()
+    launched = subprocess.run([str(launcher), "--help"], capture_output=True, text=True)
+    assert launched.returncode == 0 and "--model" in launched.stdout
     again = sh(env)
     assert again.returncode == 0 and "nothing changed" in again.stdout
     assert not [p for p in skills.iterdir() if "backup" in p.name] and not (tmp_path / "skills-backups").exists()
