@@ -1,6 +1,7 @@
 #!/bin/sh
 # Install the lsf skill: copy it to $CLAUDE_SKILLS_DIR (default ~/.claude/skills) and link `lsf` into $LSF_BIN_DIR
-# (default ~/.local/bin) as a tiny python3 wrapper. Safe to run twice: the second run changes nothing.
+# (default ~/.local/bin) as a tiny python3 wrapper. A different existing copy is moved to <skills dir>/../skills-backups/
+# (never inside the skills dir, where it would load as a second skill). Safe to run twice: the second run changes nothing.
 set -eu
 SRC=$(cd "$(dirname "$0")" && pwd)
 SKILLS=${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}
@@ -15,9 +16,11 @@ if [ -d "$DEST" ] && diff -r "$SRC" "$DEST" >/dev/null 2>&1; then
 else
   if [ -e "$DEST" ] || [ -L "$DEST" ]; then
     STAMP=$(date -u +%Y%m%d%H%M%S)
-    BK=$SKILLS/lsf.backup-$STAMP
+    BKDIR=$SKILLS/../skills-backups
+    mkdir -p "$BKDIR"
+    BK=$BKDIR/lsf.backup-$STAMP
     n=0
-    while [ -e "$BK" ]; do n=$((n + 1)); BK=$SKILLS/lsf.backup-$STAMP$n; done
+    while [ -e "$BK" ]; do n=$((n + 1)); BK=$BKDIR/lsf.backup-$STAMP$n; done
     mv "$DEST" "$BK"
     echo "skill: moved the existing different copy to $BK"
   fi

@@ -18,7 +18,7 @@ rm -rf "$stage/skills/mermaid-nesting-dolls/tests"
 cat > "$stage/install-bundle.sh" <<'SH'
 #!/bin/sh
 # Installs lsf, eli12-docs and mermaid-nesting-dolls into $CLAUDE_SKILLS_DIR (default ~/.claude/skills) and puts an
-# `lsf` command in $LSF_BIN_DIR (default ~/.local/bin). A different existing copy is moved to <name>.backup-<time>.
+# `lsf` command in $LSF_BIN_DIR (default ~/.local/bin). A different existing copy is moved to <skills dir>/../skills-backups/<name>.backup-<time>.
 # Running it twice changes nothing the second time.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -31,7 +31,8 @@ for s in eli12-docs mermaid-nesting-dolls; do
     echo "$s: already up to date"
   else
     if [ -e "$SKILLS/$s" ] || [ -L "$SKILLS/$s" ]; then
-      BK=$SKILLS/$s.backup-$(date -u +%Y%m%d%H%M%S)
+      mkdir -p "$SKILLS/../skills-backups"
+      BK=$SKILLS/../skills-backups/$s.backup-$(date -u +%Y%m%d%H%M%S)
       mv "$SKILLS/$s" "$BK"; echo "$s: moved the existing different copy to $BK"
     fi
     cp -R "$HERE/skills/$s" "$SKILLS/$s"; echo "$s: installed"
