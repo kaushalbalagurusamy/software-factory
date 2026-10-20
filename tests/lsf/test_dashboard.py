@@ -33,3 +33,21 @@ def test_no_innerhtml_of_data():
 
 def test_tabs_name_where_they_look():
     assert "docs/explorer" in HTML and "docs/eli12" in HTML
+
+
+def test_budget_summary_lines_are_separate_blocks():
+    assert '"wrows small"' in HTML and ".wrows{display:flex;flex-direction:column;gap:" in HTML
+    assert 'class:"row small"' not in HTML  # the old inline spans ran together
+
+
+def test_tabs_follow_the_hash():
+    assert "function tabFromHash" in HTML and 'addEventListener("hashchange"' in HTML
+    assert "S.tab=tabFromHash();" in HTML and 'history.pushState(null,"","#"+t[0])' in HTML
+    # the token is read and stripped before the tab is chosen, so #token=... never names a tab
+    assert HTML.index("history.replaceState(null") < HTML.index("S.tab=tabFromHash();")
+    assert 'return "now"' in HTML
+
+
+def test_path_chip_and_copy_button_share_a_row():
+    assert ".ref{display:inline-flex;align-items:center;flex-wrap:wrap;gap:" in HTML and ".ref.plain" in HTML
+    assert "margin-left:.4rem" not in HTML
