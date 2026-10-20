@@ -16,6 +16,7 @@ import json
 import os
 import re
 import secrets
+import shutil
 import shlex
 import subprocess
 import sys
@@ -162,31 +163,45 @@ def atomic_write(path, text):
         raise
 
 
+def _lock_is_stale(d):
+    """A lock is stale when its owner process is gone, or when it is older than 5 seconds."""
+    try:
+        pid = int(open(os.path.join(d, "pid")).read().strip())
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return True
+    except (OSError, ValueError):
+        pass
+    try:
+        return time.time() - os.path.getmtime(d) > 5
+    except OSError:
+        return False
+
+
 @contextlib.contextmanager
 def locked(root):
     """A portable directory lock around ledger writes (no OS-specific locking calls)."""
     d = lpath(root, ".lock")
     os.makedirs(lsf_dir(root), exist_ok=True)
-    end = time.time() + 5
+    end = time.time() + 6
     while True:
         try:
             os.mkdir(d)
+            with contextlib.suppress(OSError):
+                with open(os.path.join(d, "pid"), "w") as f:
+                    f.write(str(os.getpid()))
             break
         except FileExistsError:
-            try:
-                if time.time() - os.path.getmtime(d) > 30:
-                    os.rmdir(d)
-                    continue
-            except OSError:
-                pass
+            if _lock_is_stale(d):
+                shutil.rmtree(d, ignore_errors=True)
+                continue
             if time.time() > end:
                 raise Fail("another lsf process holds %s" % d)
             time.sleep(0.05)
     try:
         yield
     finally:
-        with contextlib.suppress(OSError):
-            os.rmdir(d)
+        shutil.rmtree(d, ignore_errors=True)
 
 
 def git(root, *args, **kw):
@@ -217,6 +232,12 @@ def find_root(arg):
 _SECRETS = [
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"),
     re.compile(r"sk-[A-Za-z0-9_\-]{12,}"),
+    re.compile(r"(?:sk|rk|pk)_(?:live|test)_[A-Za-z0-9]{8,}"),
+    re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),
+    re.compile(r"(?:npm|hf)_[A-Za-z0-9]{20,}"),
+    re.compile(r"(?<=://)[^/\s:@]+:[^@\s/]+(?=@)"),
+    re.compile(r"(?i)(?<=\s-u\s)\S+:\S+"),
+    re.compile(r"(?i)(?<=--token )\S+|(?<=--password )\S+|(?<=--passwd )\S+|(?<=--secret )\S+|(?<=--api-key )\S+"),
     re.compile(r"gh[pousr]_[A-Za-z0-9]{12,}"),
     re.compile(r"github_pat_[A-Za-z0-9_]{12,}"),
     re.compile(r"glpat-[A-Za-z0-9_\-]{10,}"),
@@ -299,8 +320,8 @@ def group_of(prof, pid):
 
 # ---------------------------------------------------------------- events
 def emit_event(root, stage, verdict, note="", source="lsf", phase=None, slice_=None, role=None,
-               duration_s=None, extra=None):
-    if os.environ.get("SF_EVENTS") == "off" or os.environ.get("LSF_EVENTS") == "off":
+               duration_s=None, extra=None, force=False):
+    if not force and (os.environ.get("SF_EVENTS") == "off" or os.environ.get("LSF_EVENTS") == "off"):
         return False
     try:
         one = lambda v: None if v is None else clean_note(v, 200)
@@ -359,6 +380,33 @@ def _entry_text(e):
     return json.dumps({k: v for k, v in e.items() if k not in ("chain", "hash")}, sort_keys=True, separators=(",", ":"), default=_jd)
 
 
+def _parse_ledger(raw):
+    """(valid entries, error) where valid is the longest verified prefix of the ledger text."""
+    prev, entries = GENESIS, []
+    try:
+        lines = raw.decode("utf-8").split("\n")
+    except UnicodeDecodeError:
+        return entries, True
+    if lines and lines[-1] == "":
+        lines.pop()
+    for i, ln in enumerate(lines, 1):
+        try:
+            e = json.loads(ln)
+        except ValueError:
+            return entries, True
+        if not isinstance(e, dict) or e.get("seq") != i or not isinstance(e.get("chain"), str) \
+                or e.get("prev") != prev or e.get("hash") != e.get("chain") \
+                or not hmac.compare_digest(_chain(prev, _entry_text(e)), e["chain"]):
+            return entries, True
+        prev = e["chain"]
+        entries.append(e)
+    return entries, False
+
+
+def _write_head(root, entries):
+    atomic_write(lpath(root, "stops.head"), json.dumps({"seq": len(entries), "chain": entries[-1]["chain"]}, default=_jd) + "\n")
+
+
 def stops_raw(root):
     """Verified ledger entries. Raises Fail('stop ledger failed verification') on any tamper."""
     bad = Fail("stop ledger failed verification")
@@ -369,35 +417,51 @@ def stops_raw(root):
         if hraw is not None:
             raise bad
         return []
-    prev, entries = GENESIS, []
-    try:
-        lines = raw.decode("utf-8").split("\n")
-    except UnicodeDecodeError:
+    entries, broken = _parse_ledger(raw)
+    if broken or not entries:
         raise bad
-    if lines and lines[-1] == "":
-        lines.pop()
-    for i, ln in enumerate(lines, 1):
-        try:
-            e = json.loads(ln)
-        except ValueError:
-            raise bad
-        if not isinstance(e, dict) or e.get("seq") != i or not isinstance(e.get("chain"), str) \
-                or e.get("prev") != prev or e.get("hash") != e.get("chain"):
-            raise bad
-        want = _chain(prev, _entry_text(e))
-        if not hmac.compare_digest(want, e["chain"]):
-            raise bad
-        prev = want
-        entries.append(e)
     try:
         h = json.loads(hraw.decode("utf-8")) if hraw is not None else None
     except ValueError:
         raise bad
-    if not entries:
-        raise bad
-    if not isinstance(h, dict) or h.get("seq") != len(entries) or h.get("chain") != prev:
+    if isinstance(h, dict) and h.get("seq") == len(entries) - 1 and len(entries) >= 1 \
+            and h.get("chain") == (entries[-2]["chain"] if len(entries) > 1 else GENESIS):
+        # crash window between the ledger append and the head write: exactly one valid extra entry, heal the head
+        try:
+            _write_head(root, entries)
+        except OSError:
+            pass
+        return entries
+    if not isinstance(h, dict) or h.get("seq") != len(entries) or h.get("chain") != entries[-1]["chain"]:
         raise bad
     return entries
+
+
+def cross_check(root, entries):
+    """Every stop opened or released must also appear in the append-only event log, and the reverse for opens."""
+    ev = [e for e in read_jsonl(lpath(root, "events.jsonl"), tail=True) if e.get("stage") == "hitl"]
+    base_seq = 0
+    for i in range(len(ev) - 1, -1, -1):
+        if ev[i].get("verdict") == "repaired":
+            base_seq = int(ev[i].get("ledger_seq") or 0)
+            ev = ev[i + 1:]
+            break
+    led = {}
+    for e in entries:
+        if e.get("seq", 0) > base_seq:
+            k = (e.get("kind"), e.get("name"))
+            led[k] = led.get(k, 0) + 1
+    evc = {}
+    for e in ev:
+        if e.get("verdict") in ("opened", "released"):
+            k = ("open" if e["verdict"] == "opened" else "release", e.get("stop"))
+            evc[k] = evc.get(k, 0) + 1
+    for k, n in evc.items():
+        if k[0] == "open" and led.get(k, 0) < n:
+            raise Fail("stop ledger inconsistent: stop %s was opened (events.jsonl) but is missing from the ledger" % k[1])
+    for k, n in led.items():
+        if k[0] == "release" and evc.get(k, 0) < n:
+            raise Fail("stop ledger inconsistent: stop %s is released in the ledger with no release event" % k[1])
 
 
 def derive_stops(entries):
@@ -410,6 +474,7 @@ def derive_stops(entries):
             for s in reversed(stops):
                 if s["name"] == e.get("name") and "released_at" not in s:
                     s["released_at"], s["released_by"], s["note"] = e.get("released_at"), e.get("released_by"), e.get("note")
+                    s["via"] = e.get("via") or "unknown"
                     break
     return stops
 
@@ -427,11 +492,23 @@ def stops_append(root, entry):
 
 
 def stops_state(root):
-    return derive_stops(stops_raw(root))
+    entries = stops_raw(root)
+    cross_check(root, entries)
+    return derive_stops(entries)
 
 
 def open_stops(root):
     return [s for s in stops_state(root) if "released_at" not in s]
+
+
+def strict_hitl(root):
+    return bool(load_profile(root).get("require_tty_release"))
+
+
+def require_tty_if_strict(root, what):
+    if strict_hitl(root) and not sys.stdin.isatty():
+        out("refused: %s needs an interactive terminal (require_tty_release is on); a human must run it" % what)
+        raise StopError()
 
 
 def hitl_open(root, name, question, artifacts, reason):
@@ -442,10 +519,10 @@ def hitl_open(root, name, question, artifacts, reason):
         stops_append(root, {"kind": "open", "name": name, "question": clean_note(question, 500),
                             "artifact": [clean_note(a, 300) for a in artifacts], "reason": clean_note(reason, 500),
                             "opened_at": iso(now())})
-    emit_event(root, "hitl", "opened", "%s: %s" % (name, question), phase=name)
+        emit_event(root, "hitl", "opened", "%s: %s" % (name, question), phase=name, extra={"stop": name}, force=True)
 
 
-def hitl_release(root, name, note="", by=None):
+def hitl_release(root, name, note="", by=None, via="cli-nontty"):
     check_name(name)
     by = by or os.environ.get("LSF_BY") or os.environ.get("USER") or "human"
     with locked(root):
@@ -456,13 +533,37 @@ def hitl_release(root, name, note="", by=None):
         if "released_at" in mine[-1]:
             raise Fail("stop %s is already released" % name)
         t = iso(now())
-        stops_append(root, {"kind": "release", "name": name, "released_at": t, "released_by": clean_note(by, 120),
-                            "note": clean_note(note, 500)})
         opened = parse_ts(mine[-1]["opened_at"])
-    wait = int(minutes_between(opened, parse_ts(t)) * 60) if opened else None
-    emit_event(root, "hitl", "released", "%s released by %s%s" % (name, by, (": " + note) if note else ""),
-               phase=name, duration_s=wait)
+        wait = int(minutes_between(opened, parse_ts(t)) * 60) if opened else None
+        # the release event goes first so a ledger release can never exist without it
+        if not emit_event(root, "hitl", "released", "%s released by %s via %s%s" % (name, by, via, (": " + note) if note else ""),
+                          phase=name, duration_s=wait, extra={"stop": name, "via": via}, force=True):
+            raise Fail("release event could not be recorded; nothing released")
+        stops_append(root, {"kind": "release", "name": name, "released_at": t, "released_by": clean_note(by, 120),
+                            "note": clean_note(note, 500), "via": via})
     return t
+
+
+def hitl_repair(root):
+    """Quarantine a bad ledger and rebuild it from its longest verified prefix. A human act."""
+    p = lpath(root, "stops.jsonl")
+    with locked(root):
+        raw = read_capped(p)
+        if raw is None:
+            raise Fail("no stop ledger to repair")
+        entries, _ = _parse_ledger(raw)
+        stamp = now().strftime("%Y%m%d%H%M%S")
+        moved = p + ".corrupt-" + stamp
+        os.replace(p, moved)
+        with contextlib.suppress(OSError):
+            os.replace(lpath(root, "stops.head"), lpath(root, "stops.head.corrupt-" + stamp))
+        if entries:
+            data = "".join(json.dumps(e, separators=(",", ":"), default=_jd) + "\n" for e in entries)
+            atomic_write(p, data)
+            _write_head(root, entries)
+        emit_event(root, "hitl", "repaired", "ledger quarantined as %s; kept %d valid entries" % (os.path.basename(moved), len(entries)),
+                   extra={"ledger_seq": len(entries)}, force=True)
+    return moved, len(entries)
 
 
 def check_name(name):
@@ -498,13 +599,14 @@ def budget_data(root, at=None):
     w = check_weights(prof)
     at = at or now()
     ivs = intervals(phase_rows(root), at)
+    ledger_error = None
     try:
         stops = stops_state(root)
-    except Fail:
-        stops = []
+    except Fail as e:
+        stops, ledger_error = [], str(e)
     wait = merged(wait_intervals(stops, at))
     groups = {g: {"planned_minutes": round(prof["session_minutes"] * w[g], 2), "actual_minutes": None,
-                  "percent_of_plan": None, "flag": "under (not measured)"} for g in GROUPS}
+                  "percent_of_plan": None, "flag": "under (not measured)", "waiting_minutes": 0.0} for g in GROUPS}
     for iv in ivs:
         g = group_of(prof, iv["phase"])
         if g is None:
@@ -523,49 +625,86 @@ def budget_data(root, at=None):
                 d["percent_of_plan"] = round(100.0 * d["actual_minutes"] / d["planned_minutes"], 1)
             d["flag"] = "over plan" if d["actual_minutes"] > d["planned_minutes"] else "under plan"
     total = sum(minutes_between(a, b) for a, b in wait)
-    return {"groups": groups, "waiting_on_human_minutes": round(total, 2), "session_minutes": prof["session_minutes"]}
+    for st in stops:
+        a0 = parse_ts(st.get("opened_at"))
+        if a0 is None:
+            continue
+        b0 = parse_ts(st.get("released_at")) if "released_at" in st else at
+        g = group_of(prof, str(st.get("name", "")).replace("-review", ""))
+        if g is None:
+            for iv in ivs:
+                if iv["start"] <= a0 and (iv["end"] is None or a0 <= iv["end"]):
+                    g = group_of(prof, iv["phase"])
+        if g:
+            groups[g]["waiting_minutes"] = round(groups[g]["waiting_minutes"] + minutes_between(a0, b0 or at), 2)
+    measured = sum(d["actual_minutes"] or 0.0 for d in groups.values())
+    out_ = {"groups": groups, "waiting_on_human_minutes": None if ledger_error else round(total, 2),
+            "session_minutes": prof["session_minutes"], "session_total_minutes": round(measured + (0 if ledger_error else total), 2),
+            "clock_overridden": bool(os.environ.get("LSF_NOW"))}
+    if ledger_error:
+        out_["ledger_error"] = ledger_error
+    return out_
 
 
 # ---------------------------------------------------------------- collectors (item shapes follow factory.ops.collect)
+def _base_dir(pattern):
+    segs = pattern.split("/")
+    keep = []
+    for seg in segs[:-1]:
+        if any(c in seg for c in "*?["):
+            break
+        keep.append(seg)
+    return "/".join(keep)
+
+
 class Source(object):
-    """Files as of a commit, from the git object database."""
+    """Files as of a commit, read straight from the git object database, one directory at a time."""
 
     def __init__(self, root, sha):
-        self.root, self.sha, self._paths, self._set = root, sha, None, None
+        self.root, self.sha = root, sha
         self.where = "commit " + sha[:12]
+        self.truncated = 0
+        self._dirs = {}
 
-    def paths(self):
-        if self._paths is None:
-            out = git(self.root, "ls-tree", "-r", "--name-only", "-z", self.sha) or b""
-            self._paths = [p for p in out.decode("utf-8", "replace").split("\0")
-                           if p and not any(c in SKIP_DIRS for c in p.split("/"))][:MAX_FILES]
-        return self._paths
+    def _raw_list(self, d):
+        out_ = git(self.root, "ls-tree", "-r", "--name-only", "-z", self.sha, "--", d + "/")
+        if out_ is None:
+            raise Fail("git ls-tree failed for %s at %s" % (d, self.sha[:12]))
+        return [p for p in out_.decode("utf-8", "replace").split("\0") if p]
 
-    def pathset(self):
-        if self._set is None:
-            self._set = set(self.paths())
-        return self._set
+    def ls(self, d):
+        if d not in self._dirs:
+            ps = [p for p in self._raw_list(d) if not any(c in SKIP_DIRS for c in p.split("/"))]
+            if len(ps) > MAX_FILES:
+                self.truncated = MAX_FILES
+                ps = ps[:MAX_FILES]
+            self._dirs[d] = ps
+        return self._dirs[d]
 
     def glob(self, pattern):
         depth = pattern.count("/")
-        return sorted(p for p in self.paths() if p.count("/") == depth and fnmatch.fnmatchcase(p, pattern))
+        return sorted(p for p in self.ls(_base_dir(pattern)) if p.count("/") == depth and fnmatch.fnmatchcase(p, pattern))
+
+    def has(self, path):
+        return path in self.ls(os.path.dirname(path))
+
+    def has_dir(self, d):
+        return any(p.startswith(d.rstrip("/") + "/") for p in self.ls(os.path.dirname(d.rstrip("/"))))
 
     def read(self, path):
-        if path not in self.pathset():
-            return None
-        out = git(self.root, "show", "%s:%s" % (self.sha, path))
-        return None if out is None else out[:MAX_READ]
+        out_ = git(self.root, "show", "%s:%s" % (self.sha, path))
+        return None if out_ is None else out_[:MAX_READ]
 
     def text(self, path):
         b = self.read(path)
         return None if b is None else b.decode("utf-8", "replace")
 
     def commits(self, limit=200):
-        out = git(self.root, "log", "-n%d" % limit, "--format=%H%x1f%cI%x1f%s", self.sha) or b""
+        out_ = git(self.root, "log", "-n%d" % limit, "--format=%H%x1f%cI%x1f%s", self.sha) or b""
         rows = []
-        for line in out.decode("utf-8", "replace").splitlines():
-            h, d, s = (line.split("\x1f") + ["", ""])[:3]
-            rows.append({"sha": h, "date": d, "subject": s})
+        for line in out_.decode("utf-8", "replace").splitlines():
+            h, d, s_ = (line.split("\x1f") + ["", ""])[:3]
+            rows.append({"sha": h, "date": d, "subject": s_})
         return rows
 
 
@@ -576,22 +715,19 @@ class WorkTree(Source):
         Source.__init__(self, root, "HEAD")
         self.where = "the working tree"
 
-    def paths(self):
-        if self._paths is None:
-            out = git(self.root, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
-            if out is not None:
-                cand = [p for p in out.decode("utf-8", "replace").split("\0") if p]
-            else:
-                cand = []
-                for dp, dn, fn in os.walk(self.root):
-                    dn[:] = [d for d in dn if d not in SKIP_DIRS]
-                    for f in fn:
-                        cand.append(os.path.relpath(os.path.join(dp, f), self.root).replace(os.sep, "/"))
-                        if len(cand) >= MAX_FILES:
-                            break
-            self._paths = sorted({p for p in cand if not any(c in SKIP_DIRS for c in p.split("/"))
-                                  and os.path.isfile(os.path.join(self.root, p))})[:MAX_FILES]
-        return self._paths
+    def _raw_list(self, d):
+        out_ = git(self.root, "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", d)
+        if out_ is not None:
+            cand = [p for p in out_.decode("utf-8", "replace").split("\0") if p]
+        else:
+            cand = []
+            for dp, dn, fn in os.walk(os.path.join(self.root, d)):
+                dn[:] = [x for x in dn if x not in SKIP_DIRS]
+                for f in fn:
+                    cand.append(os.path.relpath(os.path.join(dp, f), self.root).replace(os.sep, "/"))
+                if len(cand) > MAX_FILES:
+                    break
+        return sorted({p for p in cand if os.path.isfile(os.path.join(self.root, p))})
 
     def read(self, path):
         f = os.path.join(self.root, path)
@@ -733,9 +869,8 @@ def _onepager(src, path):
         s = re.match(r"\s*Slices:\s*(.*)$", ln)
         if s:
             ids = [x.strip() for x in s.group(1).split(",") if x.strip()]
-            cur["slices"] = [{"id": i, "exists": any(p.startswith("docs/slices/%s/" % i) for p in src.paths())}
-                             for i in ids]
-            cur["unknown_slices"] = [i for i in ids if not any(p.startswith("docs/slices/%s/" % i) for p in src.paths())]
+            cur["slices"] = [{"id": i, "exists": src.has_dir("docs/slices/%s" % i)} for i in ids]
+            cur["unknown_slices"] = [i for i in ids if not src.has_dir("docs/slices/%s" % i)]
         elif re.match(r"\s*(?:[-*]|\d+\.)\s+\S", ln):
             cur["steps"].append(re.sub(r"^\s*(?:[-*]|\d+\.)\s+", "", ln).strip())
     if len(lines) > 80:
@@ -752,7 +887,7 @@ def c_prd_journeys(src):
         items.append({"slice": p.split("/")[2], "path": p, "title": _title(t, p.split("/")[2]),
                       "priority": pri.group(1) if pri else None, "stories": _stories(t)})
     items.sort(key=lambda i: (str(i["priority"] or "~"), i["slice"]))
-    if "docs/prd/onepager.md" in src.pathset():
+    if src.has("docs/prd/onepager.md"):
         items.extend(_onepager(src, "docs/prd/onepager.md"))
     for p in src.glob("docs/prds/*.md"):
         t = src.text(p) or ""
@@ -780,7 +915,7 @@ def c_bug_log(src):
         tx = src.text(p) or ""
         items.append({"kind": "qa-notes", "path": p, "slice": p.split("/")[2], "title": _title(tx, p.split("/")[2]),
                       "failures": re.findall(r"^#{2,}\s+(.+)$", tx, re.M)})
-    if not items and t is None:
+    if not items:
         return unavailable("no docs/bugs/*.md, no docs/bug-log.jsonl and no docs/slices/*/qa-notes.md in %s" % src.where)
     return ok(items)
 
@@ -831,10 +966,17 @@ COLLECTORS = [("research", c_research), ("experiments", c_experiments), ("adrs",
 def collect_tabs(src):
     tabs = {}
     for name, fn in COLLECTORS:
+        src.truncated = 0
         try:
             tabs[name] = fn(src)
         except Exception as e:  # a broken source must show as unavailable, never as a crash or an empty success
             tabs[name] = unavailable("%s collector failed: %s" % (name, e))
+        if src.truncated:
+            t = tabs[name]
+            if t["available"]:
+                t["summary"]["truncated"] = "truncated: scan stopped at %d files" % src.truncated
+            else:
+                t["reason"] = "truncated: scan stopped at %d files; %s" % (src.truncated, t["reason"])
     return tabs
 
 
@@ -885,7 +1027,7 @@ def status_data(root):
                         "elapsed_minutes": round(minutes_between(op["start"], at), 2)} if op else None),
         "session_elapsed_minutes": round(minutes_between(ivs[0]["start"], at), 2) if ivs else None,
         "open_stops": [s for s in stops if "released_at" not in s], "next_phase": nxt,
-        "stop_ledger": "ok",
+        "stop_ledger": "ok", "clock_overridden": bool(os.environ.get("LSF_NOW")),
     }
 
 
@@ -944,6 +1086,8 @@ def cmd_init(a, root):
         except ValueError:
             raise Usage("bad weight %r" % item)
     prof = default_profile(root, a.minutes, a.checkpoints, a.editor, w)
+    if a.strict_hitl:
+        prof["require_tty_release"] = True
     check_weights(prof)
     atomic_write(lpath(root, "profile.json"), json.dumps(prof, indent=2, default=_jd) + "\n")
     out("initialised %s (session %d min, checkpoints: %s, editor: %s)" % (d, a.minutes, a.checkpoints, a.editor))
@@ -1021,8 +1165,17 @@ def cmd_hitl(a, root):
         out("human stop opened: %s" % a.name)
         return 0
     if a.action == "release":
-        t = hitl_release(root, a.name, a.note or "", a.by)
-        out("released %s at %s (a recorded procedure, not proof of identity)" % (a.name, t))
+        require_tty_if_strict(root, "hitl release")
+        via = "cli-tty" if sys.stdin.isatty() else "cli-nontty"
+        t = hitl_release(root, a.name, a.note or "", a.by, via)
+        out("released %s at %s via %s (a recorded procedure, not proof of identity)" % (a.name, t, via))
+        return 0
+    if a.action == "repair":
+        if not a.yes:
+            raise Usage("hitl repair moves the stop ledger aside and rebuilds it from its valid prefix; add --yes to do that")
+        require_tty_if_strict(root, "hitl repair")
+        moved, kept = hitl_repair(root)
+        out("quarantined the old ledger as %s; kept %d valid entries" % (moved, kept))
         return 0
     try:
         stops = stops_state(root)
@@ -1045,12 +1198,15 @@ def cmd_status(a, root):
         d = status_data(root)
     except Fail as e:
         out(str(e))
+        out("waiting on human: not measured (stop ledger failed verification)")
         raise
     if a.json:
         out(json.dumps(d, indent=2, default=_jd))
         return 0
     op = d["open_phase"]
     out("lsf status  %s" % d["now"])
+    if os.environ.get("LSF_NOW"):
+        out("WARN: clock overridden by LSF_NOW")
     out("open phase: %s" % ("%s (%s), elapsed %.1f min" % (op["phase"], op["group"], op["elapsed_minutes"]) if op else "none"))
     if d["session_elapsed_minutes"] is not None:
         out("session: %.1f of %d min" % (d["session_elapsed_minutes"], d["session_minutes"]))
@@ -1064,16 +1220,25 @@ def cmd_status(a, root):
 def cmd_budget(a, root):
     d = budget_data(root)
     if a.json:
-        out(json.dumps({"groups": d["groups"], "waiting_on_human_minutes": d["waiting_on_human_minutes"]}, indent=2, default=_jd))
-        return 0
+        out(json.dumps({"groups": d["groups"], "waiting_on_human_minutes": d["waiting_on_human_minutes"],
+                        "session_total_minutes": d["session_total_minutes"], "session_minutes": d["session_minutes"],
+                        "clock_overridden": d["clock_overridden"], "ledger_error": d.get("ledger_error")}, indent=2, default=_jd))
+        return 1 if d.get("ledger_error") else 0
+    if d["clock_overridden"]:
+        out("WARN: clock overridden by LSF_NOW")
     for g in GROUPS:
         x = d["groups"][g]
         if x["actual_minutes"] is None:
-            out("%-7s planned %.1f min, actual not measured, %s" % (g, x["planned_minutes"], x["flag"]))
+            out("%-7s planned %.1f min, actual not measured, %s, human wait %.1f min" % (g, x["planned_minutes"], x["flag"], x["waiting_minutes"]))
         else:
-            out("%-7s planned %.1f min, actual %.1f min (%.1f%% of plan), %s" % (
-                g, x["planned_minutes"], x["actual_minutes"], x["percent_of_plan"] or 0.0, x["flag"]))
+            out("%-7s planned %.1f min, actual %.1f min (%.1f%% of plan), %s, human wait %.1f min" % (
+                g, x["planned_minutes"], x["actual_minutes"], x["percent_of_plan"] or 0.0, x["flag"], x["waiting_minutes"]))
+    if d.get("ledger_error"):
+        out("waiting on human: not measured (stop ledger failed verification)")
+        out(d["ledger_error"])
+        return 1
     out("waiting on human: %.1f min (counted separately, not in the groups above)" % d["waiting_on_human_minutes"])
+    out("session total: %.1f of %d planned min (phases plus waiting on human)" % (d["session_total_minutes"], d["session_minutes"]))
     return 0
 
 
@@ -1129,7 +1294,8 @@ def hooks_config():
         if matcher:
             g = dict([("matcher", matcher)], **g)
         return [g]
-    return {"hooks": {"SubagentStop": grp("SubagentStop"), "Stop": grp("Stop"), "PostToolUse": grp("PostToolUse", "Bash")}}
+    return {"hooks": {"SubagentStop": grp("SubagentStop"), "Stop": grp("Stop"), "PostToolUse": grp("PostToolUse", "Bash"),
+                      "PreToolUse": grp("guard", "Bash")}}
 
 
 def _own(cmd):
@@ -1206,8 +1372,41 @@ def summarize(text, limit=200):
     return clean_note(" ".join(str(text).split()), limit)
 
 
-def cmd_hook(a, root):
-    """Always exits 0 and prints nothing on stdout, whatever arrives on stdin."""
+_COMMIT = re.compile(r"(?:^|&&|\|\||;|\n|\()\s*(?:\w+=\S+\s+)*git\s+(?:-\S+\s+(?:[^-\s]\S*\s+)?)*commit\b")
+_DENY_RELEASE = re.compile(r"hitl\s+(?:release|repair)\b")
+_STOPS_TOUCH = re.compile(r"\.lsf/(?:stops|\.lock)|stops\.(?:jsonl|head)")
+_WRITES = re.compile(r"(?:>|\brm\b|\bmv\b|\btruncate\b|\btee\b|\bsed\b[^|;&]*\s-i|\bcp\b|\bdd\b|\bperl\b|\bpython|\bnode\b|\bln\b|\bchmod\b|\bsh\s+-c)")
+
+
+def guard_reason(command):
+    """Friction, not proof: a PreToolUse hook cannot stop every way of editing a file. Returns a denial reason or None."""
+    if _DENY_RELEASE.search(command):
+        return "lsf hitl release and repair are human acts; ask the owner to run them in their own terminal"
+    if _STOPS_TOUCH.search(command) and _WRITES.search(command):
+        return "the human stop ledger (.lsf/stops*) must not be written by an agent"
+    if re.search(r"/api/hitl/release", command):
+        return "the release route is for the human's browser; an agent must not call it"
+    return None
+
+
+def hook_root(root_arg, payload):
+    """Nearest directory (from --root, else the payload cwd, else the cwd) that already has .lsf; None if there is none."""
+    start = root_arg or (payload.get("cwd") if isinstance(payload.get("cwd"), str) else None)
+    try:
+        d = os.path.realpath(start or os.getcwd())
+    except OSError:
+        return None
+    while True:
+        if os.path.isdir(os.path.join(d, ".lsf")):
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            return None
+        d = parent
+
+
+def cmd_hook(a, root_arg):
+    """Exits 0 and prints nothing on stdout, whatever arrives on stdin; only `guard` may exit 2 (a denial on stderr)."""
     try:
         raw = sys.stdin.buffer.read(MAX_READ)
         try:
@@ -1217,11 +1416,22 @@ def cmd_hook(a, root):
         if not isinstance(p, dict):
             return 0
         name = a.name
-        role = p.get("agent_type") if isinstance(p.get("agent_type"), str) else None
         ti = p.get("tool_input") if isinstance(p.get("tool_input"), dict) else {}
+        cmd = ti.get("command") if isinstance(ti.get("command"), str) else ""
+        root = hook_root(root_arg, p)
+        if name.lower() == "guard":
+            why = guard_reason(cmd) if cmd else None
+            if why:
+                if root:
+                    emit_event(root, "guard", "denied", summarize(cmd), source="hook")
+                sys.stderr.write("lsf guard: %s (friction, not proof)\n" % why)
+                return 2
+            return 0
+        if root is None:
+            return 0
+        role = p.get("agent_type") if isinstance(p.get("agent_type"), str) else None
         if name.lower().replace("-", "") in ("posttooluse", "posttool"):
-            cmd = ti.get("command") if isinstance(ti.get("command"), str) else ""
-            if "git commit" not in cmd:
+            if not _COMMIT.search(cmd):
                 return 0
             note = "%s: %s" % (p.get("tool_name") or "Bash", summarize(cmd))
             verdict = "commit"
@@ -1312,6 +1522,8 @@ def cmd_doctor(a, root):
     add("self-check", "PASS" if ok_s else "FAIL", why)
     node = subprocess.run(["node", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode().strip() \
         if _has("node") else None
+    if os.environ.get("LSF_NOW"):
+        add("clock", "WARN", "LSF_NOW is set (%s): every timestamp is overridden" % os.environ["LSF_NOW"])
     add("node", "INFO", node or "not found (optional, only for browser-free checks)")
     for n, s, d in results:
         out("%s %s: %s" % (s, n, d))
@@ -1353,11 +1565,11 @@ def safe_rel(rel):
 
 def forbidden_rel(rel):
     segs = rel.split("/")
-    if ".git" in segs:
+    if any(s.lower() == ".git" for s in segs):
         return True
     if any(s.lower().startswith(".env") for s in segs):
         return True
-    if segs[0] == ".lsf" and any(("secret" in s.lower() or "token" in s.lower()) for s in segs):
+    if segs[0].lower() == ".lsf" and any(("secret" in s.lower() or "token" in s.lower()) for s in segs):
         return True
     return False
 
@@ -1558,6 +1770,7 @@ def build_parser():
     p.add_argument("--minutes", type=int, default=60, help="session length in minutes (default 60)")
     p.add_argument("--checkpoints", choices=["align", "all", "none"], default="align")
     p.add_argument("--editor", choices=EDITORS, default="vscode")
+    p.add_argument("--strict-hitl", action="store_true", help="hitl release and repair refuse unless stdin is a terminal")
     p.add_argument("--weight", action="append", metavar="GROUP=W", help="align|review|build weight, repeatable; must sum to 1.0")
 
     p = mk("phase", cmd_phase, "start or end a phase")
@@ -1584,7 +1797,7 @@ def build_parser():
     p.add_argument("--source", choices=["lsf", "hook", "agent"], default="agent")
 
     p = mk("hitl", cmd_hitl, "human checkpoints: request, status, release")
-    hs = p.add_subparsers(dest="action", metavar="request|status|release")
+    hs = p.add_subparsers(dest="action", metavar="request|status|release|repair")
     hs.required = True
     q = hs.add_parser("request")
     q.add_argument("name")
@@ -1594,6 +1807,9 @@ def build_parser():
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
     q = hs.add_parser("status")
     q.add_argument("--json", action="store_true")
+    q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
+    q = hs.add_parser("repair", description="Quarantine a failed stop ledger and rebuild it from its valid prefix. A human act.")
+    q.add_argument("--yes", action="store_true")
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
     q = hs.add_parser("release", description="Release is a human act; agents must never run it. It records who and when; it is a procedure, not proof of identity.")
     q.add_argument("name")
@@ -1663,6 +1879,8 @@ def main(argv=None):
     try:
         argv, root_arg = extract_root(argv)
         args = build_parser().parse_args(argv)
+        if args.cmd == "hook":
+            return args.fn(args, os.path.abspath(root_arg) if root_arg else None)
         root = find_root(root_arg)
         return args.fn(args, root)
     except Usage as e:

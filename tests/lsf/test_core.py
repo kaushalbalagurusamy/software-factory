@@ -141,6 +141,7 @@ def test_root_before_or_after(repo):
 
 
 def test_control_chars_and_secrets_in_every_field(repo):
+    run(repo, "init")
     tok = "ghp_" + "a1B2c3D4e5F6g7H8i9J0"
     r = run(repo, "event", "st\x01age", "ver" + tok, "--note", "n\x07ote " + tok, "--role", "r" + tok, "--slice", "s" + tok)
     assert r.returncode in (0, 1, 2)
@@ -225,6 +226,7 @@ def test_ledger_entries_carry_prev_and_hash_literals(repo):
 
 
 def test_hook_nul_byte_payloads(repo):
+    run(repo, "init")
     for payload in ('{"agent_type": "a\\u0000b", "last_assistant_message": "x\\u0000y"}',
                     '{"agent_type": "a", "last_assistant_message": "x\x00y"}'):
         r = run(repo, "hook", "SubagentStop", stdin=payload)
