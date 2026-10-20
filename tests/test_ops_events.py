@@ -176,3 +176,9 @@ def test_shell_script_ignores_shadowing_cwd_package(tmp_path):
                        capture_output=True, text=True, env={**os.environ, "PYTHONPATH": str(tmp_path)})
     assert r.returncode == 0 and "shadowed" not in r.stderr
     assert len(lines(tmp_path)) == 1
+
+
+def test_missing_root_creates_nothing(tmp_path, capsys):
+    missing = tmp_path / "a" / "b"
+    assert emit(missing, "a", "b", "c") is False
+    assert not (tmp_path / "a").exists() and capsys.readouterr().err.startswith("event not recorded: ")
