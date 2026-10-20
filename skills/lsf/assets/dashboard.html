@@ -63,6 +63,7 @@ main{padding:8px 16px 64px;max-width:1180px;margin:0 auto;min-width:0}
 .steps li.done{color:var(--fg)}.steps li.done::before{content:"\2713 "}
 .steps li.open{background:var(--acc);color:var(--acc-fg);border-color:var(--acc);font-weight:700}
 .gb{margin:.9rem 0}
+.wrows{display:flex;flex-direction:column;gap:.35rem;margin-top:.6rem}
 .gb .row{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;font-size:.9rem}
 .track{position:relative;height:16px;border-radius:99px;background:var(--panel2);margin:.35rem 0}
 .plan{position:absolute;left:0;top:0;bottom:0;border:2px dashed var(--mute);border-radius:99px;opacity:.55}
@@ -72,8 +73,9 @@ main{padding:8px 16px 64px;max-width:1180px;margin:0 auto;min-width:0}
 .legend{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.78rem;color:var(--mute)}
 .q{font-size:1.15rem;font-weight:650;margin:.2rem 0 .5rem}
 .refs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
-a.elink,.ref{display:inline-flex;align-items:center;flex-wrap:wrap;min-height:44px;padding:0 .7rem;border:1px solid var(--line);border-radius:10px;background:var(--panel2);text-decoration:none;max-width:100%;overflow-wrap:anywhere}
-.ref button{min-height:44px;margin-left:.4rem;padding:0 .6rem;font-size:.8rem}
+.ref{display:inline-flex;align-items:center;flex-wrap:wrap;gap:.4rem;max-width:100%;min-width:0}
+a.elink,.ref.plain{display:inline-flex;align-items:center;min-height:44px;padding:0 .7rem;border:1px solid var(--line);border-radius:10px;background:var(--panel2);text-decoration:none;max-width:100%;overflow-wrap:anywhere}
+.ref button{min-height:44px;padding:0 .6rem;font-size:.8rem}
 .row2{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.7rem}
 .err{color:var(--bad)}
 .list{list-style:none;margin:0;padding:0}
@@ -182,6 +184,8 @@ var GROUPS=["align","review","build"];
 var S={state:null,snap:null,tab:"now",token:"",editor:null,wsroot:null,openDoc:null,docText:{},err:"",busy:{},sig:"",gotAt:0,iframe:{}};
 var main=document.getElementById("main"),nav=document.getElementById("nav");
 try{var m=/token=([0-9a-f]+)/.exec(location.hash||"");if(m){S.token=m[1];history.replaceState(null,"",location.pathname+location.search);}}catch(e){}
+function tabFromHash(){var id=(location.hash||"").replace(/^#/,"");for(var i=0;i<TABS.length;i++){if(TABS[i][0]===id){return id;}}return "now";}
+S.tab=tabFromHash();
 function store(k,v){try{if(v===undefined){return localStorage.getItem("lsf."+k);}localStorage.setItem("lsf."+k,v);}catch(e){return null;}return null;}
 function h(tag,attrs,kids){var el=document.createElement(tag),k,i;attrs=attrs||{};
  for(k in attrs){if(attrs[k]===null||attrs[k]===undefined||attrs[k]===false){continue;}
@@ -198,7 +202,7 @@ function ref(path,line,label){
  try{url=SFEditorLinks.editorUrl(c.editor,c.root,String(path),line);}catch(e){url=null;}
  var cp=h("button",{type:"button",onclick:function(ev){var b=ev.currentTarget;try{navigator.clipboard.writeText(text);b.textContent="Copied";}catch(e){b.textContent="Copy failed";}}},"Copy path");
  if(url){return h("span",{class:"ref"},[h("a",{class:"elink mono",href:url,title:"Open in "+c.editor},txt),cp]);}
- return h("span",{class:"ref mono",title:"Set a valid editor and absolute workspace root in the header to get a link"},[txt,cp]);}
+ return h("span",{class:"ref plain mono",title:"Set a valid editor and absolute workspace root in the header to get a link"},[txt,cp]);}
 function tabData(name){var t=S.snap?S.snap.tabs:(S.state&&S.state.tabs);return t?t[name]:null;}
 function items(t){return t&&t.available&&Array.isArray(t.items)&&t.items.length?t.items:null;}
 function emptyTab(t,what){var why=t&&t.reason?t.reason:(t&&t.available?"the source holds no items":"no data was collected");
@@ -233,7 +237,7 @@ function renderHeader(){
 function renderNav(){
  var stops=((S.state&&S.state.runtime.stops)||[]).filter(function(x){return !x.released_at;}).length;
  nav.textContent="";
- TABS.forEach(function(t){var b=h("button",{type:"button",role:"tab","aria-selected":S.tab===t[0]?"true":"false","data-tab":t[0],onclick:function(){S.tab=t[0];S.sig="";renderNav();renderTab();}},[t[1]]);
+ TABS.forEach(function(t){var b=h("button",{type:"button",role:"tab","aria-selected":S.tab===t[0]?"true":"false","data-tab":t[0],onclick:function(){S.tab=t[0];S.sig="";try{if(location.hash!=="#"+t[0]){history.pushState(null,"","#"+t[0]);}}catch(e){}renderNav();renderTab();}},[t[1]]);
   if(t[0]==="now"&&stops){b.appendChild(h("span",{class:"dot","aria-label":stops+" waiting"},String(stops)));}nav.appendChild(b);});
 }
 
@@ -249,7 +253,7 @@ function groupBars(budget){
     h("div",{class:"plan",style:"width:"+(100*x.planned_minutes/scale)+"%"}),
     h("div",{class:"fill g-"+g+(over?" over":""),style:"width:"+(100*(x.actual_minutes||0)/scale)+"%"})]),
    h("div",{class:"small "+(over?"v-wait":"mute")},x.flag+" - human wait in this group: "+fmtMin(x.waiting_minutes))]));});
- wrap.appendChild(h("div",{class:"row small"},[h("span",{class:"v-wait"},budget.ledger_error?"waiting on human: not measured (stop ledger failed verification)":"waiting on human: "+fmtMin(budget.waiting_on_human_minutes)),
+ wrap.appendChild(h("div",{class:"wrows small"},[h("span",{class:"v-wait"},budget.ledger_error?"waiting on human: not measured (stop ledger failed verification)":"waiting on human: "+fmtMin(budget.waiting_on_human_minutes)),
   h("b",{},"session total "+fmtMin(budget.session_total_minutes)+" of "+fmtMin(budget.session_minutes))]));
  return wrap;}
 function phaseCard(){
@@ -421,6 +425,7 @@ function poll(){
    var liveTab=S.tab==="now"||S.tab==="telemetry"||S.tab==="evals",typing=document.activeElement&&document.activeElement.tagName==="INPUT"&&main.contains(document.activeElement);
    if((first||tabsChanged||(rtChanged&&liveTab))&&!typing){renderTab();}}
  }).catch(function(e){S.err="Cannot reach the lsf server: "+e.message;renderHeader();if(!S.state){renderTab();}});}
+window.addEventListener("hashchange",function(){var t=tabFromHash();if(t!==S.tab){S.tab=t;S.sig="";render();}});
 document.getElementById("ed").addEventListener("change",function(e){S.editor=e.target.value;store("editor",S.editor);renderTab();});
 document.getElementById("ws").addEventListener("change",function(e){S.wsroot=e.target.value.trim();store("root",S.wsroot);renderTab();});
 S.editor=store("editor");S.wsroot=store("root");
