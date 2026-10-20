@@ -77,11 +77,11 @@ def test_L11_unavailable_tabs_agree_with_the_oracle_on_an_empty_repo(rig):
 def test_L11_every_tab_reads_the_contract_paths(fixture_rig):
     b = fixture_rig.bundle()
     assert len(tab(b, "research")["items"]) == 2
-    assert {i["name"] for i in tab(b, "experiments")["items"]} == {"e1", "e2"}
+    assert {i["name"] for i in tab(b, "experiments")["items"]} == {"e1", "e2", "e3"}
     assert any("error" in i for i in tab(b, "experiments")["items"]), "broken results.json is reported, not skipped"
     assert len(tab(b, "adrs")["items"]) == 2
     assert len(tab(b, "bug_log")["items"]) == 2
-    assert len(tab(b, "prd_journeys")["items"]) == 2
+    assert len(tab(b, "prd_journeys")["items"]) == 3  # 2 slice proposals + the one-pager journey
     assert len(tab(b, "git")["items"]) >= 2
 
 
