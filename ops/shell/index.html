@@ -238,7 +238,7 @@ var HIST={
  dev_journey:function(d){
    var h=table([["slice","Slice"],["t","Tasks done/total"],["v","Verified/total"],["a","Amendments"]],d.items.map(function(s){
      return {slice:s.slice,t:s.tasks.total!=null?s.tasks.done+"/"+s.tasks.total:"n/a: "+s.tasks.reason,v:s.verification.total!=null?s.verification.verified+"/"+s.verification.total:"n/a: "+s.verification.reason,a:s.amendments.count!=null?s.amendments.count:"n/a"}}));
-   return h+"<h2>Stage events</h2>"+(d.events.length?table([["at","At"],["stage","Stage"],["slice","Slice"],["verdict","Verdict"],["sha","Commit"],["note","Note"]],d.events.slice().reverse()):'<p class="mute">No stage events recorded at this commit.</p>')},
+   return h+"<h2>Stage events</h2>"+(d.events_source?'<p class="mute">Source: '+esc(d.events_source)+"</p>":"")+(d.events.length?table([["at","At"],["stage","Stage"],["slice","Slice"],["verdict","Verdict"],["sha","Commit"],["note","Note"]],d.events.slice().reverse()):'<p class="mute">No stage events recorded at this commit.</p>')},
  evals:function(d){
    var sm=d.summary,m=sm.membership,h="";
    if(m)h+='<div class="card">Eval membership from GOLDEN.json: <strong>'+m.golden+"</strong> golden, <strong>"+m.diagnostic+"</strong> diagnostic-tagged.</div>";

@@ -89,15 +89,49 @@ def _when(text):
     return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
 
 
-def _stage_events(tab: dict, commit_date: str, worktree: bool) -> dict:
-    """Stage events are history: drop those stamped after the commit, and report none as unavailable, not an empty table."""
+LOCAL_LOG_BYTES = 8_000_000
+
+
+def _local_events(repo: Path, cut) -> list[dict]:
+    """Events of the untracked working-tree log (C-50) stamped no later than the commit's committer date."""
+    path = Path(repo) / "ops" / "events.jsonl"
+    try:
+        if path.is_symlink() or path.parent.is_symlink() or not path.is_file():
+            return []
+        with open(path, "rb") as f:
+            text = f.read(LOCAL_LOG_BYTES).decode("utf-8", "replace")
+    except OSError:
+        return []
+    out = []
+    for ln in text.splitlines():
+        try:
+            e = json.loads(ln)
+        except ValueError:
+            continue
+        when = _when(e.get("at")) if isinstance(e, dict) else None
+        if when is not None and (cut is None or when <= cut):
+            out.append(e)
+    return out
+
+
+def _stage_events(tab: dict, commit_date: str, worktree: bool, repo: Path | None = None, tracked: bool = True) -> dict:
+    """Stage events are history: use the committed log, or the local log when the commit does not track it, drop
+    those stamped after the commit, and report none as unavailable, not an empty table."""
+    cut = None if worktree else _when(commit_date)
+    source = "commit"
+    if not worktree and not tracked and repo is not None:
+        local = _local_events(repo, cut)
+        if local:
+            if not tab["available"]:
+                tab = {"available": True, "summary": {"count": 0, "slices": 0}, "items": [], "events": []}
+            tab["events"], source = local, "local log"
     if not tab["available"]:
         return unavailable(f"no stage events recorded ({tab['reason']})")
-    cut = None if worktree else _when(commit_date)
     keep = [e for e in tab["events"] if "error" in e or cut is None or (_when(e.get("at")) or cut) <= cut]
     if not any("error" not in e for e in keep):
         return unavailable("no stage events recorded")
     tab["events"] = keep
+    tab["events_source"] = source
     tab["summary"]["events"] = len(keep)
     return tab
 
@@ -112,7 +146,7 @@ def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
     else:
         src = WorkTreeSource(repo) if worktree else GitSource(repo, meta["sha"])
         tabs_out, tabs = {}, collect_all(src)
-        tabs["dev_journey"] = _stage_events(tabs["dev_journey"], meta["date"], worktree)
+        tabs["dev_journey"] = _stage_events(tabs["dev_journey"], meta["date"], worktree, repo, src.text("ops/events.jsonl") is not None)
         for name, tab in tabs.items():
             entry: dict = {"available": tab["available"]}
             if not tab["available"]:

@@ -315,3 +315,55 @@ def test_event_goes_to_the_repo_of_the_path_argument(proj, fake_tool, tmp_path_f
     assert events(proj) == []
     assert cli.main(["slice", "lock", "plain"]) == 0  # no path argument that leaves the cwd repo
     assert [e["stage"] for e in events(proj)] == ["5-evals"]
+
+
+def test_untracked_local_log_reaches_the_snapshot(proj):
+    from factory.ops import bundle as B
+    ev = '{"at": "%s", "stage": "7-qa", "slice": "s", "sha": "x", "verdict": "pass", "note": ""}\n'
+    (proj / "ops").mkdir()
+    (proj / "ops" / "events.jsonl").write_text(ev % "2000-01-01T00:00:00+00:00" + ev % "2999-01-01T00:00:00+00:00" + "garbage\n")
+    c = commit(proj, "one")
+    B.bundle(proj, "HEAD", Path("ops"))
+    man = json.loads((proj / "ops" / "snapshots" / c / "manifest.json").read_text())
+    dj = man["tabs"]["dev_journey"]
+    assert dj["available"] is True
+    blob = json.loads((proj / "ops" / "blobs" / f"{dj['blob']}.json").read_text())
+    assert [e["at"][:4] for e in blob["events"]] == ["2000"] and blob["events_source"] == "local log"
+    (proj / "ops" / "events.jsonl").write_text("")  # the stored snapshot stays reproducible
+    assert json.loads((proj / "ops" / "blobs" / f"{dj['blob']}.json").read_text())["events"]
+
+
+def test_empty_or_missing_local_log_keeps_the_reason(proj):
+    from factory.ops import bundle as B
+    c = commit(proj, "one")
+    B.bundle(proj, "HEAD", Path("ops"))
+    assert "no stage events recorded" in json.loads(
+        (proj / "ops" / "snapshots" / c / "manifest.json").read_text())["tabs"]["dev_journey"]["reason"]
+
+
+def test_hook_built_snapshot_shows_the_11_commit_event(proj):
+    import time
+    commit(proj)
+    sf("ops", "init", cwd=proj)
+    assert sf("ops", "autobundle", "install", cwd=proj).returncode == 0
+    shim = proj.parent / "shim"  # the hook resolves `sf` from PATH: point it at this checkout
+    shim.mkdir(exist_ok=True)
+    (shim / "sf").write_text(f'#!/bin/sh\nPYTHONPATH="{REPO}" exec "{sys.executable}" -m factory.cli "$@"\n')
+    (shim / "sf").chmod(0o755)
+    env = {k: v for k, v in os.environ.items() if k != "SF_EVENTS"} | {"PYTHONPATH": str(REPO), "PATH": f"{shim}:{os.environ['PATH']}"}
+    subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "h1"],
+                   cwd=proj, check=True, env=env)
+    time.sleep(0.5)
+    for _ in range(100):  # the second commit's snapshot is built after the first commit's event exists
+        if events(proj):
+            break
+        time.sleep(0.1)
+    subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "h2"],
+                   cwd=proj, check=True, env=env)
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=proj, capture_output=True, text=True).stdout.strip()
+    man = proj / "ops" / "snapshots" / head / "manifest.json"
+    for _ in range(150):
+        if man.exists():
+            break
+        time.sleep(0.1)
+    assert json.loads(man.read_text())["tabs"]["dev_journey"]["available"] is True
