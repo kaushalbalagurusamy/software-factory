@@ -136,3 +136,27 @@ def test_pin_external_reports_skill_without_skill_md(skills, tmp_path):
     assert any("not pinned: away-mode" in o for o in out)
     assert "away-mode" not in json.loads((root / "docs/external-skills.json").read_text())["skills"]
     assert dict((n, s) for n, s, _ in doctor.check_external(root, skills))["external away-mode"] == "FAIL"
+
+
+def test_cli_pin_external_needs_yes(skills, tmp_path, capsys):
+    root = tmp_path / "r"
+    root.mkdir()
+    args = ["pin-external", "--skills-dir", str(skills), "--factory-root", str(root)]
+    assert main(args) == 2
+    assert not (root / "docs/external-skills.json").exists()
+    assert "external-skills.json" in capsys.readouterr().out
+    assert main([*args, "--yes"]) == 0
+    assert (root / "docs/external-skills.json").is_file()
+
+
+def test_profile_allow_models_alone_does_not_widen(tmp_path, capsys):
+    from factory.install import core
+    proj = tmp_path / "p"
+    (proj / ".factory").mkdir(parents=True)
+    (proj / ".factory/profile.yaml").write_text(
+        "schema_version: 1\nproject: {name: X}\npaths:\n  eval: [e/**]\nallow_models: [opus]\n")
+    assert inst(proj) == 0
+    assert "extra allowed models" not in capsys.readouterr().out
+    assert inst(proj, "--allow-model", "opus") == 0
+    assert "extra allowed models: opus" in capsys.readouterr().out
+    assert core.MODEL == "sonnet"
