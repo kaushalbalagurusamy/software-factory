@@ -1,0 +1,3 @@
+You also should make a fast version that uses the same flow that replaces backslash lsf (lite software factory) this one in particular I need to be able to run locally on my mac for the 1hr session in front of peak6 tmr.
+
+They will focus on telemetry and HITL. So the ops dashboard matters more than ever, probably we spend like 60% on our time on human-ai alignment (contextualized by research and experiments) steps and 20% on code review. Code review the nested mermaids will be crucial on the ops dashboard which should open up specific files on our code editor. Probably both sf and lsf need ELI12 documentation skills to prevent technically terse, illegible docs (maybe a format like X object / function expects ABC and outputs DEF, Y depends on it Z it depends on)
