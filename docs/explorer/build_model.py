@@ -848,7 +848,7 @@ N("session-start", "Session start", "At SessionStart gives a new session the cur
   files=[F("factory/hooks/session_start.py", None, "NO_TICKET", "Summary or the no-ticket line")], cov=C("built", "Implemented with acceptance cases."))
 nodes["subagent-validators"]["files"] += [F("factory/hooks/subagent_stop.py", None, "def record", "Leaves a subagent-stop stage event")]
 setsum("path-guard", "Each role may write only its own folders (Research under research/, Design under docs/prd, spec and adr, Audit under docs/audit, Review nowhere, QA only qa-notes and qa-feedback and .sf/qa through the qa_paths class). Only Implement writes application code.")
-nodes["path-guard"]["files"] += [F("factory/hooks/path_guard.py", None, "C-41.2: the only paths a `qa_paths` role may write", "The qa_paths globs; configuration may override them"), F("factory/hooks/path_guard.py", None, "C-41.3: qa gets the implement-style git restrictions", "Bash limits for qa")]
+nodes["path-guard"]["files"] += [F("factory/hooks/path_guard.py", None, "the only paths a `qa_paths` role may write", "The qa_paths globs; configuration may override them"), F("factory/hooks/path_guard.py", None, "C-41.3: qa gets the implement-style git restrictions", "Bash limits for qa")]
 nodes["path-guard"]["coverage"]["note"] += " The qa_paths class (C-41.2) was added by ADR-0005."
 
 # ---- native install: doctor checks and pin-external

@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "16f6cf2",
+  "commit": "005edab",
   "generated": "2026-10-20"
  },
  "root": "factory",
@@ -1684,7 +1684,7 @@
      "path": "factory/hooks/path_guard.py",
      "contains": "def decide",
      "note": "Implementation",
-     "lines": "440-454"
+     "lines": "532-546"
     },
     {
      "path": "docs/prds/TB-05-path-guard.md",
@@ -1693,15 +1693,15 @@
     },
     {
      "path": "factory/hooks/path_guard.py",
-     "contains": "C-41.2: the only paths a `qa_paths` role may write",
+     "contains": "the only paths a `qa_paths` role may write",
      "note": "The qa_paths globs; configuration may override them",
-     "lines": "26"
+     "lines": "26-27"
     },
     {
      "path": "factory/hooks/path_guard.py",
      "contains": "C-41.3: qa gets the implement-style git restrictions",
      "note": "Bash limits for qa",
-     "lines": "408"
+     "lines": "497"
     }
    ],
    "coverage": {
@@ -3177,7 +3177,7 @@
      "path": "docs/ops-events.md",
      "contains": "# Ops events and the live dashboard",
      "note": "Events and what emits them",
-     "lines": "1-39"
+     "lines": "1-44"
     },
     {
      "path": "docs/ops-tabs.md",
@@ -3254,7 +3254,7 @@
     {
      "path": "factory/install/doctor.py",
      "contains": "def check_roles",
-     "lines": "142-163"
+     "lines": "168-189"
     },
     {
      "path": "docs/native-install.md",
@@ -3265,13 +3265,13 @@
      "path": "factory/install/doctor.py",
      "contains": "def check_external",
      "note": "External skills versus docs/external-skills.json",
-     "lines": "166-187"
+     "lines": "192-213"
     },
     {
      "path": "factory/install/core.py",
      "contains": "def pin_external",
      "note": "Rewrites the pins from the installed copies; exit 2 without --yes",
-     "lines": "368-388"
+     "lines": "368-400"
     },
     {
      "path": "docs/external-skills.json",
@@ -3343,7 +3343,7 @@
      "path": "factory/hooks/path_guard.py",
      "contains": "if writes == \"qa_paths\"",
      "note": "Enforcement (C-41.2)",
-     "lines": "146"
+     "lines": "149"
     },
     {
      "path": "docs/hooks/roles.md",
@@ -3434,7 +3434,7 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def main",
      "note": "Entry point",
-     "lines": "1877-1897"
+     "lines": "1937-1957"
     },
     {
      "path": "docs/prds/SFN-06-lsf-lite.md",
@@ -3482,31 +3482,31 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def build_parser",
      "note": "All commands",
-     "lines": "1755-1857"
+     "lines": "1815-1917"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_init",
      "note": "Writes .lsf/profile.json",
-     "lines": "1069-1095"
+     "lines": "1129-1155"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_phase",
      "note": "start and end; start refuses under an open stop",
-     "lines": "1112-1144"
+     "lines": "1172-1204"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_doctor",
      "note": "python, git, repository, port and the self-check",
-     "lines": "1482-1530"
+     "lines": "1542-1590"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_bundle",
      "note": "Prints which dashboard tabs have data",
-     "lines": "1270-1282"
+     "lines": "1330-1342"
     }
    ],
    "coverage": {
@@ -3625,25 +3625,25 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def make_handler",
      "note": "Handler with every route",
-     "lines": "1608-1711"
+     "lines": "1668-1771"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_serve",
      "note": "Prints the URL with #token= once",
-     "lines": "1714-1751"
+     "lines": "1774-1811"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def read_repo_file",
      "note": "Path and size checks for /api/file",
-     "lines": "1577-1605"
+     "lines": "1637-1665"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def resolve_sha",
      "note": "Used by /api/at",
-     "lines": "983-989"
+     "lines": "1043-1049"
     }
    ],
    "coverage": {
@@ -3663,43 +3663,43 @@
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "var TABS=",
      "note": "The ten tabs",
-     "lines": "182"
+     "lines": "185"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderNow",
      "note": "Now tab: clock, stops, Approve button",
-     "lines": "289-299"
+     "lines": "292-302"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderTelemetry",
      "note": "Telemetry tab",
-     "lines": "302-325"
+     "lines": "305-328"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderArch",
      "note": "Architecture tab (the explorer in an iframe)",
-     "lines": "351-372"
+     "lines": "355-376"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderDocs",
      "note": "Docs tab (reads docs/eli12/index.json)",
-     "lines": "385-399"
+     "lines": "389-403"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "COLLECTORS = [",
      "note": "Collectors behind the tabs",
-     "lines": "962-963"
+     "lines": "1022-1023"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def c_experiments",
      "note": "Experiments and resolved.json",
-     "lines": "801-817"
+     "lines": "801-820"
     }
    ],
    "coverage": {
@@ -3720,19 +3720,19 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def hooks_config",
      "note": "The four hooks",
-     "lines": "1290-1298"
+     "lines": "1350-1358"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_hook",
      "note": "Always exits 0 except the guard's denial",
-     "lines": "1339-1368"
+     "lines": "1399-1428"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def guard_reason",
      "note": "What the guard denies",
-     "lines": "1381-1389"
+     "lines": "1441-1449"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
@@ -3750,7 +3750,7 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_hooks",
      "note": "print, install, uninstall",
-     "lines": "1339-1368"
+     "lines": "1399-1428"
     }
    ],
    "coverage": {
@@ -3834,7 +3834,7 @@
      "path": "skills/eli12-docs/scripts/eli12.py",
      "contains": "def main",
      "note": "scaffold, check, index",
-     "lines": "799-851"
+     "lines": "830-882"
     },
     {
      "path": "docs/prds/SFN-07-eli12-docs.md",
@@ -3934,7 +3934,7 @@
      "path": "skills/eli12-docs/scripts/eli12.py",
      "contains": "def run_check",
      "note": "Runs the checks",
-     "lines": "743-794"
+     "lines": "774-825"
     },
     {
      "path": "skills/eli12-docs/scripts/eli12.py",
@@ -3946,7 +3946,7 @@
      "path": "skills/eli12-docs/scripts/eli12.py",
      "contains": "\"stale-dependencies\"",
      "note": "Used by / Depends on drift",
-     "lines": "714"
+     "lines": "745"
     },
     {
      "path": "skills/eli12-docs/scripts/eli12.py",
@@ -3958,7 +3958,7 @@
      "path": "skills/eli12-docs/scripts/eli12.py",
      "contains": "def changed_files",
      "note": "--changed GITREF",
-     "lines": "732-740"
+     "lines": "763-771"
     }
    ],
    "coverage": {
@@ -4014,7 +4014,7 @@
      "path": "skills/mermaid-nesting-dolls/assets/editor-links.js",
      "contains": "function editorUrl",
      "note": "The pure function",
-     "lines": "45-60"
+     "lines": "61-63"
     },
     {
      "path": "docs/prds/SFN-08-editor-links.md",
@@ -4053,7 +4053,7 @@
      "path": "skills/mermaid-nesting-dolls/assets/editor-links.js",
      "contains": "function editorUrl",
      "note": "Builder",
-     "lines": "45-60"
+     "lines": "61-63"
     },
     {
      "path": "skills/mermaid-nesting-dolls/assets/editor-links.js",
@@ -4123,7 +4123,7 @@
      "path": "skills/mermaid-nesting-dolls/assets/template.html",
      "contains": "ed=w.editor||\"none\"",
      "note": "View-time override",
-     "lines": "340"
+     "lines": "343"
     }
    ],
    "coverage": {
@@ -4160,13 +4160,13 @@
      "path": "factory/ops/bundle.py",
      "contains": "def put_blob",
      "note": "Content-addressed blob",
-     "lines": "49-55"
+     "lines": "52-58"
     },
     {
      "path": "factory/ops/bundle.py",
      "contains": "def build_viewer",
      "note": "Viewer from the dolls template",
-     "lines": "58-67"
+     "lines": "61-70"
     }
    ],
    "coverage": {
@@ -4183,13 +4183,13 @@
      "path": "factory/ops/events.py",
      "contains": "def emit",
      "note": "The writer",
-     "lines": "65-97"
+     "lines": "70-104"
     },
     {
      "path": "factory/ops/events.py",
      "contains": "def _redact",
      "note": "Secret shapes",
-     "lines": "25-32"
+     "lines": "30-40"
     },
     {
      "path": "docs/ops-events.md",
@@ -4212,13 +4212,13 @@
      "path": "factory/cli.py",
      "contains": "def _record_event",
      "note": "Telemetry only; never raises",
-     "lines": "402-415"
+     "lines": "432-445"
     },
     {
      "path": "factory/cli.py",
      "contains": "def run_tool",
      "note": "Calls _record_event after the tool",
-     "lines": "418-432"
+     "lines": "448-462"
     },
     {
      "path": "factory/hooks/subagent_stop.py",
@@ -4256,25 +4256,25 @@
      "path": "factory/ops/cli.py",
      "contains": "def _init",
      "note": "init",
-     "lines": "62-102"
+     "lines": "64-104"
     },
     {
      "path": "factory/ops/cli.py",
      "contains": "def _backfill",
      "note": "backfill",
-     "lines": "105-125"
+     "lines": "107-136"
     },
     {
      "path": "factory/ops/cli.py",
      "contains": "def _status",
      "note": "status; BEHIND exit 4",
-     "lines": "128-153"
+     "lines": "139-169"
     },
     {
      "path": "factory/ops/cli.py",
      "contains": "def _autobundle",
      "note": "autobundle",
-     "lines": "177-213"
+     "lines": "221-283"
     }
    ],
    "coverage": {
@@ -4298,7 +4298,7 @@
      "path": "factory/ops/runtime.py",
      "contains": "def repo_state",
      "note": "repo_head and behind",
-     "lines": "189-199"
+     "lines": "189-200"
     },
     {
      "path": "factory/ops/runtime.py",
@@ -4316,7 +4316,7 @@
      "path": "factory/ops/runtime.py",
      "contains": "def collect_runtime",
      "note": "Assembles runtime.json",
-     "lines": "202-226"
+     "lines": "203-227"
     }
    ],
    "coverage": {
@@ -4489,25 +4489,25 @@
      "path": "ops/shell/index.html",
      "contains": "var TABS=[",
      "note": "The twelve tabs",
-     "lines": "125-128"
+     "lines": "128-131"
     },
     {
      "path": "ops/shell/index.html",
      "contains": "function renderStops",
      "note": "Stops banner",
-     "lines": "174-179"
+     "lines": "177-182"
     },
     {
      "path": "ops/shell/index.html",
      "contains": "commits behind the repository",
      "note": "Staleness banner",
-     "lines": "266"
+     "lines": "269"
     },
     {
      "path": "ops/shell/index.html",
      "contains": "function hitlHtml",
      "note": "Human stops tab",
-     "lines": "180-189"
+     "lines": "183-192"
     }
    ],
    "coverage": {
