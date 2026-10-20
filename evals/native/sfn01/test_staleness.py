@@ -89,7 +89,7 @@ def test_E12_a_snapshot_with_committed_events_shows_them_in_dev_journey(repo):
     from factory.ops.events import emit
     for stage in ("4-slice", "5-evals", "7-qa"):
         assert emit(repo, stage, "s1", "pass")
-    git(repo, "add", "--", "ops/events.jsonl")
+    git(repo, "add", "-f", "--", "ops/events.jsonl")  # C-50: the log is excluded locally; force-add it for this case
     sha = commit(repo, "with events")
     assert sf(repo, "ops", "bundle", env=child_env(SF_EVENTS="off")).returncode == 0
     m = manifest(repo, sha)["tabs"]["dev_journey"]
@@ -103,7 +103,7 @@ def test_E12_events_emitted_by_sf_commands_reach_the_dev_journey_tab(repo):
     (repo / "docs" / "slices").mkdir(parents=True)
     sf(repo, "slice", "triage", "--root", "docs/slices")  # E-04 writes the event
     assert len(read_events(repo)) == 1
-    git(repo, "add", "--", "ops/events.jsonl")
+    git(repo, "add", "-f", "--", "ops/events.jsonl")  # C-50: the log is excluded locally; force-add it for this case
     sha = commit(repo, "commit the events")
     sf(repo, "ops", "bundle", env=child_env(SF_EVENTS="off"))
     evs = tab_blob(repo, sha, "dev_journey")["events"]
@@ -122,7 +122,7 @@ def test_E12_no_events_at_all_reports_not_available_with_the_stated_reason(repo)
 
 def test_E12_an_empty_events_file_is_the_same_as_no_events(repo):
     sf(repo, "ops", "init")
-    git(repo, "add", "--", "ops/events.jsonl")
+    git(repo, "add", "-f", "--", "ops/events.jsonl")  # C-50: the log is excluded locally; force-add it for this case
     sha = commit(repo, "empty events file")
     sf(repo, "ops", "bundle", env=child_env(SF_EVENTS="off"))
     tab = manifest(repo, sha)["tabs"]["dev_journey"]
