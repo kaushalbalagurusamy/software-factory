@@ -279,23 +279,6 @@ with current versus planned behaviour is `docs/sf-flow.md`. All commands run as 
 | 11 Commit | Atomic commits, explicit paths | `sf ops bundle` | CLI |
 | 12 Inbound | Rank new items into the ledger or backlog | `sf intake gate --since SHA` for new source text | CLI for new requirement text; the ranking is prose |
 
-Added 2026-10-20 (owner flow `docs/requirements/sf-owner-flow.md`, ADR-0005, clarifications C-40 to C-50):
-- **The dashboard updates itself.** Every `sf` command in the table above writes its own stage event to `ops/events.jsonl` (a local,
-  append-only log that is excluded from git; `SF_EVENTS=off` switches it off), the sub-agent stop hooks add `subagent-stop` events,
-  and `sf ops init | backfill | status | autobundle` create the dashboard, snapshot past commits, report how far the newest snapshot is
-  behind HEAD, and bundle every new commit from a `post-commit` hook. The viewer shows a staleness banner. Details: `docs/ops-events.md`.
-- **Eight roles, all Sonnet.** A `qa` role (skill `qa-supervisor`, writes only QA notes and attempt records, enforced by `path_guard`) sits between
-  `implement` and `review`; the reviewer carries `implementation-review`, `mermaid-nesting-dolls`, `minesweeper`, `doc-sync` and the Ponytail rubric
-  (`skills/implementation-review/ponytail-rubric.md`) and approves only after `sf slice done` and `doc-sync` are clean. A role file that names another
-  model is rejected unless the operator passes `--allow-model`. `sf install doctor` checks every role's skills and the pinned external skills
-  (`docs/external-skills.json`; refresh with `sf install pin-external --yes`).
-- **Plain-language docs.** At stage 10, `python3 skills/eli12-docs/scripts/eli12.py check` must be clean for the changed modules (`scaffold` writes the
-  skeleton with who-uses-it and what-it-uses computed from the code; the explanations are written from the code and tests).
-- **Review in the editor.** The nested diagrams and every dashboard file reference open the exact file and line in the owner's editor
-  (`skills/mermaid-nesting-dolls/assets/editor-links.js`; build the explorer with `--workspace-root "$PWD" --editor vscode`).
-- **`/lsf`** is the fast version of this same flow for a live session on a laptop (`skills/lsf`): same stage names and file conventions, phase clock,
-  human checkpoints with an Approve button, telemetry, needs only python3 and git.
-
 Retry and escalation defaults (configurable in `.sf/policy.yaml`, tuned from `sf qa stats`): 4 attempts per
 failure signature, model tier per attempt, one flake rerun, environment crashes (out of disk, out of memory,
 killed, timeout) classified separately and never consuming an attempt. At the cap QA hands the slice to the
@@ -324,9 +307,7 @@ in that project's settings, so an inherited user-level default of another model 
 
 Known limits, stated so nothing reads as more than it is: the hooks are mechanical only in projects where
 `sf` has generated the project settings and agent files, and their behaviour inside a live Claude Code session
-has been exercised through the command line, simulated event streams and scripted headless real sessions
-(`docs/native-verification/2026-10-19/REPORT.md`: denials, a failing gate and repair, a human stop), but not in an
-interactive session, and not for the intake gate, the full QA loop with real agents or reviewer amendments;
+has been exercised through the command line and simulated event streams, not yet end to end in a real session;
 the Bash and blindness guards are denylist parsers and cannot be complete, so the OS sandbox and permission
 layer remain the backstop; the solver gate covers a small pure-Python subset and everything else must route
 to tests; structure extraction is Python-only and never a complete call graph.

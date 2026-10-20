@@ -37,15 +37,6 @@ feedback in contract terms. Full schemas and exit codes: `docs/qa-loop.md`.
    - `accept`: all criteria verified; `verify-pass TASK --evidence T --commit SHA --criteria AC-n` for each task.
 4. `audit` before trusting state; a failed audit (exit 1) means the logs were edited.
 
-## Repeated failures: promote notes
-When `next` reports a repeated signature (the same failure again, `escalate_model`, `hand_to_reviewer` or
-`mark_blocked`), run `sf qa promote-notes --slice DIR` (DIR is the slice folder, `docs/slices/<id>`; add
-`--protect P` for each protected path, or the profile's eval and held-out paths apply). It reads the local
-attempt log `.sf/slices/<id>/` and writes `DIR/qa-notes.md`, one block per repeated signature, after the leak
-check; nothing is written if the text matches protected material. Commit `docs/slices/<id>/qa-notes.md`; it
-is the only QA note file the Write tool lets you create, together with `docs/slices/<id>/qa-feedback/*.md`
-and the files under `.sf/slices/` (`.md .json .jsonl .txt .tsv` only).
-
 ## Leak rule
 Feedback carries criterion IDs (AC-n), observed versus expected behaviour, a product-level reproduction command,
 the attempt number and what changed. Never test source, assertion text, protected file paths or fixtures.
