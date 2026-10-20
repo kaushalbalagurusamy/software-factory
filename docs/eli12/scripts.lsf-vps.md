@@ -52,7 +52,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Used by:**
 - scripts.lsf-vps.dashboard (scripts/lsf-vps.py:211)
 - scripts.lsf-vps.fingerprint (scripts/lsf-vps.py:142)
-- scripts.lsf-vps.main (scripts/lsf-vps.py:272)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:276)
 - scripts.lsf-vps.pin_runtime (scripts/lsf-vps.py:66)
 - scripts.lsf-vps.prepare (scripts/lsf-vps.py:113)
 - scripts.lsf-vps.snapshot (scripts/lsf-vps.py:185)
@@ -160,7 +160,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** dict: the remote commit identifier and a content check value
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:279)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:283)
 - scripts.lsf-vps.snapshot (scripts/lsf-vps.py:160)
 
 **Depends on:**
@@ -199,7 +199,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:265)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:269)
 
 **Depends on:**
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
@@ -217,7 +217,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:269)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:273)
 
 **Depends on:**
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
@@ -233,7 +233,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.<module> (scripts/lsf-vps.py:283)
+- scripts.lsf-vps.<module> (scripts/lsf-vps.py:287)
 
 **Depends on:**
 - scripts.lsf-vps.dashboard (scripts/lsf-vps.py:210)

@@ -249,7 +249,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     sub=parser.add_subparsers(dest='action',required=True)
     prep=sub.add_parser('prepare');prep.add_argument('name');prep.add_argument('source',type=Path)
-    for action in ('snapshot','pin','fetch','attach','status','tunnel-stop'):
+    for action in ('snapshot','pin','fetch','review','attach','status','tunnel-stop'):
         sub.add_parser(action).add_argument('name')
     s=sub.add_parser('start');s.add_argument('name');s.add_argument('--model',default='sonnet')
     d=sub.add_parser('dashboard');d.add_argument('name');d.add_argument('--port',type=int,default=8890);d.add_argument('--open',action='store_true')
@@ -257,6 +257,10 @@ def main():
     if args.action=='prepare':prepare(p,args.source)
     elif args.action=='snapshot':snapshot(p)
     elif args.action=='pin':pin_runtime(p)
+    elif args.action=='review':
+        if not p['review'].is_dir():raise ValueError('Create a review snapshot first')
+        run(['/Applications/Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide',
+             '--new-window',p['review']],capture_output=True)
     elif args.action=='fetch':
         source=Path(json.loads((p['local']/'source.json').read_text())['source'])
         run(['git','-C',source,'fetch','--update-shallow',HOST+':'+p['remote'],

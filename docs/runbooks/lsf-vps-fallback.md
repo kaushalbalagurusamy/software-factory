@@ -28,6 +28,7 @@ Once Claude has initialized LSF and paused at its first human checkpoint:
 
 ```sh
 lsf-vps snapshot peak6
+lsf-vps review peak6
 lsf-vps dashboard peak6 --open
 ```
 
@@ -52,6 +53,10 @@ the VPS, including tracked deletions and uncommitted files, are included. A
 fingerprint check rejects a copy if remote code changes during transfer.
 Snapshots have Git history for reviewing diffs. Their metadata records the
 remote commit, content check and capture time in `.lsf-vps-review.json`.
+
+`review` opens the matching folder in a separate Antigravity window, preserving
+the current window and enabling native file search and Git diffs for the mirror.
+It is optional if direct file links are enough.
 
 Earlier snapshots are retained. Local notes or edits in an earlier snapshot
 are never overwritten. These are review copies: edits do not automatically
