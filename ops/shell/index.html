@@ -227,7 +227,7 @@ var HIST={
  experiments:function(d){return table([["name","Experiment"],["kind","Kind"],["path","File"]],d.items)+d.items.map(function(i){return "<details><summary>"+esc(i.name)+" ("+esc(i.kind||"experiment")+")</summary><pre><code>"+esc(JSON.stringify(i.kind==="resolved"&&!i.error?{question:i.question,resolved_by:i.resolved_by,sources:i.sources,as_of:i.as_of}:(i.results||i.error),null,1))+"</code></pre></details>"}).join("")},
  adrs:function(d){return table([["id","ID"],["title","Title"],["status","Status"],["date","Date"]],d.items)},
  prd_journeys:function(d){
-   var h=d.warning?'<div class="card bad" role="alert">'+esc(d.warning)+'</div>':"";
+   var h=(d.title?'<p><strong>'+esc(d.title)+'</strong></p>':"")+(d.warning?'<div class="card bad" role="alert">'+esc(d.warning)+'</div>':"");
    return h+d.items.map(function(s){
      if(s.kind==="journey")return '<div class="card"><strong>Journey: '+esc(s.name)+'</strong><ul>'+s.steps.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ul><span class="mute">Slices: '+(s.slices.map(function(x){return esc(x.id)+(x.exists?"":" (unknown slice)")}).join(", ")||"none")+'</span>'+(s.flags.length?'<br><span class="bad">'+s.flags.map(esc).join("; ")+'</span>':"")+'</div>';
      if(s.kind==="prd")return '<div class="card"><strong>'+esc(s.title)+'</strong> <span class="mute">PRD '+fileRef(s.path)+'</span><br>'+esc(s.delivers||"")+'</div>';

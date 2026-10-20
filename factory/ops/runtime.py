@@ -141,7 +141,7 @@ def langfuse(cfg: dict, repo: Path | None = None) -> dict:
                                                     if ids else "no Langfuse host configured in ops/config.json"))
         else:
             extra["message"] = None
-    if not spec.get("llm_features"):
+    if not spec.get("llm_features") and not spec.get("host"):
         return {"applicable": False, "reason": "not applicable: the config declares no LLM features", "label": "unavailable", **extra}
     host = spec.get("host")
     fig = measured({"configured": bool(host), "host": _origin(host)}, "config", "static") if host else \

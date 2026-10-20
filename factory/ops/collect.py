@@ -228,11 +228,12 @@ ONEPAGER = "docs/prd/onepager.md"
 _JOURNEY = re.compile(r"^##[ \t]+Journey:[ \t]*(.*?)[ \t]*$")
 
 
-def _onepager(src: GitSource) -> tuple[list[dict], str | None]:
+def _onepager(src: GitSource) -> tuple[list[dict], str | None, str | None]:
     text = src.text(ONEPAGER)
     if text is None:
-        return [], None
+        return [], None, None
     lines = text.splitlines()
+    tm = re.search(r"^#[ \t]+(.+?)[ \t]*$", text, re.M)
     existing = {p.split("/")[2] for p in src.paths() if p.startswith("docs/slices/") and p.count("/") >= 3}
     journeys: list[dict] = []
     cur = None
@@ -265,11 +266,11 @@ def _onepager(src: GitSource) -> tuple[list[dict], str | None]:
                 j["flags"].append(f"unknown slice {s_['id']}")
         if not 1 <= len(j["steps"]) <= 5:
             j["flags"].append(f"{len(j['steps'])} steps (expected 1 to 5)")
-    return journeys, ("longer than one page" if len(lines) > 80 else None)
+    return journeys, ("longer than one page" if len(lines) > 80 else None), (tm.group(1) if tm else None)
 
 
 def prd_journeys(src: GitSource) -> dict:
-    items, warning = _onepager(src)
+    items, warning, title = _onepager(src)
     props = src.glob("docs/slices/*/proposal.md")
     prds = src.glob("docs/prds/*.md")
     rows = []
@@ -288,6 +289,9 @@ def prd_journeys(src: GitSource) -> dict:
     if not items:
         return unavailable(f"no slices (docs/slices/*/proposal.md), no {ONEPAGER} and no docs/prds/*.md at this commit")
     out = ok(items, journeys=sum(1 for i in items if i.get("kind") == "journey"))
+    if title:
+        out["title"] = title
+        out["summary"]["title"] = title
     if warning:
         out["warning"] = warning
         out["summary"]["warning"] = warning
