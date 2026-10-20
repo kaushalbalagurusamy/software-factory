@@ -55,7 +55,7 @@ _FIND_FORBIDDEN = frozenset({"-delete", "-exec", "-execdir", "-ok", "-okdir",
 
 @functools.lru_cache(maxsize=1)
 def _roles() -> dict[str, RoleSpec]:
-    return load_roles()
+    return load_roles(check_model=False)  # model policy belongs to install, doctor and generation
 
 
 # ---- paths -----------------------------------------------------------------------------------
