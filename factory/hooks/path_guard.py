@@ -14,6 +14,7 @@ import os
 import re
 
 from factory.agents.roles import RoleSpec, load_roles
+from factory.hooks import bash_guard
 from factory.hooks.core import Decision, HookConfig, Payload
 
 # Write tools and the tool_input field naming the file they write (C-38.4).
@@ -22,6 +23,9 @@ WRITE_TARGET_FIELDS = {"Write": "file_path", "Edit": "file_path", "MultiEdit": "
 FREEZE_MARKER = ".factory/frozen"
 # Folders the implement role may never write (C-36 and A-05-5), project-relative.
 CONTROL_DIRS: tuple[str, ...] = (".factory", ".claude")
+# C-41.2: the only paths a `qa_paths` role may write; the hook configuration may override them
+# with a `qa_paths` attribute.
+QA_PATHS: tuple[str, ...] = ("**/qa-notes.md", "**/qa-feedback/**", ".sf/qa/**")
 
 # Read commands a read-only role may start a pipeline segment with (PRD behaviour 5).
 READONLY_PREFIXES: tuple[tuple[str, ...], ...] = (
@@ -120,6 +124,10 @@ def _matches(rel: str, globs: tuple[str, ...]) -> str | None:
     return None
 
 
+def _qa_globs(cfg: HookConfig) -> tuple[str, ...]:
+    return tuple(getattr(cfg, "qa_paths", QA_PATHS))
+
+
 def _fmt(items) -> str:
     items = [i for i in items if i]
     return ", ".join(items) if items else "none"
@@ -135,6 +143,8 @@ def _allowed_folders(role: str, writes: str, cfg: HookConfig) -> tuple[str, ...]
         return (cfg.audit_dir,)
     if writes == "eval_paths":
         return tuple(cfg.eval_globs)
+    if writes == "qa_paths":
+        return _qa_globs(cfg)
     if writes == "app":
         return ("anywhere in the project except " + _fmt(
             (*cfg.eval_globs, *cfg.held_out, *cfg.frozen_tests, *(c + "/**" for c in CONTROL_DIRS))),)
@@ -181,7 +191,24 @@ def _decide_write(role: str, spec: RoleSpec | None, raw_path, payload: Payload, 
             hit = _matches(rel, globs) or (lex_rel is not None and _matches(lex_rel, globs))
             if hit:
                 return _deny(role, subject, allowed, f"the path is in the protected {label} paths ({hit})")
+        hit = _matches(rel, _qa_globs(cfg)) or (lex_rel is not None and _matches(lex_rel, _qa_globs(cfg)))
+        if hit:
+            return _deny(role, subject, allowed, f"the path is in the QA-only paths ({hit}), which role {role} may not write")
         return Decision("allow")
+
+    if spec.writes == "qa_paths":
+        for cdir in CONTROL_DIRS:
+            if _within(target, os.path.join(root, cdir)) or (lex_rel is not None and _within(lex_rel, cdir)):
+                return _deny(role, subject, allowed, f"{cdir}/** is a protected factory control folder")
+        for label, globs in (("eval", cfg.eval_globs), ("held-out", cfg.held_out),
+                             ("frozen-test", cfg.frozen_tests)):
+            hit = _matches(rel, globs) or (lex_rel is not None and _matches(lex_rel, globs))
+            if hit:
+                return _deny(role, subject, allowed, f"the path is in the protected {label} paths ({hit})")
+        # the resolved path must itself match: a symlink named qa-notes.md cannot reach app code
+        if any(_glob_regex(g).match(rel) for g in _qa_globs(cfg)):
+            return Decision("allow")
+        return _deny(role, subject, allowed, "the path is outside the role's allowed folders")
 
     if spec.writes == "eval_paths":
         if os.path.exists(os.path.join(root, FREEZE_MARKER)):
@@ -378,7 +405,16 @@ def _decide_bash(role: str, spec: RoleSpec | None, command, cfg: HookConfig) -> 
     if spec is None:
         return _deny(role, subject, "none", f"unknown agent type {role}, no Bash access")
     if spec.bash == "full":
-        return Decision("allow")  # A-05-1: Bash writes are not inspected for full-mode roles
+        if spec.writes == "qa_paths":  # C-41.3: qa gets the implement-style git restrictions
+            try:
+                findings = bash_guard._analyse(bash_guard.parse(command), cfg) if isinstance(command, str) else None
+            except bash_guard.ParseError as exc:
+                return _deny(role, subject, allowed, f"unparseable command ({exc})")
+            if findings is None:
+                return _deny(role, subject, allowed, "missing or malformed command")
+            if findings:  # every bash_guard finding is a deny for a non-orchestrator role
+                return _deny(role, subject, allowed, f"{findings[0].what} (QA may not change the git state)")
+        return Decision("allow")  # A-05-1: Bash writes are not inspected for other full-mode roles
     if spec.bash == "none":
         return _deny(role, subject, allowed, f"role {role} has no Bash access")
     if not isinstance(command, str) or not command.strip():
