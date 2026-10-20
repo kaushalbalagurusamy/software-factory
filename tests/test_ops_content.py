@@ -179,3 +179,13 @@ def test_init_langfuse_host(repo, capsys):
 def test_viewer_script_parses():
     html = (Path(__file__).resolve().parents[1] / "ops/shell/index.html").read_text()
     assert html.count("<script>") == 1 and "hitl" in html and "human stops unknown" in html
+
+
+def test_onepager_title_and_langfuse_host_only(repo, tmp_path):
+    put(repo, "docs/prd/onepager.md", "# Core PRD\n\n## Journey: J\nSlices: x\n- s\n")
+    assert C.prd_journeys(src(repo))["title"] == "Core PRD"
+    cfg = tmp_path / "config.json"
+    cfg.write_text(json.dumps({"langfuse": {"host": "https://lf.example.com"}}))
+    lf = R.collect_runtime(cfg)["langfuse"]
+    assert lf["applicable"] and "lf.example.com" in json.dumps(lf["configured"])
+    assert "not checked" in lf["traces"]["reason"]
