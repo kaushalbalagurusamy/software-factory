@@ -3,17 +3,17 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "f500f1a",
-  "generated": "2026-10-19"
+  "commit": "16f6cf2",
+  "generated": "2026-10-20"
  },
  "root": "factory",
  "nodes": {
   "factory": {
    "title": "Claude Software Factory",
-   "summary": "A set of skills, rules, deterministic gates and designed agent roles that turn an AI coding assistant from a 'vibe-coder' into a disciplined engineer: requirements are verified before use, tests come before code, the implementer is blind to the tests, and verification is deterministic and independent.",
+   "summary": "A set of skills, rules, deterministic gates and eight Sonnet-pinned agent roles that turn an AI coding assistant from a 'vibe-coder' into a disciplined engineer: requirements are verified before use, tests come before code, the implementer is blind to the tests, QA supervises and verification is deterministic and independent.",
    "kind": "system",
    "detail": [
-    "The factory is three things layered together. The method (the /sf build loop, its skills and the new sf toolchain) runs today. A deterministic engine (the sf CLI) enforces test integrity, one-way-door detection and, through factory/verify, honest solver verdicts on a small pure subset. An agent layer (seven roles, eight hooks, generator, settings emitter, ledger, walking skeleton) is implemented and acceptance-tested but not yet exercised in a live Claude Code session.",
+    "The factory is layered. The method (the /sf build loop, its skills and the sf toolchain) runs today. A deterministic engine (the sf CLI) enforces test integrity, one-way-door detection and, through factory/verify, honest solver verdicts on a small pure subset. An agent layer (eight roles, eight hook ids, generator, settings emitter, ledger, walking skeleton) is implemented and acceptance-tested. A lite factory (lsf) runs the same flow in one hour on a laptop with a phase clock, human checkpoints and an offline dashboard.",
     "Click any stacked box to open the diagram inside it. The Coverage tab lists what is built, partial, only designed, outside the repo, or a gap, with reasons."
    ],
    "design": [
@@ -31,7 +31,7 @@
    "files": [
     {
      "path": "README.md",
-     "lines": "12-41",
+     "lines": "37-41",
      "contains": "ONE-WAY DOORS",
      "note": "The manifesto and the two-door model"
     },
@@ -43,19 +43,31 @@
     },
     {
      "path": "docs/factory/METHODOLOGY.md",
-     "lines": "5-12",
+     "lines": "6-12",
      "contains": "Requirements first",
      "note": "Rules every agent must follow"
+    },
+    {
+     "path": "docs/sf-flow.md",
+     "contains": "The /sf flow as implemented",
+     "note": "The flow, its evidence base and what is unverified",
+     "lines": "1-108"
+    },
+    {
+     "path": "docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md",
+     "contains": "## 2. Decision",
+     "note": "The latest accepted decision",
+     "lines": "12-13"
     }
    ],
    "coverage": {
     "status": "partial",
-    "note": "The method, the sf CLI and tool groups, the agent layer (roles, generator, settings emitter, seven hooks, ledger, stage graph, walking skeleton), slices, intake, structure, contracts/solver, QA loop and dashboard are implemented and tested: 4,017 unit tests and 1,497 eval cases pass, golden gate 141 of 141. Live behaviour inside a real Claude Code session and cross-vendor review are not verified.",
+    "note": "The method, the sf CLI and tool groups, the eight-role agent layer (generator, settings emitter, eight hook ids, ledger, stage graph, walking skeleton), slices, intake, structure, contracts/solver, the QA loop, the ops dashboard and the lite factory (lsf) are implemented and tested. Test and eval counts are recorded in docs/sf-flow.md ('Evidence base') and docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md section 3; this explorer cites them instead of restating them. Real headless sessions verified the hooks, the qa role and the self-updating dashboard (docs/native-verification/2026-10-19/REPORT.md, docs/native-verification/2026-10-20/REPORT.md); the intake gate, a full QA loop with real agents, reviewer amendments and interactive use have not run in a real session.",
     "gaps": [
-     "Hooks are mechanical only in projects where sf has generated the project settings; exercised through the command line and simulated event streams, not a live session (clarification C-34 is still open)",
+     "Hooks are mechanical only in projects where sf has generated the project settings; verified through headless sessions and simulated event streams, not an interactive session (clarification C-34 is still open)",
      "The Bash and blindness guards are command-text guards and cannot be complete; the OS sandbox is the backstop (see the residual-risk sections of docs/hooks/bash_guard.md and blindness_guard.md)",
      "One acceptance case is open by design pending a decision: TB06-D-035 (docs/adr/ADR-0004)",
-     "The repository has a build-loop profile now (docs/development-workflow.md) but the factory is not yet run through its own loop for every change"
+     "Not yet run in a real session: intake gate, the full QA loop, reviewer amendments, the lsf skill driven by Claude Code (docs/native-verification/2026-10-20/REPORT.md 'Not covered')"
     ]
    },
    "diagram": [
@@ -63,13 +75,14 @@
     "  intake[\"Requirements intake<br/>sweep the brief\"] -->|\"verified requirements<br/>become a ledger\"| build-loop[\"Build loop<br/>/sf, 12 stages\"]",
     "  skills-library[\"Skills library<br/>procedures per stage\"] -->|\"each stage invokes<br/>a skill\"| build-loop",
     "  governance-docs[\"Decisions and rules<br/>ADRs, contracts, plans\"] -->|\"binding rules\"| build-loop",
-    "  governance-docs -->|\"contracts the<br/>roles implement\"| agent-layer[\"Agent layer<br/>7 roles + hooks\"]",
+    "  governance-docs -->|\"contracts the<br/>roles implement\"| agent-layer[\"Agent layer<br/>8 roles + hooks\"]",
     "  build-loop -->|\"split work across<br/>roles (designed)\"| agent-layer",
     "  build-loop -->|\"run the deterministic<br/>gates\"| verification-engine[\"Verification engine<br/>factory/ and sf CLI\"]",
     "  agent-layer -->|\"graded blind by\"| evals-gate[\"Evals and golden gate\"]",
     "  verification-engine -->|\"routing decisions,<br/>shadow only\"| routing[\"Jev routing\"]",
     "  build-loop -->|\"state, hygiene,<br/>owner briefings\"| ops-runtime[\"Session ops<br/>and dashboards\"]",
-    "  build-loop -->|\"stage commands, gates, records\"| sf-toolchain[\"sf toolchain<br/>slices, intake, verify, QA, dashboard\"]"
+    "  build-loop -->|\"stage commands, gates, records\"| sf-toolchain[\"sf toolchain<br/>slices, intake, verify, QA, dashboard\"]",
+    "  build-loop -->|\"same flow, one hour, laptop\"| lsf[\"Lite factory (lsf)<br/>phase clock, checkpoints, dashboard\"]"
    ],
    "children": [
     "intake",
@@ -81,7 +94,8 @@
     "evals-gate",
     "routing",
     "ops-runtime",
-    "sf-toolchain"
+    "sf-toolchain",
+    "lsf"
    ]
   },
   "intake": {
@@ -119,9 +133,10 @@
    ],
    "coverage": {
     "status": "partial",
-    "note": "The skills exist outside this repo and the process is written into /sf; this repository only holds the design proposal.",
+    "note": "The skills exist outside this repo and the deterministic half (ledger, sweep record, gate) is implemented as sf intake; the sweep itself is a model procedure and the gate has not run in a real session.",
     "gaps": [
-     "The only in-repo document about the sweep still says 'Nothing is built yet', while an engine, 26 lens packs and tests exist under ~/.claude/skills/minesweeper"
+     "The only in-repo document about the sweep (docs/plans/2026-10-14-minesweeper-skill-proposal.md) still says 'Nothing is built yet'",
+     "Intake gate not yet run in a real session"
     ]
    },
    "diagram": [
@@ -259,7 +274,7 @@
    "files": [
     {
      "path": "docs/plans/2026-10-14-minesweeper-skill-proposal.md",
-     "lines": "68-80",
+     "lines": "79-80",
      "contains": "lens.md",
      "note": "Architecture: lens packs"
     },
@@ -374,10 +389,11 @@
     }
    ],
    "coverage": {
-    "status": "gap",
-    "note": "Blindness is currently only by instruction: this repo has no profile and no hooks, so nothing mechanical stops an implementer reading evals/.",
+    "status": "partial",
+    "note": "Blindness is mechanical where sf install generated the settings: blindness_guard plus scripts/implementer-worktree.sh (sparse checkout without evals/). Verified in headless real sessions; the interactive case and ADR-0004's open symlink case are not.",
     "gaps": [
-     "MECE audit finding P0-5: this build's implementers are blind to evals/ only by instruction"
+     "TB06-D-035 open (ADR-0004); command-text guards have documented residual risk",
+     "Interactive (non -p) sessions not exercised"
     ]
    }
   },
@@ -400,8 +416,11 @@
     }
    ],
    "coverage": {
-    "status": "external",
-    "note": "Defined in the installed /sf skill; mechanical enforcement waits on the agent layer."
+    "status": "partial",
+    "note": "Defined in the installed /sf skill and now carried by the qa role and sf qa; the qa role's path limits were verified in a real headless session, a full QA loop with a real implementer and QA agent has not run.",
+    "gaps": [
+     "Full QA loop with real agents not yet run (docs/native-verification/2026-10-20/REPORT.md 'Not covered')"
+    ]
    }
   },
   "stage-8-review": {
@@ -424,8 +443,11 @@
     }
    ],
    "coverage": {
-    "status": "external",
-    "note": "Defined in the installed /sf skill; mechanical enforcement waits on the agent layer."
+    "status": "partial",
+    "note": "Defined in the installed /sf skill; the review role now carries implementation-review, code-review, mermaid-nesting-dolls, minesweeper and doc-sync, and sf slice amend --role reviewer exists. Reviewer amendments have not run in a real session.",
+    "gaps": [
+     "Reviewer amendments not yet exercised by a real reviewer agent"
+    ]
    }
   },
   "stage-9-drift": {
@@ -541,7 +563,8 @@
     "  prove -->|\"earned pass\"| close",
     "  close -->|\"ledger updated\"| next-slice([\"Next slice is chosen<br/>from the ledger, not a queue\"])",
     "  build-profile[\"Project profile<br/>.claude/build-loop.md\"] -->|\"paths, commands, reviewer\"| truth",
-    "  build-hygiene[\"Hygiene<br/>disk and memory\"] -.->|\"beside every stage\"| prove"
+    "  build-hygiene[\"Hygiene<br/>disk and memory\"] -.->|\"beside every stage\"| prove",
+    "  build-hygiene -.->|\"drawn against lsf\"| flow-compare[\"Flow: sf vs lsf<br/>loop-backs\"]"
    ],
    "children": [
     "stage-1-research",
@@ -557,7 +580,8 @@
     "stage-11-commit",
     "stage-12-inbound",
     "build-profile",
-    "build-hygiene"
+    "build-hygiene",
+    "flow-compare"
    ]
   },
   "build-profile": {
@@ -572,17 +596,17 @@
      "external": true
     },
     {
-     "path": ".claude/state.md",
-     "lines": "22-22",
-     "contains": "no build-loop profile",
-     "note": "Local, untracked state file recording the 2026-10-09 decision"
+     "path": "docs/development-workflow.md",
+     "contains": "Build-loop profile: software-factory",
+     "note": "The profile for this repository",
+     "lines": "1-44"
     }
    ],
    "coverage": {
-    "status": "gap",
-    "note": "This repository deliberately has none: the owner decision on 2026-10-09 was to stand by until asked for factory changes, so the factory is not built with its own loop.",
+    "status": "built",
+    "note": "This repository now has a profile at docs/development-workflow.md (source requirements, ADRs, tests, the blind eval path, test commands). The skill's own default location, .claude/build-loop.md, is untracked and is not cited here.",
     "gaps": [
-     "No .claude/build-loop.md exists in this checkout"
+     "The installed sf skill is the only copy of the loop text; this repo's history does not version it"
     ]
    }
   },
@@ -593,7 +617,7 @@
    "files": [
     {
      "path": "~/.claude/skills/sf/SKILL.md",
-     "lines": "317-358",
+     "lines": "334-375",
      "contains": "Hygiene: disk and memory",
      "external": true
     },
@@ -625,7 +649,7 @@
    "files": [
     {
      "path": "README.md",
-     "lines": "48-60",
+     "lines": "50-60",
      "contains": "versioned in this repository",
      "note": "Skills catalog and where the masters live"
     },
@@ -638,10 +662,10 @@
    ],
    "coverage": {
     "status": "partial",
-    "note": "13 skills are versioned in skills/ with scripts/skills_sync.py; live copies in ~/.claude/skills are identical or being adopted; minesweeper and a few others are still live-only.",
+    "note": "15 skills are versioned under skills/ (axiomatic-spec, contract-verify, doc-sync, eli12-docs, eval-designer, implementation-review, intake-gate, lsf, mermaid-nesting-dolls, ops-dashboard-design, orchestration, prd-writer, qa-supervisor, sf, structure-scan) with scripts/skills_sync.py; the external ones are pinned in docs/external-skills.json and checked by sf install doctor.",
     "gaps": [
-     "Install into ~/.claude/skills is opt-in (--adopt) and not yet run for the changed skills",
-     "minesweeper (14 MB) is not versioned here"
+     "minesweeper (14 MB) and a few others are still live-only in ~/.claude/skills",
+     "Install into ~/.claude/skills is opt-in and is not done by this explorer"
     ]
    },
    "diagram": [
@@ -652,7 +676,8 @@
     "  skills-session[\"Session control<br/>sf, away-mode, good-night\"] -->|\"drives\"| skills-spec",
     "  promotions-ledger[\"Promotion ledger<br/>PROMOTIONS.md\"] -.->|\"tracks (partially)\"| skills-decide",
     "  skills-archive[\"Retired originals<br/>skills/_archive\"] -.->|\"history only\"| skills-decide",
-    "  skills-ci[\"CI frontmatter check\"] -->|\"validates skills/**/SKILL.md\"| skills-archive"
+    "  skills-ci[\"CI frontmatter check\"] -->|\"validates skills/**/SKILL.md\"| skills-archive",
+    "  skills-ship -->|\"documented by\"| skills-docs[\"Docs tools<br/>eli12-docs, explorer\"]"
    ],
    "children": [
     "skills-spec",
@@ -662,7 +687,8 @@
     "skills-session",
     "promotions-ledger",
     "skills-archive",
-    "skills-ci"
+    "skills-ci",
+    "skills-docs"
    ]
   },
   "skills-spec": {
@@ -695,7 +721,7 @@
    "files": [
     {
      "path": "PROMOTIONS.md",
-     "lines": "7-31",
+     "lines": "14-31",
      "contains": "one-way-door"
     },
     {
@@ -723,7 +749,8 @@
     {
      "path": "templates/deterministic-eval-template.py",
      "contains": "unittest",
-     "note": "The reusable eval template CI runs"
+     "note": "The reusable eval template CI runs",
+     "lines": "7"
     },
     {
      "path": "~/.claude/skills/eval-designer/SKILL.md",
@@ -809,12 +836,14 @@
    "files": [
     {
      "path": "skills/_archive/sf-door-guard/SKILL.md",
-     "contains": "name:"
+     "contains": "name:",
+     "lines": "2"
     },
     {
      "path": "docs/plans/2026-09-24-skills-consolidation-proposal.md",
      "contains": "sf-door-guard",
-     "note": "Why they were merged"
+     "note": "Why they were merged",
+     "lines": "77"
     }
    ],
    "coverage": {
@@ -829,7 +858,7 @@
    "files": [
     {
      "path": ".github/workflows/ci.yml",
-     "lines": "11-51",
+     "lines": "27-51",
      "contains": "Validate Skill Frontmatters"
     }
    ],
@@ -844,7 +873,7 @@
   },
   "governance-docs": {
    "title": "Decisions and rules",
-   "summary": "The written authority the rest of the factory obeys: three accepted ADRs, the methodology every agent must follow, the requirements register, binding contracts and the plans.",
+   "summary": "The written authority the rest of the factory obeys: five ADRs, the methodology every agent must follow, the requirements register, binding contracts and clarifications, the plans and the review reports.",
    "kind": "docs",
    "design": [
     {
@@ -855,7 +884,7 @@
    "files": [
     {
      "path": "docs/factory/METHODOLOGY.md",
-     "lines": "1-4",
+     "lines": "3-4",
      "contains": "written here, not only in skills"
     },
     {
@@ -866,14 +895,15 @@
    ],
    "coverage": {
     "status": "partial",
-    "note": "Decisions are well documented and extended (ADR-0004 proposed; binding clarifications C-36 to C-39); the roadmap is stale.",
+    "note": "Five ADRs (0001 to 0005), the methodology, the requirements register, contracts with binding clarifications, plans and reviews. Some summary documents lag the code.",
     "gaps": [
-     "ROADMAP.md still has no mention of the agent layer or the sf toolchain"
+     "ROADMAP.md still has no mention of the agent layer or the sf toolchain",
+     "ADR-0003 still reads 'Seven agent definitions' and 'not built yet'; ADR-0005 supersedes it in count and records the edits"
     ]
    },
    "diagram": [
     "flowchart LR",
-    "  adrs[\"ADRs 0001 to 0003<br/>docs/adr\"] -->|\"decisions\"| methodology[\"Methodology<br/>rules for every agent\"]",
+    "  adrs[\"ADRs 0001 to 0005<br/>docs/adr\"] -->|\"decisions\"| methodology[\"Methodology<br/>rules for every agent\"]",
     "  methodology -->|\"IDs and sources\"| requirements[\"Requirements register<br/>R-01 to R-24\"]",
     "  requirements -->|\"published as\"| contracts[\"Contracts<br/>docs/contracts\"]",
     "  plans[\"Plans and research<br/>Austin plan, capability map\"] -->|\"inform\"| adrs",
@@ -890,7 +920,7 @@
   },
   "adrs": {
    "title": "Architecture decision records",
-   "summary": "ADR-0001 chooses the Unity-IR dual-plane substrate, ADR-0002 the zero-trust verification substrate, ADR-0003 seven agent roles above skills.",
+   "summary": "ADR-0001 chooses the Unity-IR dual-plane substrate, ADR-0002 the zero-trust verification substrate, ADR-0003 agent roles above skills, ADR-0004 (proposed) the blindness guard and symlinks, ADR-0005 Sonnet for every role plus a qa role and the test and eval edits that followed.",
    "kind": "docs",
    "design": [
     {
@@ -907,30 +937,48 @@
      "choice": "Roles above skills (ADR-0003)",
      "why": "Split by context boundary, not pipeline phase; one writer per tree; hooks enforce, prompts advise.",
      "alternatives": "A fixed seven-stage relay"
+    },
+    {
+     "choice": "Sonnet for every role, plus a qa role (ADR-0005)",
+     "why": "The owner's flow asks for one model across roles and QA agents that supervise and re-initiate; the loader, installer and doctor reject any other model unless explicitly allowed.",
+     "alternatives": "Per-role model tiers (Opus to author, Haiku to run) proposed in the 2026-09-24 design"
     }
    ],
    "files": [
     {
      "path": "docs/adr/ADR-0001-unity-invariant-substrate.md",
-     "lines": "26-28",
+     "lines": "27-28",
      "contains": "Option 3"
     },
     {
      "path": "docs/adr/ADR-0002-epistemic-zero-trust-verification.md",
-     "lines": "26-34",
+     "lines": "30-34",
      "contains": "Cryptographic Baseline Locking"
     },
     {
      "path": "docs/adr/ADR-0003-agent-roles-above-skills.md",
-     "lines": "26-40",
+     "lines": "27-40",
      "contains": "Option 3"
+    },
+    {
+     "path": "docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md",
+     "contains": "## 2. Decision",
+     "note": "Accepted 2026-10-20; section 4 lists every test and eval edit",
+     "lines": "12-13"
+    },
+    {
+     "path": "docs/adr/ADR-0004-blindness-guard-glob-through-symlinks.md",
+     "contains": "Status",
+     "note": "Proposed",
+     "lines": "3"
     }
    ],
    "coverage": {
     "status": "partial",
-    "note": "ADR-0001 to 0003 accepted; ADR-0004 (blindness guard and symlinks) is proposed and needs a decision.",
+    "note": "ADR-0001 to 0003 and ADR-0005 are accepted; ADR-0004 (blindness guard and symlinks) is proposed and needs a decision. ADR-0005 supersedes ADR-0003's role count (seven to eight) and model proposals.",
     "gaps": [
-     "deal and CrossHair from ADR-0002 are still unused by production code; the z3 solver gate in factory/verify covers a small pure subset"
+     "deal and CrossHair from ADR-0002 are still unused by production code; the z3 solver gate in factory/verify covers a small pure subset",
+     "ADR-0003's own text still says roles and hooks are not built"
     ]
    }
   },
@@ -941,12 +989,12 @@
    "files": [
     {
      "path": "docs/factory/METHODOLOGY.md",
-     "lines": "5-12",
+     "lines": "8-12",
      "contains": "Evals before features"
     },
     {
      "path": "docs/factory/METHODOLOGY.md",
-     "lines": "26-35",
+     "lines": "28-35",
      "contains": "Pause and ask a person"
     }
    ],
@@ -962,7 +1010,8 @@
    "files": [
     {
      "path": "docs/factory/requirements.md",
-     "contains": "R-24"
+     "contains": "R-24",
+     "lines": "49"
     }
    ],
    "coverage": {
@@ -993,12 +1042,12 @@
   },
   "plans": {
    "title": "Plans and research",
-   "summary": "The Austin-ready plan, the seven-agents design, the capability map, the skills consolidation, the minesweeper proposal and a token-saving research note.",
+   "summary": "The Austin-ready plan, the original seven-agents design (now eight roles, see ADR-0005), the capability map, the skills consolidation, the minesweeper proposal and a token-saving research note.",
    "kind": "docs",
    "files": [
     {
      "path": "docs/plans/2026-09-23-austin-ready-software-factory-plan.md",
-     "lines": "36-67",
+     "lines": "41-67",
      "contains": "flowchart TD",
      "note": "Ticket-in, PR-out graph"
     },
@@ -1044,10 +1093,10 @@
   },
   "agent-layer": {
    "title": "Agent layer",
-   "summary": "Seven agent definitions (orchestrator, research, design, audit, implement, test, review) with their own models, tool allowlists and hooks, generated from a project profile so nothing names a specific project. Specified through 14 tracer-bullet PRDs; none implemented.",
+   "summary": "Eight agent definitions (orchestrator, research, design, audit, implement, qa, test, review), all pinned to Sonnet, with tool allowlists and hooks, generated from a project profile so nothing names a specific project. Implemented in factory/agents and factory/hooks and acceptance-tested.",
    "kind": "subsystem",
    "detail": [
-    "Seven roles, eight hook ids, a profile loader, a stage graph, an agent file generator, a settings emitter, a tamper-evident ticket ledger and an end-to-end simulation with a shadow routing log exist as code, with 1,000+ acceptance cases behind them. Implementers were mechanically blind to the evals (sparse worktrees without evals/), and an independent runner graded each slice; QA feedback and the clarifications C-36 to C-39 record what the iterations found."
+    "Eight roles, eight hook ids, a profile loader, a stage graph (default order orchestrate, research, design, audit, implement, qa, test, review; loops qa to implement and review to implement), an agent file generator, a settings emitter, a tamper-evident ticket ledger and an end-to-end simulation with a shadow routing log exist as code. Implementers were mechanically blind to the evals (sparse worktrees without evals/), and an independent runner graded each slice; clarifications C-36 to C-41 record what the iterations found. docs/adr/ADR-0005 lists the test and eval edits for the eight-role shape."
    ],
    "design": [
     {
@@ -1064,31 +1113,44 @@
    "files": [
     {
      "path": "docs/adr/ADR-0003-agent-roles-above-skills.md",
-     "lines": "26-40",
+     "lines": "27-40",
      "contains": "Option 3"
     },
     {
      "path": "docs/prds/INDEX.md",
-     "lines": "1-30",
+     "lines": "7-30",
      "contains": "TB-01"
     },
     {
      "path": "docs/plans/2026-09-24-agent-layer-status.md",
-     "lines": "5-20",
+     "lines": "12-20",
      "contains": "Not done"
+    },
+    {
+     "path": "factory/agents/default_graph.yaml",
+     "contains": "loops:",
+     "note": "Stage order and the two loop-backs",
+     "lines": "20"
+    },
+    {
+     "path": "docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md",
+     "contains": "## 2. Decision",
+     "note": "Eight roles, Sonnet only",
+     "lines": "12-13"
     }
    ],
    "coverage": {
     "status": "partial",
-    "note": "All 14 tracer bullets are implemented by blind implementers and pass their acceptance cases after QA iterations; one diagnostic case is open pending ADR-0004.",
+    "note": "All 14 tracer bullets are implemented and pass their acceptance cases; ADR-0005 added the qa role, the Sonnet-only rule and the doctor role-skill and external-pin checks. One diagnostic case is open pending ADR-0004. Counts: docs/sf-flow.md.",
     "gaps": [
-     "TB06-D-035 open (ADR-0004); everything else green, golden 141 of 141",
-     "Not exercised in a real Claude Code session (C-34); command-text guards have documented residual risk"
+     "TB06-D-035 open (ADR-0004)",
+     "Not exercised in an interactive session (C-34); command-text guards have documented residual risk",
+     "Each sub-agent stop is recorded twice (subagent_stop and ledger_audit both emit), noted in docs/native-verification/2026-10-20/REPORT.md"
     ]
    },
    "diagram": [
     "flowchart LR",
-    "  profile-loader[\"Project profile<br/>TB-01\"] -->|\"roles, paths, patterns\"| role-specs[\"Seven role specs<br/>TB-02\"]",
+    "  profile-loader[\"Project profile<br/>TB-01\"] -->|\"roles, paths, patterns\"| role-specs[\"Eight role specs<br/>TB-02\"]",
     "  profile-loader -->|\"stages and gates as data\"| stage-graph[\"Stage graph<br/>TB-12\"]",
     "  role-specs -->|\"rendered to files\"| agent-generator[\"Agent file generator<br/>TB-03\"]",
     "  profile-loader -->|\"paths and patterns\"| hooks[\"Hooks<br/>TB-04 to TB-10\"]",
@@ -1118,11 +1180,13 @@
     {
      "path": "factory/agents/profile.py",
      "contains": "def load_profile",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "431-438"
     },
     {
      "path": "docs/contracts/profile.md",
-     "contains": "profile"
+     "contains": "profile",
+     "lines": "1-37"
     }
    ],
    "coverage": {
@@ -1138,11 +1202,13 @@
     {
      "path": "factory/agents/graph.py",
      "contains": "class GraphError",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "21-22"
     },
     {
      "path": "docs/contracts/graph-and-ledger.md",
-     "contains": "Ledger"
+     "contains": "Ledger",
+     "lines": "10-13"
     }
    ],
    "coverage": {
@@ -1158,11 +1224,13 @@
     {
      "path": "factory/agents/generate.py",
      "contains": "HOOK_REGISTRATION",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "24-33"
     },
     {
      "path": "docs/contracts/roles-and-generation.md",
-     "contains": "RoleSpec"
+     "contains": "RoleSpec",
+     "lines": "3"
     }
    ],
    "coverage": {
@@ -1178,11 +1246,13 @@
     {
      "path": "factory/ledger.py",
      "contains": "def verify",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "216-256"
     },
     {
      "path": "docs/contracts/graph-and-ledger.md",
-     "contains": "Ledger"
+     "contains": "Ledger",
+     "lines": "10-13"
     }
    ],
    "coverage": {
@@ -1198,11 +1268,13 @@
     {
      "path": "factory/agents/settings.py",
      "contains": "def emit_settings",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "69-99"
     },
     {
      "path": "docs/prds/TB-13-settings-emitter.md",
-     "contains": "TB-13"
+     "contains": "TB-13",
+     "lines": "1-32"
     }
    ],
    "coverage": {
@@ -1218,11 +1290,13 @@
     {
      "path": "factory/agents/simulate.py",
      "contains": "def run_events",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "153-162"
     },
     {
      "path": "docs/prds/TB-14-walking-skeleton.md",
-     "contains": "TB-14"
+     "contains": "TB-14",
+     "lines": "1-32"
     }
    ],
    "coverage": {
@@ -1246,12 +1320,12 @@
    "files": [
     {
      "path": "docs/prds/INDEX.md",
-     "lines": "31-35",
+     "lines": "35",
      "contains": "Wave 5"
     },
     {
      "path": "docs/factory/METHODOLOGY.md",
-     "lines": "20-24",
+     "lines": "21-24",
      "contains": "dependency graph"
     }
    ],
@@ -1261,25 +1335,34 @@
    }
   },
   "role-specs": {
-   "title": "Seven role specs",
-   "summary": "Orchestrator, Research, Design, Audit, Implement, Test and Review, each with a model, tools, skills, MCP servers and hooks.",
+   "title": "Eight role specs",
+   "summary": "Orchestrator, Research, Design, Audit, Implement, QA, Test and Review, each with a model (always sonnet), tools, skills, MCP servers and hooks, loaded and validated from factory/agents/roles/*.yaml.",
    "kind": "TB-02",
    "design": [
     {
-     "choice": "Narrow tools, smallest adequate model",
-     "why": "Every subagent inherits the plugin and skill listing, so each role lists at most 20 tools and only read tools of an MCP server unless it needs more."
+     "choice": "Narrow tools, one model for every role",
+     "why": "Every subagent inherits the plugin and skill listing, so each role lists at most 20 tools. ADR-0005 fixes Sonnet for all roles; load_roles, the installer and sf install doctor reject any other model unless it is explicitly allowed.",
+     "alternatives": "Per-role tiers (Opus to author, Haiku to run) from the 2026-09-24 design"
     }
    ],
    "files": [
     {
      "path": "factory/agents/roles.py",
      "contains": "def load_roles",
-     "note": "Implementation"
+     "note": "Loader; rejects a non-sonnet model unless allowed",
+     "lines": "158-180"
     },
     {
-     "path": "docs/plans/2026-09-24-seven-core-agents.md",
-     "lines": "24-34",
-     "contains": "**Implement**"
+     "path": "factory/agents/roles/qa.yaml",
+     "contains": "writes: qa_paths",
+     "note": "The role added by ADR-0005",
+     "lines": "9"
+    },
+    {
+     "path": "docs/hooks/roles.md",
+     "contains": "## Writes class `qa_paths`",
+     "note": "Role data, qa_paths and the Sonnet rule",
+     "lines": "13-14"
     },
     {
      "path": "docs/contracts/roles-and-generation.md",
@@ -1289,7 +1372,7 @@
    ],
    "coverage": {
     "status": "built",
-    "note": "Seven role files load and validate; generated agents follow them."
+    "note": "Eight role files load and validate; generated agents follow them. Real headless sessions resolved all eight generated agents (docs/native-verification/2026-10-20/REPORT.md)."
    },
    "diagram": [
     "flowchart LR",
@@ -1300,7 +1383,10 @@
     "  role-design -->|\"spec\"| role-test[\"Test<br/>evals first, then frozen\"]",
     "  role-test -.->|\"hidden from\"| role-implement",
     "  role-implement -->|\"diff and traces\"| role-review[\"Review<br/>different vendor\"]",
-    "  role-test -->|\"verdicts\"| role-review"
+    "  role-test -->|\"verdicts\"| role-review",
+    "  role-implement -->|\"supervised by\"| role-qa[\"QA<br/>runs suites, feedback, no code\"]",
+    "  role-qa -->|\"runs the protected suites via\"| role-test",
+    "  role-qa -.->|\"loops back to\"| role-implement"
    ],
    "children": [
     "role-orchestrator",
@@ -1309,7 +1395,8 @@
     "role-audit",
     "role-implement",
     "role-test",
-    "role-review"
+    "role-review",
+    "role-qa"
    ]
   },
   "role-orchestrator": {
@@ -1317,20 +1404,26 @@
    "summary": "Holds state, sequences stages, dispatches, calls humans at gates and runs deploy. Writes no application code; its routing is code, not model judgement.",
    "kind": "role",
    "detail": [
-    "Proposed model: Opus (main session).",
+    "Model: sonnet (ADR-0005; every role file declares it). Writes class: none.",
     "One-way-door hook asks a human before deploys and destructive actions."
    ],
    "files": [
     {
+     "path": "factory/agents/roles/orchestrator.yaml",
+     "contains": "model: sonnet",
+     "note": "Role data",
+     "lines": "3"
+    },
+    {
      "path": "docs/plans/2026-09-24-seven-core-agents.md",
-     "lines": "24-34",
+     "lines": "28-34",
      "contains": "**Orchestrator**",
      "note": "Role table row"
     }
    ],
    "coverage": {
-    "status": "partial",
-    "note": "Role data is loaded and validated and a generated agent file can be emitted from it; model choices remain proposals to measure."
+    "status": "built",
+    "note": "Implemented as role data and loaded by factory/agents/roles.py; a generated agent file is emitted from it and resolved in real headless sessions."
    }
   },
   "role-research": {
@@ -1338,41 +1431,53 @@
    "summary": "Verifies facts and surveys topics; orients in a repo. Read-only fan-out; each returns a 1,000 to 2,000 token summary.",
    "kind": "role",
    "detail": [
-    "Proposed model: Sonnet lead, Haiku workers.",
+    "Model: sonnet (ADR-0005; every role file declares it). Writes class: research_dir.",
     "Writes only research/*.md and its ledger section."
    ],
    "files": [
     {
+     "path": "factory/agents/roles/research.yaml",
+     "contains": "model: sonnet",
+     "note": "Role data",
+     "lines": "3"
+    },
+    {
      "path": "docs/plans/2026-09-24-seven-core-agents.md",
-     "lines": "24-34",
+     "lines": "29-34",
      "contains": "**Research**",
      "note": "Role table row"
     }
    ],
    "coverage": {
-    "status": "partial",
-    "note": "Role data is loaded and validated and a generated agent file can be emitted from it; model choices remain proposals to measure."
+    "status": "built",
+    "note": "Implemented as role data and loaded by factory/agents/roles.py; a generated agent file is emitted from it and resolved in real headless sessions."
    }
   },
   "role-design": {
    "title": "Design",
-   "summary": "Brief to PRD, axioms and contracts, one-way-door check, ADR. Runs behind gates G0, G1 and G2.",
+   "summary": "Brief to PRD (prd-writer), axioms and contracts, one-way-door check, ADR. Runs behind gates G0, G1 and G2.",
    "kind": "role",
    "detail": [
-    "Proposed model: Opus.",
+    "Model: sonnet (ADR-0005; every role file declares it). Writes class: design_dirs.",
     "Writes only docs/prd, docs/spec, docs/adr."
    ],
    "files": [
     {
+     "path": "factory/agents/roles/design.yaml",
+     "contains": "model: sonnet",
+     "note": "Role data",
+     "lines": "3"
+    },
+    {
      "path": "docs/plans/2026-09-24-seven-core-agents.md",
-     "lines": "24-34",
+     "lines": "30-34",
      "contains": "**Design**",
      "note": "Role table row"
     }
    ],
    "coverage": {
-    "status": "partial",
-    "note": "Role data is loaded and validated and a generated agent file can be emitted from it; model choices remain proposals to measure."
+    "status": "built",
+    "note": "Implemented as role data and loaded by factory/agents/roles.py; a generated agent file is emitted from it and resolved in real headless sessions."
    }
   },
   "role-audit": {
@@ -1380,20 +1485,26 @@
    "summary": "Complete read pass over legacy code before a rewrite; produces a bug catalog. Fan-out one unit per dispatch.",
    "kind": "role",
    "detail": [
-    "Proposed model: Sonnet per unit, Haiku for inventory.",
+    "Model: sonnet (ADR-0005; every role file declares it). Writes class: audit_dir.",
     "Writes only docs/audit."
    ],
    "files": [
     {
+     "path": "factory/agents/roles/audit.yaml",
+     "contains": "model: sonnet",
+     "note": "Role data",
+     "lines": "3"
+    },
+    {
      "path": "docs/plans/2026-09-24-seven-core-agents.md",
-     "lines": "24-34",
+     "lines": "31-34",
      "contains": "**Audit**",
      "note": "Role table row"
     }
    ],
    "coverage": {
-    "status": "partial",
-    "note": "Role data is loaded and validated and a generated agent file can be emitted from it; model choices remain proposals to measure."
+    "status": "built",
+    "note": "Implemented as role data and loaded by factory/agents/roles.py; a generated agent file is emitted from it and resolved in real headless sessions."
    }
   },
   "role-implement": {
@@ -1401,20 +1512,26 @@
    "summary": "Builds one slice against the spec; the only role that edits application code, one per worktree, in a fresh-context loop with a cap.",
    "kind": "role",
    "detail": [
-    "Proposed model: Sonnet; Opus after repeated failure.",
+    "Model: sonnet (ADR-0005; every role file declares it). Writes class: app.",
     "Blind to eval and held-out paths by hook; cannot edit frozen tests."
    ],
    "files": [
     {
+     "path": "factory/agents/roles/implement.yaml",
+     "contains": "model: sonnet",
+     "note": "Role data",
+     "lines": "3"
+    },
+    {
      "path": "docs/plans/2026-09-24-seven-core-agents.md",
-     "lines": "24-34",
+     "lines": "32-34",
      "contains": "**Implement**",
      "note": "Role table row"
     }
    ],
    "coverage": {
-    "status": "partial",
-    "note": "Role data is loaded and validated and a generated agent file can be emitted from it; model choices remain proposals to measure."
+    "status": "built",
+    "note": "Implemented as role data and loaded by factory/agents/roles.py; a generated agent file is emitted from it and resolved in real headless sessions."
    }
   },
   "role-test": {
@@ -1422,46 +1539,62 @@
    "summary": "Writes evals first from the spec and freezes them, runs them, triages failures and runs post-deploy checks.",
    "kind": "role",
    "detail": [
-    "Proposed model: Opus to author, Haiku to run.",
+    "Model: sonnet (ADR-0005; every role file declares it). Writes class: eval_paths.",
     "Writes eval files only before implementation exists."
    ],
    "files": [
     {
+     "path": "factory/agents/roles/test.yaml",
+     "contains": "model: sonnet",
+     "note": "Role data",
+     "lines": "3"
+    },
+    {
      "path": "docs/plans/2026-09-24-seven-core-agents.md",
-     "lines": "24-34",
+     "lines": "33-34",
      "contains": "**Test**",
      "note": "Role table row"
     }
    ],
    "coverage": {
-    "status": "partial",
-    "note": "Role data is loaded and validated and a generated agent file can be emitted from it; model choices remain proposals to measure."
+    "status": "built",
+    "note": "Implemented as role data and loaded by factory/agents/roles.py; a generated agent file is emitted from it and resolved in real headless sessions."
    }
   },
   "role-review": {
    "title": "Review",
-   "summary": "Independent read of the diff, traces and passes; drift against requirements. Read-only; verdict only.",
+   "summary": "Independent read of the diff, traces and passes; drift against requirements. Read-only; verdict only. Carries implementation-review, code-review, mermaid-nesting-dolls, minesweeper and doc-sync.",
    "kind": "role",
    "detail": [
-    "Proposed model: A different vendor from Implement where available.",
+    "Model: sonnet (ADR-0005; every role file declares it). Writes class: none.",
     "Verdict must be APPROVE or REJECT with citations."
    ],
    "files": [
     {
+     "path": "factory/agents/roles/review.yaml",
+     "contains": "mermaid-nesting-dolls",
+     "note": "The reviewer's skills",
+     "lines": "6"
+    },
+    {
      "path": "docs/plans/2026-09-24-seven-core-agents.md",
-     "lines": "24-34",
+     "lines": "34",
      "contains": "**Review**",
      "note": "Role table row"
     }
    ],
    "coverage": {
     "status": "partial",
-    "note": "Role data is loaded and validated and a generated agent file can be emitted from it; model choices remain proposals to measure."
+    "note": "Role data and skills are implemented; the reviewer has not amended a slice in a real session.",
+    "gaps": [
+     "Cross-vendor review is not configured: every role is Sonnet by owner decision (ADR-0005)",
+     "Reviewer amendments (sf slice amend --role reviewer) not yet exercised by a real reviewer agent"
+    ]
    }
   },
   "hooks": {
    "title": "Hooks",
-   "summary": "Seven deterministic hook specs share one core: a payload parser and decision type, then guards for paths, blindness, secrets, Bash, stop and sub-agent stop. Guards fail closed on malformed input.",
+   "summary": "Eight hook ids share one core: a payload parser and decision type, then guards for paths (including the qa_paths class), blindness, secrets, Bash and stop, the sub-agent stop validator, the ledger audit and the session-start summary. Guards fail closed on malformed input.",
    "kind": "TB-04..10",
    "design": [
     {
@@ -1478,18 +1611,24 @@
    "files": [
     {
      "path": "docs/contracts/hook-io.md",
-     "lines": "1-30",
+     "lines": "8-30",
      "contains": "PreToolUse"
     },
     {
      "path": "docs/plans/2026-09-24-agent-capability-map.md",
-     "lines": "104-108",
+     "lines": "106-108",
      "contains": "Secrets"
+    },
+    {
+     "path": "factory/agents/generate.py",
+     "contains": "HOOK_REGISTRATION",
+     "note": "Hook ids, events and matchers",
+     "lines": "24-33"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Eight hook ids are implemented behind one registry; every guard has acceptance cases; security-review hardening recorded as clarifications C-36 to C-39."
+    "note": "Eight hook ids are implemented behind one registry (factory/agents/generate.py HOOK_REGISTRATION); every guard has acceptance cases; security-review hardening recorded as clarifications C-36 to C-39 and the qa_paths class as C-41."
    },
    "diagram": [
     "flowchart LR",
@@ -1498,7 +1637,9 @@
     "  hook-core -->|\"PreToolUse: key-shaped value?\"| secrets-guard[\"Secrets guard<br/>TB-07\"]",
     "  hook-core -->|\"PreToolUse: Bash\"| bash-guard[\"Bash guard<br/>TB-08\"]",
     "  hook-core -->|\"Stop: implement says done\"| stop-gate[\"Stop gate<br/>TB-09\"]",
-    "  hook-core -->|\"SubagentStop\"| subagent-validators[\"Sub-agent validators<br/>TB-10\"]"
+    "  hook-core -->|\"SubagentStop\"| subagent-validators[\"Sub-agent validators<br/>TB-10\"]",
+    "  hook-core -->|\"SubagentStop: audit trail\"| ledger-audit[\"Ledger audit<br/>ticket Audit Trail + event\"]",
+    "  hook-core -->|\"SessionStart\"| session-start[\"Session start<br/>ticket summary\"]"
    ],
    "children": [
     "hook-core",
@@ -1507,7 +1648,9 @@
     "secrets-guard",
     "bash-guard",
     "stop-gate",
-    "subagent-validators"
+    "subagent-validators",
+    "ledger-audit",
+    "session-start"
    ]
   },
   "hook-core": {
@@ -1518,11 +1661,13 @@
     {
      "path": "factory/hooks/core.py",
      "contains": "class Payload",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "24-25"
     },
     {
      "path": "docs/prds/TB-04-hook-core.md",
-     "contains": "TB-04"
+     "contains": "TB-04",
+     "lines": "1-34"
     }
    ],
    "coverage": {
@@ -1532,22 +1677,36 @@
   },
   "path-guard": {
    "title": "Path guard",
-   "summary": "Each role may write only its own folders (Research under research/, Design under docs/prd, spec and adr, Audit under docs/audit, Review nowhere). Only Implement writes application code.",
+   "summary": "Each role may write only its own folders (Research under research/, Design under docs/prd, spec and adr, Audit under docs/audit, Review nowhere, QA only qa-notes and qa-feedback and .sf/qa through the qa_paths class). Only Implement writes application code.",
    "kind": "TB-05",
    "files": [
     {
      "path": "factory/hooks/path_guard.py",
      "contains": "def decide",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "440-454"
     },
     {
      "path": "docs/prds/TB-05-path-guard.md",
-     "contains": "TB-05"
+     "contains": "TB-05",
+     "lines": "1-35"
+    },
+    {
+     "path": "factory/hooks/path_guard.py",
+     "contains": "C-41.2: the only paths a `qa_paths` role may write",
+     "note": "The qa_paths globs; configuration may override them",
+     "lines": "26"
+    },
+    {
+     "path": "factory/hooks/path_guard.py",
+     "contains": "C-41.3: qa gets the implement-style git restrictions",
+     "note": "Bash limits for qa",
+     "lines": "408"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Implemented; hardened after automated security review (clarification C-38: awk, sed, git abbreviations, MultiEdit and NotebookEdit). Acceptance cases for this slice all pass (evals/agents); the blind implementer never saw them.",
+    "note": "Implemented; hardened after automated security review (clarification C-38: awk, sed, git abbreviations, MultiEdit and NotebookEdit). Acceptance cases for this slice all pass (evals/agents); the blind implementer never saw them. The qa_paths class (C-41.2) was added by ADR-0005.",
     "gaps": [
      "Command-text parsing cannot be complete: the OS sandbox is the backstop (docs/hooks/path_guard.md)"
     ]
@@ -1561,11 +1720,13 @@
     {
      "path": "factory/hooks/secrets_guard.py",
      "contains": "def decide",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "214-245"
     },
     {
      "path": "docs/prds/TB-07-secrets-guard.md",
-     "contains": "TB-07"
+     "contains": "TB-07",
+     "lines": "1-33"
     }
    ],
    "coverage": {
@@ -1584,11 +1745,13 @@
     {
      "path": "factory/hooks/bash_guard.py",
      "contains": "def decide",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "1026-1045"
     },
     {
      "path": "docs/prds/TB-08-bash-guard.md",
-     "contains": "TB-08"
+     "contains": "TB-08",
+     "lines": "1-32"
     }
    ],
    "coverage": {
@@ -1607,11 +1770,13 @@
     {
      "path": "factory/hooks/stop_gate.py",
      "contains": "def decide",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "451-475"
     },
     {
      "path": "docs/prds/TB-09-stop-gate.md",
-     "contains": "TB-09"
+     "contains": "TB-09",
+     "lines": "1-34"
     }
    ],
    "coverage": {
@@ -1627,11 +1792,19 @@
     {
      "path": "factory/hooks/subagent_stop.py",
      "contains": "def decide",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "318-336"
     },
     {
      "path": "docs/prds/TB-10-subagent-stop-validators.md",
-     "contains": "TB-10"
+     "contains": "TB-10",
+     "lines": "1-33"
+    },
+    {
+     "path": "factory/hooks/subagent_stop.py",
+     "contains": "def record",
+     "note": "Leaves a subagent-stop stage event",
+     "lines": "339-344"
     }
    ],
    "coverage": {
@@ -1654,7 +1827,8 @@
     {
      "path": "factory/hooks/blindness_guard.py",
      "contains": "def decide",
-     "note": "Implementation"
+     "note": "Implementation",
+     "lines": "1597-1622"
     },
     {
      "path": "docs/prds/TB-06-blindness-guard.md",
@@ -1779,7 +1953,7 @@
   },
   "verification-engine": {
    "title": "Verification engine (sf CLI)",
-   "summary": "A small deterministic Python package behind the sf command: it classifies architectural doors, locks test baselines against reward hacking, runs a gated synthesis loop around the Claude CLI, and transpiles with a proved equivalence. About 2,000 lines.",
+   "summary": "A small deterministic Python package behind the sf command: it classifies architectural doors, locks test baselines against reward hacking, runs a gated synthesis loop around the Claude CLI, transpiles with a proved equivalence and, through the tool groups, carries the intake, slice, structure, contract, QA, hitl, install and ops commands.",
    "kind": "subsystem",
    "design": [
     {
@@ -1791,7 +1965,7 @@
    "files": [
     {
      "path": "factory/cli.py",
-     "lines": "237-293",
+     "lines": "281-293",
      "contains": "add_subparsers",
      "note": "Four subcommands"
     },
@@ -1802,16 +1976,16 @@
     },
     {
      "path": "README.md",
-     "lines": "62-80",
+     "lines": "75-80",
      "contains": "sf audit"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "The sf engine is implemented and tested with Unity installed (4,017 tests pass in the bounded full run); governance now fails closed and the CLI exposes the new tool groups.",
+    "note": "Implemented and tested; governance fails closed and the CLI exposes the tool groups. Test and eval counts are recorded in docs/sf-flow.md ('Evidence base') and docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md section 3; this explorer cites them instead of restating them.",
     "gaps": [
-     "The semantic verifier is Unity, which an earlier audit found ledger-specific; this was not re-run here. The new honest solver gate for a pure subset is factory/verify (sf contracts)",
-     "tests marked requires_unity need the sibling Unity repo; CI runs the rest",
+     "The semantic verifier is Unity, which an earlier audit found ledger-specific; this was not re-run. The honest solver gate for a pure subset is factory/verify (sf contracts)",
+     "tests marked requires_unity need the sibling Unity repo",
      "One intermittent failure of the transpiler parity test was seen once and not explained"
     ]
    },
@@ -1872,7 +2046,7 @@
    "files": [
     {
      "path": "factory/governance.py",
-     "lines": "28-43",
+     "lines": "29-43",
      "contains": "ONE_WAY"
     },
     {
@@ -1947,7 +2121,7 @@
    "files": [
     {
      "path": "factory/synthesis.py",
-     "lines": "151-166",
+     "lines": "159-166",
      "contains": "--restricted"
     }
    ],
@@ -1963,7 +2137,7 @@
    "files": [
     {
      "path": "factory/governance.py",
-     "lines": "20-26",
+     "lines": "23-26",
      "contains": "UNITY_AVAILABLE"
     },
     {
@@ -1996,7 +2170,7 @@
    "files": [
     {
      "path": "factory/synthesis.py",
-     "lines": "136-150",
+     "lines": "141-150",
      "contains": "class SynthesisEngine"
     },
     {
@@ -2040,7 +2214,7 @@
    "files": [
     {
      "path": "factory/synthesis.py",
-     "lines": "168-176",
+     "lines": "173-176",
      "contains": "extract_repo_context"
     }
    ],
@@ -2056,7 +2230,7 @@
    "files": [
     {
      "path": "factory/synthesis.py",
-     "lines": "151-166",
+     "lines": "156-166",
      "contains": "_call_claude_cli"
     }
    ],
@@ -2088,7 +2262,7 @@
    "files": [
     {
      "path": "factory/synthesis.py",
-     "lines": "359-386",
+     "lines": "367-386",
      "contains": "Gate 1: Governance Matrix"
     }
    ],
@@ -2163,7 +2337,7 @@
   },
   "evals-gate": {
    "title": "Evals and golden gate",
-   "summary": "Evals are authored from published contracts before any implementer exists, then locked. 1,302 cases (129 golden must-pass, 1,173 diagnostic) all resolve to 'blocked' until something implements them; an independent audit found the golden gate not collectively exhaustive.",
+   "summary": "Evals are authored from published contracts before any implementer exists, then locked. Golden cases must pass, diagnostic cases are reported; an independent audit found the first golden gate not collectively exhaustive and its blocking findings were closed. Counts live in docs/sf-flow.md and ADR-0005.",
    "kind": "subsystem",
    "design": [
     {
@@ -2184,21 +2358,22 @@
     },
     {
      "path": "evals/agents/run.py",
-     "lines": "30-50",
+     "lines": "47-50",
      "contains": "GOLDEN VERDICT"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "1,498 cases (golden 141): 1,496 pass, 1 open diagnostic (TB06-D-035), 1 library self-check blocked by design. The golden gate is GREEN. The five audit P0 findings are closed; C-38 and C-39 added cases.",
+    "note": "The agent-layer eval suite (golden and diagnostic tiers) runs and its golden gate is the pass criterion; one diagnostic case, TB06-D-035, is open on purpose pending ADR-0004. Test and eval counts are recorded in docs/sf-flow.md ('Evidence base') and docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md section 3; this explorer cites them instead of restating them.",
     "gaps": [
      "TB06-D-035 is open pending ADR-0004",
-     "Results are gitignored (evals/agents/results/)"
+     "Results are gitignored (evals/agents/results/)",
+     "Cases were edited for the eight-role shape under docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md section 4 (no deletions or loosening, per that ADR)"
     ]
    },
    "diagram": [
     "flowchart LR",
-    "  contracts-in[\"Published contracts<br/>docs/contracts\"] -->|\"expectations quoted from\"| eval-cases[\"Eval cases<br/>129 golden, 1,173 diagnostic\"]",
+    "  contracts-in[\"Published contracts<br/>docs/contracts\"] -->|\"expectations quoted from\"| eval-cases[\"Eval cases<br/>golden and diagnostic tiers\"]",
     "  eval-cases -->|\"pytest + run.py\"| eval-runner[\"Runner and verdict<br/>blocked, pass, fail\"]",
     "  eval-cases -->|\"graded as MECE by\"| mece-audit[\"Independent MECE audit<br/>verdict: FAIL\"]",
     "  mece-audit -->|\"five blocking findings\"| golden-fix[\"Golden gate fixes<br/>not yet applied\"]",
@@ -2241,7 +2416,8 @@
     },
     {
      "path": "evals/agents/GOLDEN.json",
-     "contains": "TB"
+     "contains": "TB01-G-001",
+     "lines": "2"
     },
     {
      "path": "evals/agents/lib.py",
@@ -2251,9 +2427,9 @@
    ],
    "coverage": {
     "status": "built",
-    "note": "1,302 cases exist across TB-01 to TB-14, with per-TB coverage notes.",
+    "note": "Cases exist across TB-01 to TB-14 and the SFN slices (evals/native), with per-TB coverage notes; counts are in docs/sf-flow.md.",
     "gaps": [
-     "All blocked: nothing under test is implemented"
+     "TB06-D-035 is open on purpose (ADR-0004)"
     ]
    }
   },
@@ -2264,7 +2440,7 @@
    "files": [
     {
      "path": "evals/agents/run.py",
-     "lines": "30-50",
+     "lines": "47-50",
      "contains": "GOLDEN VERDICT"
     },
     {
@@ -2285,11 +2461,13 @@
    "files": [
     {
      "path": "docs/evals/triggers/trigger_check.py",
-     "contains": "def "
+     "contains": "def run_one",
+     "lines": "5-38"
     },
     {
      "path": "docs/evals/triggers/README.md",
-     "contains": "trigger"
+     "contains": "trigger",
+     "lines": "1-7"
     }
    ],
    "coverage": {
@@ -2304,7 +2482,7 @@
    "files": [
     {
      "path": "docs/plans/2026-09-24-agent-layer-status.md",
-     "lines": "9-15",
+     "lines": "14-15",
      "contains": "P0"
     }
    ],
@@ -2327,7 +2505,7 @@
    "files": [
     {
      "path": "evals/agents/audit/MECE-AUDIT.md",
-     "lines": "9-16",
+     "lines": "11-16",
      "contains": "MECE: FAIL"
     }
    ],
@@ -2357,12 +2535,12 @@
   },
   "audit-verdict": {
    "title": "Audit verdict",
-   "summary": "MECE: FAIL. Run result at audit time: 1,302 cases, 129 golden blocked, 1,173 diagnostic blocked, 0 failed, no membership problem, golden verdict NOT GREEN.",
+   "summary": "MECE: FAIL at audit time (2026-09-24): 1,302 cases, 129 golden blocked, 1,173 diagnostic blocked, 0 failed, golden verdict NOT GREEN. Historical: the findings were closed afterwards.",
    "kind": "result",
    "files": [
     {
      "path": "evals/agents/audit/MECE-AUDIT.md",
-     "lines": "5-16",
+     "lines": "11-16",
      "contains": "MECE: FAIL"
     }
    ],
@@ -2475,7 +2653,7 @@
     },
     {
      "path": "factory/routing/jev-policy.yaml",
-     "lines": "1-12",
+     "lines": "6-12",
      "contains": "shadow mode only"
     }
    ],
@@ -2512,7 +2690,7 @@
    "files": [
     {
      "path": "factory/routing/jev-policy.yaml",
-     "lines": "1-30",
+     "lines": "4-30",
      "contains": "policy_version"
     }
    ],
@@ -2528,7 +2706,7 @@
    "files": [
     {
      "path": "factory/routing/jev_client.py",
-     "lines": "73-105",
+     "lines": "87-105",
      "contains": "def build_request"
     }
    ],
@@ -2618,12 +2796,6 @@
      "lines": "64-84",
      "contains": "Start away mode with the run",
      "external": true
-    },
-    {
-     "path": ".claude/state.md",
-     "lines": "1-8",
-     "contains": "Working state",
-     "note": "Local, untracked working state for this session"
     }
    ],
    "coverage": {
@@ -2698,14 +2870,10 @@
    "kind": "state",
    "files": [
     {
-     "path": ".claude/state.md",
-     "lines": "1-4",
-     "contains": "Working state"
-    },
-    {
-     "path": ".claude/subagent-ledger.jsonl",
-     "contains": "agent_id",
-     "note": "One line per sub-agent run"
+     "path": ".gitignore",
+     "contains": "runtime state of the bounded test runner",
+     "note": "Only .sf/ is ignored here; .claude/ is not tracked at all, so it is described but not cited",
+     "lines": "11"
     }
    ],
    "coverage": {
@@ -2789,21 +2957,23 @@
    "files": [
     {
      "path": "factory/cli.py",
-     "contains": "TOOL_GROUPS",
-     "note": "Tool groups wired into sf"
+     "contains": "TOOL_GROUPS = {",
+     "note": "Tool groups wired into sf",
+     "lines": "328-337"
     },
     {
      "path": "docs/sf-flow.md",
      "contains": "flowchart",
-     "note": "The flow with current versus planned behaviour"
+     "note": "The flow with current versus planned behaviour",
+     "lines": "12"
     }
    ],
    "coverage": {
-    "status": "built",
-    "note": "Implemented and tested; used by this very build (QA loop concepts, slices, bounded tests, dashboard bundle).",
+    "status": "partial",
+    "note": "Implemented and tested; used by this very build. The deterministic parts are built; the intake gate and the full QA loop have not run in a real session.",
     "gaps": [
-     "Adversarial acceptance of verify and structure is in progress",
-     "Not yet run on a product project"
+     "Intake gate, full QA loop and reviewer amendments not yet run in a real session",
+     "Not yet applied to a product project"
     ]
    },
    "diagram": [
@@ -2838,23 +3008,27 @@
    "files": [
     {
      "path": "factory/intake/ledger.py",
-     "contains": "def check"
+     "contains": "def check",
+     "lines": "62-144"
     },
     {
      "path": "factory/intake/sweep.py",
-     "contains": "def"
+     "contains": "def build_record",
+     "lines": "64-103"
     },
     {
      "path": "docs/intake-format.md",
-     "contains": "ledger"
+     "contains": "ledger",
+     "lines": "1-67"
     }
    ],
    "coverage": {
     "status": "partial",
-    "note": "Implemented and tested (61 tests). The sweep and the value-extraction pass are model procedure; only recording and gating are deterministic.",
+    "note": "Implemented and tested (tests/test_intake.py, test_intake_seeds.py, test_intake_experiments.py). The sweep and the value-extraction pass are model procedure; only recording and gating are deterministic. The gate has not run in a real session.",
     "gaps": [
      "Minesweeper's locator format could not be confirmed; every integer in a locator is read as a source line",
-     "The register schema is copied from the live skill and can drift"
+     "The register schema is copied from the live skill and can drift",
+     "Not run in a real session (docs/native-verification/2026-10-20/REPORT.md)"
     ]
    }
   },
@@ -2865,16 +3039,18 @@
    "files": [
     {
      "path": "factory/slices/cli.py",
-     "contains": "def cmd_done"
+     "contains": "def cmd_done",
+     "lines": "152-173"
     },
     {
      "path": "docs/slice-format.md",
-     "contains": "OpenSpec"
+     "contains": "OpenSpec",
+     "lines": "3"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Implemented and tested (28 tests). OpenSpec's own validator accepted the fixture layout (its tool was run in a throwaway directory with telemetry off); compatibility beyond that is not claimed.",
+    "note": "Implemented and tested (tests/test_slices.py). OpenSpec's own validator accepted the fixture layout (run in a throwaway directory with telemetry off); compatibility beyond that is not claimed.",
     "gaps": [
      "The chain cannot catch deleting the newest entries together with the head; git is the backstop",
      "A hand-edited [x] in tasks.md is not blocked, though `done` still needs a QA chain entry"
@@ -2888,19 +3064,20 @@
    "files": [
     {
      "path": "factory/structure/extract.py",
-     "contains": "def"
+     "contains": "def make_source",
+     "lines": "145-153"
     },
     {
      "path": "factory/structure/diff.py",
-     "contains": "def"
+     "contains": "def diff_extractions",
+     "lines": "33-117"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Implemented and tested (34 tests); run on this repo's own factory/ package.",
+    "note": "Implemented and tested (tests/test_structure.py, test_structure_hardening.py); run on this repo's own factory/ package. Adversarial acceptance report: docs/acceptance/verify-structure-report.md.",
     "gaps": [
-     "Python only; never a complete call graph",
-     "Independent adversarial acceptance is in progress"
+     "Python only; never a complete call graph"
     ]
    }
   },
@@ -2918,25 +3095,27 @@
    "files": [
     {
      "path": "factory/verify/solve.py",
-     "contains": "def"
+     "contains": "class Verdict",
+     "lines": "34-40"
     },
     {
      "path": "factory/verify/gate.py",
-     "contains": "def"
+     "contains": "def run_gate",
+     "lines": "135-232"
     },
     {
      "path": "docs/verification-ir.md",
-     "contains": "floor"
+     "contains": "floor",
+     "lines": "14"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Implemented and tested (152 tests plus a differential test of the z3 model against real Python); demonstrated end to end on a labelled minimal fixture (examples/dogfood-limits).",
+    "note": "Implemented and tested (tests/test_verify_*.py and tests/acceptance/verify, including a differential test of the z3 model against real Python); demonstrated end to end on a labelled minimal fixture (examples/dogfood-limits). Adversarial acceptance report: docs/acceptance/verify-structure-report.md.",
     "gaps": [
      "Supported subset only: no loops, calls, floats or containers; everything else must route to tests",
      "int64 is modelled as checked overflow, not wraparound",
-     "Generated regression tests replay an absolute source path",
-     "Independent adversarial acceptance is in progress"
+     "Generated regression tests replay an absolute source path"
     ]
    }
   },
@@ -2947,12 +3126,13 @@
    "files": [
     {
      "path": "scripts/implementer-worktree.sh",
-     "contains": "sparse-checkout"
+     "contains": "sparse-checkout",
+     "lines": "53"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Tested (7 tests); used for every blind implementer in this build.",
+    "note": "Tested (tests/test_implementer_worktree.py); used for the blind implementers of this build.",
     "gaps": [
      "The object database still holds the protected files: a shell command could read them from git; the hooks and sandbox are the backstop"
     ]
@@ -2965,53 +3145,77 @@
    "files": [
     {
      "path": "factory/qa/decide.py",
-     "contains": "def"
+     "contains": "def decide(",
+     "lines": "30-77"
     },
     {
      "path": "factory/qa/leak.py",
-     "contains": "def"
+     "contains": "def leak_check",
+     "lines": "68-121"
     },
     {
      "path": "docs/qa-loop.md",
-     "contains": "signature"
+     "contains": "signature",
+     "lines": "14"
     }
    ],
    "coverage": {
-    "status": "built",
-    "note": "Implemented and tested (79 tests including a scripted fake-implementer simulation); policy defaults are configurable and tuned from recorded attempts.",
+    "status": "partial",
+    "note": "Implemented and tested (tests/test_qa_*.py, including a scripted fake-implementer simulation, tests/test_qa_sim.py). Policy defaults are configurable. The qa role's write limits were verified in a real headless session; the loop has not run with a real implementer and a real QA agent.",
     "gaps": [
-     "Not yet run against real agent sessions",
+     "Full QA loop with real agents not yet run (docs/native-verification/2026-10-20/REPORT.md 'Not covered')",
      "Tamper detection misses someone who rewrites the logs and the state together"
     ]
    }
   },
   "ops-dashboard": {
    "title": "Dashboard",
-   "summary": "factory.ops bundles historical development artifacts per commit from the git object database into content-addressed blobs, collects runtime telemetry separately with measured / not-measured labels, and a static shell offers a commit selector and tabs.",
+   "summary": "factory.ops bundles historical development artifacts per commit from the git object database, collects runtime telemetry separately with measured / not-measured labels, records stage events as the commands run, and a static shell offers a commit selector, tabs and banners for staleness and open human stops.",
    "kind": "module",
    "files": [
     {
-     "path": "factory/ops/bundle.py",
-     "contains": "def"
+     "path": "docs/ops-events.md",
+     "contains": "# Ops events and the live dashboard",
+     "note": "Events and what emits them",
+     "lines": "1-39"
     },
     {
-     "path": "factory/ops/runtime.py",
-     "contains": "def"
-    },
-    {
-     "path": "ops/shell/index.html",
-     "contains": "snapshot"
+     "path": "docs/ops-tabs.md",
+     "contains": "# Ops dashboard tabs",
+     "note": "Where each tab reads from",
+     "lines": "1-17"
     }
    ],
    "coverage": {
     "status": "partial",
-    "note": "Built and tested (27 + 8 tests); verified in a real browser against this repository's history.",
+    "note": "Built and tested (tests/test_ops*.py); a real headless session ran sf ops init and sf slice check and the stage event appeared without anyone calling a script (docs/native-verification/2026-10-20/REPORT.md, S6). Not deployed.",
     "gaps": [
      "Not deployed",
      "Runtime telemetry covers only what its config declares; most figures are 'not measured' without configuration",
-     "Langfuse and CI figures are reported only when configured"
+     "Langfuse and CI figures are reported only when configured",
+     "Per-product use not done"
     ]
-   }
+   },
+   "diagram": [
+    "flowchart LR",
+    "  ops-emission[\"Event emission<br/>run_tool, hooks\"] -->|\"one JSON line per stage\"| ops-events[\"events.jsonl<br/>ops/events.py\"]",
+    "  ops-events -->|\"stage hitl events\"| ops-tab-sources[\"Tab sources<br/>collectors\"]",
+    "  qa-notes[\"QA notes<br/>qa promote-notes\"] -->|\"qa-notes.md\"| ops-tab-sources",
+    "  ops-cli[\"sf ops<br/>init, backfill, status, autobundle\"] -->|\"snapshots\"| ops-bundle[\"Bundle<br/>content-addressed blobs\"]",
+    "  ops-tab-sources -->|\"tabs per commit\"| ops-bundle",
+    "  ops-runtime-collector[\"Runtime telemetry<br/>repo_head, behind, stops, Langfuse\"] -->|\"runtime.json\"| ops-shell[\"Shell<br/>tabs, banners\"]",
+    "  ops-bundle --> ops-shell"
+   ],
+   "children": [
+    "ops-bundle",
+    "ops-events",
+    "ops-emission",
+    "ops-cli",
+    "ops-runtime-collector",
+    "ops-tab-sources",
+    "qa-notes",
+    "ops-shell"
+   ]
   },
   "resource-limits": {
    "title": "Resource limits",
@@ -3020,16 +3224,18 @@
    "files": [
     {
      "path": "conftest.py",
-     "contains": "RLIMIT_AS"
+     "contains": "RLIMIT_AS",
+     "lines": "21"
     },
     {
      "path": "scripts/bounded-pytest.sh",
-     "contains": "prlimit"
+     "contains": "prlimit",
+     "lines": "13"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Tested (4 tests); every test run since the incident used it.",
+    "note": "Tested (tests/test_resource_limits.py); the test runs for this explorer refresh used scripts/bounded-pytest.sh.",
     "gaps": [
      "A tripped limit is a failure, not a pass; a limit that is too tight would need tuning"
     ]
@@ -3037,31 +3243,60 @@
   },
   "native-install": {
    "title": "Native install",
-   "summary": "sf install writes the generated agents, settings-level hooks with absolute verified commands, the Sonnet-only pin and a manifest into a project; doctor executes every hook command (a hook that cannot run fails open); uninstall restores from backups.",
+   "summary": "sf install writes the generated agents, settings-level hooks with absolute verified commands, the Sonnet-only pin and a manifest into a project, and rejects any non-Sonnet role model unless --allow-model; doctor executes every hook command and also checks that each role's skills resolve and that external skills match their pins; pin-external rewrites the pins.",
    "kind": "module",
    "files": [
     {
      "path": "factory/install/core.py",
-     "contains": "ENV_PIN"
+     "contains": "ENV_PIN",
+     "lines": "29"
     },
     {
      "path": "factory/install/doctor.py",
-     "contains": "def"
+     "contains": "def check_roles",
+     "lines": "142-163"
     },
     {
      "path": "docs/native-install.md",
-     "contains": "fail"
+     "contains": "fail",
+     "lines": "16"
+    },
+    {
+     "path": "factory/install/doctor.py",
+     "contains": "def check_external",
+     "note": "External skills versus docs/external-skills.json",
+     "lines": "166-187"
+    },
+    {
+     "path": "factory/install/core.py",
+     "contains": "def pin_external",
+     "note": "Rewrites the pins from the installed copies; exit 2 without --yes",
+     "lines": "368-388"
+    },
+    {
+     "path": "docs/external-skills.json",
+     "contains": "\"skills\"",
+     "note": "The pins",
+     "lines": "3-34"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Implemented and unit-tested (35 tests); verified in real headless Claude Code sessions: skills, agents and hooks resolve, hooks block in subagents, the pin overrides an inherited default (docs/native-verification/2026-10-19/REPORT.md).",
+    "note": "Implemented and unit-tested (tests/test_install.py, test_install_native.py); verified in real headless Claude Code sessions: skills (including eli12-docs and lsf) and all eight generated agents resolve, hooks block in subagents, the pin overrides an inherited default (docs/native-verification/2026-10-19/REPORT.md, docs/native-verification/2026-10-20/REPORT.md).",
     "gaps": [
      "Interactive (non -p) use not exercised",
-     "The user-level default model (Opus) is deliberately unchanged; sessions elsewhere without --model sonnet or a project pin still inherit it",
-     "A hook parser guard is not OS isolation"
+     "The user-level default model is deliberately unchanged; sessions elsewhere without --model sonnet or a project pin still inherit it",
+     "A hook parser guard is not OS isolation",
+     "doctor WARNs (not FAILs) when an external skill changed since it was pinned"
     ]
-   }
+   },
+   "design": [
+    {
+     "choice": "Doctor fails when a hook cannot run, a role skill does not resolve or an external pin is missing",
+     "why": "A hook that cannot run fails open, so the check executes the command; unresolved skills and unpinned externals would silently change behaviour.",
+     "alternatives": "Trusting that files exist"
+    }
+   ]
   },
   "human-stop": {
    "title": "Human stop",
@@ -3070,14 +3305,1425 @@
    "files": [
     {
      "path": "factory/hitl/store.py",
-     "contains": "def release"
+     "contains": "def release",
+     "lines": "180-193"
     }
    ],
    "coverage": {
     "status": "built",
-    "note": "Implemented and unit-tested (23+ tests); obeyed in a real session: slice done refused (exit 5), release refused, stop still open.",
+    "note": "Implemented and unit-tested (tests/test_hitl.py); obeyed in a real session: slice done refused (exit 5), release refused, stop still open (docs/native-verification/2026-10-19/REPORT.md).",
     "gaps": [
      "Friction, not proof: a role with full Bash could allocate a terminal; no out-of-band secret"
+    ]
+   }
+  },
+  "role-qa": {
+   "title": "QA",
+   "summary": "Supervises the implementer: runs the protected suites, writes behavioural feedback in criterion terms, records attempts, proposes regression cases and marks tasks verified. Never edits application code or writes test source.",
+   "kind": "role",
+   "detail": [
+    "Model: sonnet (ADR-0005). Writes class qa_paths: only **/qa-notes.md, **/qa-feedback/** and .sf/qa/**. Bash is full so it can run suites, but path_guard denies it every command bash_guard flags.",
+    "Skills: qa-supervisor and superpowers:verification-before-completion."
+   ],
+   "design": [
+    {
+     "choice": "A QA role between implement and test, enforced by path_guard",
+     "why": "QA must run suites and write feedback without being able to edit code or test source; a writes class plus the hook, not a prompt, enforces it.",
+     "alternatives": "Folding QA into the Test role, which freezes evals"
+    }
+   ],
+   "files": [
+    {
+     "path": "factory/agents/roles/qa.yaml",
+     "contains": "writes: qa_paths",
+     "note": "Role data",
+     "lines": "9"
+    },
+    {
+     "path": "factory/hooks/path_guard.py",
+     "contains": "if writes == \"qa_paths\"",
+     "note": "Enforcement (C-41.2)",
+     "lines": "146"
+    },
+    {
+     "path": "docs/hooks/roles.md",
+     "contains": "## Writes class `qa_paths`",
+     "note": "Contract",
+     "lines": "13-14"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; in a real headless session the generated qa agent could write its QA notes and was blocked from writing src/hack.py and from git add -A by the real hooks (docs/native-verification/2026-10-20/REPORT.md, S7).",
+    "gaps": [
+     "A full QA loop with a real implementer and a real QA agent has not run"
+    ]
+   }
+  },
+  "ledger-audit": {
+   "title": "Ledger audit",
+   "summary": "At SubagentStop appends an entry (agent type, id, the first 200 characters of the last message, secret shapes removed) to the current ticket's ledger; it always allows. Its recording step also leaves a subagent-stop stage event for the dashboard.",
+   "kind": "TB-11",
+   "files": [
+    {
+     "path": "factory/hooks/ledger_audit.py",
+     "contains": "def decide",
+     "note": "Always allows",
+     "lines": "46-47"
+    },
+    {
+     "path": "factory/hooks/ledger_audit.py",
+     "contains": "emit(cfg.project_root, \"subagent-stop\"",
+     "note": "The ops event",
+     "lines": "53"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; the event emission was seen in a real session.",
+    "gaps": [
+     "Double counting with subagent_stop: both emit one subagent-stop event per stop"
+    ]
+   }
+  },
+  "session-start": {
+   "title": "Session start",
+   "summary": "At SessionStart gives a new session the current ticket's ledger summary, or 'No ticket is active.'; it always allows.",
+   "kind": "TB-11",
+   "files": [
+    {
+     "path": "factory/hooks/session_start.py",
+     "contains": "NO_TICKET",
+     "note": "Summary or the no-ticket line",
+     "lines": "12"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented with acceptance cases."
+   }
+  },
+  "lsf": {
+   "title": "Lite factory (lsf)",
+   "summary": "/sf made fast: the owner's flow (brief, minesweep, research, experiments, tracer PRDs, evals, blind build, QA, mechanistic review, docs and drift) run in about an hour on a laptop with Python 3.9+ and git. A phase clock, telemetry, human checkpoints and an offline dashboard make every step visible.",
+   "kind": "subsystem",
+   "detail": [
+    "One CLI (skills/lsf/scripts/lsf.py, standard library only) writes a .lsf folder in the project: a profile, an events log, a phase log and a hash-chained stop ledger. The dashboard (skills/lsf/assets/dashboard.html) is served from 127.0.0.1 by the same script and reads the project's own files, so nothing is fabricated for it.",
+    "Phase ids are an alias map onto the /sf stages, so events from both tools read the same (see the flow node under the build loop)."
+   ],
+   "design": [
+    {
+     "choice": "A separate lite tool, not a mode of sf",
+     "why": "It must install on a Mac with only python3 and git (no virtualenv, no solver) and be demonstrable live in an hour.",
+     "alternatives": "Running the full sf toolchain with its z3 and Unity dependencies"
+    },
+    {
+     "choice": "Human checkpoints are a procedure with an audit trail, not proof of identity",
+     "why": "The release route needs a token the agent is told never to read; the ledger is cross-checked against the event log. The skill says plainly that no software check can prove who clicked.",
+     "alternatives": "Claiming the stop cannot be bypassed"
+    }
+   ],
+   "files": [
+    {
+     "path": "skills/lsf/SKILL.md",
+     "contains": "# lsf: the lite software factory",
+     "note": "The skill: flow, per-phase procedure, rules",
+     "lines": "7-74"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def main",
+     "note": "Entry point",
+     "lines": "1877-1897"
+    },
+    {
+     "path": "docs/prds/SFN-06-lsf-lite.md",
+     "contains": "# SFN-06",
+     "note": "The PRD",
+     "lines": "1-44"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Implemented and tested here: tests/lsf ran with one failure (test_parity_with_factory_collectors). It has not been driven by Claude Code in a real session (docs/native-verification/2026-10-20/REPORT.md 'Not covered').",
+    "gaps": [
+     "tests/lsf/test_hooks_collect.py::test_parity_with_factory_collectors fails on this checkout: lsf's experiments collector omits kind: experiment and returns the whole resolved.json instead of the four fields factory/ops/collect.py returns",
+     "The lsf skill has not been driven by Claude Code in a real session",
+     "Human stop release is friction with an audit trail, not proof (docs/reviews/2026-10-20-lsf-review.md)"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  lsf-install[\"Installer<br/>install.sh, bundle\"] -->|\"skill + lsf wrapper\"| lsf-cli[\"lsf CLI<br/>init, phase, event, budget, cost, doctor\"]",
+    "  lsf-cli -->|\"phase start/end, events\"| lsf-clock[\"Phase clock and budget<br/>11 phases, 3 groups\"]",
+    "  lsf-cli -->|\"hitl request/status\"| lsf-stops[\"Stop ledger and human checkpoints\"]",
+    "  lsf-stops -->|\"open stop: phase start exits 3\"| lsf-clock",
+    "  lsf-hooks[\"Hooks and telemetry<br/>SubagentStop, Stop, commit, guard\"] -->|\"events.jsonl\"| lsf-clock",
+    "  lsf-cli -->|\"serve\"| lsf-server[\"Dashboard server<br/>127.0.0.1, routes\"]",
+    "  lsf-server -->|\"/api/state, /api/file, /api/at\"| lsf-ui[\"Dashboard UI<br/>ten tabs\"]",
+    "  lsf-ui -->|\"Approve: POST /api/hitl/release\"| lsf-stops"
+   ],
+   "children": [
+    "lsf-cli",
+    "lsf-clock",
+    "lsf-stops",
+    "lsf-hooks",
+    "lsf-server",
+    "lsf-ui",
+    "lsf-install"
+   ]
+  },
+  "lsf-cli": {
+   "title": "lsf CLI",
+   "summary": "One argparse program with the commands init, phase, event, hitl, status, budget, serve, bundle, hooks, doctor and cost. Every command takes --root; exit codes are 0 ok, 1 a check failed, 2 usage, 3 refused by a human stop.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def build_parser",
+     "note": "All commands",
+     "lines": "1755-1857"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def cmd_init",
+     "note": "Writes .lsf/profile.json",
+     "lines": "1069-1095"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def cmd_phase",
+     "note": "start and end; start refuses under an open stop",
+     "lines": "1112-1144"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def cmd_doctor",
+     "note": "python, git, repository, port and the self-check",
+     "lines": "1482-1530"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def cmd_bundle",
+     "note": "Prints which dashboard tabs have data",
+     "lines": "1270-1282"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/lsf/test_core.py passes here."
+   }
+  },
+  "lsf-clock": {
+   "title": "Phase clock and budget",
+   "summary": "Eleven phases in three groups (align 0-intake to 6-decide, build 7-implement and 8-qa, review 9-review and 10-docs) with default weights 60 / 20 / 20 of the session minutes. budget compares planned with actual minutes per group and subtracts time spent waiting on a human stop.",
+   "kind": "module",
+   "design": [
+    {
+     "choice": "Waiting on a human is not charged to the work",
+     "why": "A checkpoint can sit open for minutes; counting it would make every group look over budget.",
+     "alternatives": "Wall-clock phase time only"
+    }
+   ],
+   "files": [
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "PHASES = [",
+     "note": "Phase ids and groups",
+     "lines": "36-41"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "SF_ALIAS = {",
+     "note": "lsf phase to /sf stage",
+     "lines": "43-46"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "DEFAULT_WEIGHTS",
+     "note": "60 / 20 / 20",
+     "lines": "47"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def budget_data",
+     "note": "Planned versus actual, minus waiting",
+     "lines": "597-646"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def wait_intervals",
+     "note": "Time under an open stop",
+     "lines": "574-582"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; the clock can be overridden with LSF_NOW for rehearsals and tests (documented in SKILL.md).",
+    "gaps": [
+     "Actual minutes are 'under (not measured)' until phases have been started and ended"
+    ]
+   }
+  },
+  "lsf-stops": {
+   "title": "Stop ledger and human checkpoints",
+   "summary": "A hash-chained ledger under .lsf/stops with a head file: hitl request opens a named stop, ending an alignment phase opens <phase>-review automatically (the default; the profile can change it), hitl release records who and how (dashboard, cli-tty or cli-nontty). The ledger is cross-checked against the event log, and repair quarantines a failed ledger and rebuilds its valid prefix.",
+   "kind": "module",
+   "design": [
+    {
+     "choice": "Release is a human act with a recorded channel",
+     "why": "Agents must never run release or repair; --strict-hitl refuses them without a real terminal; the guard hook denies them in Bash.",
+     "alternatives": "A boolean approved flag an agent could set"
+    }
+   ],
+   "files": [
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def hitl_open",
+     "note": "Opens a stop",
+     "lines": "514-522"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def hitl_release",
+     "note": "Records the release and its channel",
+     "lines": "525-544"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def hitl_repair",
+     "note": "Quarantine and rebuild",
+     "lines": "547-566"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def cross_check",
+     "note": "Ledger versus events.jsonl",
+     "lines": "440-464"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def require_tty_if_strict",
+     "note": "--strict-hitl",
+     "lines": "508-511"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/lsf/test_core.py and test_review_fixes.py pass here.",
+    "gaps": [
+     "Friction, not proof: the unkeyed chain and head file can be forged by anything that can write .lsf; the adversarial review lists the residual cases (docs/reviews/2026-10-20-lsf-review.md)"
+    ]
+   }
+  },
+  "lsf-server": {
+   "title": "Dashboard server and routes",
+   "summary": "A ThreadingHTTPServer bound to 127.0.0.1 only. GET / serves the dashboard with a restrictive Content-Security-Policy, GET /api/state the whole state, GET /api/file a repository file (path-checked, size-capped), GET /api/at?sha= the historical tabs at a commit, and POST /api/hitl/release (the only write) needs the per-run token in X-LSF-Token. Host and Origin must be loopback.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def make_handler",
+     "note": "Handler with every route",
+     "lines": "1608-1711"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def cmd_serve",
+     "note": "Prints the URL with #token= once",
+     "lines": "1714-1751"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def read_repo_file",
+     "note": "Path and size checks for /api/file",
+     "lines": "1577-1605"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def resolve_sha",
+     "note": "Used by /api/at",
+     "lines": "983-989"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/lsf/test_serve.py passes here.",
+    "gaps": [
+     "The agent must never run serve or read the token: that is procedure, not enforcement"
+    ]
+   }
+  },
+  "lsf-ui": {
+   "title": "Dashboard UI tabs",
+   "summary": "One offline page with ten tabs: Now, Telemetry, Research, Experiments, ADRs, PRD, Architecture, Docs, Evals & bugs and Git. The tabs read the collectors (research, experiments, adrs, bug_log, prd_journeys, architecture, git, docs) and a commit selector shows the historical tabs at a past commit while Now and Telemetry stay live. File references open the editor through the inlined editor-links function.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "skills/lsf/assets/dashboard.html",
+     "contains": "var TABS=",
+     "note": "The ten tabs",
+     "lines": "182"
+    },
+    {
+     "path": "skills/lsf/assets/dashboard.html",
+     "contains": "function renderNow",
+     "note": "Now tab: clock, stops, Approve button",
+     "lines": "289-299"
+    },
+    {
+     "path": "skills/lsf/assets/dashboard.html",
+     "contains": "function renderTelemetry",
+     "note": "Telemetry tab",
+     "lines": "302-325"
+    },
+    {
+     "path": "skills/lsf/assets/dashboard.html",
+     "contains": "function renderArch",
+     "note": "Architecture tab (the explorer in an iframe)",
+     "lines": "351-372"
+    },
+    {
+     "path": "skills/lsf/assets/dashboard.html",
+     "contains": "function renderDocs",
+     "note": "Docs tab (reads docs/eli12/index.json)",
+     "lines": "385-399"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "COLLECTORS = [",
+     "note": "Collectors behind the tabs",
+     "lines": "962-963"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def c_experiments",
+     "note": "Experiments and resolved.json",
+     "lines": "801-817"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Implemented; tests/lsf/test_dashboard.py passes here. The experiments collector disagrees with factory/ops (parity test fails).",
+    "gaps": [
+     "lsf's experiments rows lack kind: experiment and carry the whole resolved.json",
+     "Architecture and Docs tabs show 'not available' unless docs/explorer/*.model.json and docs/eli12/index.json exist; they are not faked"
+    ]
+   }
+  },
+  "lsf-hooks": {
+   "title": "Hooks and telemetry",
+   "summary": "hooks install prints a diff of settings and --apply writes four hooks: SubagentStop and Stop (events), PostToolUse on Bash (git commit events) and a PreToolUse guard that denies hitl release, hitl repair, the release route and writes to .lsf/stops. Events are redacted and truncated; hooks write only into a project that already has .lsf.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def hooks_config",
+     "note": "The four hooks",
+     "lines": "1290-1298"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def cmd_hook",
+     "note": "Always exits 0 except the guard's denial",
+     "lines": "1339-1368"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def guard_reason",
+     "note": "What the guard denies",
+     "lines": "1381-1389"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def emit_event",
+     "note": "Telemetry write; LSF_EVENTS=off disables",
+     "lines": "322-342"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def redact",
+     "note": "Secret shapes removed",
+     "lines": "253-256"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "def cmd_hooks",
+     "note": "print, install, uninstall",
+     "lines": "1339-1368"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Implemented; tests/lsf/test_hooks_collect.py passes except the collector parity test. Hooks are opt-in (--apply) and have not been exercised in a real Claude Code session.",
+    "gaps": [
+     "The guard is friction, not proof (SKILL.md)",
+     "Not run in a real session"
+    ]
+   }
+  },
+  "lsf-install": {
+   "title": "Installer and bundle",
+   "summary": "install.sh copies the skill to ~/.claude/skills/lsf and writes an lsf wrapper in ~/.local/bin; running it twice changes nothing and a different older copy is moved to skills-backups, never inside the skills folder. scripts/make-lsf-bundle.sh zips lsf, eli12-docs and mermaid-nesting-dolls with an install-bundle.sh for a machine with only python3 and git.",
+   "kind": "script",
+   "files": [
+    {
+     "path": "skills/lsf/install.sh",
+     "contains": "WRAP=$BIN/lsf",
+     "note": "Wrapper and idempotence",
+     "lines": "34"
+    },
+    {
+     "path": "skills/lsf/install.sh",
+     "contains": "BKDIR=$SKILLS/../skills-backups",
+     "note": "Backup outside the skills folder",
+     "lines": "19"
+    },
+    {
+     "path": "scripts/make-lsf-bundle.sh",
+     "contains": "for s in lsf eli12-docs mermaid-nesting-dolls",
+     "note": "What the bundle holds",
+     "lines": "13"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "install.sh is tested (tests/lsf/test_install_skill.py passes here). make-lsf-bundle.sh has no test of its own.",
+    "gaps": [
+     "The bundle script was not run in this refresh",
+     "Mac behaviour is described in SKILL.md but was verified on Linux only"
+    ]
+   }
+  },
+  "skills-docs": {
+   "title": "Docs tools",
+   "summary": "eli12-docs writes and checks plain-English module docs; mermaid-nesting-dolls builds this explorer and opens its files in the editor.",
+   "kind": "skills",
+   "coverage": {
+    "status": "built",
+    "note": "Both tools are implemented and tested; see the children."
+   },
+   "diagram": [
+    "flowchart LR",
+    "  eli12-docs[\"ELI12 docs<br/>eli12.py scaffold, check, index\"] -->|\"index.json maps each file to its page\"| dolls-explorer[\"Explorer and editor links<br/>nesting_dolls.py\"]"
+   ],
+   "children": [
+    "eli12-docs",
+    "dolls-explorer"
+   ]
+  },
+  "eli12-docs": {
+   "title": "ELI12 docs",
+   "summary": "A script that creates, refreshes and checks one Markdown page per Python module under docs/eli12/ in a fixed format: what it does, what it expects, what it gives back, who uses it, what it depends on. It computes the who-uses-who lines from the code and leaves TODO for the words only a person can write.",
+   "kind": "skill",
+   "design": [
+    {
+     "choice": "The tool computes facts, a person writes meaning",
+     "why": "Signatures, callers and callees must not be guessed; the sig fingerprint and the Used by / Depends on lists are computed, and the check fails when they drift.",
+     "alternatives": "A model rewriting the docs on every change"
+    }
+   ],
+   "files": [
+    {
+     "path": "skills/eli12-docs/SKILL.md",
+     "contains": "## The format",
+     "note": "The page format and rules",
+     "lines": "25-32"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "def main",
+     "note": "scaffold, check, index",
+     "lines": "799-851"
+    },
+    {
+     "path": "docs/prds/SFN-07-eli12-docs.md",
+     "contains": "# SFN-07",
+     "note": "The PRD",
+     "lines": "1-33"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_eli12.py passes here. lsf ships an identical copy of the script (tests compare them).",
+    "gaps": [
+     "Only Python modules are covered",
+     "Whether the sentences are plain enough for a 12-year-old is a human judgement the check cannot make (it checks length, labels, jargon list)"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  eli12-format[\"Page format<br/>docs/eli12/MODULE.md\"] -->|\"template for\"| eli12-scaffold[\"scaffold<br/>creates or refreshes\"]",
+    "  eli12-scaffold -->|\"pages with TODO\"| eli12-check[\"check<br/>finding codes\"]",
+    "  eli12-scaffold --> eli12-index[\"index<br/>INDEX.md + index.json\"]"
+   ],
+   "children": [
+    "eli12-format",
+    "eli12-scaffold",
+    "eli12-check",
+    "eli12-index"
+   ]
+  },
+  "eli12-format": {
+   "title": "Page format",
+   "summary": "Line one is the .py path; then one sentence; then per public class or function (methods as Class.method) the labelled lines What it does, Expects, Gives back, Used by, Depends on and an optional Watch out, in that order, with a sig comment. Jargon words need a GLOSSARY entry.",
+   "kind": "rule",
+   "files": [
+    {
+     "path": "skills/eli12-docs/SKILL.md",
+     "contains": "## The format",
+     "note": "Example page",
+     "lines": "25-32"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "LABELS = [",
+     "note": "Label order",
+     "lines": "21"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "def parse_doc",
+     "note": "Parser of a page",
+     "lines": "368-406"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented and enforced by check."
+   }
+  },
+  "eli12-scaffold": {
+   "title": "scaffold",
+   "summary": "Creates or refreshes a page: on an existing page it only refreshes sig, Used by and Depends on and adds missing sections, so written sentences are never overwritten. Calls it cannot pin to one project symbol are listed with (maybe).",
+   "kind": "command",
+   "files": [
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "def scaffold_module",
+     "note": "Whole page",
+     "lines": "482-503"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "def scaffold_entry",
+     "note": "One entry; keeps old sentences",
+     "lines": "442-475"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "class Project",
+     "note": "Computes callers and callees",
+     "lines": "168-337"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented.",
+    "gaps": [
+     "Unresolved calls are only marked (maybe); a person must check them"
+    ]
+   }
+  },
+  "eli12-check": {
+   "title": "check and finding codes",
+   "summary": "Exit 0 clean, 1 findings, 2 usage. Each finding is path:line: code: message with a code from missing-entry, orphan-entry, stale-signature, stale-dependencies, todo, format, too-long, bad-param, jargon and unparseable. --changed GITREF limits it to changed modules plus modules whose lists mention them.",
+   "kind": "command",
+   "files": [
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "def run_check",
+     "note": "Runs the checks",
+     "lines": "743-794"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "\"stale-signature\"",
+     "note": "Signature drift",
+     "lines": "680"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "\"stale-dependencies\"",
+     "note": "Used by / Depends on drift",
+     "lines": "714"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "\"bad-param\"",
+     "note": "Parameter line shape",
+     "lines": "704"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "def changed_files",
+     "note": "--changed GITREF",
+     "lines": "732-740"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; the todo, format and jargon codes are listed in SKILL.md and produced inside check_doc and check_entry."
+   }
+  },
+  "eli12-index": {
+   "title": "index",
+   "summary": "Writes docs/eli12/INDEX.md and docs/eli12/index.json (module path to page path) so the explorer and the dashboards can link each file to its page; scaffold refreshes index.json too.",
+   "kind": "command",
+   "files": [
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "def build_index",
+     "note": "Builds the mapping",
+     "lines": "547-565"
+    },
+    {
+     "path": "skills/eli12-docs/scripts/eli12.py",
+     "contains": "def write_index",
+     "note": "Writes both files",
+     "lines": "568-573"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented.",
+    "gaps": [
+     "docs/eli12/ does not exist in this repository yet, so the lsf Docs tab reports 'not available' here"
+    ]
+   }
+  },
+  "dolls-explorer": {
+   "title": "Explorer and editor links",
+   "summary": "The nesting-dolls builder turns a model.json into this one-file explorer. Each file in a node's panel is a link that opens the editor at the first line of its range, with a Copy path button; editor and checkout root are set at build time (--workspace-root, --editor) or per view (?editor=&root=).",
+   "kind": "skill",
+   "design": [
+    {
+     "choice": "One pure link builder, inlined in every surface",
+     "why": "assets/editor-links.js is the single source; its text between the begin/end markers is copied into the viewer template, the ops shell and the lsf dashboard, and a check fails if a copy drifts.",
+     "alternatives": "Each surface writing its own link code"
+    }
+   ],
+   "files": [
+    {
+     "path": "skills/mermaid-nesting-dolls/SKILL.md",
+     "contains": "## Opening files in your editor",
+     "note": "Usage",
+     "lines": "61-68"
+    },
+    {
+     "path": "skills/mermaid-nesting-dolls/assets/editor-links.js",
+     "contains": "function editorUrl",
+     "note": "The pure function",
+     "lines": "45-60"
+    },
+    {
+     "path": "docs/prds/SFN-08-editor-links.md",
+     "contains": "# SFN-08",
+     "note": "The PRD",
+     "lines": "1-31"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_editor_links.py passes here and the committed explorer was rebuilt and checked with --assets in this refresh.",
+    "gaps": [
+     "The committed HTML has no workspace root, so it shows Copy path only until ?editor=&root= or a rebuild with --workspace-root is used",
+     "Opening the editor from the page was not clicked in this refresh (no desktop editor registered on this host)"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  editor-links[\"editor-links.js<br/>editorUrl(editor, root, path, line)\"] -->|\"inlined between markers\"| editor-copies[\"Inlined copies<br/>viewer, ops shell, lsf dashboard\"]",
+    "  dolls-options[\"Build options<br/>--workspace-root, --editor, ?editor=&root=\"] -->|\"workspace in the model\"| editor-copies",
+    "  editor-copies -->|\"check --assets\"| asset-check[\"Drift check<br/>two copies\"]"
+   ],
+   "children": [
+    "editor-links",
+    "editor-copies",
+    "dolls-options",
+    "asset-check"
+   ]
+  },
+  "editor-links": {
+   "title": "editor-links.js",
+   "summary": "A dependency-free ES5 function editorUrl(editor, root, relPath, line) for vscode, cursor, windsurf, zed, idea, sublime and textmate. It returns null for an absolute or .. path, a backslash, a NUL, a scheme prefix or a non-absolute root, and percent-encodes each path segment.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "skills/mermaid-nesting-dolls/assets/editor-links.js",
+     "contains": "function editorUrl",
+     "note": "Builder",
+     "lines": "45-60"
+    },
+    {
+     "path": "skills/mermaid-nesting-dolls/assets/editor-links.js",
+     "contains": "function validRel",
+     "note": "Path safety",
+     "lines": "36-44"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_editor_links.py exercises it."
+   }
+  },
+  "editor-copies": {
+   "title": "Inlined copies",
+   "summary": "The function text between /* editor-links:begin */ and /* editor-links:end */ appears in the viewer template, ops/shell/index.html and skills/lsf/assets/dashboard.html, and skills/lsf/assets/editor-links.js is a copy of the source.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "skills/mermaid-nesting-dolls/assets/template.html",
+     "contains": "editor-links:begin",
+     "note": "Viewer copy",
+     "lines": "174"
+    },
+    {
+     "path": "ops/shell/index.html",
+     "contains": "editor-links:begin",
+     "note": "Ops shell copy",
+     "lines": "60"
+    },
+    {
+     "path": "skills/lsf/assets/dashboard.html",
+     "contains": "editor-links:begin",
+     "note": "lsf dashboard copy",
+     "lines": "114"
+    },
+    {
+     "path": "skills/lsf/assets/editor-links.js",
+     "contains": "editor-links:begin",
+     "note": "lsf asset copy",
+     "lines": "1"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "All four copies are covered by tests (tests/lsf/test_dashboard.py, evals/native/sfn06/test_static.py)."
+   }
+  },
+  "dolls-options": {
+   "title": "Build options and view overrides",
+   "summary": "build and check accept --workspace-root DIR and --editor NAME, stored as model.workspace and validated (absolute root, known editor or none). In the browser ?editor= and ?root= override the model and an invalid root is ignored.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "skills/mermaid-nesting-dolls/scripts/nesting_dolls.py",
+     "contains": "--workspace-root",
+     "note": "Build and check options",
+     "lines": "252"
+    },
+    {
+     "path": "skills/mermaid-nesting-dolls/scripts/nesting_dolls.py",
+     "contains": "def validate_workspace",
+     "note": "Validation",
+     "lines": "55-65"
+    },
+    {
+     "path": "skills/mermaid-nesting-dolls/assets/template.html",
+     "contains": "ed=w.editor||\"none\"",
+     "note": "View-time override",
+     "lines": "340"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "asset-check": {
+   "title": "Drift check (--assets)",
+   "summary": "check --assets fails if the inlined copy in the viewer template or in ops/shell/index.html differs from assets/editor-links.js. The two lsf copies are not covered by this command; tests cover them.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "skills/mermaid-nesting-dolls/scripts/nesting_dolls.py",
+     "contains": "def check_assets",
+     "note": "The comparison",
+     "lines": "73-84"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Implemented for two of the four copies.",
+    "gaps": [
+     "skills/lsf copies are guarded by tests, not by check --assets"
+    ]
+   }
+  },
+  "ops-bundle": {
+   "title": "Bundle",
+   "summary": "Writes per-commit snapshots under ops/snapshots/<sha>/ as content-addressed blobs read from the git object database (or the working tree), builds the viewer and installs the shell.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/ops/bundle.py",
+     "contains": "def put_blob",
+     "note": "Content-addressed blob",
+     "lines": "49-55"
+    },
+    {
+     "path": "factory/ops/bundle.py",
+     "contains": "def build_viewer",
+     "note": "Viewer from the dolls template",
+     "lines": "58-67"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_ops.py passes here."
+   }
+  },
+  "ops-events": {
+   "title": "Stage events",
+   "summary": "emit(root, stage, slice, verdict, note, source, role) appends one JSON line to ops/events.jsonl under an exclusive lock: notes are cut to 2,000 characters, control characters and secret shapes are removed, a symlink that leaves the root is refused, and a failure returns False and never raises. SF_EVENTS=off writes nothing.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/ops/events.py",
+     "contains": "def emit",
+     "note": "The writer",
+     "lines": "65-97"
+    },
+    {
+     "path": "factory/ops/events.py",
+     "contains": "def _redact",
+     "note": "Secret shapes",
+     "lines": "25-32"
+    },
+    {
+     "path": "docs/ops-events.md",
+     "contains": "## Stage events",
+     "note": "Contract",
+     "lines": "5-15"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_ops_events.py and test_ops_security.py pass here."
+   }
+  },
+  "ops-emission": {
+   "title": "Where events come from",
+   "summary": "factory/cli.py run_tool emits one event after a delegated tool group finishes (pass on exit 0, else fail, note exit=N; nothing for exit 2); the subagent_stop and ledger_audit hooks each emit a subagent-stop event. The exit code and the hook decision are never changed.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/cli.py",
+     "contains": "def _record_event",
+     "note": "Telemetry only; never raises",
+     "lines": "402-415"
+    },
+    {
+     "path": "factory/cli.py",
+     "contains": "def run_tool",
+     "note": "Calls _record_event after the tool",
+     "lines": "418-432"
+    },
+    {
+     "path": "factory/hooks/subagent_stop.py",
+     "contains": "def record",
+     "note": "Hook emission",
+     "lines": "339-344"
+    },
+    {
+     "path": "factory/hooks/ledger_audit.py",
+     "contains": "emit(cfg.project_root",
+     "note": "Hook emission",
+     "lines": "53"
+    },
+    {
+     "path": "docs/ops-events.md",
+     "contains": "## Which commands leave an event",
+     "note": "Command to stage table",
+     "lines": "17-30"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; seen in a real headless session (S6).",
+    "gaps": [
+     "Each sub-agent stop is recorded twice (both hooks emit); the agent-stop tile would double count (docs/native-verification/2026-10-20/REPORT.md)"
+    ]
+   }
+  },
+  "ops-cli": {
+   "title": "sf ops commands",
+   "summary": "init creates ops/config.json and events.jsonl, installs the viewer and bundles HEAD (optionally recording a Langfuse host); backfill bundles commits without a snapshot; status says how far the newest snapshot is behind HEAD (exit 4 when behind or none); autobundle installs, removes or reports a post-commit hook block that runs sf ops bundle --sha HEAD.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/ops/cli.py",
+     "contains": "def _init",
+     "note": "init",
+     "lines": "62-102"
+    },
+    {
+     "path": "factory/ops/cli.py",
+     "contains": "def _backfill",
+     "note": "backfill",
+     "lines": "105-125"
+    },
+    {
+     "path": "factory/ops/cli.py",
+     "contains": "def _status",
+     "note": "status; BEHIND exit 4",
+     "lines": "128-153"
+    },
+    {
+     "path": "factory/ops/cli.py",
+     "contains": "def _autobundle",
+     "note": "autobundle",
+     "lines": "177-213"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_ops_cli_native.py passes here; init and status were run in a real session (S6)."
+   }
+  },
+  "ops-runtime-collector": {
+   "title": "Runtime telemetry",
+   "summary": "collect_runtime measures what the config declares and labels each figure measured or not measured. repo_state reports repo_head and how many commits the newest snapshot is behind (behind, None when unknown); stops reads open human stops through the hitl store with the hash chain verified and reports a failed ledger as an open entry; langfuse says 'not measured' with the reason instead of a number it does not have.",
+   "kind": "module",
+   "design": [
+    {
+     "choice": "Not measured is shown, never a zero",
+     "why": "A dashboard that prints 0 traces when it never asked is lying; every runtime figure carries a source and a label.",
+     "alternatives": "Defaulting missing figures to zero"
+    }
+   ],
+   "files": [
+    {
+     "path": "factory/ops/runtime.py",
+     "contains": "def repo_state",
+     "note": "repo_head and behind",
+     "lines": "189-199"
+    },
+    {
+     "path": "factory/ops/runtime.py",
+     "contains": "def stops",
+     "note": "Open human stops, chain verified",
+     "lines": "152-164"
+    },
+    {
+     "path": "factory/ops/runtime.py",
+     "contains": "def langfuse",
+     "note": "Host shown when configured; traces not measured",
+     "lines": "132-149"
+    },
+    {
+     "path": "factory/ops/runtime.py",
+     "contains": "def collect_runtime",
+     "note": "Assembles runtime.json",
+     "lines": "202-226"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_ops.py and test_ops_content.py pass here.",
+    "gaps": [
+     "Trace ingestion is not checked by the collector: Langfuse traces stay 'not measured'"
+    ]
+   }
+  },
+  "ops-tab-sources": {
+   "title": "Tab sources",
+   "summary": "Collectors for the historical tabs, each returning items or 'not available' with the paths searched, never an empty success: the one-page PRD journeys, experiments including resolved.json, the bug log and QA notes, and the human stops history.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/ops/collect.py",
+     "contains": "COLLECTORS = {",
+     "note": "All tab collectors",
+     "lines": "487-491"
+    },
+    {
+     "path": "docs/ops-tabs.md",
+     "contains": "# Ops dashboard tabs",
+     "note": "Source per tab",
+     "lines": "1-17"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_ops_content.py passes here."
+   },
+   "diagram": [
+    "flowchart LR",
+    "  tab-prd[\"PRD journeys<br/>docs/prd/onepager.md\"] --> tab-experiments[\"Experiments<br/>results.json, resolved.json\"]",
+    "  tab-experiments --> tab-bugs[\"Evals and bugs<br/>docs/bugs, qa-notes.md\"]",
+    "  tab-bugs --> tab-hitl[\"Human stops<br/>ADRs + hitl events\"]"
+   ],
+   "children": [
+    "tab-prd",
+    "tab-experiments",
+    "tab-bugs",
+    "tab-hitl"
+   ]
+  },
+  "tab-prd": {
+   "title": "One-page PRD journeys",
+   "summary": "Reads docs/prd/onepager.md (## Journey: name, a Slices line, one to five steps), flags an id with no docs/slices/<id>/, and warns when the page is over 80 lines without cutting anything; the slice proposals and docs/prds follow.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/ops/collect.py",
+     "contains": "def _onepager",
+     "note": "Parser",
+     "lines": "231-269"
+    },
+    {
+     "path": "factory/ops/collect.py",
+     "contains": "def prd_journeys",
+     "note": "Tab source",
+     "lines": "272-298"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "tab-experiments": {
+   "title": "Resolved experiments",
+   "summary": "experiments/<id>/results.json is kind experiment; experiments/<id>/resolved.json {question, resolved_by, sources, as_of} is kind resolved, so a choice settled by research is shown without a fake experiment. sf intake experiments check validates both.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/ops/collect.py",
+     "contains": "def experiments",
+     "note": "Tab source",
+     "lines": "170-187"
+    },
+    {
+     "path": "factory/intake/cli.py",
+     "contains": "experiments",
+     "note": "The check accepts resolved.json",
+     "lines": "1"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "tab-bugs": {
+   "title": "Bug log",
+   "summary": "Reads docs/bugs/*.md (Status: open, fixed or wontfix, else invalid), docs/bug-log.jsonl and the signature blocks of docs/slices/*/qa-notes.md.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/ops/collect.py",
+     "contains": "def bug_log",
+     "note": "Tab source",
+     "lines": "353-372"
+    },
+    {
+     "path": "factory/ops/collect.py",
+     "contains": "def _qa_notes",
+     "note": "QA note blocks",
+     "lines": "336-350"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "tab-hitl": {
+   "title": "Human stops history",
+   "summary": "Historical view of open decisions: ADRs whose status is Proposed or Pending, and ops/events.jsonl events with stage hitl up to the snapshot's commit date. Open stops never enter a snapshot; the live ones come from the runtime collector.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/ops/collect.py",
+     "contains": "def hitl",
+     "note": "Tab source",
+     "lines": "456-484"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented."
+   }
+  },
+  "qa-notes": {
+   "title": "QA notes (promote-notes)",
+   "summary": "sf qa promote-notes --slice DIR writes DIR/qa-notes.md from the local .sf attempt log: one signature block with attempt count, criteria, the observed and expected text and the regression proposal. The leak check runs first (exit 1, nothing written); an unchanged re-run does not rewrite the file.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "factory/qa/notes.py",
+     "contains": "def promote",
+     "note": "Commits the notes",
+     "lines": "124-139"
+    },
+    {
+     "path": "factory/qa/notes.py",
+     "contains": "def build",
+     "note": "Builds the Markdown",
+     "lines": "69-121"
+    },
+    {
+     "path": "docs/ops-tabs.md",
+     "contains": "## Committing QA notes",
+     "note": "Contract",
+     "lines": "16-17"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; tests/test_qa_notes.py passes here.",
+    "gaps": [
+     "The notes exist only after a real QA loop has recorded failures; none have been produced by a real session"
+    ]
+   }
+  },
+  "ops-shell": {
+   "title": "Shell: tabs and banners",
+   "summary": "ops/shell/index.html is the static viewer: twelve tabs (overview, human stops, ops, architecture, research, experiments, ADRs, PRD journeys, Langfuse, evals and bugs, dev journey, git history), a stops banner ('N open human stop(s)' or 'human stops unknown') and a staleness banner ('Snapshot is N commits behind the repository') driven by runtime.json.",
+   "kind": "module",
+   "files": [
+    {
+     "path": "ops/shell/index.html",
+     "contains": "var TABS=[",
+     "note": "The twelve tabs",
+     "lines": "125-128"
+    },
+    {
+     "path": "ops/shell/index.html",
+     "contains": "function renderStops",
+     "note": "Stops banner",
+     "lines": "174-179"
+    },
+    {
+     "path": "ops/shell/index.html",
+     "contains": "commits behind the repository",
+     "note": "Staleness banner",
+     "lines": "266"
+    },
+    {
+     "path": "ops/shell/index.html",
+     "contains": "function hitlHtml",
+     "note": "Human stops tab",
+     "lines": "180-189"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented; verified in a real browser against this repository's history in the earlier build.",
+    "gaps": [
+     "Not deployed"
+    ]
+   }
+  },
+  "flow-compare": {
+   "title": "Flow: sf stages vs lsf phases",
+   "summary": "The owner's flow as two runners over one set of stages. Each sf stage 0 to 12 is shown with the lsf phase that aliases onto it (lsf runs decide, phase 6, after evals, phase 5; stages 9, 11 and 12 exist only in sf). The four loop-backs are drawn as clickable boxes: qa to implement, qa to evals, review to implement and inbound to slice.",
+   "kind": "process",
+   "design": [
+    {
+     "choice": "Loop-backs are explicit, evidence-bearing edges",
+     "why": "A flow that only runs forward hides the rework the owner cares about; each loop-back names the command or file that makes it happen.",
+     "alternatives": "A linear stage list"
+    }
+   ],
+   "files": [
+    {
+     "path": "docs/sf-flow.md",
+     "contains": "flowchart TD",
+     "note": "The sf flow with its legend",
+     "lines": "12"
+    },
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "SF_ALIAS = {",
+     "note": "lsf phase to /sf stage",
+     "lines": "43-46"
+    },
+    {
+     "path": "factory/agents/default_graph.yaml",
+     "contains": "loops:",
+     "note": "Declared loops of the role graph",
+     "lines": "20"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The sf stages, the alias map and the role-graph loops are code or documents; the loop-backs qa to evals, review to implement and inbound to slice have not been exercised by real agents.",
+    "gaps": [
+     "Loop-backs have not run in a real session"
+    ]
+   },
+   "diagram": [
+    "flowchart LR",
+    "  s0[\"0 Intake gate<br/>lsf 0-intake, 1-sweep\"] --> s1[\"1 Research<br/>lsf 2-research\"] --> s2[\"2 Experiments<br/>lsf 3-experiments\"] --> s3[\"3 Decide, ADR<br/>lsf 6-decide\"] --> s4[\"4 Slice, UX stories first<br/>lsf 4-prd\"] --> s5[\"5 Evals first, frozen<br/>lsf 5-evals\"] --> s6[\"6 Blind implement<br/>lsf 7-implement\"] --> s7[\"7 QA<br/>lsf 8-qa\"] --> s8[\"8 Gate, 8b Review<br/>lsf 9-review\"] --> s9[\"9 Drift<br/>sf only\"] --> s10[\"10 Docs<br/>lsf 10-docs\"] --> s11[\"11 Commit + snapshot<br/>sf only\"] --> s12[\"12 Inbound<br/>sf only\"]",
+    "  s7 -->|\"fail: feedback\"| flow-lb-qa-impl{{\"Loop 1<br/>QA to implement\"}}",
+    "  flow-lb-qa-impl --> s6",
+    "  s7 -->|\"same signature again\"| flow-lb-qa-evals{{\"Loop 2<br/>QA to evals\"}}",
+    "  flow-lb-qa-evals --> s5",
+    "  s8 -->|\"finding\"| flow-lb-review-impl{{\"Loop 3<br/>review to implement\"}}",
+    "  flow-lb-review-impl --> s6",
+    "  s12 -->|\"new text, ranked\"| flow-lb-inbound-slice{{\"Loop 4<br/>inbound to slice\"}}",
+    "  flow-lb-inbound-slice --> s4",
+    "  flow-phase-map[\"Alias map<br/>lsf phase to sf stage\"] -.-> s0"
+   ],
+   "children": [
+    "flow-lb-qa-impl",
+    "flow-lb-qa-evals",
+    "flow-lb-review-impl",
+    "flow-lb-inbound-slice",
+    "flow-phase-map"
+   ]
+  },
+  "flow-lb-qa-impl": {
+   "title": "Loop 1: QA to implement",
+   "summary": "A failed gate gives behavioural feedback (criterion terms, no test source, leak-checked) and the same tier retries; at the policy point the model tier escalates; at the cap the case is handed to the reviewer. The role graph declares the loop [qa, implement].",
+   "kind": "loop",
+   "files": [
+    {
+     "path": "factory/agents/default_graph.yaml",
+     "contains": "- [qa, implement]",
+     "note": "Declared loop",
+     "lines": "21"
+    },
+    {
+     "path": "factory/qa/decide.py",
+     "contains": "def decide(",
+     "note": "Retry, escalate, hand off",
+     "lines": "30-77"
+    },
+    {
+     "path": "docs/qa-loop.md",
+     "contains": "`rerun_for_flake`",
+     "note": "Actions",
+     "lines": "50-51"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Implemented and simulated with a scripted implementer; not run with real agents.",
+    "gaps": [
+     "Real implementer and QA agent loop not yet run"
+    ]
+   }
+  },
+  "flow-lb-qa-evals": {
+   "title": "Loop 2: QA to evals",
+   "summary": "When the same failure signature recurs, QA proposes a regression case (sf qa regression-propose, written append-only to regression-proposals/<signature>.md) which goes back to the evals stage; the evals stay frozen except through an additive amendment.",
+   "kind": "loop",
+   "files": [
+    {
+     "path": "docs/qa-loop.md",
+     "contains": "regression-proposals",
+     "note": "Where proposals go",
+     "lines": "22"
+    },
+    {
+     "path": "factory/qa/decide.py",
+     "contains": "propose_regression",
+     "note": "The decision",
+     "lines": "6-7"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "Implemented and simulated; not run with real agents. The role graph declares no qa to evals back-edge: this loop is the proposal artifact plus a human or orchestrator step.",
+    "gaps": [
+     "Real run not done"
+    ]
+   }
+  },
+  "flow-lb-review-impl": {
+   "title": "Loop 3: review to implement",
+   "summary": "A reviewer finding becomes a triaged task or criterion through sf slice amend --role reviewer (additive only; weakening needs an explicit approval marker) and re-opens implement and QA. The role graph declares the loop [review, implement]; in lsf, 9-review failures amend the PRD and go back to 7 and 8.",
+   "kind": "loop",
+   "files": [
+    {
+     "path": "factory/agents/default_graph.yaml",
+     "contains": "- [review, implement]",
+     "note": "Declared loop",
+     "lines": "22"
+    },
+    {
+     "path": "factory/slices/cli.py",
+     "contains": "def cmd_amend",
+     "note": "Reviewer amendment",
+     "lines": "93-129"
+    },
+    {
+     "path": "skills/lsf/SKILL.md",
+     "contains": "failures amend the PRD and go back to 7 and 8",
+     "note": "lsf wording",
+     "lines": "43"
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The command and the graph loop are implemented and tested; a real reviewer has not amended a slice.",
+    "gaps": [
+     "Reviewer amendments not yet run in a real session"
+    ]
+   }
+  },
+  "flow-lb-inbound-slice": {
+   "title": "Loop 4: inbound to slice",
+   "summary": "Stage 12 looks at what arrived while working, ranks it into the ledger or backlog (sf intake gate --since GITREF re-checks changed requirement text), states 'nothing new' explicitly and the next slice is chosen from the ledger, not a queue.",
+   "kind": "loop",
+   "files": [
+    {
+     "path": "docs/sf-flow.md",
+     "contains": "inbound --> slice",
+     "note": "In the flow diagram",
+     "lines": "41"
+    },
+    {
+     "path": "factory/intake/cli.py",
+     "contains": "--since",
+     "note": "Gate on changed source",
+     "lines": "44"
+    },
+    {
+     "path": "~/.claude/skills/sf/SKILL.md",
+     "lines": "223-252",
+     "contains": "Check the inbound sources",
+     "note": "Stage 12 text in the installed skill",
+     "external": true
+    }
+   ],
+   "coverage": {
+    "status": "partial",
+    "note": "The gate option exists; the ranking is model procedure and not yet run in a real session.",
+    "gaps": [
+     "Not run in a real session",
+     "The ranking and the 'nothing new' statement are written procedure with no mechanical check"
+    ]
+   }
+  },
+  "flow-phase-map": {
+   "title": "Alias map: lsf phase to sf stage",
+   "summary": "0-intake and 1-sweep map to stage 0, 2-research to 1, 3-experiments to 2, 4-prd to 4, 5-evals to 5, 6-decide to 3, 7-implement to 6, 8-qa to 7, 9-review to 8b and 10-docs to 10, so events from both tools read the same.",
+   "kind": "config",
+   "files": [
+    {
+     "path": "skills/lsf/scripts/lsf.py",
+     "contains": "SF_ALIAS = {",
+     "note": "The map",
+     "lines": "43-46"
+    },
+    {
+     "path": "skills/lsf/SKILL.md",
+     "contains": "| lsf phase | group |",
+     "note": "The table with the /sf stage column",
+     "lines": "32"
+    }
+   ],
+   "coverage": {
+    "status": "built",
+    "note": "Implemented as data.",
+    "gaps": [
+     "lsf has no phase for stages 8 (impact and solver gate), 11 or 12; they exist only in sf"
     ]
    }
   }
