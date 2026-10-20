@@ -9,7 +9,7 @@ python -m factory.install install   --project DIR [--factory-root DIR] [--python
                                     [--no-hooks] [--no-agents] [--allow-model NAME ...] [--dry-run]
 python -m factory.install uninstall --project DIR
 python -m factory.install doctor    [--project DIR] [--skills-dir DIR] [--json] [--allow-model NAME ...]
-python -m factory.install pin-external [--skills-dir DIR] [--factory-root DIR] [--yes]
+python -m factory.install pin-external [--skills-dir DIR] [--factory-root DIR] [--yes] [--accept-changed NAME ...]
 python -m factory.hitl request|status|release --root R ...
 ```
 
@@ -84,15 +84,18 @@ that mentions `factory.` or the installed python.
 Role and pin checks (always run; `--factory-root` selects the role files and `docs/external-skills.json`):
 `PASS|FAIL role <id> model: ...` (FAIL when a role file names a model that is not `sonnet` and not
 allowed); `PASS|FAIL role <id> skill <name>: ...` for every skill a role names (PASS when it
-resolves in the repo `skills/`, the user skills dir, an installed plugin as `plugin:skill`, or is
-the built-in `claude-api`); `PASS|WARN|FAIL external <name>: ...` for the skills pinned in
+resolves to a non-empty `SKILL.md` in the repo `skills/` or the user skills dir, or in an installed
+and not disabled plugin (`plugin:skill`; `enabledPlugins` in `~/.claude/settings.json` is honoured),
+or is the built-in `claude-api`; names containing `..` or a slash never resolve). The agent files are
+checked too: model, the role's skills present, extra skills resolving; a profile `agents.<role>.model`
+override is checked like a role file's model; `PASS|WARN|FAIL external <name>: ...` for the skills pinned in
 `docs/external-skills.json` (missing or unpinned is FAIL; a changed `SKILL.md` is a WARN
 `changed since pinned`, which does not change the exit code).
 
 `pin-external` rewrites `docs/external-skills.json` (`{"schema": 1, "skills": {name: {"sha256": ...}}}`)
 from the installed copies in `--skills-dir` (default `~/.claude/skills`), prints the diff, and
 writes only with `--yes`; without it nothing is written and the exit code is 2. A skill with no
-`SKILL.md` is reported as not pinned.
+`SKILL.md` is reported as not pinned. A skill whose hash differs from its existing pin (or that vanished) is never re-pinned silently: the diff is printed and the command exits 2, writing nothing, until each such skill is named with `--accept-changed NAME`.
 
 ## Human stop (`python -m factory.hitl`)
 
