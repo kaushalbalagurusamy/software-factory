@@ -27,3 +27,13 @@ are recorded in the session handoff/status, not assumed from local results.
 
 New VPS fallback projects may use the tested personal extension while the
 coordinator base remains 30ed8d5. Existing pinned agents retain their runtimes.
+
+Final VPS verification: all **91 LSF checks passed in 35.33 seconds** after
+correcting noninteractive PATH to include the installed Claude binary. The
+combined LSF/lifecycle VPS run exceeded its 180-second guard and is not counted
+as a pass. Local lifecycle verification remains 268 passing checks.
+
+Installed on both machines. An isolated VPS dashboard using the new runtime is
+available through http://127.0.0.1:8893/#load; the served HTML and model collector
+were checked. New fallback projects select personal runtime 1293faf while the
+coordinator base is unchanged. Existing pinned projects were not restarted.
