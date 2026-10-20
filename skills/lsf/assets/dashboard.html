@@ -398,7 +398,8 @@ function renderGit(){
    h("div",{class:"row2",style:"margin-top:.3rem"},[h("button",{type:"button",disabled:cur,"aria-label":"View tabs at "+c.sha.slice(0,8),onclick:function(){S.err="";api("/api/at?sha="+c.sha).then(function(j){S.snap=j;S.sig="";render();}).catch(function(e){S.err="Could not load "+c.sha.slice(0,8)+": "+e.message;render();});}},cur?"Showing":"View tabs at this commit")])]));});
  n.appendChild(l);return n;}
 
-var RENDER={now:renderNow,telemetry:renderTelemetry,research:renderResearch,experiments:renderExperiments,adrs:renderAdrs,prd:renderPrd,architecture:renderArch,docs:renderDocs,evals:renderEvals,git:renderGit};
+function withHelp(text,node){var w=h("div",{});w.appendChild(h("p",{class:"mute small"},text));w.appendChild(node);return w;}
+var RENDER={now:renderNow,telemetry:renderTelemetry,research:renderResearch,experiments:renderExperiments,adrs:renderAdrs,prd:renderPrd,architecture:function(){return withHelp("Looks in docs/explorer/*.model.json and docs/explorer/*.html (the nested diagrams); each node lists its source files as editor links.",renderArch());},docs:function(){return withHelp("Looks in docs/eli12/index.json and the module pages it names under docs/eli12/.",renderDocs());},evals:renderEvals,git:renderGit};
 function renderTab(){
  main.textContent="";
  if(!S.state){main.appendChild(h("div",{class:"empty",role:"status"},S.err||"Loading..."));return;}

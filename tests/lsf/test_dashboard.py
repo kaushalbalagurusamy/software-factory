@@ -29,3 +29,7 @@ def test_offline_and_themed_and_mobile():
 
 def test_no_innerhtml_of_data():
     assert "innerHTML" not in HTML
+
+
+def test_tabs_name_where_they_look():
+    assert "docs/explorer" in HTML and "docs/eli12" in HTML

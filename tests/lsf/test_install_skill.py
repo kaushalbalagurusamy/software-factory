@@ -67,3 +67,8 @@ def test_skill_names_prds_and_dashboard_copy_path():
     for p in ("docs/prds", "docs/adr", "experiments/", "research/", "docs/eli12", "docs/explorer", "docs/bugs"):
         assert p in t, p
     assert "Copy path" in (SKILL / "assets" / "dashboard.html").read_text()
+
+
+def test_mac_quick_start_section():
+    t = (SKILL / "SKILL.md").read_text()
+    assert "## Mac quick start" in t and "python3 --version" in t and "sh install.sh" in t and "lsf serve --open" in t and "#token=" in t
