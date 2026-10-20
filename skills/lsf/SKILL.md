@@ -16,7 +16,12 @@ Run the tool as `lsf` (installed by `install.sh`) or `python3 <skill dir>/script
 2. From the unpacked skill folder: `sh install.sh`. It copies the skill to `~/.claude/skills/lsf` and puts an `lsf` wrapper in `~/.local/bin` (add that folder to `PATH` if it says so). Running it again changes nothing. An older different copy is kept in `~/.claude/skills-backups`, never inside the skills folder (it would load as a second `lsf`).
 3. In the project folder: `lsf doctor`, then `lsf init`.
 4. `lsf serve --open` prints `http://127.0.0.1:PORT/#token=...` once in that terminal and opens it. The token after `#` is what enables the Approve button, so open that exact URL (if the page has no token it shows the terminal command instead). Keep this terminal running.
-5. To approve a checkpoint: click **Approve** on its card in the Now tab (add a note if you like), or run `lsf hitl release NAME` in another terminal. Agents never release.
+5. Decisions you are asked for follow this lifecycle (agents never release):
+   - **Asked**: the agent runs `lsf hitl request NAME --question Q --option A --option B`; the dashboard banner says `N decision(s) waiting for you`.
+   - **Answered**: you pick an option and press **Submit answer** in the Human stops tab (a question without options keeps **Approve**), or run `lsf hitl release NAME --answer A`.
+   - **Recorded**: the agent writes your answer down and runs `lsf hitl recorded NAME --where PATH`.
+   - **Applied**: once the change is made, the agent runs `lsf hitl applied NAME --evidence "what changed"`; only then does the card say Applied.
+   - **Stale**: if the question or an artifact changed after it was asked, the answer is refused (409) and the agent must ask again.
 
 ## Start
 
