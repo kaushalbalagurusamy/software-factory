@@ -1370,12 +1370,71 @@ def cmd_phase(a, root):
     return 0
 
 
+MAX_LOG = 64 * 1024
+
+
+def read_log_input(src):
+    """(last 64 KiB of the log as bytes, total byte count). '-' reads stdin. Unreadable input is a Usage error."""
+    try:
+        if src == "-":
+            tail, total = b"", 0
+            while True:
+                chunk = sys.stdin.buffer.read(1 << 16)
+                if not chunk:
+                    break
+                total += len(chunk)
+                tail = (tail + chunk)[-MAX_LOG:]
+            return tail, total
+        if not os.path.isfile(src):
+            raise Usage("log file %s is missing or not a regular file" % src)
+        total = os.path.getsize(src)
+        with open(src, "rb") as f:
+            if total > MAX_LOG:
+                f.seek(total - MAX_LOG)
+            return f.read(MAX_LOG), total
+    except OSError as e:
+        raise Usage("cannot read the log: %s" % e)
+
+
+def clean_log(raw, total):
+    """Decode, redact like events (keeping line breaks), and say so when the front was cut."""
+    text = raw.decode("utf-8", "replace").replace("\r", "")
+    text = "".join(" " if (ord(c) < 32 and c not in "\n\t") or 127 <= ord(c) < 160 else c for c in text)
+    text = redact(text)
+    if total > len(raw):
+        text = "[earlier output cut: %d bytes]\n" % (total - len(raw)) + text
+    return text
+
+
+def store_log(root, text):
+    """Write text to .lsf/logs/<id>.txt (0700 dir, 0600 file, never through a symlink). Returns the repo-relative path."""
+    d = lpath(root, "logs")
+    if os.path.islink(d):
+        raise Fail(".lsf/logs is a symlink; refusing to write the log")
+    os.makedirs(d, mode=0o700, exist_ok=True)
+    name = "%s-%s.txt" % (now().strftime("%Y%m%dT%H%M%S"), secrets.token_hex(4))
+    fd = os.open(os.path.join(d, name), os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(text)
+    return ".lsf/logs/" + name
+
+
 def cmd_event(a, root):
     if not a.stage.strip() or not a.verdict.strip():
         raise Usage("stage and verdict are required")
+    if a.log_file and a.log:
+        raise Usage("use either --log-file PATH or --log -, not both")
+    if a.log not in (None, "-"):
+        raise Usage("--log only accepts - (read the log from stdin); use --log-file PATH for a file")
+    logp = None
+    if a.log_file or a.log:
+        raw, total = read_log_input(a.log_file or "-")
+        logp = store_log(root, clean_log(raw, total))
     op = open_phase(phase_rows(root))
-    emit_event(root, a.stage, a.verdict, a.note or "", source=a.source, phase=a.phase or (op["phase"] if op else None),
-               slice_=a.slice, role=a.role)
+    if not emit_event(root, a.stage, a.verdict, a.note or "", source=a.source, phase=a.phase or (op["phase"] if op else None),
+                      slice_=a.slice, role=a.role, extra={"log": logp} if logp else None) and logp:
+        with contextlib.suppress(OSError):
+            os.remove(os.path.join(root, logp))  # no event, so nothing may point at the log
     return 0
 
 
@@ -2101,6 +2160,8 @@ def build_parser():
     p.add_argument("--slice")
     p.add_argument("--phase")
     p.add_argument("--source", choices=["lsf", "hook", "agent"], default="agent")
+    p.add_argument("--log-file", metavar="PATH", help="store this file's last 64 KiB (redacted) as the event's error log")
+    p.add_argument("--log", metavar="-", help="read the error log from stdin: --log -")
 
     p = mk("rollback", cmd_rollback, "revert a commit with a new commit (never rewrites history)")
     p.add_argument("sha")
