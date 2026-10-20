@@ -239,3 +239,19 @@ In `Used by` and `Depends on`, the `path:line` of an entry is the line where the
 ## C-48 (2026-10-20, SFN-07): which place each reference opens
 
 Refines C-47. In `Used by`, `path:line` is the call site in the caller (where the use happens). In `Depends on`, `path:line` is where the depended-on symbol is defined (so the entry opens the thing being relied on); a `(maybe)` dependency that resolves to no definition cites the call site in this symbol. Every finding that concerns one symbol (`stale-signature`, `stale-dependencies`, `too-long`, `bad-param`, `format`, `todo`, `missing-entry`, `orphan-entry`) names that symbol, with its short name or dotted name, in its message text.
+
+## C-49 (2026-10-20, SFN-01): readings of the live-dashboard PRD
+
+Binding for `docs/prds/SFN-01-live-dashboard.md`.
+1. `sf ops init --dir DIR`: DIR is the project (repository) directory, default the current directory; the output directory is DIR/ops.
+2. An exit code of 2 never emits an event (argument-parse errors and the delegated tool's own usage errors alike).
+3. `contracts report` and any subcommand not named in E-04 emit nothing.
+4. A refused `hitl release` (for example exit 5 under a stop) emits stage `hitl`, verdict `fail`, note `exit=5`; only successful `request` and `release` use the verdicts `open` and `released`.
+5. The slice id of an event is the basename of the `DIR` or `--slice` argument (a trailing slash is ignored), else `-`.
+6. `sf ops status --json` prints `{"head": <full sha>, "snapshot": <sha or null>, "behind": <int or null>, "events": <int>}`; `behind` is null when there is no snapshot. The text form prints the same values.
+7. `sf ops init` prints one line per historical tab named by its `factory.ops.collect.TABS` id, `available` or `not available: <reason>`. The `dev_journey` reason, when no events exist, contains `no stage events recorded`, even when slices exist.
+8. `ops/index.json` gets a top-level `head`; `runtime.json` gets top-level `repo_head` and `behind`. `head` is the commit of the newest bundle run with the default `--sha HEAD`.
+9. `ledger_audit` emits its `subagent-stop` event whether or not a ticket exists.
+10. A symlink that resolves inside the root is allowed; one resolving outside is refused (E-02).
+11. A commit counts as already snapshotted for backfill only if `ops/snapshots/<sha>/manifest.json` exists. A commit that fails to bundle is listed and counted as failed.
+12. A pre-existing `events.jsonl` without a trailing newline gets one before the next event is appended.
