@@ -15,7 +15,7 @@ import yaml
 
 from evals.agents import lib
 
-ROLES = ["orchestrator", "research", "design", "audit", "implement", "test", "review"]
+ROLES = ["orchestrator", "research", "design", "audit", "implement", "qa", "test", "review"]
 FM_ORDER = ["name", "description", "model", "tools", "disallowedTools", "skills", "hooks"]
 REVIEWERS = {"pr-review-toolkit:silent-failure-hunter", "pr-review-toolkit:pr-test-analyzer",
              "feature-dev:code-reviewer"}
@@ -129,8 +129,8 @@ def with_server(name, tools_list, override=None):
 # ---------------------------------------------------------------- golden
 
 @case("TB03-G-001", "golden", reqs=("R-04",))
-def test_g001_seven_files_deterministic(tmp_path):
-    """Behaviour 1 + contract: seven entries keyed .claude/agents/<role>.md, byte-identical across calls."""
+def test_g001_eight_files_deterministic(tmp_path):
+    """Behaviour 1 + contract: eight entries keyed .claude/agents/<role>.md, byte-identical across calls."""
     a = generate(tmp_path, "base", "a")
     b = generate(tmp_path, "base", "b")
     assert set(a) == {f".claude/agents/{r}.md" for r in ROLES}
@@ -468,7 +468,7 @@ def test_d020_independent_of_project_location(tmp_path):
 
 @case("TB03-D-021", "diagnostic", reqs=("R-07",))
 def test_d021_spawn_allowlists_in_tools(tmp_path):
-    """R-07 + [A-18]: orchestrator's Agent(...) lists exactly the other six roles; implement has no Agent tool;
+    """R-07 + [A-18]: orchestrator's Agent(...) lists exactly the other seven roles; implement has no Agent tool;
     review's lists exactly the three reviewer agents. No unrestricted bare Agent entry."""
     out = generate(tmp_path)
     t = {r: tools_of(split(out[f".claude/agents/{r}.md"])[0]) for r in ROLES}
@@ -600,7 +600,7 @@ def test_d031_project_name_check_case_insensitive(tmp_path):
 def test_d032_project_name_substring_is_not_a_match(tmp_path):
     """[A-24] negative control: a project name that occurs only inside a longer word (`urpos` in `Purpose`) is not a
     whole-word match and generation succeeds."""
-    assert len(generate(tmp_path, with_extra(project={"name": "urpos"}))) == 7
+    assert len(generate(tmp_path, with_extra(project={"name": "urpos"}))) == 8
 
 
 @case("TB03-D-033", "diagnostic", reqs=("R-05", "R-01"))
