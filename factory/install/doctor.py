@@ -19,9 +19,11 @@ from pathlib import Path
 import yaml
 
 from factory.agents.generate import HOOK_REGISTRATION
-from factory.agents.roles import load_roles
+from factory.agents.roles import DEFAULT_DIR, ROLE_IDS, load_roles
 
-from .core import ENV_PIN, MANIFEST, MODEL, PROFILE, SETTINGS, hook_command_prefix
+from .core import (
+    ENV_PIN, EXTERNAL_PINS, EXTERNAL_SKILLS, MANIFEST, MODEL, PROFILE, SETTINGS, hook_command_prefix, sha,
+)
 
 BENIGN = {"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": "ls"},
           "agent_type": "implement", "agent_id": "doctor"}
@@ -79,6 +81,89 @@ def check_skills(root: Path, skills_dir: Path) -> list[Check]:
             continue
         problems = ss.check_skill_md(dst / "SKILL.md")
         out.append((f"skill {n}", "FAIL" if problems else "PASS", "; ".join(problems) or state))
+    return out
+
+
+BUILTIN_SKILLS = ("claude-api",)
+
+
+def _plugin_dirs(plugin: str) -> list[Path]:
+    """Installed locations of `plugin`: installed_plugins.json install paths plus the cache."""
+    base = Path.home() / ".claude" / "plugins"
+    dirs = []
+    try:
+        for key, entries in json.loads((base / "installed_plugins.json").read_text(encoding="utf-8"))["plugins"].items():
+            if key.split("@")[0] == plugin:
+                dirs += [Path(e["installPath"]) for e in entries if isinstance(e, dict) and e.get("installPath")]
+    except (OSError, ValueError, KeyError, AttributeError, TypeError):
+        return []  # unreadable registry: the skill is unresolved, so the check fails
+    dirs += sorted(base.glob(f"cache/*/{plugin}/*"))
+    return dirs
+
+
+def _skill_resolves(name: str, root: Path, skills_dir: Path) -> str | None:
+    """Where `name` resolves, or None."""
+    if name in BUILTIN_SKILLS:
+        return "built-in"
+    plugin, sep, skill = name.partition(":")
+    if sep:
+        for d in _plugin_dirs(plugin):
+            for f in (d / "skills" / skill / "SKILL.md", d / "commands" / f"{skill}.md", d / "workflows" / f"{skill}.js"):
+                if f.is_file():
+                    return str(f)
+        return None
+    for d in (root / "skills", skills_dir):
+        if (d / name / "SKILL.md").is_file():
+            return str(d / name)
+    return None
+
+
+def check_roles(root: Path, skills_dir: Path, allowed: set[str]) -> list[Check]:
+    """Per role: the model must be allowed and every skill it names must resolve. Reads the role
+    files raw so one bad role does not hide the others."""
+    rdir = root / "factory" / "agents" / "roles"
+    rdir = rdir if rdir.is_dir() else DEFAULT_DIR
+    out: list[Check] = []
+    for rid in ROLE_IDS:
+        try:
+            data = yaml.safe_load((rdir / f"{rid}.yaml").read_text(encoding="utf-8"))
+            model, skills = data["model"], data["skills"]
+            if not isinstance(skills, list):
+                raise TypeError("skills is not a list")
+        except Exception as e:  # noqa: BLE001
+            out.append((f"role {rid} file", "FAIL", f"{rdir / (rid + '.yaml')} unreadable: {e}"))
+            continue
+        ok = model in allowed
+        out.append((f"role {rid} model", "PASS" if ok else "FAIL",
+                    str(model) if ok else f"{model!r} is not allowed (allowed: {sorted(allowed)}; set allow_models or --allow-model)"))
+        for sk in skills:
+            where = _skill_resolves(sk, root, skills_dir) if isinstance(sk, str) else None
+            out.append((f"role {rid} skill {sk}", "PASS" if where else "FAIL",
+                        where or f"role {rid} names skill {sk!r} which resolves in no repo skills dir, user skills dir or installed plugin"))
+    return out
+
+
+def check_external(root: Path, skills_dir: Path) -> list[Check]:
+    pf = root / EXTERNAL_PINS
+    try:
+        skills = json.loads(pf.read_text(encoding="utf-8"))["skills"]
+        if not isinstance(skills, dict):
+            raise TypeError("skills is not an object")
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        return [("external pins", "FAIL", f"{pf} unreadable or malformed ({e}); run `sf install pin-external --yes`")]
+    out: list[Check] = []
+    for name in dict.fromkeys([*EXTERNAL_SKILLS, *skills]):
+        f = skills_dir / name / "SKILL.md"
+        pin = skills.get(name)
+        pinned = pin.get("sha256") if isinstance(pin, dict) else None
+        if not isinstance(pinned, str):
+            out.append((f"external {name}", "FAIL", f"not pinned in {EXTERNAL_PINS}"))
+        elif not f.is_file():
+            out.append((f"external {name}", "FAIL", f"{f} is missing"))
+        elif sha(f.read_bytes()) != pinned:
+            out.append((f"external {name}", "WARN", f"changed since pinned ({f})"))
+        else:
+            out.append((f"external {name}", "PASS", "matches pin"))
     return out
 
 
@@ -230,9 +315,17 @@ def run_doctor(a) -> int:
     root = Path(a.factory_root).resolve() if a.factory_root else Path(__file__).resolve().parents[2]
     py = os.path.abspath(a.python) if a.python else str(root / ".venv" / "bin" / "python")
     skills = Path(a.skills_dir) if a.skills_dir else Path.home() / ".claude" / "skills"
-    checks = check_tools(py, root) + check_skills(root, skills) + check_sf()
+    allowed = {MODEL, *a.allow_model}
+    if proj:  # the project's own allow_models counts, as at install time
+        try:
+            from factory.agents.profile import load_profile
+            allowed |= set(load_profile(proj / PROFILE).allow_models)
+        except Exception:  # noqa: BLE001  the profile check below reports it
+            pass
+    checks = (check_tools(py, root) + check_skills(root, skills) + check_roles(root, skills, allowed)
+              + check_external(root, skills) + check_sf())
     if proj:
-        checks += check_project(proj, {MODEL, *a.allow_model}, root, py)[0]
+        checks += check_project(proj, allowed, root, py)[0]
     failed = [c for c in checks if c[1] == "FAIL"]
     if a.json:
         print(json.dumps({"ok": not failed, "checks": [{"name": n, "status": s, "detail": d} for n, s, d in checks]}, indent=2))
