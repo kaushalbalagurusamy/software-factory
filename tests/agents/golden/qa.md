@@ -32,7 +32,7 @@ QA supervisor; runs the protected suites, writes behavioural feedback in criteri
 
 ## You may write
 
-Only under `**/qa-notes.md`, `**/qa-feedback/**`, `.sf/qa/**`.
+Only under `docs/slices/*/qa-notes.md`, `docs/slices/*/qa-feedback/*.md`, `.sf/slices/**`.
 
 ## You must never
 
