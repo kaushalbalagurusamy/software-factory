@@ -19,7 +19,7 @@ from pathlib import Path
 import yaml
 
 from factory.agents.generate import HOOK_REGISTRATION
-from factory.agents.roles import DEFAULT_DIR, ROLE_IDS, load_roles
+from factory.agents.roles import DEFAULT_DIR, ROLE_IDS, RoleError, load_roles
 
 from .core import (
     ENV_PIN, EXTERNAL_PINS, EXTERNAL_SKILLS, MANIFEST, MODEL, PROFILE, SETTINGS, hook_command_prefix, sha,
@@ -118,11 +118,31 @@ def _skill_resolves(name: str, root: Path, skills_dir: Path) -> str | None:
     return None
 
 
+def _role_dir(root: Path) -> Path:
+    rdir = root / "factory" / "agents" / "roles"
+    return rdir if rdir.is_dir() else DEFAULT_DIR
+
+
+def _load_for_checks(root: Path):
+    """The role specs for the hook and agent checks, or a FAIL detail. Model problems are reported
+    by check_roles, so they are not allowed to stop the other checks; any other invalid role is."""
+    rdir = _role_dir(root)
+    models = {"sonnet"}
+    for f in rdir.glob("*.yaml"):
+        try:
+            models.add(yaml.safe_load(f.read_text(encoding="utf-8"))["model"])
+        except Exception:  # noqa: BLE001  load_roles below reports the unreadable file
+            pass
+    try:
+        return load_roles(rdir, allow_models=[m for m in models if isinstance(m, str)]), None
+    except (RoleError, OSError, UnicodeDecodeError) as e:
+        return None, f"roles in {rdir} cannot be loaded: {e}"
+
+
 def check_roles(root: Path, skills_dir: Path, allowed: set[str]) -> list[Check]:
     """Per role: the model must be allowed and every skill it names must resolve. Reads the role
     files raw so one bad role does not hide the others."""
-    rdir = root / "factory" / "agents" / "roles"
-    rdir = rdir if rdir.is_dir() else DEFAULT_DIR
+    rdir = _role_dir(root)
     out: list[Check] = []
     for rid in ROLE_IDS:
         try:
@@ -203,7 +223,10 @@ def check_hooks(proj: Path, settings: dict, manifest: dict | None, root: Path, p
     project's manifest or settings) is run; anything else naming factory.hooks is a FAIL, not run."""
     if manifest is not None and not manifest["options"]["hooks"]:
         return [("hooks registered", "SKIP", "installed with --no-hooks")]
-    needed = sorted({h for r in load_roles().values() for h in r.hooks}, key=list(HOOK_REGISTRATION).index)
+    roles, err = _load_for_checks(root)
+    if roles is None:
+        return [("hooks registered", "FAIL", err)]
+    needed = sorted({h for r in roles.values() for h in r.hooks}, key=list(HOOK_REGISTRATION).index)
     prefix = hook_command_prefix(root, py)
     expected = {h: f"{prefix} -m factory.hooks {h}" for h in needed}
     registered = _factory_commands(settings)
@@ -243,11 +266,14 @@ def check_hooks(proj: Path, settings: dict, manifest: dict | None, root: Path, p
     return out
 
 
-def check_agents(proj: Path, manifest: dict | None, allowed: set[str]) -> list[Check]:
+def check_agents(proj: Path, manifest: dict | None, allowed: set[str], root: Path | None = None) -> list[Check]:
     if manifest is not None and not manifest["options"]["agents"]:
         return [("agents", "SKIP", "installed with --no-agents")]
+    roles, err = _load_for_checks(root or Path(__file__).resolve().parents[2])
+    if roles is None:
+        return [("agents", "FAIL", err)]
     out = []
-    for role in load_roles():
+    for role in roles:
         p = proj / ".claude" / "agents" / f"{role}.md"
         if not p.is_file():
             out.append((f"agent {role}", "FAIL", f"{p} is missing"))
@@ -284,7 +310,7 @@ def check_project(proj: Path, allowed: set[str], root: Path, py: str) -> tuple[l
     bad = {k: env.get(k) for k, v in ENV_PIN.items() if env.get(k) != v}
     out.append(("env pin", "FAIL" if bad else "PASS", f"wrong or missing: {bad}" if bad else "subagent model forced to sonnet"))
     out += check_hooks(proj, settings, manifest, root, py)
-    out += check_agents(proj, manifest, allowed)
+    out += check_agents(proj, manifest, allowed, root)
     try:
         from factory.agents.profile import load_profile
         load_profile(proj / PROFILE)
@@ -309,6 +335,14 @@ def check_project(proj: Path, allowed: set[str], root: Path, py: str) -> tuple[l
     return out, manifest
 
 
+def _safe(label: str, fn, *args) -> list[Check]:
+    """A check that raises is a FAIL line, never a traceback."""
+    try:
+        return fn(*args)
+    except Exception as e:  # noqa: BLE001
+        return [(label, "FAIL", f"check could not run: {type(e).__name__}: {e}")]
+
+
 def run_doctor(a) -> int:
     proj = Path(a.project).absolute() if a.project else None
     # trusted inputs only: the arguments and this checkout, never the project's manifest or settings
@@ -316,12 +350,13 @@ def run_doctor(a) -> int:
     py = os.path.abspath(a.python) if a.python else str(root / ".venv" / "bin" / "python")
     skills = Path(a.skills_dir) if a.skills_dir else Path.home() / ".claude" / "skills"
     allowed = {MODEL, *a.allow_model}
-    checks = (check_tools(py, root) + check_skills(root, skills) + check_roles(root, skills, allowed)
-              + check_external(root, skills) + check_sf())
+    checks = (_safe("tools", check_tools, py, root) + _safe("skills", check_skills, root, skills)
+              + _safe("roles", check_roles, root, skills, allowed)
+              + _safe("external pins", check_external, root, skills) + _safe("sf command", check_sf))
     if allowed - {MODEL} and not a.json:
         print(f"extra allowed models: {', '.join(sorted(allowed - {MODEL}))}")
     if proj:
-        checks += check_project(proj, allowed, root, py)[0]
+        checks += _safe("project", lambda: check_project(proj, allowed, root, py)[0])
     failed = [c for c in checks if c[1] == "FAIL"]
     if a.json:
         print(json.dumps({"ok": not failed, "checks": [{"name": n, "status": s, "detail": d} for n, s, d in checks]}, indent=2))
