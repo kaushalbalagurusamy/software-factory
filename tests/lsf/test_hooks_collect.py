@@ -131,3 +131,17 @@ def test_bundle_at_sha(repo):
     assert t["research"]["available"]
     assert run(repo, "bundle", "--sha", "zzzz").returncode == 2
     assert run(repo, "bundle", "--sha", "deadbeef").returncode == 1
+
+
+def test_free_form_qa_report_is_a_linked_entry(repo):
+    for p, x in {"docs/slices/prefix/qa-notes.md": "# QA report: prefix\n\nRan 12 cases. 1 fails: login returns 500.\n",
+                 "docs/slices/s1/qa-notes.md": EXTRA["docs/slices/s1/qa-notes.md"],
+                 "docs/slices/s3/qa-notes.md": "# QA notes\n"}.items():
+        f = repo / p
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(x)
+    items = json.loads(run(repo, "bundle", "--json").stdout)["tabs"]["bug_log"]["items"]
+    reps = [i for i in items if i.get("kind") == "qa-report"]
+    assert [(i["slice"], i["path"], i["title"]) for i in reps] == [("prefix", "docs/slices/prefix/qa-notes.md", "QA report: prefix")]
+    assert "login returns 500" in reps[0]["text"]
+    assert any(i.get("kind") == "qa-note" and i["attempts"] == 3 for i in items)

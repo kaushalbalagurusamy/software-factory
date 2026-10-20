@@ -1066,6 +1066,11 @@ def _qa_notes(src):
                           "attempts": int(att.group(1)) if att else None,
                           "criteria": [c.strip() for c in (_line(blk, "criteria") or "").split(",") if c.strip()],
                           "text": "signature %s: " % m.group(1) + " ".join(blk.split("\n", 1)[1].split())})
+        prose = re.sub(r"^## Signature .*?(?=^## |\Z)", "", text, flags=re.M | re.S)
+        body = " ".join(ln.strip() for ln in prose.splitlines() if ln.strip() and not ln.lstrip().startswith("#"))
+        if body:  # an ordinary QA report: keep it visible and linked
+            items.append({"kind": "qa-report", "slice": slice_id, "path": p,
+                          "title": _first_heading(text, "QA report: " + slice_id), "text": body[:600]})
     return items
 
 
