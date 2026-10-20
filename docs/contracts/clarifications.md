@@ -207,3 +207,21 @@ Amends C-42 and PRD K-02/K-03. The editors' documented URL form puts the absolut
 ## C-44 (2026-10-20, SFN-08): UNC and empty-segment roots (automated security review)
 
 Amends K-03. A POSIX root that begins with two or more slashes (`//host/share`) is invalid, because the editors' URL handler would read the result as a network (UNC) path. A root or `relPath` containing an empty path segment (`a//b`) or a segment equal to `.` is invalid. A single trailing slash on the root is still stripped. The same rules hold for roots taken from `?root=`, which keeps overriding a configured root as K-04 says; the UNC rule is what makes a crafted link harmless on Windows.
+
+## C-45 (2026-10-20, SFN-06): lsf interfaces the PRD left open
+
+Binding for `docs/prds/SFN-06-lsf-lite.md`.
+1. **Clock.** `LSF_NOW=<ISO UTC, e.g. 2026-10-20T10:00:00Z>` overrides "now" for every command (event `at`, budget, status).
+2. **Data dump.** `lsf bundle --json` prints `{"tabs": {<tab>: {"available": bool, "items": [...] | "reason": str}}}` with tab names research, experiments, adrs, bug_log, prd_journeys, architecture, git (the names and item shapes of `factory.ops.collect`) plus `docs` (ELI12). `/api/state` and `/api/at` return the same tab layout.
+3. `--root DIR` is accepted before or after the subcommand and its arguments.
+4. `doctor --port N` names the port to check (default 8765).
+5. **Profile keys** in `.lsf/profile.json`: `session_minutes`, `phases` (list of `{id, group}`), `weights` (`{align, review, build}`), `checkpoints` (`{phase: bool}`), `editor`, `workspace_root`, optional `models`. The default checkpoint mode is `align` (the seven align phases). A second `lsf init` never deletes events, stops or the profile.
+6. **`budget --json`**: `{"groups": {name: {planned_minutes, actual_minutes, percent_of_plan, flag}}, "waiting_on_human_minutes": N}`; an unmeasured `actual_minutes` is null; flag text contains `over` or `under`; the human-readable output always has a line containing `waiting on human`. A weights sum outside tolerance is exit 2 on `budget` and `status`.
+7. **`hitl status --json`**: a list of stops with `name`, `question`, `artifact` (list), `reason`, `opened_at`, and when released `released_at`, `released_by`, `note`. Release of an unknown or already released stop is exit 1. `phase end` on a phase that is not open is exit 1.
+8. **Hooks.** `hooks print` decides the command names. The `PostToolUse` matcher is `Bash`; the `hook` command filters for `git commit` itself. A `hook` run prints nothing on stdout and exits 0 on any input; for malformed input stderr is empty too; for a failed write only stdout must be empty.
+9. **Events.** `note` keeps the first 2000 characters, no ellipsis. Required keys: `at, stage, slice (may be null), phase, verdict, note, source`; `sha` is HEAD (full) or `unknown`. `source` is one of `lsf`, `hook`, `agent`. The hook summary lives in `note`, at most 200 characters.
+10. **Stop ledger.** Each entry carries a 64-hex chain value over the previous chain value and the entry text; any edited, deleted or malformed line makes `status` print `stop ledger failed verification` and exit 1.
+11. **`/api/file`**: errors are 4xx (missing 404, over 1 MiB 4xx, non-UTF-8 4xx); anything under `.lsf/` whose name contains `secret` or `token`, and every `.env*` at any depth, is refused; a symlink that stays inside the repo is allowed; the success body is the file text. `/api/at?sha=` takes a full or short sha; a bad revision is 4xx.
+12. **Release route.** A wrong, missing or foreign-Host request is 403; an unknown stop, an already released stop or bad JSON is 4xx; other POST paths give 404, 405 or 501; no CORS headers are sent.
+13. **`install.sh`**: shebang `#!/bin/sh` or `#!/usr/bin/env sh`; avoids `sha256sum`, `realpath`, `cp -a`, `mktemp --`, `readlink -f`, `sed -i`, `date -d`, `stat -c`; the wrapper is at most 15 lines and runs `python3` on the installed `lsf.py`; backups are named `lsf.backup-<UTC digits>`.
+14. The dashboard's "never available with zero items" rule is checked statically in source and through the bundle data.
