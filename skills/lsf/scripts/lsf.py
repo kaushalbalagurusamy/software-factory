@@ -1039,6 +1039,7 @@ def c_prd_journeys(src):
 
 
 BUG_STATUSES = ("open", "fixed", "wontfix")
+FAIL_VERDICTS = ("fail", "error", "red")
 
 
 def _first_heading(text, fallback):
@@ -1068,8 +1069,36 @@ def _qa_notes(src):
     return items
 
 
+def _repo_file(root, rel):
+    """rel when it names an existing regular file inside the repo, else None."""
+    if not isinstance(rel, str) or not safe_rel(rel)[0]:
+        return None
+    base = os.path.realpath(root)
+    real = os.path.realpath(os.path.join(base, *rel.split("/")))
+    try:
+        if os.path.commonpath([real, base]) != base or not os.path.isfile(real):
+            return None
+    except ValueError:
+        return None
+    return rel
+
+
+def _bug_log(src, text, slice_, criterion, events):
+    """Log: line in the bug file, else the latest failing event of that slice whose stage is the bug's criterion."""
+    m = re.search(r"(?mi)^\s*Log:\s*(\S+)\s*$", text)
+    if m and _repo_file(src.root, m.group(1)):
+        return m.group(1)
+    if slice_ and criterion:
+        for e in reversed(events):
+            if e.get("verdict") in FAIL_VERDICTS and e.get("slice") == slice_ and e.get("stage") == criterion \
+                    and _repo_file(src.root, e.get("log")):
+                return e["log"]
+    return None
+
+
 def c_bug_log(src):
     items = []
+    events = read_events(src.root)
     t = src.text("docs/bug-log.jsonl")
     if t is not None:
         for i, ln in enumerate(t.splitlines(), 1):
@@ -1081,9 +1110,12 @@ def c_bug_log(src):
     for p in src.glob("docs/bugs/*.md"):
         tx = src.text(p) or ""
         st = (_line(tx, "Status") or "").lower()
+        sl, cr = _line(tx, "Slice") or None, _line(tx, "Criterion") or None
         items.append({"id": stem(p), "path": p, "title": _first_heading(tx, stem(p)),
-                      "status": st if st in BUG_STATUSES else "invalid",
-                      "slice": _line(tx, "Slice") or None, "criterion": _line(tx, "Criterion") or None})
+                      "status": st if st in BUG_STATUSES else "invalid", "slice": sl, "criterion": cr})
+        lg = _bug_log(src, tx, sl, cr, events)
+        if lg:  # shape parity with the factory collector: the key exists only when a log does
+            items[-1]["log"] = lg
     items += _qa_notes(src)
     if not items:
         return unavailable("no entries in docs/bugs/*.md, docs/bug-log.jsonl or docs/slices/*/qa-notes.md in %s" % src.where)
@@ -1981,6 +2013,11 @@ def make_handler(root, token, assets_html):
                         return self._send(200, text, "text/html; charset=utf-8",
                                           {"Content-Security-Policy": "sandbox allow-scripts"})
                     return self._send(200, text, "text/plain; charset=utf-8")
+                if path == "/api/log":
+                    status, msg, text = read_repo_file(root, qs.get("path", ""))
+                    if status != 200:
+                        return self._err(status, msg)
+                    return self._send(200, json.dumps(log_view(root, text), default=_jd))
                 if path == "/api/commit":
                     try:
                         full, subject, files = rollback_plan(root, qs.get("sha", ""))
