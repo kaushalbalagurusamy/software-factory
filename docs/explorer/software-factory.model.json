@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "28774f3632a27c1c765529a9f657656b175fddda",
+  "commit": "723bf010ee89c96f957959586c3b4cf575d4ed36",
   "generated": "2026-10-20"
  },
  "root": "factory",
@@ -3434,7 +3434,7 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def main",
      "note": "Entry point",
-     "lines": "2344-2364"
+     "lines": "2349-2369"
     },
     {
      "path": "docs/prds/SFN-06-lsf-lite.md",
@@ -3482,31 +3482,31 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def build_parser",
      "note": "All commands",
-     "lines": "2204-2324"
+     "lines": "2209-2329"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_init",
      "note": "Writes .lsf/profile.json",
-     "lines": "1327-1353"
+     "lines": "1332-1358"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_phase",
      "note": "start and end; start refuses under an open stop",
-     "lines": "1370-1402"
+     "lines": "1375-1407"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_doctor",
      "note": "python, git, repository, port and the self-check",
-     "lines": "1860-1908"
+     "lines": "1865-1913"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_bundle",
      "note": "Prints which dashboard tabs have data",
-     "lines": "1643-1655"
+     "lines": "1648-1660"
     }
    ],
    "coverage": {
@@ -3625,25 +3625,25 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def make_handler",
      "note": "Handler with every route",
-     "lines": "2007-2151"
+     "lines": "2012-2156"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_serve",
      "note": "Prints the URL with #token= once",
-     "lines": "2154-2191"
+     "lines": "2159-2196"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def read_repo_file",
      "note": "Path and size checks for /api/file",
-     "lines": "1955-1983"
+     "lines": "1960-1988"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def resolve_sha",
      "note": "Used by /api/at",
-     "lines": "1185-1191"
+     "lines": "1190-1196"
     }
    ],
    "coverage": {
@@ -3681,19 +3681,19 @@
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderArch",
      "note": "Architecture tab (the explorer in an iframe)",
-     "lines": "427-448"
+     "lines": "428-449"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderDocs",
      "note": "Docs tab (reads docs/eli12/index.json)",
-     "lines": "461-475"
+     "lines": "462-476"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "COLLECTORS = [",
      "note": "Collectors behind the tabs",
-     "lines": "1164-1165"
+     "lines": "1169-1170"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
@@ -3720,19 +3720,19 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def hooks_config",
      "note": "The four hooks",
-     "lines": "1663-1671"
+     "lines": "1668-1676"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_hook",
      "note": "Always exits 0 except the guard's denial",
-     "lines": "1712-1741"
+     "lines": "1717-1746"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def guard_reason",
      "note": "What the guard denies",
-     "lines": "1755-1767"
+     "lines": "1760-1772"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
@@ -3750,7 +3750,7 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_hooks",
      "note": "print, install, uninstall",
-     "lines": "1712-1741"
+     "lines": "1717-1746"
     }
    ],
    "coverage": {
@@ -4336,7 +4336,7 @@
      "path": "factory/ops/collect.py",
      "contains": "COLLECTORS = {",
      "note": "All tab collectors",
-     "lines": "487-491"
+     "lines": "492-496"
     },
     {
      "path": "docs/ops-tabs.md",
@@ -4417,13 +4417,13 @@
      "path": "factory/ops/collect.py",
      "contains": "def bug_log",
      "note": "Tab source",
-     "lines": "353-372"
+     "lines": "358-377"
     },
     {
      "path": "factory/ops/collect.py",
      "contains": "def _qa_notes",
      "note": "QA note blocks",
-     "lines": "336-350"
+     "lines": "336-355"
     }
    ],
    "coverage": {
@@ -4440,7 +4440,7 @@
      "path": "factory/ops/collect.py",
      "contains": "def hitl",
      "note": "Tab source",
-     "lines": "456-484"
+     "lines": "461-489"
     }
    ],
    "coverage": {
