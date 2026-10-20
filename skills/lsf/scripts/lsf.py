@@ -1438,16 +1438,42 @@ def clean_log(raw, total):
     return text
 
 
+def private_dir(root, *parts):
+    """Create or verify root/.lsf/<parts> as real directories (no symlink at any level, inside the repo), mode 0700."""
+    base = os.path.realpath(root)
+    cur = base
+    for part in (".lsf",) + parts:
+        cur = os.path.join(cur, part)
+        if os.path.lexists(cur) and (os.path.islink(cur) or not os.path.isdir(cur)):
+            raise Fail("%s is not a real directory; refusing to write there" % os.path.relpath(cur, base))
+        try:
+            os.makedirs(cur, mode=0o700, exist_ok=True)
+        except OSError as e:
+            raise Fail("cannot create %s: %s" % (os.path.relpath(cur, base), e))
+        if os.path.islink(cur) or os.path.realpath(cur) != cur:
+            raise Fail("%s resolves outside the repository; refusing to write there" % os.path.relpath(cur, base))
+    try:
+        os.chmod(cur, 0o700)
+    except OSError as e:
+        raise Fail("cannot set %s to 0700: %s" % (os.path.relpath(cur, base), e))
+    return cur
+
+
 def store_log(root, text):
-    """Write text to .lsf/logs/<id>.txt (0700 dir, 0600 file, never through a symlink). Returns the repo-relative path."""
-    d = lpath(root, "logs")
-    if os.path.islink(d):
-        raise Fail(".lsf/logs is a symlink; refusing to write the log")
-    os.makedirs(d, mode=0o700, exist_ok=True)
+    """Write text to .lsf/logs/<id>.txt (dir 0700, file 0600, created exclusively and never through a symlink).
+    Returns the repo-relative path; any problem is a Fail and nothing is written."""
+    d = private_dir(root, "logs")
     name = "%s-%s.txt" % (now().strftime("%Y%m%dT%H%M%S"), secrets.token_hex(4))
-    fd = os.open(os.path.join(d, name), os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        f.write(text)
+    try:
+        dfd = os.open(d, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=dfd)
+        finally:
+            os.close(dfd)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+    except OSError as e:
+        raise Fail("cannot store the log: %s" % e)
     return ".lsf/logs/" + name
 
 
