@@ -73,7 +73,12 @@ def test_E10_install_preserves_existing_hook_content_and_still_runs_it(repo, tmp
     p.chmod(0o644)  # not executable yet: install must set the bit
     assert sf(repo, "ops", "autobundle", "install").returncode == 0
     new = p.read_text()
-    assert EXISTING.rstrip("\n") in new
+    # Amended after the independent review (finding 3): the block goes right after the shebang so a later top-level
+    # `exit` cannot skip it; the existing hook content must survive unchanged and in order after the block.
+    first, rest = EXISTING.split("\n", 1)
+    assert new.startswith(first + "\n")
+    assert rest.rstrip("\n") in new
+    assert new.index("# >>> sf ops autobundle >>>") < new.index(rest.rstrip("\n"))
     block_of(new)
     assert p.stat().st_mode & stat.S_IXUSR
     again = p.read_bytes()

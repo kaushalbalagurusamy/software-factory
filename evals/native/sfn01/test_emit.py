@@ -208,12 +208,14 @@ def test_E02_dangling_symlink_to_outside_is_refused_and_not_created(repo, tmp_pa
     assert not target.exists()
 
 
-def test_E02_symlink_that_stays_inside_root_is_allowed(repo):
+def test_E02_symlinked_ops_is_refused_even_when_it_stays_inside_root(repo):
+    # Amended after the independent review (docs/reviews/2026-10-20-sfn-review.md, finding 5): a symlink at ops/ or
+    # ops/events.jsonl is refused whatever its target (an in-repo target could be an eval file or a git hook).
     emit = emit_fn()
     (repo / "real_ops").mkdir()
     (repo / "ops").symlink_to(repo / "real_ops", target_is_directory=True)
-    assert emit(repo, "x", "s", "v") is True
-    assert (repo / "real_ops" / "events.jsonl").read_text().count("\n") == 1
+    assert emit(repo, "x", "s", "v") is False
+    assert not (repo / "real_ops" / "events.jsonl").exists()
 
 
 def _fake(prefix: str, body: str) -> str:
