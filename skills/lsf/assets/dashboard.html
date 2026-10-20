@@ -73,7 +73,7 @@ main{padding:8px 16px 64px;max-width:1180px;margin:0 auto;min-width:0}
 .q{font-size:1.15rem;font-weight:650;margin:.2rem 0 .5rem}
 .refs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
 a.elink,.ref{display:inline-flex;align-items:center;flex-wrap:wrap;min-height:44px;padding:0 .7rem;border:1px solid var(--line);border-radius:10px;background:var(--panel2);text-decoration:none;max-width:100%;overflow-wrap:anywhere}
-.ref button{min-height:36px;margin-left:.4rem;padding:0 .6rem;font-size:.8rem}
+.ref button{min-height:44px;margin-left:.4rem;padding:0 .6rem;font-size:.8rem}
 .row2{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.7rem}
 .err{color:var(--bad)}
 .list{list-style:none;margin:0;padding:0}
@@ -181,7 +181,7 @@ var TABS=[["now","Now"],["telemetry","Telemetry"],["research","Research"],["expe
 var GROUPS=["align","review","build"];
 var S={state:null,snap:null,tab:"now",token:"",editor:null,wsroot:null,openDoc:null,docText:{},err:"",busy:{},sig:"",gotAt:0,iframe:{}};
 var main=document.getElementById("main"),nav=document.getElementById("nav");
-try{var m=/token=([0-9a-f]+)/.exec(location.hash||"");if(m){S.token=m[1];}}catch(e){}
+try{var m=/token=([0-9a-f]+)/.exec(location.hash||"");if(m){S.token=m[1];history.replaceState(null,"",location.pathname+location.search);}}catch(e){}
 function store(k,v){try{if(v===undefined){return localStorage.getItem("lsf."+k);}localStorage.setItem("lsf."+k,v);}catch(e){return null;}return null;}
 function h(tag,attrs,kids){var el=document.createElement(tag),k,i;attrs=attrs||{};
  for(k in attrs){if(attrs[k]===null||attrs[k]===undefined||attrs[k]===false){continue;}
@@ -206,9 +206,9 @@ function emptyTab(t,what){var why=t&&t.reason?t.reason:(t&&t.available?"the sour
 function chip(text,cls){return h("span",{class:"chip "+(cls||"")},text);}
 function grpChip(g){return chip(g||"?","g-"+(g||"x"));}
 function verdictClass(v){v=String(v||"").toLowerCase();
- if(/^(pass|passed|ok|green|done|approved|released|accepted|commit|success)$/.test(v)){return "v-pass";}
- if(/^(fail|failed|red|error|blocked|rejected|broken)$/.test(v)){return "v-fail";}
- if(/^(opened|waiting|started|switched|stopped|manual)$/.test(v)){return "v-wait";}return "v-mute";}
+ if(v==="pass"){return "v-pass";}
+ if(v==="fail"||v==="error"){return "v-fail";}
+ if(/^(opened|waiting|switched|stopped|denied)$/.test(v)){return "v-wait";}return "v-mute";}
 function api(path,opts){return fetch(path,opts).then(function(r){return r.text().then(function(t){var j=null;try{j=JSON.parse(t);}catch(e){}
  if(!r.ok){throw new Error((j&&j.error)||("HTTP "+r.status));}return j===null?t:j;});});}
 
@@ -218,13 +218,14 @@ function renderHeader(){
  document.getElementById("clk").textContent=sess!==null&&sess!==undefined?clock(sess*60+(Date.now()-S.gotAt)/1000*(S.live?1:0)):"--:--";
  document.getElementById("clkl").textContent=(sess!==null&&sess!==undefined?"of "+clock((tot||60)*60)+" session":"session not started")+(op?" - "+op.phase:"");
  var p=(st&&st.profile)||{},c=conf(),sel=document.getElementById("ed");
- if(!sel.options.length){(SFEditorLinks.editors||[]).forEach(function(e){sel.appendChild(h("option",{value:e,text:e}));});}
+ if(!sel.options.length){(SFEditorLinks.editors||[]).concat(["none"]).forEach(function(e){sel.appendChild(h("option",{value:e,text:e}));});}
  if(document.activeElement!==sel){sel.value=c.editor;}
  var ws=document.getElementById("ws");if(document.activeElement!==ws){ws.value=c.root;}
  var b=document.getElementById("banner"),stops=(rt&&rt.stops||[]).filter(function(x){return !x.released_at;});
  b.className="";
  if(rt&&rt.stop_ledger&&rt.stop_ledger!=="ok"){b.className="err";b.textContent=rt.stop_ledger;}
  else if(S.err){b.className="err";b.textContent=S.err;}
+ else if(s&&s.clock_overridden){b.className="stop";b.textContent="Clock overridden by LSF_NOW: every time on this page is a rehearsal value";}
  else if(S.snap){b.className="snap";b.textContent="Viewing commit "+S.snap.sha.slice(0,8)+": the historical tabs show that commit; Now and Telemetry stay live.";}
  else if(stops.length){b.className="stop";b.textContent=stops.length+" human checkpoint"+(stops.length>1?"s":"")+" waiting for approval";}
  else{b.textContent="";}
@@ -247,8 +248,9 @@ function groupBars(budget){
    h("div",{class:"track",role:"img","aria-label":g+": "+fmtMin(x.actual_minutes)+" of "+fmtMin(x.planned_minutes)+", "+x.flag},[
     h("div",{class:"plan",style:"width:"+(100*x.planned_minutes/scale)+"%"}),
     h("div",{class:"fill g-"+g+(over?" over":""),style:"width:"+(100*(x.actual_minutes||0)/scale)+"%"})]),
-   h("div",{class:"small "+(over?"v-wait":"mute")},x.flag)]));});
- wrap.appendChild(h("div",{class:"row small"},[h("span",{class:"v-wait"},"waiting on human: "+fmtMin(budget.waiting_on_human_minutes))]));
+   h("div",{class:"small "+(over?"v-wait":"mute")},x.flag+" - human wait in this group: "+fmtMin(x.waiting_minutes))]));});
+ wrap.appendChild(h("div",{class:"row small"},[h("span",{class:"v-wait"},budget.ledger_error?"waiting on human: not measured (stop ledger failed verification)":"waiting on human: "+fmtMin(budget.waiting_on_human_minutes)),
+  h("b",{},"session total "+fmtMin(budget.session_total_minutes)+" of "+fmtMin(budget.session_minutes))]));
  return wrap;}
 function phaseCard(){
  var rt=S.state.runtime,s=rt.status||{},op=s.open_phase,prof=S.state.profile,done={};
@@ -265,7 +267,9 @@ function stopCard(s){
  kids.push(h("div",{class:"q"},s.question||"Approve?"));
  if(s.reason){kids.push(h("div",{class:"small mute"},s.reason));}
  if((s.artifact||[]).length){kids.push(h("div",{class:"refs"},s.artifact.map(function(a){var m=/^(.*?)(?::(\d+))?$/.exec(a);return ref(m[1],m[2]?parseInt(m[2],10):null,a);})));}
- if(released){kids.push(h("div",{class:"small mute"},"released by "+(s.released_by||"?")+" at "+hhmmss(s.released_at)+(s.note?": "+s.note:"")));}
+ if(released){
+  if(s.via&&s.via!=="dashboard"){kids.push(h("div",{class:"small v-wait"},[chip("released from the command line","v-wait")," ("+s.via+")"]));}
+  kids.push(h("div",{class:"small mute"},"released by "+(s.released_by||"?")+" at "+hhmmss(s.released_at)+(s.note?": "+s.note:"")));}
  else{
   var msg=h("div",{class:"small err",role:"alert"});
   if(S.token){
@@ -292,10 +296,12 @@ function renderNow(){
 
 /* ---------- Telemetry ---------- */
 function renderTelemetry(){
- var rt=S.state.runtime,ev=rt.events||[],pass=0,fail=0,agents=0,commits=0;
- ev.forEach(function(e){var c=verdictClass(e.verdict);if(c==="v-pass"){pass++;}if(c==="v-fail"){fail++;}if(e.source==="hook"&&e.stage==="SubagentStop"){agents++;}if(e.source==="hook"&&e.verdict==="commit"){commits++;}});
+ var rt=S.state.runtime,ev=rt.events||[],pass=0,fail=0,agents=0,commits=0,phases=0,rel=0;
+ ev.forEach(function(e){var c=verdictClass(e.verdict);if(c==="v-pass"){pass++;}if(c==="v-fail"){fail++;}if(e.source==="hook"&&e.stage==="SubagentStop"){agents++;}if(e.source==="hook"&&e.verdict==="commit"){commits++;}
+  if(e.type==="phase_end"&&e.verdict!=="switched"){phases++;}if(e.stage==="hitl"&&e.verdict==="released"){rel++;}});
  var n=h("div",{});
- n.appendChild(h("div",{class:"tiles",style:"margin-top:.7rem"},[["events",ev.length],["pass",pass],["fail",fail],["agent stops",agents],["commits seen",commits],["cost (manual)","$"+((rt.cost&&rt.cost.total_usd)||0)]].map(function(t){return h("div",{class:"tile"},[h("b",{},String(t[1])),h("span",{},t[0])]);})));
+ n.appendChild(h("div",{class:"tiles",style:"margin-top:.7rem"},[["events (last "+ev.length+")",ev.length],["pass",pass],["fail",fail],["phases ended",phases],["checkpoints released",rel],["agent stops",agents],["commits seen",commits],["cost (manual)","$"+((rt.cost&&rt.cost.total_usd)||0)]].map(function(t){return h("div",{class:"tile"},[h("b",{},String(t[1])),h("span",{},t[0])]);})));
+ n.appendChild(h("p",{class:"small mute"},"Legend: pass and fail count only the verdicts pass, fail and error that an agent or test run recorded with lsf event. Phase ends, releases, commits and agent stops are counted separately and are not test results."));
  n.appendChild(h("h2",{},"Phase durations"));
  var iv=rt.intervals||[],max=1,prof=S.state.profile,gm={};(prof.phases||[]).forEach(function(p){gm[p.id]=p.group;});
  var at=Date.parse(rt.now);

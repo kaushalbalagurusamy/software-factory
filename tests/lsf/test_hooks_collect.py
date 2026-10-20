@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def test_hooks_print_install_idempotent_uninstall(repo, tmp_path):
     cfg = json.loads(run(repo, "hooks", "print").stdout)["hooks"]
-    assert set(cfg) == {"SubagentStop", "Stop", "PostToolUse"} and cfg["PostToolUse"][0]["matcher"] == "Bash"
+    assert set(cfg) == {"SubagentStop", "Stop", "PostToolUse", "PreToolUse"} and cfg["PostToolUse"][0]["matcher"] == "Bash"
     proj = tmp_path / "p"
     (proj / ".claude").mkdir(parents=True)
     f = proj / ".claude" / "settings.local.json"
@@ -27,6 +27,7 @@ def test_hooks_print_install_idempotent_uninstall(repo, tmp_path):
 
 
 def test_hook_always_zero_and_silent(repo):
+    run(repo, "init")
     for payload in ("", "not json", "[1]", '{"tool_input": 3}', '{"agent_type": 5}'):
         r = run(repo, "hook", "Stop", stdin=payload)
         assert r.returncode == 0 and r.stdout == "" and (payload != "" and payload != "not json" or r.stderr == "")

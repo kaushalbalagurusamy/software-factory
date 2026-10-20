@@ -20,10 +20,11 @@ def test_install_twice_and_backup(tmp_path):
     assert len(wrapper.splitlines()) <= 15 and "python3" in wrapper and "lsf.py" in wrapper
     again = sh(env)
     assert again.returncode == 0 and "nothing changed" in again.stdout
-    assert not [p for p in skills.iterdir() if "backup" in p.name]
+    assert not [p for p in skills.iterdir() if "backup" in p.name] and not (tmp_path / "skills-backups").exists()
     (skills / "lsf" / "SKILL.md").write_text("different")
     third = sh(env)
-    backups = [p.name for p in skills.iterdir() if p.name.startswith("lsf.backup-")]
+    assert not [p for p in skills.iterdir() if "backup" in p.name]
+    backups = [p.name for p in (tmp_path / "skills-backups").iterdir() if p.name.startswith("lsf.backup-")]
     assert third.returncode == 0 and len(backups) == 1 and re.match(r"^lsf\.backup-\d+$", backups[0])
     out = subprocess.run([str(bindir / "lsf"), "--help"], capture_output=True, text=True)
     assert out.returncode == 0 and "init" in out.stdout
