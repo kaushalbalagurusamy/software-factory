@@ -93,7 +93,11 @@ on every turn.
    priority, needs an owner's judgment call, out of scope this pass). The point is that the user
    can see the sweep happened and audit the choices, not just trust that it did.
 
-7. **Delegate the mechanical part.** Once the dependency map and the before/after are established,
+7. **Check the plain-English module docs.** If the project has `docs/eli12/`, run
+   `python3 skills/eli12-docs/scripts/eli12.py check --root . --changed <base ref>` and treat every
+   finding as a stale document: fix it (see the `eli12-docs` skill) or report why it stays.
+
+8. **Delegate the mechanical part.** Once the dependency map and the before/after are established,
    checking a stack of documents against a known set of superseded claims is cheap, well-specified
    work — a good candidate to hand to a smaller/cheaper model via a subagent, one document (or a
    batch) per dispatch, with the before/after and the priority order given explicitly rather than
