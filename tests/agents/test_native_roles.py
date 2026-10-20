@@ -62,7 +62,7 @@ def test_generates_eight_files_with_qa_paths():
     out = generate_agents(parse_profile(PROFILE), load_roles())
     assert len(out) == 8
     qa = out[".claude/agents/qa.md"]
-    assert "**/qa-notes.md" in qa and ".sf/qa/" in qa and "model: sonnet" in qa
+    assert "docs/slices/*/qa-notes.md" in qa and ".sf/slices/**" in qa and "model: sonnet" in qa
     assert all("model: sonnet" in t for t in out.values())
 
 
