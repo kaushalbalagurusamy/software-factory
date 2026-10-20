@@ -123,7 +123,11 @@ captures is not the feature build time).
 
 ## Live build screenshots (peak6-live-build)
 
-<!-- PLACEHOLDER: another agent is capturing dashboard screenshots from the peak6-live-build project.
-     Add image links and one-line captions here. Do not add images that were not captured from that run. -->
+Captured on 2026-10-20 from the real `peak6-live-build` run (booking app built with this flow; repo: https://labs.gauntletai.com/kaushalbalagurusamy/peak6-live-build).
 
-_Pending: no live-build screenshots have been added yet._
+- Demo videos (captioned, real recordings): [booking-demo.mp4](live-build/video/booking-demo.mp4) (two users, hold race, expiry, price moves only on purchase, tests passing live: 24/24) and [dashboard-demo.mp4](live-build/video/dashboard-demo.mp4) (phase clock, hash-chained stop ledger with the superseded stop, telemetry, experiments, ADRs, PRD, nested architecture diagram, evals, git).
+- Every dashboard tab with a caption saying what it shows and where the data comes from: [live-build/TOUR.md](live-build/TOUR.md) (images in [live-build/img/](live-build/img/)).
+- Honest limits: captions lag the screen by up to about a second; the nested diagrams load Mermaid from a CDN; phases 7-9 were logged after the fact, so they read 0 min.
+
+![Human stops tab](live-build/img/02-stops.png)
+![Nested architecture diagram](live-build/img/08b-architecture-level2.png)
