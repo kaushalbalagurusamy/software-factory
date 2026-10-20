@@ -16,7 +16,8 @@ def build_fixture(rig: Rig):
     rig.write("research/alpha.md", "# Alpha findings\n\nAs of: 2026-10-01.\n")
     rig.write("research/beta.md", "# Beta notes\n")
     rig.write("experiments/e1/results.json", json.dumps({"winner": "sqlite", "n": 3}))
-    rig.write("experiments/e1/resolved.json", json.dumps({"resolved": True}))
+    # resolved.json is deliberately not in the parity fixture: factory.ops.collect learns it in SFN-03 (T-03);
+    # the lsf collector reading it is covered by its own tests.
     rig.write("experiments/e2/results.json", "{ broken json")
     rig.write("docs/adr/ADR-0001-use-sqlite.md", "# ADR-0001 Use SQLite\n\n**Status:** Accepted\n**Date:** 2026-10-02\n")
     rig.write("docs/adr/ADR-0002-queue.md", "# Queue choice\n\nStatus: Proposed\nDate: 2026-10-03\n")
