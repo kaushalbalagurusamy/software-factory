@@ -444,6 +444,22 @@ function renderDocs(){
    api("/api/file?path="+encodeURIComponent(x.doc)).then(function(txt){S.docText[x.doc]=txt;show(txt);}).catch(function(e){body.textContent="";body.appendChild(h("div",{class:"empty"},"not available: "+x.doc+" could not be read ("+e.message+")"));});});
   n.appendChild(d);});
  return n;}
+function rollbackControl(c){
+ if(c.parents!==1){return null;}
+ var box=h("div",{class:"rb",style:"flex:1 1 100%"}),btn;
+ function close(){box.textContent="";btn.hidden=false;S.rb=null;}
+ function openIt(){btn.hidden=true;S.rb=c.sha;box.textContent="";box.appendChild(h("div",{class:"small mute"},"Loading..."));
+  api("/api/commit?sha="+c.sha).then(function(j){box.textContent="";var msg=h("div",{class:"small err",role:"alert"});
+   var yes=h("button",{type:"button",class:"primary",disabled:!!j.refusal,onclick:function(){yes.disabled=true;msg.textContent="";
+    api("/api/rollback",{method:"POST",headers:{"Content-Type":"application/json","X-LSF-Token":S.token},body:JSON.stringify({sha:c.sha,confirm_sha:j.sha})})
+     .then(function(){S.rb=null;S.sig="";return poll();}).catch(function(e){msg.textContent="Could not roll back: "+e.message;yes.disabled=false;});}},"Confirm rollback");
+   box.appendChild(h("div",{class:"card dec"},[h("b",{},j.subject),h("div",{class:"small mute"},j.files.length+" file"+(j.files.length===1?"":"s")+" changed: "+j.files.slice(0,12).join(", ")+(j.files.length>12?" ...":"")),
+    h("p",{class:"small"},"This adds a new commit that undoes it; history is kept."),j.refusal?h("p",{class:"small err",role:"alert"},"Cannot roll back now: "+j.refusal):null,
+    h("div",{class:"row2"},[yes,h("button",{type:"button",onclick:close},"Cancel")]),msg]));
+  }).catch(function(e){box.textContent="";box.appendChild(h("div",{class:"small err",role:"alert"},"Could not load the commit: "+e.message));box.appendChild(h("button",{type:"button",onclick:close},"Close"));});}
+ if(!S.token){return h("span",{class:"small"},["No token in this URL, so run in a terminal: ",h("code",{},"lsf rollback "+c.sha.slice(0,8)+" --yes")]);}
+ btn=h("button",{type:"button","aria-label":"Rollback "+c.sha.slice(0,8),onclick:openIt},"Rollback");
+ return h("span",{style:"display:contents"},[btn,box]);}
 function renderGit(){
  var gt=S.state.tabs.git,it=items(gt);
  if(!it){return emptyTab(gt);}
@@ -452,7 +468,7 @@ function renderGit(){
  var l=h("ul",{class:"list card"});
  it.forEach(function(c){var cur=S.snap&&S.snap.sha===c.sha;
   l.appendChild(h("li",{},[h("div",{},[h("b",{class:"mono"},c.sha.slice(0,8))," ",h("span",{class:"small mute"},c.date)]),h("div",{},c.subject),
-   h("div",{class:"row2",style:"margin-top:.3rem"},[h("button",{type:"button",disabled:cur,"aria-label":"View tabs at "+c.sha.slice(0,8),onclick:function(){S.err="";api("/api/at?sha="+c.sha).then(function(j){S.snap=j;S.sig="";render();}).catch(function(e){S.err="Could not load "+c.sha.slice(0,8)+": "+e.message;render();});}},cur?"Showing":"View tabs at this commit")])]));});
+   h("div",{class:"row2",style:"margin-top:.3rem"},[h("button",{type:"button",disabled:cur,"aria-label":"View tabs at "+c.sha.slice(0,8),onclick:function(){S.err="";api("/api/at?sha="+c.sha).then(function(j){S.snap=j;S.sig="";render();}).catch(function(e){S.err="Could not load "+c.sha.slice(0,8)+": "+e.message;render();});}},cur?"Showing":"View tabs at this commit"),rollbackControl(c)])]));});
  n.appendChild(l);return n;}
 
 function withHelp(text,node){var w=h("div",{});w.appendChild(h("p",{class:"mute small"},text));w.appendChild(node);return w;}
