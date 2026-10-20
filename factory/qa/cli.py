@@ -122,6 +122,23 @@ def cmd_policy(a):
     return OK
 
 
+def cmd_promote_notes(a):
+    from .notes import NotesError, promote
+    root = a.notes_root or a.root
+    slice_dir = a.notes_slice or a.slice
+    if not slice_dir:
+        raise Usage("--slice DIR is required")
+    try:
+        print(promote(root, slice_dir, a.protect, a.allow_no_protect))
+    except LeakError:
+        print("error: the notes text matches protected material; nothing was written", file=sys.stderr)
+        return ERR
+    except NotesError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return ERR
+    return OK
+
+
 def build():
     ap = argparse.ArgumentParser(prog="python -m factory.qa", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -153,8 +170,10 @@ def build():
     c.add_argument("--evidence", required=True); c.add_argument("--commit", required=True); c.add_argument("--criteria", nargs="+")
     c = add("reviewer-verdict", cmd_reviewer); c.add_argument("--signature", required=True)
     c.add_argument("--verdict", required=True, choices=["amended", "unresolved"]); c.add_argument("--note", required=True)
+    c = add("promote-notes", cmd_promote_notes)
+    c.add_argument("--slice", dest="notes_slice"); c.add_argument("--root", dest="notes_root")
     add("unblock", cmd_unblock); add("stats", cmd_stats); add("audit", cmd_audit); add("policy", cmd_policy)
-    for n in ("feedback", "regression-propose", "reviewer-verdict"):
+    for n in ("feedback", "regression-propose", "reviewer-verdict", "promote-notes"):
         sp = sub.choices[n]
         sp.add_argument("--protect", action="append", default=[])
         sp.add_argument("--allow-no-protect", action="store_true")
