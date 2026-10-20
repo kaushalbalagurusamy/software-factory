@@ -34,6 +34,8 @@ th,td{border-bottom:1px solid var(--line);padding:.4rem .6rem;text-align:left;ve
 iframe{width:100%;height:70vh;min-height:420px;border:1px solid var(--line);border-radius:.5rem;background:var(--card)}
 code{font-family:ui-monospace,Menlo,monospace;font-size:.88em}
 .skip{position:absolute;left:-999px}.skip:focus{left:.5rem;top:.5rem;background:var(--card);padding:.5rem;z-index:9}
+a.elink,button.cp{min-height:40px;display:inline-flex;align-items:center;padding:0 .5rem}
+button.cp{font-size:.85rem;margin-left:.4rem}
 header>div{min-width:0;max-width:100%}#sel{width:100%;text-overflow:ellipsis}
 </style>
 </head>
@@ -48,6 +50,60 @@ header>div{min-width:0;max-width:100%}#sel{width:100%;text-overflow:ellipsis}
 <nav id="nav" aria-label="Dashboard tabs"></nav>
 <main id="main" tabindex="-1"></main>
 <script>
+/* editor-links:begin */
+var SFEditorLinks = (function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module && module.exports) { module.exports = api; }
+  else if (root) { root.SFEditorLinks = api; }
+  return api;
+})(typeof window !== "undefined" ? window : null, function () {
+  var MAX_PATH = 4096, MAX_LINE = 10000000;
+  var EDITORS = ["vscode", "cursor", "windsurf", "zed", "idea", "sublime", "textmate"];
+  function encSeg(s) { return s.split("/").map(encodeURIComponent).join("/"); }
+  function encRoot(r) {
+    var m = /^([A-Za-z]:)(\/.*)$/.exec(r);
+    return m ? m[1] + encSeg(m[2]) : encSeg(r);
+  }
+  function lineOf(line) {
+    var n;
+    if (typeof line === "number") { n = line; }
+    else if (typeof line === "string" && /^[0-9]+$/.test(line)) { n = parseInt(line, 10); }
+    else { return null; }
+    if (isFinite(n) && Math.floor(n) === n && n >= 1 && n <= MAX_LINE) { return n; }
+    return null;
+  }
+  function validRoot(r) {
+    return typeof r === "string" && r.length > 0 && r.length <= MAX_PATH && r.indexOf("\0") < 0 &&
+      r.indexOf("\\") < 0 && (r.charAt(0) === "/" || /^[A-Za-z]:\//.test(r));
+  }
+  function validRel(p) {
+    var i, segs;
+    if (typeof p !== "string" || p.length === 0 || p.length > MAX_PATH) { return false; }
+    if (p.indexOf("\0") >= 0 || p.indexOf("\\") >= 0 || p.charAt(0) === "/") { return false; }
+    if (/^[A-Za-z0-9+.\-]+:/.test(p)) { return false; }
+    segs = p.split("/");
+    for (i = 0; i < segs.length; i++) { if (segs[i] === "..") { return false; } }
+    return true;
+  }
+  function editorUrl(editor, rootDir, relPath, line) {
+    var base, abs, n, q, i, found = false;
+    if (typeof editor !== "string") { return null; }
+    for (i = 0; i < EDITORS.length; i++) { if (EDITORS[i] === editor) { found = true; } }
+    if (!found || !validRoot(rootDir) || !validRel(relPath)) { return null; }
+    base = rootDir.replace(/\/+$/, "");
+    n = lineOf(line);
+    if (editor === "idea") {
+      return "idea://open?file=" + encodeURIComponent(base + "/" + relPath) + (n ? "&line=" + n : "");
+    }
+    abs = encRoot(base) + "/" + encSeg(relPath);
+    q = n ? "&line=" + n : "";
+    if (editor === "sublime") { return "subl://open?url=file://" + abs + q; }
+    if (editor === "textmate") { return "txmt://open?url=file://" + abs + q; }
+    return editor + "://file/" + abs + (n ? ":" + n : "");
+  }
+  return { editorUrl: editorUrl, editors: EDITORS.slice(), validRoot: validRoot };
+});
+/* editor-links:end */
 (function(){
 "use strict";
 var TABS=[
@@ -94,6 +150,21 @@ function langfuseHtml(){
   return h+'<div class="grid">'+fig("configured",l.configured)+fig("traces",l.traces)+"</div>";
 }
 
+function wsConf(){
+  var r=S.runtime||{},c=r.config||{},q=new URLSearchParams(location.search),h=location.hash,i=h.indexOf("?"),hq=new URLSearchParams(i>=0?h.slice(i+1):"");
+  var ed=q.get("editor")||hq.get("editor")||r.editor||c.editor||"none",root=q.get("root")||hq.get("root")||r.workspace_root||c.workspace_root||"";
+  return {editor:ed,root:root};
+}
+function fileRef(path,line){
+  if(!path)return "";
+  var w=wsConf(),u=SFEditorLinks.editorUrl(w.editor,w.root,String(path),line);
+  return (u?'<a class="elink" href="'+esc(u)+'"><code>'+esc(path)+'</code></a>':'<code>'+esc(path)+'</code>')+
+    '<button type="button" class="cp" data-copy="'+esc(path)+'">Copy path</button>';
+}
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("[data-copy]");
+  if(b){try{navigator.clipboard.writeText(b.getAttribute("data-copy"));b.textContent="Copied";setTimeout(function(){b.textContent="Copy path"},1200)}catch(x){}}
+});
 function tabData(key){
   var m=S.manifest;if(!m)return Promise.reject(new Error(S.manifestErr||"no snapshot selected"));
   var t=m.tabs[key];if(!t)return Promise.reject(new Error("manifest has no tab "+key));
@@ -104,18 +175,18 @@ function na(d){return '<div class="card">'+badge("unavailable")+" <strong>Not av
 function table(cols,rows){
   if(!rows.length)return '<p class="mute">No rows.</p>';
   return "<table><thead><tr>"+cols.map(function(c){return "<th scope=col>"+esc(c[1])+"</th>"}).join("")+"</tr></thead><tbody>"+
-   rows.map(function(r){return "<tr>"+cols.map(function(c){var v=r[c[0]];return "<td>"+esc(v==null?"":v)+"</td>"}).join("")+"</tr>"}).join("")+"</tbody></table>";
+   rows.map(function(r){return "<tr>"+cols.map(function(c){var v=r[c[0]];return "<td>"+(c[2]?fileRef(v):esc(v==null?"":v))+"</td>"}).join("")+"</tr>"}).join("")+"</tbody></table>";
 }
 var HIST={
  architecture:function(d){
    var h="";d.items.forEach(function(it){
      if(it.error){h+=errBox(it.path+": "+it.error);return}
-     h+='<div class="card"><strong>'+esc(it.title)+'</strong> <span class="mute">'+esc(it.path)+", "+it.nodes+" nodes, "+it.diagrams+' diagrams</span></div>'+
+     h+='<div class="card"><strong>'+esc(it.title)+'</strong> <span class="mute">'+fileRef(it.path)+", "+it.nodes+" nodes, "+it.diagrams+' diagrams</span></div>'+
      '<iframe title="Architecture explorer: '+esc(it.title)+'" src="../viewer.html?model='+encodeURIComponent("blobs/"+it.model_blob+".json")+'"></iframe>';
    });return h},
- research:function(d){return table([["title","Title"],["as_of","As of"],["path","File"]],d.items)},
- experiments:function(d){return table([["name","Experiment"],["path","File"]],d.items)+d.items.map(function(i){return "<details><summary>"+esc(i.name)+"</summary><pre><code>"+esc(JSON.stringify(i.results||i.error,null,1))+"</code></pre></details>"}).join("")},
- adrs:function(d){return table([["id","ID"],["title","Title"],["status","Status"],["date","Date"]],d.items)},
+ research:function(d){return table([["title","Title"],["as_of","As of"],["path","File",1]],d.items)},
+ experiments:function(d){return table([["name","Experiment"],["path","File",1]],d.items)+d.items.map(function(i){return "<details><summary>"+esc(i.name)+"</summary><pre><code>"+esc(JSON.stringify(i.results||i.error,null,1))+"</code></pre></details>"}).join("")},
+ adrs:function(d){return table([["id","ID"],["title","Title"],["status","Status"],["date","Date"],["path","File",1]],d.items)},
  prd_journeys:function(d){return d.items.map(function(s){return '<div class="card"><strong>'+esc(s.title)+'</strong> <span class="mute">slice '+esc(s.slice)+", priority "+esc(s.priority||"unset")+"</span><ul>"+(s.stories.length?s.stories.map(function(x){return "<li>"+esc(x)+"</li>"}).join(""):'<li class="mute">no UX stories recorded</li>')+"</ul></div>"}).join("")},
  dev_journey:function(d){
    var h=table([["slice","Slice"],["t","Tasks done/total"],["v","Verified/total"],["a","Amendments"]],d.items.map(function(s){
@@ -127,7 +198,7 @@ var HIST={
    if(sm.results_committed)h+='<div class="card"><details open><summary>Committed results (latest.json)</summary><pre><code>'+esc(JSON.stringify(d.items[0].results,null,1))+"</code></pre></details></div>";
    else h+='<div class="card">'+badge("unavailable")+" No results committed. "+esc(sm.note||"")+"</div>";
    return h},
- bug_log:function(d){return table([["title","Title"],["status","Status"],["path","Source"]],d.items.map(function(b){return {title:b.title||b.id||b.error||"",status:b.status||"",path:b.path||""}}))},
+ bug_log:function(d){return table([["title","Title"],["status","Status"],["path","Source",1]],d.items.map(function(b){return {title:b.title||b.id||b.error||"",status:b.status||"",path:b.path||""}}))},
  git:function(d){return table([["sha","Commit"],["date","Date"],["subject","Subject"]],d.items.map(function(c){return {sha:short(c.sha),date:c.date,subject:c.subject}}))}
 };
 function histPanel(key,title){

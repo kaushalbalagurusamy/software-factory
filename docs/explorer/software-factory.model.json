@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "5f41579",
+  "commit": "ad33b62",
   "generated": "2026-10-19"
  },
  "root": "factory",

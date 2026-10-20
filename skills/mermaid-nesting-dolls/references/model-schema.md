@@ -12,6 +12,7 @@ One JSON file describes the whole explorer. `scripts/nesting_dolls.py check` enf
     "generated": "2026-10-19",
     "repoUrl": "https://github.com/owner/repo"
   },
+  "workspace": {"root": "/abs/path/to/checkout", "editor": "vscode"},
   "root": "factory",
   "nodes": {
     "factory": {
@@ -60,3 +61,7 @@ Leave `coverage` off nodes where status is meaningless. Never mark `built` from 
 - `lines` ("10-40" or "12") must lie inside the file (**checked**).
 - `contains` is a literal string that must occur in those lines (**checked**). Use it on every file that backs a specific claim: it turns a vague pointer into a verified one and breaks loudly when the code moves.
 - A file with neither `lines` nor `contains` draws a warning: it is weakly grounded.
+
+## workspace (optional, editor links)
+
+`workspace.root` is the absolute checkout directory (`/abs/path` or `C:/abs/path`) and `workspace.editor` is one of `vscode`, `cursor`, `windsurf`, `zed`, `idea`, `sublime`, `textmate` or `none`. Both are **checked**. The viewer joins `root` and a file's `path` to open it in the editor at the first line of `lines`; `?editor=` and `?root=` in the page address override them. Omit `workspace` for a portable file (files then show `Copy path` only). `build --workspace-root DIR --editor NAME` writes it.
