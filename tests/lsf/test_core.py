@@ -206,3 +206,28 @@ def test_doctor_editors_git_missing_and_syntax(repo, tmp_path):
     r = subprocess.run([sys.executable, str(copy), "doctor", "--root", str(repo)], capture_output=True, text=True)
     line = [x for x in r.stdout.splitlines() if "self-check" in x][0]
     assert line.startswith("FAIL") and "line" in line and r.returncode == 1
+
+
+def test_ledger_entries_carry_prev_and_hash_literals(repo):
+    run(repo, "init")
+    for n in "abc":
+        run(repo, "hitl", "request", n, "--question", "q")
+    rows = [json.loads(x) for x in (repo / ".lsf" / "stops.jsonl").read_text().splitlines()]
+    assert rows[0]["prev"] == "0" * 64
+    for a, b in zip(rows, rows[1:]):
+        assert len(a["hash"]) == 64 and b["prev"] == a["hash"] and b["prev"] in json.dumps(b)
+    led = repo / ".lsf" / "stops.jsonl"
+    good = led.read_text()
+    led.write_text(good.replace(rows[1]["prev"], "f" * 64))
+    assert run(repo, "hitl", "status").returncode == 1
+    led.write_text(good)
+    assert run(repo, "hitl", "status").returncode == 3
+
+
+def test_hook_nul_byte_payloads(repo):
+    for payload in ('{"agent_type": "a\\u0000b", "last_assistant_message": "x\\u0000y"}',
+                    '{"agent_type": "a", "last_assistant_message": "x\x00y"}'):
+        r = run(repo, "hook", "SubagentStop", stdin=payload)
+        assert r.returncode == 0 and r.stdout == ""
+    ev = events(repo)
+    assert sum(e["note"] == "x y" for e in ev) == 2 and not any("\x00" in json.dumps(e) or "u0000" in json.dumps(e) for e in ev)

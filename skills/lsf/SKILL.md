@@ -10,6 +10,14 @@ This is `/sf` made fast. Same stage names, same file conventions, same artifacts
 
 Run the tool as `lsf` (installed by `install.sh`) or `python3 <skill dir>/scripts/lsf.py`. Every command takes `--root DIR`.
 
+## Mac quick start
+
+1. `python3 --version` must print 3.9 or newer (macOS ships it with the Xcode command line tools; `xcode-select --install` if missing). `git --version` too.
+2. From the unpacked skill folder: `sh install.sh`. It copies the skill to `~/.claude/skills/lsf` and puts an `lsf` wrapper in `~/.local/bin` (add that folder to `PATH` if it says so). Running it again changes nothing.
+3. In the project folder: `lsf doctor`, then `lsf init`.
+4. `lsf serve --open` prints `http://127.0.0.1:PORT/#token=...` once in that terminal and opens it. The token after `#` is what enables the Approve button, so open that exact URL (if the page has no token it shows the terminal command instead). Keep this terminal running.
+5. To approve a checkpoint: click **Approve** on its card in the Now tab (add a note if you like), or run `lsf hitl release NAME` in another terminal. Agents never release.
+
 ## Start
 
 1. `lsf doctor` and fix any FAIL.
