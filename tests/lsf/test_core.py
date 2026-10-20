@@ -173,6 +173,7 @@ def test_partial_checkpoints_follow_default_mode(repo):
 
 def test_many_stops_release_and_inspect(repo):
     run(repo, "init")
+    (repo / "x").write_text("x\n")  # SFN-09: a stop's artifacts must exist so they can be hashed
     for n in "abc":
         run(repo, "hitl", "request", n, "--question", "q", "--artifact", "x", "--artifact", "x")
     assert run(repo, "hitl", "release", "b").returncode == 0
