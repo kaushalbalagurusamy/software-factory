@@ -9,7 +9,9 @@ import pytest
 
 from .conftest import LSF, walk
 
-EVENTS = ("SubagentStop", "Stop", "PostToolUse")
+# Amended after the adversarial review (docs/reviews/2026-10-20-lsf-review.md, finding 1d): a PreToolUse guard on Bash
+# joins the three telemetry hooks.
+EVENTS = ("SubagentStop", "Stop", "PostToolUse", "PreToolUse")
 
 
 def printed(rig):
@@ -45,6 +47,7 @@ def test_L08_print_has_the_three_events_and_absolute_commands(rig):
         assert c.startswith("python3 ")
         assert str(LSF.resolve()) in c and " hook " in c
     assert cmds["PostToolUse"][0][0] == "Bash"
+    assert cmds["PreToolUse"][0][0] == "Bash" and cmds["PreToolUse"][0][1].endswith("hook guard")
     assert all(m in (None, "") for m in (cmds["Stop"][0][0], cmds["SubagentStop"][0][0]))
 
 
@@ -99,7 +102,9 @@ def test_L08_install_merges_without_removing_existing_entries(rig, tmp_path):
     assert rig.run("hooks", "install", "--project", proj, "--apply").returncode == 0
     got = json.loads((proj / ".claude" / "settings.local.json").read_text())
     assert got["permissions"] == orig["permissions"] and got["env"] == orig["env"]
-    assert got["hooks"]["PreToolUse"] == orig["hooks"]["PreToolUse"]
+    for entry in orig["hooks"]["PreToolUse"]:
+        assert entry in got["hooks"]["PreToolUse"], "existing PreToolUse entries must be kept unchanged"
+    assert any("hook guard" in c for _, c in commands(got)["PreToolUse"])
     cmds = commands(got)
     flat = [c for _, c in cmds["Stop"]]
     assert "echo mine-stop" in flat and any("lsf.py" in c for c in flat)
