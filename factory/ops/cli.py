@@ -113,8 +113,8 @@ def _block() -> str:
     return f"""{BEGIN}
 __sf_autobundle() {{
   T=""; command -v timeout >/dev/null 2>&1 && T="timeout 120"
-  if command -v sf >/dev/null 2>&1; then $T sf ops bundle --sha HEAD
-  else PYTHONPATH='{root}' $T '{sys.executable}' -m factory.cli ops bundle --sha HEAD; fi
+  if command -v sf >/dev/null 2>&1; then SF_EVENTS=off $T sf ops bundle --sha HEAD
+  else SF_EVENTS=off PYTHONPATH='{root}' $T '{sys.executable}' -m factory.cli ops bundle --sha HEAD; fi
 }}
 ( __sf_autobundle ) >/dev/null 2>&1 &
 {END}

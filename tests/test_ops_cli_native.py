@@ -249,3 +249,25 @@ def test_viewer_has_staleness_banner_texts():
     html = (REPO / "ops" / "shell" / "index.html").read_text()
     for t in ("commits behind the repository", "Up to date", "Repository state unknown"):
         assert t in html
+
+
+def test_autobundle_commit_leaves_tree_clean(proj):
+    commit(proj, files={".gitignore": "ops/\n"})
+    (proj / "ops").mkdir()
+    (proj / "ops" / "events.jsonl").write_text("")
+    assert sf("ops", "autobundle", "install", cwd=proj).returncode == 0
+    env = {**os.environ, "PYTHONPATH": str(REPO)}
+    env.pop("SF_EVENTS", None)  # the owner's shell does not switch events off
+    (proj / "f.txt").write_text("x")
+    subprocess.run(["git", "add", "f.txt"], cwd=proj, check=True)
+    subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "hooked"],
+                   cwd=proj, check=True, env=env)
+    import time
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=proj, capture_output=True, text=True).stdout.strip()
+    for _ in range(150):
+        if (proj / "ops" / "snapshots" / head / "manifest.json").exists():
+            break
+        time.sleep(0.1)
+    assert (proj / "ops" / "snapshots" / head / "manifest.json").exists()
+    assert (proj / "ops" / "events.jsonl").read_text() == ""
+    assert subprocess.run(["git", "status", "--porcelain"], cwd=proj, capture_output=True, text=True).stdout == ""
