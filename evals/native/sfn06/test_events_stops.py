@@ -69,10 +69,10 @@ def test_L06_note_truncated_at_2000(inited, n, expect):
 
 
 def test_L06_control_characters_are_replaced(inited):
-    note = "a\x00b\x07c\x1bd\ne\rf\tg\x7fh"
+    note = "a\x07b\x1bc\nd\re\tf\x7fg"  # a NUL cannot be passed in argv; it is covered through the hook payload
     e = ev(inited, "7-implement", "pass", "--note", note)
     assert not [c for c in e["note"] if ord(c) < 32 or ord(c) == 127]
-    for ch in "abcdefgh":
+    for ch in "abcdefg":
         assert ch in e["note"]
     raw_lines = (inited.lsf_dir / "events.jsonl").read_text().splitlines()
     assert len(raw_lines) == 1  # an embedded newline must not split the record
@@ -233,7 +233,7 @@ def test_L07_ledger_is_append_only_and_hash_chained(inited):
     entries = [json.loads(l) for l in lines]
     hexes = [set(v for v in e.values() if isinstance(v, str) and re.fullmatch(r"[0-9a-f]{64}", v)) for e in entries]
     assert all(hexes), "each entry carries a SHA-256 hex"
-    for prev, cur in zip(hexes, hexes[1:]):
+    for prev, cur in zip(hexes, entries[1:]):
         assert any(h in json.dumps(cur) for h in prev), "entry must reference the previous entry's hash"
     inited.run("hitl", "release", "b")
     assert inited.stop_lines()[:3] == lines

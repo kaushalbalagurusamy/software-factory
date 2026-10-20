@@ -155,6 +155,12 @@ def lines_for(out, word):
     return [l for l in out.splitlines() if word.lower() in l.lower()]
 
 
+def label_lines(out, word):
+    """Lines whose check label (text before the first colon) names `word`; details can hold the tmp path,
+    which contains the test's own name."""
+    return [l for l in out.splitlines() if word.lower() in l.split(":", 1)[0].lower()]
+
+
 def test_L13_doctor_passes_on_a_healthy_repo(inited):
     p = doctor(inited)
     assert p.returncode == 0, p.stdout + p.stderr
@@ -177,7 +183,7 @@ def test_L13_missing_git_is_a_fail_not_a_pass(inited, tmp_path):
     path = tool_path(tmp_path, "python3")
     p = doctor(inited, env={"PATH": path})
     assert p.returncode == 1, p.stdout + p.stderr
-    gl = lines_for(p.stdout, "git")
+    gl = label_lines(p.stdout, "git")
     assert gl and any("FAIL" in l for l in gl)
     assert not any("PASS" in l for l in gl), "no PASS for a check that could not run"
 
@@ -236,5 +242,5 @@ def test_L13_syntax_self_check_flags_python310_code(inited, tmp_path):
                        capture_output=True, text=True, timeout=20)
     # the module itself may refuse to import on 3.9-parse; either way it must not report a clean doctor
     assert p.returncode != 0
-    assert "PASS" not in "".join(l for l in p.stdout.splitlines() if "syntax" in l.lower())
+    assert "PASS" not in "".join(l for l in p.stdout.splitlines() if "syntax" in l.split(":", 1)[0].lower() or "self-check" in l.split(":", 1)[0].lower())
 
