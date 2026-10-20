@@ -24,6 +24,7 @@ def build() -> argparse.ArgumentParser:
     d.add_argument("--allow-model", action="append", default=[], metavar="NAME")
     pe = sub.add_parser("pin-external")
     pe.add_argument("--skills-dir"); pe.add_argument("--factory-root"); pe.add_argument("--yes", action="store_true")
+    pe.add_argument("--accept-changed", action="append", default=[], metavar="NAME")
     return ap
 
 
@@ -41,7 +42,7 @@ def main(argv=None) -> int:
         if a.cmd == "uninstall":
             return 0 if uninstall(a.project) else 1
         if a.cmd == "pin-external":
-            return pin_external(a.skills_dir, a.factory_root, a.yes)
+            return pin_external(a.skills_dir, a.factory_root, a.yes, accept_changed=a.accept_changed)
         from .doctor import run_doctor
         return run_doctor(a)
     except InstallError as e:
