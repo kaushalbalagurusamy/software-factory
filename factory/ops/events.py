@@ -56,7 +56,9 @@ def _target(root: Path) -> Path:
             r = Path(os.path.realpath(p))
             if r != real_root and real_root not in r.parents:
                 raise ValueError(f"{p} is a symlink that resolves outside the repository")
-    ops.mkdir(parents=True, exist_ok=True)
+    if not root.is_dir():
+        raise FileNotFoundError(f"repository root does not exist: {root}")
+    ops.mkdir(exist_ok=True)
     return ops / "events.jsonl"
 
 
