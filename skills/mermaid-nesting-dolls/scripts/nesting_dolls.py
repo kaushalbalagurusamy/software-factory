@@ -40,8 +40,16 @@ def children_map(node: dict) -> dict[str, str]:
 
 
 def valid_root(root: object) -> bool:
-    return (isinstance(root, str) and 0 < len(root) <= 4096 and "\0" not in root and "\\" not in root
-            and (root.startswith("/") or re.match(r"[A-Za-z]:/", root) is not None))
+    """Same rule as editor-links.js: absolute POSIX or drive path, no UNC start, no empty or `.` segments."""
+    if not isinstance(root, str) or not 0 < len(root) <= 4096 or "\0" in root:
+        return False
+    drive = re.match(r"[A-Za-z]:[\\/]", root) is not None
+    if not drive and ("\\" in root or not root.startswith("/")):
+        return False
+    n = root.replace("\\", "/") if drive else root
+    n = n[:-1] if n.endswith("/") else n
+    body = n[3:] if drive else n[1:]
+    return not body or all(x not in ("", ".") for x in body.split("/"))
 
 
 def validate_workspace(ws: object) -> list[str]:

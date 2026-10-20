@@ -104,3 +104,18 @@ def test_backslash_drive_root_is_converted():
 def test_dotted_names_ok_and_odd_lines_omitted():
     assert url("zed", "/r", "a..b/c.py", 2) == "zed://file/r/a..b/c.py:2"
     assert url("vscode", "/r", "a", "abc") == "vscode://file/r/a"
+
+
+@pytest.mark.parametrize("root,rel", [
+    ("//evil/share", "a.py"), ("///x", "a.py"), ("/home/me//proj", "a.py"), ("/r//", "a.py"), ("/r/./x", "a.py"),
+    ("C:/x//y", "a.py"), ("/r", "a//b.py"), ("/r", "./a.py"), ("/r", "a/./b.py"), ("/r", "a/"), ("/r", "."),
+])
+def test_unc_empty_and_dot_segments_are_null(root, rel):
+    for ed in ["vscode", "idea", "sublime"]:
+        assert url(ed, root, rel, 1) is None
+
+
+def test_single_trailing_slash_on_root_is_stripped():
+    assert url("vscode", "/home/me/", "a.py", 1) == "vscode://file/home/me/a.py:1"
+    assert url("vscode", "C:/Users/me/", "a.py", 1) == "vscode://file/C:/Users/me/a.py:1"
+    assert url("vscode", "/", "a.py", 1) == "vscode://file/a.py:1"

@@ -81,3 +81,11 @@ def test_editor_list_matches_js():
     in_js = re.search(r"var EDITORS = \[(.*?)\]", js).group(1).replace('"', "").replace(" ", "").split(",")
     in_py = re.search(r"EDITORS = \((.*?)\)", TOOL.read_text()).group(1).replace('"', "").replace(" ", "").split(",")
     assert in_js == in_py
+
+
+def test_check_rejects_unc_and_empty_segment_roots(tmp_path):
+    for root in ("//evil/share", "/a//b", "/a/./b", "C:/x//y"):
+        r = run("check", str(setup(tmp_path, {"root": root})), "--repo", str(tmp_path))
+        assert r.returncode == 1 and "workspace.root" in r.stdout, root
+    for root in ("/", "/a/", "C:\\Users\\me", "C:/"):
+        assert run("check", str(setup(tmp_path, {"root": root})), "--repo", str(tmp_path)).returncode == 0, root
