@@ -1,0 +1,30 @@
+# Default jargon list for eli12.py check. One term per line (case-insensitive, whole words).
+# A term used in prose needs an entry in docs/eli12/GLOSSARY.md. Copy this file to
+# docs/eli12/jargon.txt in your project to replace it.
+API
+abstraction
+async
+asynchronous
+callback
+closure
+coroutine
+daemon
+decorator
+dependency injection
+deserialize
+endpoint
+idempotent
+instantiate
+iterator
+lambda
+middleware
+monad
+mutex
+namespace
+payload
+polymorphism
+recursion
+regex
+serialize
+singleton
+webhook
