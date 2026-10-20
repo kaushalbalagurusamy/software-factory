@@ -23,7 +23,7 @@ _CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 _PEM = re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----(?:.*?-----END [A-Z ]*PRIVATE KEY-----|.*)", re.S)
 
 
-_BEARER = re.compile(r"(?i)\b(bearer\s+)[A-Za-z0-9._~+/=-]{8,}")
+_BEARER = re.compile(r"(?i)\b(bearer\s*)[A-Za-z0-9._~+/=-]{8,}")
 _USERINFO = re.compile(r"(?<=://)[^/\s:@]+:[^/\s@]+@")
 
 
@@ -34,10 +34,10 @@ def _redact(text: str) -> str:
         return _USERINFO.sub(REDACTED + "@", _BEARER.sub(lambda m: m.group(1) + REDACTED, base(t)))
 
     text = _PEM.sub(REDACTED, text)  # an unterminated block hides everything after its header
-    spaced = redact(_CONTROL.sub(" ", text))
-    joined = _CONTROL.sub("", text)  # a secret split by a newline, tab or NUL only matches once rejoined
-    red = redact(joined)
-    return red if red != joined else spaced
+    spaced_in, joined_in = _CONTROL.sub(" ", text), _CONTROL.sub("", text)
+    spaced, joined = redact(spaced_in), redact(joined_in)
+    # a secret split by a control character only shows in the joined view: then nothing of the field is kept
+    return REDACTED if joined.count(REDACTED) > spaced.count(REDACTED) else spaced
 
 
 def _clean(value, limit: int) -> str:
