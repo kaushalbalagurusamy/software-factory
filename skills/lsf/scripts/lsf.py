@@ -1925,7 +1925,7 @@ def make_handler(root, token, assets_html):
                 if not self._host_ok():
                     return self._err(403, "forbidden host")
                 path = self.path.partition("?")[0]
-                if path != "/api/hitl/release":
+                if path not in ("/api/hitl/release", "/api/rollback"):
                     return self._err(404, "not found")
                 if not hmac.compare_digest(self.headers.get("X-LSF-Token", "").encode("utf-8", "replace"), token.encode()):
                     return self._err(403, "missing or wrong token")
@@ -1935,6 +1935,8 @@ def make_handler(root, token, assets_html):
                     return self._err(411, "Content-Length required")
                 if n < 0 or n > 65536:
                     return self._err(413, "body too large")
+                if path == "/api/rollback":
+                    return self._rollback(n)
                 try:
                     body = json.loads(self.rfile.read(n).decode("utf-8"))
                     name, note = body["name"], body.get("note", "")
@@ -1956,6 +1958,22 @@ def make_handler(root, token, assets_html):
                 return self._send(200, json.dumps({"ok": True, "name": name, "released_at": t}, default=_jd))
             except Exception as e:
                 return self._err(500, "internal error: %s" % e.__class__.__name__)
+
+        def _rollback(self, n):
+            try:
+                body = json.loads(self.rfile.read(n).decode("utf-8"))
+                sha, confirm = body["sha"], body["confirm_sha"]
+                if not isinstance(sha, str) or not isinstance(confirm, str):
+                    raise ValueError
+            except (ValueError, KeyError, TypeError, AttributeError):
+                return self._err(400, "body must be JSON {sha, confirm_sha}")
+            try:
+                r = rollback(root, sha, confirm)
+            except Usage as e:
+                return self._err(400, str(e))
+            except Fail as e:
+                return self._err(409, str(e))
+            return self._send(200, json.dumps(r, default=_jd))
 
         def _no(self):
             self._err(405, "method not allowed")
