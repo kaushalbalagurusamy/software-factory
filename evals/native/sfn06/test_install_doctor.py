@@ -114,15 +114,19 @@ def test_L01_existing_different_lsf_is_backed_up_first(box):
     (old / "extra.txt").write_text("keep me\n")
     p = box.install()
     assert p.returncode == 0, p.stdout + p.stderr
-    backups = [d for d in box.skills.iterdir() if re.fullmatch(r"lsf\.backup-.*\d.*", d.name)]
+    # Amended after the adversarial review (docs/reviews/2026-10-20-lsf-review.md, finding 5): a backup inside the
+    # skills directory is a second skill named lsf; backups live in the sibling skills-backups directory.
+    bdir = box.skills.parent / "skills-backups"
+    backups = [d for d in bdir.iterdir() if re.fullmatch(r"lsf\.backup-.*\d.*", d.name)]
     assert len(backups) == 1
+    assert not [d for d in box.skills.iterdir() if "backup" in d.name], "no backup may sit inside the skills dir"
     assert (backups[0] / "SKILL.md").read_text() == "the OLD lsf skill\n"
     assert (backups[0] / "extra.txt").read_text() == "keep me\n"
     assert "name: lsf" in (box.skills / "lsf" / "SKILL.md").read_text()
     assert not (box.skills / "lsf" / "extra.txt").exists()
     # and a further run does not make another backup
     box.install()
-    assert len([d for d in box.skills.iterdir() if d.name.startswith("lsf.backup-")]) == 1
+    assert len([d for d in bdir.iterdir() if d.name.startswith("lsf.backup-")]) == 1
 
 
 def test_L01_install_works_under_dash_if_present(box):
