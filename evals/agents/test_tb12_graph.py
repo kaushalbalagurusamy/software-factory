@@ -270,6 +270,18 @@ def test_d016_default_small_roles(tmp_path):
     assert kept == expected
 
 
+@case("TB12-D-034", "diagnostic")
+def test_d034_default_graph_order_and_loops():
+    """C-40.5 / SFN-02 A-03: the default graph runs orchestrate, research, design, audit, implement, qa, test, review,
+    with exactly the loops qa->implement and review->implement."""
+    data = default_graph_data()
+    assert [s["role"] for s in data["stages"]] == [
+        "orchestrator", "research", "design", "audit", "implement", "qa", "test", "review"]
+    ids = {s["id"]: s["role"] for s in data["stages"]}
+    assert {(ids[a], ids[b]) for a, b in data["loops"]} == {("qa", "implement"), ("review", "implement")}
+    assert len(data["loops"]) == 2
+
+
 @case("TB12-D-017", "diagnostic")
 def test_d017_gates_exclude_non_gates(tmp_path):
     """Behaviour 6 + [A-26]: a stage is a gate iff gate: true (role does not matter); alt reports none."""
