@@ -187,3 +187,15 @@ Supersedes C-40.1 where it differs; binding for the SFN-02 follow-up.
 2. `path_guard` enforces the `qa_paths` writes class: a role whose writes class is `qa_paths` may write only paths matching `**/qa-notes.md`, `**/qa-feedback/**` and `.sf/qa/**` (never `evals/**`, held-out, frozen-test or control directories), and the `app` branch denies writes to those `qa_paths` globs by implement-style roles. The globs come from the hook configuration, with the three above as defaults.
 3. The `qa` role's Bash mode is `full` only so it can run the protected suites. It receives the implement-style git restrictions (no `git add -A`/`.`, no history rewrite, no checkout of protected paths), and the QA feedback files are subject to the existing feedback leak check before a blind role may read them.
 4. `python -m factory.install` gains the `pin-external` subcommand (flags in C-40.3), dispatching to the existing function.
+
+## C-42 (2026-10-20, SFN-08): editor link details
+
+Binding for `docs/prds/SFN-08-editor-links.md`.
+1. `idea`: `idea://open?file=` followed by `encodeURIComponent(root + "/" + relPath)` (one encoding, so `/` becomes `%2F`), then `&line=N` when a line is valid. `sublime` and `textmate` append `&line=N` only when valid; without a line the whole `&line=` part is omitted.
+2. Windows drive roots (`C:/Users/me`, a drive letter, colon, slash) are valid roots; the colon after the drive letter is kept as is. `C:` alone and `C:proj` are not valid roots.
+3. Any `relPath` that begins with a scheme-like prefix (letters, digits, `+`, `.`, `-` followed by `:`) is rejected, so a file name containing `:` after such a prefix is rejected.
+4. A line that is a boolean, a non-numeric string, a float or a negative is omitted, not an error. A numeric string of digits is accepted.
+5. The 4,096-character limit applies to each argument separately; exactly 4,096 is accepted, 4,097 is rejected.
+6. `nesting_dolls.py check --assets [--repo DIR]` finds the ops shell at `<repo>/ops/shell/index.html` (repo defaults to the current directory's git root) and the skill assets relative to the script; a mismatch is reported with the text `editor-links` and exits 1. Without `--assets`, drift is not checked.
+7. With no editor or no valid root a file entry shows `Copy path` and a hint containing the word `editor`.
+8. Browser tests in the hidden evals launch Chrome themselves; implementers do not run them.
