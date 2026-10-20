@@ -50,3 +50,20 @@ def test_eli12_copy_identical_when_source_exists():
     dst = SKILL / "scripts" / "eli12.py"
     if src.exists():
         assert dst.read_bytes() == src.read_bytes()
+
+
+def test_eli12_and_jargon_copies_identical_and_installed(tmp_path):
+    root = SKILL.parents[1] / "skills" / "eli12-docs"
+    for rel in ("scripts/eli12.py", "assets/jargon.txt"):
+        assert (SKILL / rel).read_bytes() == (root / rel).read_bytes(), rel
+    skills = tmp_path / "s"
+    r = sh({"CLAUDE_SKILLS_DIR": str(skills), "LSF_BIN_DIR": str(tmp_path / "b"), "HOME": str(tmp_path)})
+    assert r.returncode == 0
+    assert (skills / "lsf" / "scripts" / "eli12.py").is_file() and (skills / "lsf" / "assets" / "jargon.txt").is_file()
+
+
+def test_skill_names_prds_and_dashboard_copy_path():
+    t = (SKILL / "SKILL.md").read_text()
+    for p in ("docs/prds", "docs/adr", "experiments/", "research/", "docs/eli12", "docs/explorer", "docs/bugs"):
+        assert p in t, p
+    assert "Copy path" in (SKILL / "assets" / "dashboard.html").read_text()

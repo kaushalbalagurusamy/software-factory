@@ -72,7 +72,7 @@ main{padding:8px 16px 64px;max-width:1180px;margin:0 auto;min-width:0}
 .legend{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.78rem;color:var(--mute)}
 .q{font-size:1.15rem;font-weight:650;margin:.2rem 0 .5rem}
 .refs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
-a.elink,.ref{display:inline-flex;align-items:center;min-height:44px;padding:0 .7rem;border:1px solid var(--line);border-radius:10px;background:var(--panel2);text-decoration:none;max-width:100%;overflow-wrap:anywhere}
+a.elink,.ref{display:inline-flex;align-items:center;flex-wrap:wrap;min-height:44px;padding:0 .7rem;border:1px solid var(--line);border-radius:10px;background:var(--panel2);text-decoration:none;max-width:100%;overflow-wrap:anywhere}
 .ref button{min-height:36px;margin-left:.4rem;padding:0 .6rem;font-size:.8rem}
 .row2{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.7rem}
 .err{color:var(--bad)}
@@ -194,11 +194,11 @@ function clock(sec){sec=Math.max(0,Math.floor(sec));var m=Math.floor(sec/60),s=s
 function hhmmss(iso){return iso?String(iso).slice(11,19):"";}
 function conf(){var p=(S.state&&S.state.profile)||{};return {editor:S.editor||p.editor||"vscode",root:S.wsroot||p.workspace_root||""};}
 function ref(path,line,label){
- var c=conf(),url=null,txt=label||(path+(line?":"+line:""));
+ var c=conf(),url=null,txt=label||(path+(line?":"+line:"")),text=String(path)+(line?":"+line:"");
  try{url=SFEditorLinks.editorUrl(c.editor,c.root,String(path),line);}catch(e){url=null;}
- if(url){return h("a",{class:"elink mono",href:url,title:"Open in "+c.editor},txt);}
- return h("span",{class:"ref mono",title:"Set a valid editor and absolute workspace root in the header to get a link"},[txt,
-  h("button",{type:"button",onclick:function(ev){var b=ev.currentTarget;try{navigator.clipboard.writeText(String(path)+(line?":"+line:""));b.textContent="Copied";}catch(e){b.textContent="Copy failed";}}},"Copy")]);}
+ var cp=h("button",{type:"button",onclick:function(ev){var b=ev.currentTarget;try{navigator.clipboard.writeText(text);b.textContent="Copied";}catch(e){b.textContent="Copy failed";}}},"Copy path");
+ if(url){return h("span",{class:"ref"},[h("a",{class:"elink mono",href:url,title:"Open in "+c.editor},txt),cp]);}
+ return h("span",{class:"ref mono",title:"Set a valid editor and absolute workspace root in the header to get a link"},[txt,cp]);}
 function tabData(name){var t=S.snap?S.snap.tabs:(S.state&&S.state.tabs);return t?t[name]:null;}
 function items(t){return t&&t.available&&Array.isArray(t.items)&&t.items.length?t.items:null;}
 function emptyTab(t,what){var why=t&&t.reason?t.reason:(t&&t.available?"the source holds no items":"no data was collected");
