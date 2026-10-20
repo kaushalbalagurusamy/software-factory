@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -170,22 +172,51 @@ def _hook_path(repo: Path) -> Path | None:
     return (hooks if hooks.is_absolute() else repo / hooks) / "post-commit"
 
 
+SHELLS = {"sh", "bash", "dash", "zsh"}
+
+
 def _block() -> str:
-    root = Path(__file__).resolve().parents[2]
+    root = shlex.quote(str(Path(__file__).resolve().parents[2]))
+    py = shlex.quote(sys.executable)
     return f"""{BEGIN}
 __sf_autobundle() {{
+  top=$(git rev-parse --show-toplevel 2>/dev/null) || return 0
+  [ -f "$top/ops/config.json" ] || return 0  # only repositories that opted in (sf ops init / autobundle install)
+  cd "$top" || return 0
   T=""; command -v timeout >/dev/null 2>&1 && T="timeout 120"
   if command -v sf >/dev/null 2>&1; then $T sf ops bundle --sha HEAD
-  else PYTHONPATH='{root}' $T '{sys.executable}' -m factory.cli ops bundle --sha HEAD; fi
+  elif [ -d {root} ] && [ -x {py} ]; then PYTHONPATH={root} $T {py} -m factory.cli ops bundle --sha HEAD; fi
 }}
 ( __sf_autobundle ) >/dev/null 2>&1 &
 {END}
 """
 
 
+def _shebang_problem(text: str | None) -> str | None:
+    """Why a hook's interpreter cannot run the shell block, or None."""
+    if not text or not text.startswith("#!"):
+        return None
+    try:
+        words = shlex.split(text.split("\n", 1)[0][2:])
+    except ValueError:
+        return "unreadable shebang"
+    if words and Path(words[0]).name == "env":
+        words = [w for w in words[1:] if not w.startswith("-") and "=" not in w]
+    name = Path(words[0]).name if words else ""
+    return None if name in SHELLS else f"shebang is not sh, bash, dash or zsh: {text.splitlines()[0]}"
+
+
+def _unreachable(text: str) -> str | None:
+    for ln in text[:text.index(BEGIN)].splitlines():
+        if re.match(r"\s*(exit|exec)\b", ln):
+            return f"a line before the block ends the hook: {ln.strip()}"
+    return None
+
+
 def _autobundle(action: str, repo: Path) -> int:
     repo = repo.resolve()
-    hook = _hook_path(repo) if _git(repo, "rev-parse", "--git-dir") is not None else None
+    top = _git(repo, "rev-parse", "--show-toplevel")
+    hook = _hook_path(repo) if top is not None else None
     if hook is None:
         print(f"error: {repo} is not a git repository", file=sys.stderr)
         return 2
@@ -194,26 +225,51 @@ def _autobundle(action: str, repo: Path) -> int:
         return 1
     text = hook.read_text(encoding="utf-8") if hook.exists() else None
     has = text is not None and BEGIN in text and END in text
+    half = text is not None and not has and (BEGIN in text or END in text)
     if action == "status":
-        print(f"installed: {hook}" if has else f"not installed: {hook}")
+        if half:
+            print(f"not effective: the sf ops autobundle markers in {hook} are incomplete")
+            return 1
+        if not has:
+            print(f"not installed: {hook}")
+            return 0
+        why = (_shebang_problem(text) or _unreachable(text)
+               or (None if os.access(hook, os.X_OK) else "the hook is not executable")
+               or (None if (Path(top) / "ops" / "config.json").is_file() else "ops/config.json is missing, so the block does nothing"))
+        if why:
+            print(f"not effective: {why}")
+            return 1
+        print(f"installed: {hook}")
         return 0
     if action == "install":
+        why = _shebang_problem(text) or ("the sf ops autobundle markers are incomplete; fix or remove them first" if half else None)
+        if why:
+            print(f"error: not installing into {hook}: {why}", file=sys.stderr)
+            return 1
         if not has:
             if text is None:
                 new = "#!/bin/sh\n" + _block()
+            elif text.startswith("#!"):  # right after the shebang, so a later top-level exit cannot skip it
+                first, _, rest = text.partition("\n")
+                new = first + "\n" + _block() + rest
             else:
-                new = text + ("" if text.endswith("\n") or not text else "\n") + ("\n" if text else "") + _block()
+                new = _block() + text
             hook.parent.mkdir(parents=True, exist_ok=True)
             hook.write_text(new, encoding="utf-8")
         os.chmod(hook, hook.stat().st_mode | 0o111)
         _exclude_events(repo)
+        cfg = Path(top) / "ops" / "config.json"  # opting in: the block acts only where this file exists
+        if not cfg.exists():
+            B._check_inside(cfg, Path(top) / "ops")
+            B._atomic(cfg, b"{}\n", Path(top) / "ops")
         print(f"installed: {hook}")
         return 0
-    if has:  # uninstall: drop the block and the blank line install put before it
+    if half:
+        print(f"error: the sf ops autobundle markers in {hook} are incomplete; edit the file by hand", file=sys.stderr)
+        return 1
+    if has:
         a, b = text.index(BEGIN), text.index(END) + len(END)
-        before, after = text[:a].rstrip("\n"), text[b:].lstrip("\n")
-        rest = before + ("\n" if before and after else "") + after
-        rest = rest + ("\n" if rest and not rest.endswith("\n") else "")
+        rest = text[:a] + text[b:].removeprefix("\n")
         if rest.strip() in ("", "#!/bin/sh"):
             hook.unlink()
         else:

@@ -219,10 +219,10 @@ def test_autobundle_lifecycle(proj):
     assert "120" in t and os.access(hook, os.X_OK) and "installed" in sf("ops", "autobundle", "status", cwd=proj).stdout
     assert sf("ops", "autobundle", "uninstall", cwd=proj).returncode == 0
     assert hook.read_text() == "#!/bin/sh\necho mine\n"
+    hook.unlink()
     sf("ops", "autobundle", "install", cwd=proj)
-    hook.write_text(first.decode().split("# >>>")[0].replace("echo mine\n", "") + "# >>>" + first.decode().split("# >>>")[1])
     sf("ops", "autobundle", "uninstall", cwd=proj)
-    assert not hook.exists()
+    assert not hook.exists()  # a hook that holds only our block is deleted
 
 
 def test_autobundle_runs_after_commit_and_never_fails_the_commit(proj):
@@ -402,3 +402,69 @@ def test_head_never_moves_to_a_non_descendant(proj):
     c3 = commit(proj, "side")
     B.update_index(proj / "ops", [], c3, proj)  # diverged
     assert json.loads((proj / "ops" / "index.json").read_text())["head"] == c2
+
+
+def hook_of(proj):
+    return proj / ".git" / "hooks" / "post-commit"
+
+
+def test_autobundle_refuses_non_shell_hooks_and_half_blocks(proj):
+    commit(proj)
+    hook_of(proj).parent.mkdir(exist_ok=True)
+    py = "#!/usr/bin/env python3\nprint('mine')\n"
+    hook_of(proj).write_text(py)
+    r = sf("ops", "autobundle", "install", cwd=proj)
+    assert r.returncode == 1 and r.stderr and hook_of(proj).read_text() == py and not (proj / "ops").exists()
+    hook_of(proj).write_text("#!/usr/bin/env bash\necho a\n# >>> sf ops autobundle >>>\n")
+    assert sf("ops", "autobundle", "install", cwd=proj).returncode == 1
+    assert sf("ops", "autobundle", "status", cwd=proj).stdout.startswith("not effective: ")
+    hook_of(proj).write_text("#!/usr/bin/env -S bash -e\necho a\n")
+    assert sf("ops", "autobundle", "install", cwd=proj).returncode == 0
+
+
+def test_autobundle_block_goes_right_after_the_shebang_and_survives_exit(proj):
+    commit(proj)
+    hook_of(proj).parent.mkdir(exist_ok=True)
+    hook_of(proj).write_text("#!/bin/sh\necho mine\nexit 0\n")
+    assert sf("ops", "autobundle", "install", cwd=proj).returncode == 0
+    t = hook_of(proj).read_text()
+    assert t.index("# >>> sf ops autobundle") < t.index("echo mine") < t.index("exit 0")
+    assert sf("ops", "autobundle", "status", cwd=proj).stdout.startswith("installed:")
+    assert sf("ops", "autobundle", "uninstall", cwd=proj).returncode == 0
+    assert hook_of(proj).read_text() == "#!/bin/sh\necho mine\nexit 0\n"
+
+
+def test_autobundle_status_reports_not_effective(proj):
+    commit(proj)
+    sf("ops", "autobundle", "install", cwd=proj)
+    os.chmod(hook_of(proj), 0o644)
+    r = sf("ops", "autobundle", "status", cwd=proj)
+    assert r.returncode == 1 and r.stdout.startswith("not effective: ") and "executable" in r.stdout
+    os.chmod(hook_of(proj), 0o755)
+    t = hook_of(proj).read_text()
+    hook_of(proj).write_text(t.replace("#!/bin/sh\n", "#!/bin/sh\nexit 0\n", 1))
+    r = sf("ops", "autobundle", "status", cwd=proj)
+    assert r.returncode == 1 and "ends the hook" in r.stdout
+    hook_of(proj).write_text(t)
+    (proj / "ops" / "config.json").unlink()
+    assert "config.json" in sf("ops", "autobundle", "status", cwd=proj).stdout
+
+
+def test_shared_hooks_path_only_acts_in_opted_in_repos(proj, tmp_path_factory):
+    other = tmp_path_factory.mktemp("other")
+    subprocess.run(["git", "init", "-q", str(other)], check=True)
+    shared = tmp_path_factory.mktemp("shared")
+    for r in (proj, other):
+        subprocess.run(["git", "-C", str(r), "config", "core.hooksPath", str(shared)], check=True)
+    commit(proj)
+    assert sf("ops", "autobundle", "install", cwd=proj).returncode == 0
+    import time
+    commit(other, "x")
+    time.sleep(1.5)
+    assert not (other / "ops").exists()
+
+
+def test_autobundle_block_quotes_the_pinned_paths(proj, monkeypatch):
+    from factory.ops import cli as opscli
+    monkeypatch.setattr(opscli.sys, "executable", "/opt/it's here/python")
+    assert "'/opt/it'\"'\"'s here/python'" in opscli._block()
