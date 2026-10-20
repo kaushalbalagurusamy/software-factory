@@ -13,7 +13,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** dict: project folders and separate session names
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:264)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:267)
 
 **Depends on:** nothing
 
@@ -29,12 +29,12 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** CompletedProcess: the command result and any captured output
 
 **Used by:**
-- scripts.lsf-vps.dashboard (scripts/lsf-vps.py:245)
-- scripts.lsf-vps.main (scripts/lsf-vps.py:270)
-- scripts.lsf-vps.prepare (scripts/lsf-vps.py:120)
+- scripts.lsf-vps.dashboard (scripts/lsf-vps.py:248)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:273)
+- scripts.lsf-vps.prepare (scripts/lsf-vps.py:123)
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:37)
 - scripts.lsf-vps.shallow_boundary (scripts/lsf-vps.py:58)
-- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:170)
+- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:173)
 
 **Depends on:** nothing
 
@@ -50,13 +50,13 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** object or None: the remote program output read as JSON, or nothing
 
 **Used by:**
-- scripts.lsf-vps.dashboard (scripts/lsf-vps.py:219)
-- scripts.lsf-vps.fingerprint (scripts/lsf-vps.py:150)
-- scripts.lsf-vps.main (scripts/lsf-vps.py:284)
+- scripts.lsf-vps.dashboard (scripts/lsf-vps.py:222)
+- scripts.lsf-vps.fingerprint (scripts/lsf-vps.py:153)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:287)
 - scripts.lsf-vps.pin_runtime (scripts/lsf-vps.py:66)
-- scripts.lsf-vps.prepare (scripts/lsf-vps.py:121)
-- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:193)
-- scripts.lsf-vps.start (scripts/lsf-vps.py:203)
+- scripts.lsf-vps.prepare (scripts/lsf-vps.py:124)
+- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:196)
+- scripts.lsf-vps.start (scripts/lsf-vps.py:206)
 
 **Depends on:**
 - scripts.lsf-vps.run (scripts/lsf-vps.py:30)
@@ -73,8 +73,8 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** list: file copy arguments, without a delete option
 
 **Used by:**
-- scripts.lsf-vps.prepare (scripts/lsf-vps.py:141)
-- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:184)
+- scripts.lsf-vps.prepare (scripts/lsf-vps.py:144)
+- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:187)
 
 **Depends on:** nothing
 
@@ -90,7 +90,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:191)
+- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:194)
 
 **Depends on:** nothing
 
@@ -105,7 +105,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** str or None: history boundary identifiers, or nothing for complete history
 
 **Used by:**
-- scripts.lsf-vps.prepare (scripts/lsf-vps.py:139)
+- scripts.lsf-vps.prepare (scripts/lsf-vps.py:142)
 
 **Depends on:**
 - scripts.lsf-vps.run (scripts/lsf-vps.py:30)
@@ -121,8 +121,8 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** dict: the tested version and tool locations
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:267)
-- scripts.lsf-vps.prepare (scripts/lsf-vps.py:144)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:270)
+- scripts.lsf-vps.prepare (scripts/lsf-vps.py:147)
 
 **Depends on:**
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
@@ -139,7 +139,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:265)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:268)
 
 **Depends on:**
 - scripts.lsf-vps.copy_args (scripts/lsf-vps.py:42)
@@ -147,7 +147,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
 - scripts.lsf-vps.run (scripts/lsf-vps.py:30)
 - scripts.lsf-vps.shallow_boundary (scripts/lsf-vps.py:57)
-- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:166)
+- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:169)
 
 ## fingerprint
 <!-- sig:049e2bf9 -->
@@ -160,8 +160,8 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** dict: the remote commit identifier and a content check value
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:291)
-- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:168)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:294)
+- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:171)
 
 **Depends on:**
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
@@ -177,12 +177,12 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:266)
-- scripts.lsf-vps.prepare (scripts/lsf-vps.py:145)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:269)
+- scripts.lsf-vps.prepare (scripts/lsf-vps.py:148)
 
 **Depends on:**
 - scripts.lsf-vps.copy_args (scripts/lsf-vps.py:42)
-- scripts.lsf-vps.fingerprint (scripts/lsf-vps.py:149)
+- scripts.lsf-vps.fingerprint (scripts/lsf-vps.py:152)
 - scripts.lsf-vps.publish_snapshot (scripts/lsf-vps.py:49)
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
 - scripts.lsf-vps.run (scripts/lsf-vps.py:30)
@@ -199,7 +199,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:277)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:280)
 
 **Depends on:**
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
@@ -217,7 +217,7 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.main (scripts/lsf-vps.py:281)
+- scripts.lsf-vps.main (scripts/lsf-vps.py:284)
 
 **Depends on:**
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
@@ -233,15 +233,15 @@ Keeps coding work on the remote computer while this Mac shows matching files for
 **Gives back:** nothing
 
 **Used by:**
-- scripts.lsf-vps.<module> (scripts/lsf-vps.py:295)
+- scripts.lsf-vps.<module> (scripts/lsf-vps.py:298)
 
 **Depends on:**
-- scripts.lsf-vps.dashboard (scripts/lsf-vps.py:218)
-- scripts.lsf-vps.fingerprint (scripts/lsf-vps.py:149)
+- scripts.lsf-vps.dashboard (scripts/lsf-vps.py:221)
+- scripts.lsf-vps.fingerprint (scripts/lsf-vps.py:152)
 - scripts.lsf-vps.paths (scripts/lsf-vps.py:20)
 - scripts.lsf-vps.pin_runtime (scripts/lsf-vps.py:65)
-- scripts.lsf-vps.prepare (scripts/lsf-vps.py:118)
+- scripts.lsf-vps.prepare (scripts/lsf-vps.py:121)
 - scripts.lsf-vps.remote (scripts/lsf-vps.py:34)
 - scripts.lsf-vps.run (scripts/lsf-vps.py:30)
-- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:166)
-- scripts.lsf-vps.start (scripts/lsf-vps.py:202)
+- scripts.lsf-vps.snapshot (scripts/lsf-vps.py:169)
+- scripts.lsf-vps.start (scripts/lsf-vps.py:205)

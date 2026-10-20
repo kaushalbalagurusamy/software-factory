@@ -93,6 +93,9 @@ w=Path(config['bin'])/'lsf'
 w.write_text('#!/bin/sh\\nexec python3 "'+str(target/'skills/lsf/scripts/lsf.py')+'" "$@"\\n');w.chmod(0o755)
 guarded=Path(config['bin'])/'lsf-vps-test'
 guarded.write_text('#!/bin/sh\\nexec python3 "'+str(guard)+'" --memory-mb "${LSF_TEST_MEM_MB:-4096}" --wall-s "${LSF_TEST_WALL_S:-180}" --lock /tmp/sf-factory-pytest.lock -- "$@"\\n');guarded.chmod(0o755)
+legacy_bin=target/'bin';legacy_bin.mkdir(exist_ok=True)
+compat=legacy_bin/'lsf-vps-test'
+if not compat.exists():compat.write_text(guarded.read_text());compat.chmod(0o755)
 project=Path(data['remote'])/'.claude/skills';project.mkdir(parents=True,exist_ok=True)
 for name in ('lsf','eli12-docs','mermaid-nesting-dolls'):
  dest=project/name;wanted=target/'skills'/name
