@@ -9,7 +9,7 @@ Stages and gates as validated data (R-03). Contract: `docs/contracts/graph-and-l
 - `Graph.order()`: Kahn's algorithm over `edges`, always taking the smallest ready stage id; `loops` are ignored.
 - `Graph.gates()`: ids of stages with `gate: true`, in `order()` order (A-26, A-30).
 - `Graph.select(name)`: keeps stages whose role is in `subsets[name]`, reconnects edges across removed stages (a path through only removed stages becomes one edge), keeps a loop only when both ends are kept, raises `GraphError` for an unknown subset or when no start or end stage would remain.
-- `default_graph()`: the shipped seven-stage graph (`small` subset: orchestrator, implement, test, review).
+- `default_graph()`: the shipped eight-stage graph (orchestrate, research, design, audit, implement, qa, test, review; `small` subset: orchestrator, implement, qa, test, review).
 
 ## Example call
 ```python

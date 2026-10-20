@@ -5,7 +5,7 @@ Status: published. Location in a project: `.factory/profile.yaml`. Loader: `fact
 ```yaml
 schema_version: 1                    # required, must be 1
 project: {name: <str>}               # required
-main_session_role: orchestrator      # optional, one of the seven role ids
+main_session_role: orchestrator      # optional, one of the eight role ids
 paths:
   eval: [<glob>, ...]                # required, non-empty. Implement is blind to these; Test writes here before the freeze
   held_out: [<glob>, ...]            # optional. Also hidden from Implement

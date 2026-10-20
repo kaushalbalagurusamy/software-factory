@@ -22,5 +22,5 @@ else:
 
 ## Shape decisions where the contract is silent (unverified against the gate)
 - A missing `deploy`/`checks` key inside a present mapping is `None`; unknown keys inside `project`, `paths`, `deploy`, `checks`, `mcp_servers.<name>` are ignored (only top-level and `agents.<role>` unknown keys are errors).
-- Graph stage roles are checked for shape only; subset members are checked against the seven role ids.
+- Graph stage roles are checked for shape only; subset members are checked against the eight role ids.
 - A non-mapping document or invalid YAML raises `ProfileError` with an empty `.field`.

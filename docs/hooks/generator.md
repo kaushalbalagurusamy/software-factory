@@ -1,9 +1,9 @@
 # Agent file generator (`factory.agents.generate`)
 
-Turns the seven role specs plus a project profile into `.claude/agents/<role>.md` text. Pure and deterministic: no file write, clock, randomness, network or model call (writing to disk is the caller's job; `settings.json` is TB-13). Contract: `docs/contracts/roles-and-generation.md`; binding clarifications A-10, A-15, A-19, A-21 to A-24, A-34 in `docs/contracts/clarifications.md`.
+Turns the eight role specs plus a project profile into `.claude/agents/<role>.md` text. Pure and deterministic: no file write, clock, randomness, network or model call (writing to disk is the caller's job; `settings.json` is TB-13). Contract: `docs/contracts/roles-and-generation.md`; binding clarifications A-10, A-15, A-19, A-21 to A-24, A-34 in `docs/contracts/clarifications.md`.
 
 ## API
-- `generate_agents(profile, roles) -> dict[str, str]`: keys `.claude/agents/<role>.md` in role order (`orchestrator research design audit implement test review`); `roles` must hold exactly the seven ids. Same inputs give byte-identical output.
+- `generate_agents(profile, roles) -> dict[str, str]`: keys `.claude/agents/<role>.md` in role order (`orchestrator research design audit implement qa test review`); `roles` must hold exactly the eight ids. Same inputs give byte-identical output.
 - `GenerationError(ValueError)` with `.role` and `.message`.
 
 ## Output
@@ -26,7 +26,7 @@ profile = parse_profile({"schema_version": 1, "project": {"name": "demo"},
                          "paths": {"eval": ["evals/**"]}})
 files = generate_agents(profile, load_roles())
 print(files[".claude/agents/review.md"].splitlines()[:4])
-# ['---', 'name: review', 'description: Independent read-only reviewer; ...', 'model: opus']
+# ['---', 'name: review', 'description: Independent read-only reviewer; ...', 'model: sonnet']
 ```
 
 Tests: `.venv/bin/python -m pytest tests/agents/test_generate.py` (unit coverage, not the acceptance gate). Own expected outputs: `tests/agents/golden/`.

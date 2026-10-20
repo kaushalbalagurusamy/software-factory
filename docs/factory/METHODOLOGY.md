@@ -11,7 +11,7 @@ Rules every agent (any vendor, any tool) must follow when planning, building, te
 6. **Verify deterministically, then review independently.** Deterministic checks (tests, baseline hashes, skip and weakened-assertion scans) run first. Then a reviewer that did not write the code (a different model family where available) checks the diff and the evidence, and grades each pass as right-reason, wrong-reason or inconclusive.
 
 ## 2. Roles of the people and agents
-- **Implementers** (Sonnet-class by default, Opus for hard slices): own only the paths in their brief.
+- **Implementers** (Sonnet 5.5; no role declares another model, and the installer rejects one unless `--allow-model` names it): own only the paths in their brief.
 - **Eval author** (separate agent): writes cases and graders from the contracts; never edits application code.
 - **Auditor** (separate agent): MECE grading, read-only.
 - **Reviewer:** read-only; never edits implementation, tests or cases.

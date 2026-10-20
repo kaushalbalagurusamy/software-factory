@@ -12,7 +12,7 @@ Shows that the profile, role specs, generator, settings emitter and hooks work t
   - a hook that returns something other than a `Decision`
 
   A missing `cwd` defaults to the project root. A hook's `record` runs after `decide`, as on the command line, and its errors are ignored. An invalid profile raises `ProfileError`.
-- `generate_project(project_root) -> dict[str, str]` returns the seven `.claude/agents/<role>.md` texts and `.claude/settings.json`, all produced from the profile alone.
+- `generate_project(project_root) -> dict[str, str]` returns the eight `.claude/agents/<role>.md` texts and `.claude/settings.json`, all produced from the profile alone.
 - The module never reads `routing.jsonl` or any Jev state.
 
 ### Fixtures (`tests/fixtures/e2e_project/`)
@@ -78,7 +78,7 @@ These are unit tests. They are not the acceptance gate. They block socket connec
 
 ## Manual live rehearsal (once, by a human)
 1. Copy `tests/fixtures/e2e_project` (without `variant/`) to a scratch directory and run `git init` and an initial commit there.
-2. Write the output of `generate_project(<dir>)` into `<dir>`, which gives the seven agent files and `.claude/settings.json`. Make sure `python -m factory.hooks` resolves, either by installing this repo in the active venv or by setting `PYTHONPATH`.
+2. Write the output of `generate_project(<dir>)` into `<dir>`, which gives the eight agent files and `.claude/settings.json`. Make sure `python -m factory.hooks` resolves, either by installing this repo in the active venv or by setting `PYTHONPATH`.
 3. Start `claude` in that directory and do each step of the scripted stream for real:
    - Have the `implement` agent read `evals/case_001.yaml`. Expect a deny.
    - Have the `test` agent read the same file. Expect it to be allowed.
