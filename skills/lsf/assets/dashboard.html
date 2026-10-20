@@ -445,7 +445,8 @@ function renderDocs(){
   n.appendChild(d);});
  return n;}
 function rollbackControl(c){
- if(c.parents!==1){return null;}
+ var par=((S.state.runtime||{}).commit_parents||{})[c.sha];
+ if(par!==1){return null;}
  var box=h("div",{class:"rb",style:"flex:1 1 100%"}),btn;
  function close(){box.textContent="";btn.hidden=false;S.rb=null;}
  function openIt(){btn.hidden=true;S.rb=c.sha;box.textContent="";box.appendChild(h("div",{class:"small mute"},"Loading..."));

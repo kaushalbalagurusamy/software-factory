@@ -810,11 +810,11 @@ class Source(object):
         return None if b is None else b.decode("utf-8", "replace")
 
     def commits(self, limit=200):
-        out_ = git(self.root, "log", "-n%d" % limit, "--format=%H%x1f%cI%x1f%s%x1f%P", self.sha) or b""
+        out_ = git(self.root, "log", "-n%d" % limit, "--format=%H%x1f%cI%x1f%s", self.sha) or b""
         rows = []
         for line in out_.decode("utf-8", "replace").splitlines():
-            h, d, s_, par = (line.split("\x1f") + ["", "", ""])[:4]
-            rows.append({"sha": h, "date": d, "subject": s_, "parents": len(par.split())})
+            h, d, s_ = (line.split("\x1f") + ["", ""])[:3]
+            rows.append({"sha": h, "date": d, "subject": s_})
         return rows
 
 
@@ -1250,6 +1250,12 @@ def status_data(root):
     }
 
 
+def commit_parents(root):
+    """{sha: number of parents} for the recent log; the dashboard hides Rollback on merges and the root commit."""
+    raw = git(root, "log", "-n200", "--format=%H %P") or b""
+    return {ln.split()[0]: len(ln.split()) - 1 for ln in raw.decode("utf-8", "replace").splitlines() if ln.strip()}
+
+
 def runtime_state(root):
     out = {"now": iso(now())}
     try:
@@ -1270,6 +1276,7 @@ def runtime_state(root):
                          "verdict": i["verdict"]} for i in intervals(phase_rows(root), None)]
     out["events"] = read_events(root)
     out["cost"] = cost_summary(root)
+    out["commit_parents"] = commit_parents(root)
     return out
 
 
@@ -1623,7 +1630,7 @@ def summarize(text, limit=200):
 
 _COMMIT = re.compile(r"(?:^|&&|\|\||;|\n|\()\s*(?:\w+=\S+\s+)*git\s+(?:-\S+\s+(?:[^-\s]\S*\s+)?)*commit\b")
 _DENY_RELEASE = re.compile(r"hitl\s+(?:release|repair)\b")
-_DENY_ROLLBACK = re.compile(r"\blsf(?:\.py)?\b[^\n;|&]*\brollback\b[^\n;|&]*--yes")
+_DENY_ROLLBACK = re.compile(r"\blsf\b[^\n;|&]*\brollback\b")
 _STOPS_TOUCH = re.compile(r"\.lsf/(?:stops|\.lock)|stops\.(?:jsonl|head)")
 _WRITES = re.compile(r"(?:>|\brm\b|\bmv\b|\btruncate\b|\btee\b|\bsed\b[^|;&]*\s-i|\bcp\b|\bdd\b|\bperl\b|\bpython|\bnode\b|\bln\b|\bchmod\b|\bsh\s+-c)")
 
@@ -1635,7 +1642,7 @@ def guard_reason(command):
     if _STOPS_TOUCH.search(command) and _WRITES.search(command):
         return "the human stop ledger (.lsf/stops*) must not be written by an agent"
     if _DENY_ROLLBACK.search(command):
-        return "lsf rollback --yes is a human act; ask the owner to run it in their own terminal"
+        return "lsf rollback is a human act; ask the owner to run it in their own terminal"
     if re.search(r"/api/rollback", command):
         return "the rollback route is for the human's browser; an agent must not call it"
     if re.search(r"/api/hitl/release", command):
@@ -2042,6 +2049,15 @@ def cmd_serve(a, root):
 
 
 # ---------------------------------------------------------------- parser and main
+def _no_abbrev(parser):
+    """--ye must not mean --yes: abbreviations would slip past the guard's text match."""
+    parser.allow_abbrev = False
+    for act in parser._actions:
+        if isinstance(act, argparse._SubParsersAction):
+            for sp in act.choices.values():
+                _no_abbrev(sp)
+
+
 def build_parser():
     ap = argparse.ArgumentParser(prog="lsf", description="lite software factory: phase clock, telemetry, human checkpoints, dashboard",
                                  epilog="Every command accepts --root DIR (default: nearest git root, else the current directory). "
@@ -2159,6 +2175,7 @@ def build_parser():
     q = cs.add_parser("summary")
     q.add_argument("--json", action="store_true")
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
+    _no_abbrev(ap)
     return ap
 
 
