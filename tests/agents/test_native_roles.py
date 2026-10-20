@@ -82,7 +82,7 @@ def test_reviewer_rubric_and_approval_rule():
     skill = (root / "SKILL.md").read_text()
     rubric = (root / "ponytail-rubric.md").read_text()
     assert "ponytail-rubric.md" in skill and "sf slice amend" in skill and "doc-sync" in skill
-    for q in ("need to exist", "already in the codebase", "standard-library", "unreachable or speculative", "branch"):
+    for q in ("need to exist", "already in the codebase", "standard library", "unreachable or speculative", "branch"):
         assert q in rubric
     desc = yaml.safe_load((DEFAULT_DIR / "review.yaml").read_text())["description"]
     assert "sf slice done" in desc and "doc-sync" in desc and "sf slice amend --role reviewer" in desc
