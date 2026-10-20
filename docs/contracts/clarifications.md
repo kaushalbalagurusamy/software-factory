@@ -180,6 +180,8 @@ Binding for slice SFN-02 (`docs/prds/SFN-02-roles-and-doctor.md`). Source: the o
 5. Where the default graph lists stages, `qa` sits between `implement` and `review`; `test` stays as the runner stage reached from `qa`.
 6. Amendment of earlier acceptance material: the earlier seven-role, Opus-declaration and `prd-designer` expectations in `evals/agents/` and `tests/` are superseded by this slice. They are updated by the maintainer after the slice lands (never by the implementer), each edit listed with its reason in ADR-0005.
 
+Applied: ADR-0005
+
 ## C-41 (2026-10-20, SFN-02b): amendments after the automated security review of SFN-02
 
 Supersedes C-40.1 where it differs; binding for the SFN-02 follow-up.
