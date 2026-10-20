@@ -367,3 +367,38 @@ def test_hook_built_snapshot_shows_the_11_commit_event(proj):
             break
         time.sleep(0.1)
     assert json.loads(man.read_text())["tabs"]["dev_journey"]["available"] is True
+
+
+def test_parallel_bundles_keep_every_index_entry(proj):
+    shas = [commit(proj, str(i)) for i in range(8)]
+    env = {**os.environ, "PYTHONPATH": str(REPO), "SF_EVENTS": "off"}
+    ps = [subprocess.Popen([sys.executable, "-m", "factory.cli", "ops", "bundle", "--sha", s], cwd=proj, env=env,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) for s in shas]
+    assert [p.wait() for p in ps] == [0] * 8
+    idx = json.loads((proj / "ops" / "index.json").read_text())
+    assert {c["sha"] for c in idx["commits"]} == set(shas)
+
+
+def test_backfill_reindexes_lost_entries(proj):
+    shas = [commit(proj, str(i)) for i in range(3)]
+    assert sf("ops", "backfill", cwd=proj).returncode == 0
+    ip = proj / "ops" / "index.json"
+    idx = json.loads(ip.read_text())
+    idx["commits"] = idx["commits"][:1]
+    ip.write_text(json.dumps(idx))
+    assert sf("ops", "backfill", cwd=proj).returncode == 0
+    assert {c["sha"] for c in json.loads(ip.read_text())["commits"]} == set(shas)
+
+
+def test_head_never_moves_to_a_non_descendant(proj):
+    from factory.ops import bundle as B
+    c1 = commit(proj, "one")
+    c2 = commit(proj, "two")
+    B.bundle(proj, c2, Path("ops"))
+    B.update_index(proj / "ops", [], c2, proj)
+    B.update_index(proj / "ops", [], c1, proj)  # an older bundle finishing last
+    assert json.loads((proj / "ops" / "index.json").read_text())["head"] == c2
+    subprocess.run(["git", "checkout", "-q", "-b", "side", c1], cwd=proj, check=True)
+    c3 = commit(proj, "side")
+    B.update_index(proj / "ops", [], c3, proj)  # diverged
+    assert json.loads((proj / "ops" / "index.json").read_text())["head"] == c2

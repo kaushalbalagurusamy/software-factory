@@ -110,9 +110,18 @@ def _backfill(repo: Path, limit: int) -> int:
     shas = (_git(repo, "rev-list", f"-n{max(limit, 0)}", "HEAD") or "").split()
     built = skipped = 0
     failed: list[str] = []
+    try:
+        indexed = {c["sha"] for c in json.loads((out / "index.json").read_text(encoding="utf-8")).get("commits", [])}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        indexed = set()
     for sha in shas:
         if (out / "snapshots" / sha / "manifest.json").exists():
             skipped += 1
+            if sha not in indexed:  # a lost index entry: the manifest is there, so re-list it without rebuilding
+                try:
+                    B.bundle(repo, sha, out, viewer=False)
+                except Exception as e:  # noqa: BLE001
+                    failed.append(f"{sha[:12]} {type(e).__name__}: {' '.join(str(e).split())[:160]}")
             continue
         try:
             B.bundle(repo, sha, out, viewer=False)

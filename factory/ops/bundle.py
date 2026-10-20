@@ -9,6 +9,9 @@ import json
 import os
 import subprocess
 import sys
+import threading
+import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -41,7 +44,7 @@ def _atomic(path: Path, data: bytes, root: Path) -> None:
     _check_inside(path, root)
     path.parent.mkdir(parents=True, exist_ok=True)
     _check_inside(path, root)
-    tmp = path.with_name(path.name + f".tmp{os.getpid()}")
+    tmp = path.with_name(path.name + f".tmp{os.getpid()}.{threading.get_ident()}")
     tmp.write_bytes(data)
     os.replace(tmp, path)
 
@@ -179,18 +182,66 @@ def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
             "tabs": {k: manifest["tabs"][k]["available"] for k in sorted(manifest["tabs"])}, "latest_stage_event": latest}
 
 
-def update_index(out: Path, entries: list[dict], head: str | None = None) -> dict:
-    ip = out / "index.json"
-    idx = json.loads(ip.read_text(encoding="utf-8")) if ip.exists() else {"schema": SCHEMA, "commits": []}
-    by = {c["sha"]: c for c in idx["commits"]}
-    for e in entries:
-        if e["sha"] != "worktree":
-            by[e["sha"]] = e
-    if head:
-        idx["head"] = head  # the commit the latest default (--sha HEAD) bundle ran from
-    idx["commits"] = sorted(by.values(), key=lambda c: (c["date"], c.get("n", 0)), reverse=True)
-    _atomic(ip, json.dumps(idx, indent=1).encode("utf-8"), out)
-    return idx
+@contextmanager
+def _index_lock(out: Path):
+    """Exclusive lock for the index read-modify-write: flock where available, else an atomic mkdir lock."""
+    out.mkdir(parents=True, exist_ok=True)
+    lock = out / ".lock"
+    _check_inside(lock, out)
+    try:
+        import fcntl
+    except ImportError:
+        fcntl = None
+    if fcntl is not None:
+        fd = os.open(lock, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o644)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            os.close(fd)
+        return
+    d = out / ".lock.d"  # shortcut: a lock dir older than 60 s is taken as stale (its owner died)
+    for _ in range(600):
+        try:
+            d.mkdir()
+            break
+        except FileExistsError:
+            try:
+                if time.time() - d.stat().st_mtime > 60:
+                    d.rmdir()
+            except OSError:
+                pass
+            time.sleep(0.1)
+    else:
+        raise TimeoutError(f"could not lock {d}")
+    try:
+        yield
+    finally:
+        d.rmdir()
+
+
+def _is_ancestor(repo: Path, old: str, new: str) -> bool:
+    try:
+        return subprocess.run(["git", "-C", str(repo), "merge-base", "--is-ancestor", old, new],
+                              capture_output=True, timeout=30).returncode != 1
+    except (OSError, subprocess.SubprocessError):
+        return True
+
+
+def update_index(out: Path, entries: list[dict], head: str | None = None, repo: Path | None = None) -> dict:
+    with _index_lock(out):
+        ip = out / "index.json"
+        idx = json.loads(ip.read_text(encoding="utf-8")) if ip.exists() else {"schema": SCHEMA, "commits": []}
+        by = {c["sha"]: c for c in idx["commits"]}
+        for e in entries:
+            if e["sha"] != "worktree":
+                by[e["sha"]] = e
+        cur = idx.get("head")
+        if head and (not cur or cur == head or repo is None or _is_ancestor(repo, cur, head)):
+            idx["head"] = head  # the newest default (--sha HEAD) bundle; never moves to a non-descendant
+        idx["commits"] = sorted(by.values(), key=lambda c: (c["date"], c.get("n", 0)), reverse=True)
+        _atomic(ip, json.dumps(idx, indent=1).encode("utf-8"), out)
+        return idx
 
 
 def bundle(repo: Path, sha: str = "HEAD", out: Path = Path("ops"), backfill: int = 0, worktree: bool = False,
@@ -203,7 +254,7 @@ def bundle(repo: Path, sha: str = "HEAD", out: Path = Path("ops"), backfill: int
     if backfill > 0 and not worktree:
         shas = _git(repo, "rev-list", f"-n{backfill}", sha).decode().split()[::-1]
     entries = [snapshot(repo, s, out, worktree) for s in shas]
-    update_index(out, entries, entries[-1]["sha"] if sha == "HEAD" and not worktree else None)
+    update_index(out, entries, entries[-1]["sha"] if sha == "HEAD" and not worktree else None, repo)
     if viewer:
         build_viewer(out)
     install_shell(out)
