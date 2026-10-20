@@ -131,3 +131,22 @@ existing `.lsf` state; it does not migrate Claude's conversation or unsaved IDE
 buffers. Give the remote agent the brief, current PRD, latest QA feedback and
 next action. Keep one active builder after the switch. Existing human stops
 must remain stops; the new agent should read them before proceeding.
+
+## Antigravity agent role during HITL
+
+The global always-on rule `~/.gemini/config/rules/lsf-hitl-review.md` scopes
+Antigravity to investigation when an LSF workspace or review request is detected.
+The versioned source is `config/antigravity/lsf-hitl-review.md`. It covers both
+local `.lsf/profile.json` workspaces and VPS `.lsf-vps-review.json` snapshots, so
+fresh snapshots inherit the machine rule without copying it into the remote repo.
+
+Start a new Antigravity agent conversation to ensure rules are loaded. Ask it:
+“Review this LSF checkpoint. State your role and snapshot provenance, investigate
+read-only, and return structured findings plus a builder handoff. Do not implement
+or approve the checkpoint.” Verify it states its investigator role before use.
+
+Expected output: scope/provenance; evidenced findings with severity, file:line and
+affected criteria; proposed builder handoff with dependencies and regression
+checks; an advisory HITL recommendation; and what was not checked. Explicit owner
+delegation may authorize a bounded edit. Prompt rules are behavioral guidance,
+not filesystem permissions. Live IDE rule ingestion has not been visually tested.
