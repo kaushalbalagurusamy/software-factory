@@ -388,12 +388,11 @@ def pin_external(skills_dir, factory_root, yes, out=print, accept_changed=()) ->
     # a changed (or vanished) pin is never accepted silently: each needs --accept-changed NAME
     changed = sorted(n for n, v in old_pins.items() if pins.get(n) != v)
     unaccepted = [n for n in changed if n not in set(accept_changed)]
+    flags = ([] if yes else ["--yes"]) + [f"--accept-changed {n}" for n in unaccepted]
     if unaccepted:
-        out("changed since pinned: " + ", ".join(unaccepted)
-            + " (review the diff, then re-run with " + " ".join(f"--accept-changed {n}" for n in unaccepted) + ")")
-        return 2
-    if not yes:
-        out("not written: re-run with --yes to write the pins")
+        out("changed since pinned: " + ", ".join(unaccepted) + " (review the diff first)")
+    if flags:
+        out("not written: re-run with " + " ".join(flags))
         return 2
     if old != new:
         _atomic(target, new)

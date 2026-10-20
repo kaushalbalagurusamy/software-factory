@@ -362,3 +362,21 @@ def test_cli_accept_changed_flag(skills, tmp_path):
     (skills / "away-mode/SKILL.md").write_text("changed")
     assert main([*base, "--yes"]) == 2
     assert main([*base, "--yes", "--accept-changed", "away-mode"]) == 0
+
+
+def test_pin_external_message_names_both_flags(skills, tmp_path):
+    root = tmp_path / "r"
+    root.mkdir()
+    out = []
+    assert pin_external(skills, root, False, out.append) == 2
+    assert any("--yes" in o for o in out)
+    assert pin_external(skills, root, True, out.append) == 0
+    (skills / "minesweeper/SKILL.md").write_text("changed")
+    out.clear()
+    assert pin_external(skills, root, False, out.append) == 2
+    msg = [o for o in out if o.startswith("not written")][0]
+    assert "--yes" in msg and "--accept-changed minesweeper" in msg
+    out.clear()
+    assert pin_external(skills, root, True, out.append) == 2
+    msg = [o for o in out if o.startswith("not written")][0]
+    assert "--yes" not in msg and "--accept-changed minesweeper" in msg
