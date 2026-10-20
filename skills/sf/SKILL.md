@@ -307,7 +307,9 @@ in that project's settings, so an inherited user-level default of another model 
 
 Known limits, stated so nothing reads as more than it is: the hooks are mechanical only in projects where
 `sf` has generated the project settings and agent files, and their behaviour inside a live Claude Code session
-has been exercised through the command line and simulated event streams, not yet end to end in a real session;
+has been exercised through the command line, simulated event streams and scripted headless real sessions
+(`docs/native-verification/2026-10-19/REPORT.md`: denials, a failing gate and repair, a human stop), but not in an
+interactive session, and not for the intake gate, the full QA loop with real agents or reviewer amendments;
 the Bash and blindness guards are denylist parsers and cannot be complete, so the OS sandbox and permission
 layer remain the backstop; the solver gate covers a small pure-Python subset and everything else must route
 to tests; structure extraction is Python-only and never a complete call graph.

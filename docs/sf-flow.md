@@ -2,7 +2,7 @@
 
 This document reconciles three things: the owner's authoritative workflow (`/home/linuxuser/sf-workflow-owner-request-verbatim.md`), the verification follow-up (`/home/linuxuser/sf-verification-followup.md`), and what the repository actually contains today. It is not aspirational: each node says what exists, what checks it, and what does not.
 
-Evidence base (all run under `scripts/bounded-pytest.sh`, commit `agent-graph` head at time of writing): 4,017 unit tests pass; 1,498 agent-layer eval cases: 1,496 pass, 1 open (`TB06-D-035`, see `docs/adr/ADR-0004-blindness-guard-glob-through-symlinks.md`), 1 library self-check blocked by design; the golden gate is green, 141 of 141.
+Evidence base (all run under `scripts/bounded-pytest.sh`, commit `agent-graph` head at time of writing): 4,551 unit tests pass; 1,498 agent-layer eval cases: 1,496 pass, 1 open (`TB06-D-035`, see `docs/adr/ADR-0004-blindness-guard-glob-through-symlinks.md`), 1 library self-check blocked by design; the golden gate is green, 141 of 141.
 
 ## Diagram
 
@@ -88,10 +88,10 @@ Newly implemented and tested: the fail-closed governance gate; the intake ledger
 
 ## Implemented but unverified
 
-- The hooks inside a real Claude Code session, and that a sub-agent's frontmatter `Stop` hook runs as `SubagentStop` (C-34).
+- The hooks in an interactive Claude Code session, and that a sub-agent's frontmatter `Stop` hook runs as `SubagentStop` (C-34). Headless real sessions did verify the PreToolUse denials, a failing gate and repair, and a human stop (`docs/native-verification/2026-10-19/REPORT.md`), so node 6 is amber only for the interactive case.
 - The QA loop against real agent sessions (its simulation uses a scripted stand-in).
 - The dashboard on a deployed host; per-product use.
-- The adversarial acceptance of `factory/verify` and `factory/structure` by an independent tester was started (report in `docs/acceptance/` when it lands).
+- The adversarial acceptance of `factory/verify` and `factory/structure` by an independent tester is done; the report is `docs/acceptance/verify-structure-report.md` and its defects are fixed.
 
 ## Planned, not built
 
