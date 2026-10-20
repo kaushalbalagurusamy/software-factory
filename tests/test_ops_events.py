@@ -144,3 +144,35 @@ def test_registry_exposes_subagent_stop_record():
     from factory.hooks import subagent_stop
     from factory.hooks.registry import get_hook
     assert get_hook("subagent_stop").record is subagent_stop.record
+
+
+@pytest.mark.parametrize("note", [
+    "k sk-ant-" + "a1b2" * 3 + "\n" + "c3d4" * 3 + " end",
+    "k sk-ant-" + "a1b2" * 3 + "\t" + "c3d4" * 3 + " end",
+    "k sk-ant-" + "a1b2" * 3 + "\x00" + "c3d4" * 3 + " end",
+    "k sk-ant-" + "a1b2c3d4" * 3 + " end",
+])
+def test_secret_split_by_control_chars_is_redacted(tmp_path, note):
+    emit(tmp_path, "a", "b", "c", note)
+    n = lines(tmp_path)[0]["note"]
+    assert "sk-ant" not in n and "a1b2" not in n and "c3d4" not in n and "[REDACTED]" in n
+
+
+def test_pem_blocks_terminated_and_unterminated(tmp_path):
+    emit(tmp_path, "a", "b", "c", "x -----BEGIN RSA PRIVATE KEY-----\nMIIsecretbody\n-----END RSA PRIVATE KEY----- tail")
+    emit(tmp_path, "a", "b", "c", "x -----BEGIN PRIVATE KEY-----\nMIIsecretbody\nmore")
+    t, u = (e["note"] for e in lines(tmp_path))
+    assert "secretbody" not in t and t.endswith("tail")
+    assert "secretbody" not in u and "more" not in u and u.startswith("x ")
+
+
+def test_shell_script_ignores_shadowing_cwd_package(tmp_path):
+    git_repo(tmp_path)
+    (tmp_path / "factory" / "ops").mkdir(parents=True)
+    for f in ("factory/__init__.py", "factory/ops/__init__.py"):
+        (tmp_path / f).write_text("")
+    (tmp_path / "factory/ops/events.py").write_text("raise SystemExit('shadowed')\n")
+    r = subprocess.run([str(REPO / "scripts" / "ops-stage-event.sh"), "s", "sl", "v"], cwd=tmp_path,
+                       capture_output=True, text=True, env={**os.environ, "PYTHONPATH": str(tmp_path)})
+    assert r.returncode == 0 and "shadowed" not in r.stderr
+    assert len(lines(tmp_path)) == 1

@@ -19,12 +19,22 @@ FIELD_LIMIT = 200  # stage, slice, verdict, source, role
 _CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 
 
-def _clean(value, limit: int) -> str:
-    """Redact secret-shaped values, replace surrogates and control characters, then truncate."""
-    from factory.hooks.ledger_audit import redact  # the redaction used by factory.hooks
+_PEM = re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----(?:.*?-----END [A-Z ]*PRIVATE KEY-----|.*)", re.S)
 
-    text = str(value).encode("utf-8", "replace").decode("utf-8", "replace")
-    return _CONTROL.sub(" ", redact(text))[:limit]
+
+def _redact(text: str) -> str:
+    from factory.hooks.ledger_audit import REDACTED, redact  # the redaction used by factory.hooks
+
+    text = _PEM.sub(REDACTED, text)  # an unterminated block hides everything after its header
+    spaced = redact(_CONTROL.sub(" ", text))
+    joined = _CONTROL.sub("", text)  # a secret split by a newline, tab or NUL only matches once rejoined
+    red = redact(joined)
+    return red if red != joined else spaced
+
+
+def _clean(value, limit: int) -> str:
+    """Replace surrogates, redact secret-shaped values (also across control characters), then truncate."""
+    return _redact(str(value).encode("utf-8", "replace").decode("utf-8", "replace"))[:limit]
 
 
 def _head(root: Path) -> str:

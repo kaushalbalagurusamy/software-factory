@@ -9,9 +9,11 @@ if [ "$#" -lt 3 ]; then
 fi
 root="$(git rev-parse --show-toplevel)"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PYTHONPATH="$here${PYTHONPATH:+:$PYTHONPATH}" python3 -c '
+# -I: no current directory, PYTHONPATH or user site on sys.path, so an untrusted cwd cannot shadow `factory`.
+python3 -I -c '
 import sys
+sys.path.insert(0, sys.argv[1])
 from factory.ops.events import emit
-root, stage, slice_, verdict, note = sys.argv[1:6]
+here, root, stage, slice_, verdict, note = sys.argv[1:7]
 emit(root, stage, slice_, verdict, note, source="script")
-' "$root" "$1" "$2" "$3" "${4:-}"
+' "$here" "$root" "$1" "$2" "$3" "${4:-}"
