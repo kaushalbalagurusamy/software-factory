@@ -1,0 +1,15 @@
+schema_version: 1
+id: privacy-regulated-data-phi-endpoint-clean
+kind: clean
+twin: privacy-regulated-data-phi-endpoint-planted
+brief: |
+  A regional clinic network: intake note summariser (US clinics)
+
+  1. Nurses record the intake conversation; the audio is transcribed and summarised for the chart.
+  2. Transcripts go only to a model endpoint covered by a signed business associate agreement that
+     excludes retention and training; direct identifiers are tokenised before egress.
+  3. Summaries are stored in the clinic's EHR; transcripts are deleted after 30 days.
+  4. Data is stored in US regions only.
+  5. Clinicians approve every summary before it is filed.
+expect:
+  none_from_lens: true

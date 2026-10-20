@@ -1,0 +1,14 @@
+schema_version: 1
+id: theory-complexity-states-rule-execution-bounds
+kind: clean
+twin: theory-complexity-omits-rule-execution-bounds
+brief: |
+  Product brief: alerting rules for an industrial sensor dashboard.
+  Plant engineers write their own alert rules over live sensor readings.
+  Requirement 1: rules are written in a small formula language with comparisons, arithmetic and moving averages; it has no loops, and each evaluation is capped at 1,000 steps and 50 ms.
+  Requirement 2: a rule can raise an alert or call another rule, with call chains limited to depth 3 and cycles rejected when saved.
+  Requirement 3: alerts are sent by SMS and shown on the dashboard.
+  Requirement 4: every rule change is versioned with the author and time.
+  Success: engineers stop exporting readings to spreadsheets to build alerts.
+expect:
+  none_from_lens: true

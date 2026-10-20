@@ -1,0 +1,18 @@
+schema_version: 1
+id: numeric-representation-float-equality-planted
+kind: planted
+twin: numeric-representation-float-equality-clean
+brief: |
+  Product brief: reconciliation check for a warehouse stock report.
+  Weights of pallets are measured in kilograms with a scale precision of 0.01 kg.
+  Totals are computed from per-pallet weights read as floating-point values from the scale API.
+  All timestamps are stored in UTC; each customer's IANA time zone is stored for display.
+  Ids and counters are 64-bit integers; arithmetic on them fails loudly on overflow.
+  Requirement 1: compute the total weight per aisle.
+  Requirement 2: an aisle is marked reconciled only if the computed total is exactly equal to the weight on the manifest; otherwise it is flagged as a mismatch.
+  Requirement 3: show mismatches on a dashboard for the shift lead.
+  Success: the shift lead stops recounting aisles by hand.
+expect:
+  traps:
+  - numeric-representation.float-equality
+  min_severity: medium

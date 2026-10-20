@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "brief": {
+    "path": "runs/2026-10-15-smoke/licensing-agpl-network-clean/brief.md",
+    "sha256": "85cad60c5867618e398d7657733a8d91e7e2545ff3af4b80a9a73dc684620361"
+  },
+  "run": {
+    "date": "2026-10-15",
+    "mode": "eval",
+    "calibrated": false,
+    "lenses": [
+      {
+        "id": "accessibility",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "licensing",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "privacy-regulated-data",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "security-ethics",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "company-context",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "cryptography",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "supply-chain",
+        "version": "0.1.0",
+        "calibrated": false
+      }
+    ],
+    "claims_path": "runs/2026-10-15-smoke/licensing-agpl-network-clean/claims.json"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "claim_ids": [
+        "C-002",
+        "C-003",
+        "C-004",
+        "C-005"
+      ],
+      "lens": "licensing",
+      "trap_id": "licensing.agpl-modified-network-service",
+      "trap_status": "verified",
+      "cues_matched": [
+        "patch it for our multi-tenant SaaS"
+      ],
+      "status": "dismissed",
+      "route": "retrieval",
+      "route_reason": "AGPLv3 text settles whether the brief's plan satisfies Section 13.",
+      "evidence": [
+        {
+          "kind": "quote",
+          "ref": "https://www.gnu.org/licenses/agpl-3.0.txt",
+          "quote": "if you modify the Program, your modified version must prominently offer all users interacting with it remotely through a computer network ... an opportunity to receive the Corresponding Source of your version",
+          "locator": "Section 13",
+          "tier": "primary",
+          "date": "2026-10-15"
+        }
+      ],
+      "dismissal_reason": "The brief already does what Section 13 requires: it publishes the patched server source and links it from the app footer (item 3). Billing/admin services are stated as separate programs over a documented API; whether that boundary holds is a design/counsel check, not a defect in the brief's text.",
+      "skeptic": {
+        "verdict": "upheld",
+        "reason": "Eval single pass: no separate skeptic agent run; the dismissal rests on the brief's explicit Section 13 compliance."
+      },
+      "pass": 1
+    },
+    {
+      "id": "F-002",
+      "claim_ids": [
+        "C-010",
+        "C-012"
+      ],
+      "lens": "cryptography",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "plausible",
+      "route": "none",
+      "route_reason": "Eval mode: omission of a lens-required statement; no retrieval can settle what the brief intends.",
+      "evidence": [],
+      "would_settle": "Which standard algorithm and library encrypt the backups, and how are keys generated, stored and rotated?",
+      "severity": {
+        "tier": "medium",
+        "answers": [
+          {
+            "id": "law-licence-terms-ethics",
+            "q": "Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "harm-safety",
+            "q": "Would following the brief as written harm users or third parties, or compromise physical safety?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "production-failure",
+            "q": "Would the deliverable fail under the production conditions the brief itself implies (load, faults, adversaries, scale)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "severe-security",
+            "q": "Would it open a severe security hole (key recovery, remote code execution, supply-chain compromise, privilege escalation, data exfiltration)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "material-exposure",
+            "q": "Would it create substantial financial or legal exposure short of a plain breach (unit economics that cannot work, unbounded spend, contractual risk)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "principal-reject",
+            "q": "Is it a correctness, measurement, statistical or design flaw that a principal-level reviewer would reject?",
+            "a": true,
+            "why": "Backup encryption is required but key generation, storage, rotation and algorithm choice are unstated."
+          }
+        ]
+      },
+      "underlying_problem": "Backup encryption is required but key generation, storage, rotation and algorithm choice are unstated.",
+      "disposition": "ask-owner",
+      "owner_question": "Which standard algorithm and library encrypt the backups, and how are keys generated, stored and rotated?",
+      "spec_section": "crypto-agent-security",
+      "pass": 1
+    },
+    {
+      "id": "F-003",
+      "claim_ids": [
+        "C-013",
+        "C-015"
+      ],
+      "lens": "privacy-regulated-data",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "plausible",
+      "route": "none",
+      "route_reason": "Eval mode: omission of a lens-required statement; no retrieval can settle what the brief intends.",
+      "evidence": [],
+      "would_settle": "What personal-data classes do tenants store, where is it stored, and which processors are covered by DPAs?",
+      "severity": {
+        "tier": "medium",
+        "answers": [
+          {
+            "id": "law-licence-terms-ethics",
+            "q": "Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "harm-safety",
+            "q": "Would following the brief as written harm users or third parties, or compromise physical safety?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "production-failure",
+            "q": "Would the deliverable fail under the production conditions the brief itself implies (load, faults, adversaries, scale)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "severe-security",
+            "q": "Would it open a severe security hole (key recovery, remote code execution, supply-chain compromise, privilege escalation, data exfiltration)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "material-exposure",
+            "q": "Would it create substantial financial or legal exposure short of a plain breach (unit economics that cannot work, unbounded spend, contractual risk)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "principal-reject",
+            "q": "Is it a correctness, measurement, statistical or design flaw that a principal-level reviewer would reject?",
+            "a": true,
+            "why": "A hosted multi-tenant document service stores customer content; data classes, processors and residency are unstated."
+          }
+        ]
+      },
+      "underlying_problem": "A hosted multi-tenant document service stores customer content; data classes, processors and residency are unstated.",
+      "disposition": "ask-owner",
+      "owner_question": "What personal-data classes do tenants store, where is it stored, and which processors are covered by DPAs?",
+      "spec_section": "legal-terms",
+      "pass": 1
+    },
+    {
+      "id": "F-004",
+      "claim_ids": [
+        "C-017",
+        "C-016"
+      ],
+      "lens": "supply-chain",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "plausible",
+      "route": "none",
+      "route_reason": "Eval mode: omission of a lens-required statement; no retrieval can settle what the brief intends.",
+      "evidence": [],
+      "would_settle": "How are dependencies sourced, pinned and vetted?",
+      "severity": {
+        "tier": "low",
+        "answers": [
+          {
+            "id": "law-licence-terms-ethics",
+            "q": "Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "harm-safety",
+            "q": "Would following the brief as written harm users or third parties, or compromise physical safety?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "production-failure",
+            "q": "Would the deliverable fail under the production conditions the brief itself implies (load, faults, adversaries, scale)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "severe-security",
+            "q": "Would it open a severe security hole (key recovery, remote code execution, supply-chain compromise, privilege escalation, data exfiltration)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "material-exposure",
+            "q": "Would it create substantial financial or legal exposure short of a plain breach (unit economics that cannot work, unbounded spend, contractual risk)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "principal-reject",
+            "q": "Is it a correctness, measurement, statistical or design flaw that a principal-level reviewer would reject?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "friction",
+            "q": "Is it operational friction, weaker maintainability, or minor inefficiency?",
+            "a": true,
+            "why": "A patched server with many components needs a stated source, pinning and vetting policy."
+          }
+        ]
+      },
+      "underlying_problem": "A patched server with many components needs a stated source, pinning and vetting policy.",
+      "disposition": "ask-owner",
+      "owner_question": "How are dependencies sourced, pinned and vetted?",
+      "spec_section": "legal-terms",
+      "pass": 1
+    },
+    {
+      "id": "F-005",
+      "claim_ids": [
+        "C-019"
+      ],
+      "lens": "accessibility",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "plausible",
+      "route": "none",
+      "route_reason": "Eval mode: omission of a lens-required statement; no retrieval can settle what the brief intends.",
+      "evidence": [],
+      "would_settle": "What accessibility standard and level apply to the editor UI?",
+      "severity": {
+        "tier": "medium",
+        "answers": [
+          {
+            "id": "law-licence-terms-ethics",
+            "q": "Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "harm-safety",
+            "q": "Would following the brief as written harm users or third parties, or compromise physical safety?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "production-failure",
+            "q": "Would the deliverable fail under the production conditions the brief itself implies (load, faults, adversaries, scale)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "severe-security",
+            "q": "Would it open a severe security hole (key recovery, remote code execution, supply-chain compromise, privilege escalation, data exfiltration)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "material-exposure",
+            "q": "Would it create substantial financial or legal exposure short of a plain breach (unit economics that cannot work, unbounded spend, contractual risk)?",
+            "a": false,
+            "why": "no"
+          },
+          {
+            "id": "principal-reject",
+            "q": "Is it a correctness, measurement, statistical or design flaw that a principal-level reviewer would reject?",
+            "a": true,
+            "why": "A browser-only editor has no stated accessibility target."
+          }
+        ]
+      },
+      "underlying_problem": "A browser-only editor has no stated accessibility target.",
+      "disposition": "ask-owner",
+      "owner_question": "What accessibility standard and level apply to the editor UI?",
+      "spec_section": "product-scope",
+      "pass": 1
+    }
+  ],
+  "quarantine": [],
+  "convergence": {
+    "passes": 1,
+    "converged": false,
+    "stop_reason": "eval-single-pass",
+    "new_findings_last_pass": 5,
+    "open": [
+      "F-002",
+      "F-003",
+      "F-004",
+      "F-005"
+    ]
+  },
+  "gates": {
+    "blocking": [],
+    "needs_disposition": []
+  }
+}

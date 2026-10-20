@@ -1,0 +1,14 @@
+schema_version: 1
+id: agent-security-untrusted-tool-servers-clean
+kind: clean
+twin: agent-security-untrusted-tool-servers-planted
+brief: |
+  A marketing agency wants a desktop assistant for its account managers.
+  - Drafts client reports from the agency's own analytics exports.
+  - Runs on managed laptops; files stay on the laptop.
+  - It connects only to three MCP servers the IT team has reviewed and pinned to specific versions; new
+    servers go through the same review.
+  - Every outgoing email is shown to the user for approval before sending.
+  - Usage reports weekly to the operations lead.
+expect:
+  none_from_lens: true

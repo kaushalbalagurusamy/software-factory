@@ -1,0 +1,17 @@
+schema_version: 1
+id: theory-complexity-backtracking-regex-on-untrusted-input-planted
+kind: planted
+twin: theory-complexity-backtracking-regex-on-untrusted-input-clean
+brief: |
+  Product brief: shared log-search service for internal engineering teams.
+  All teams query the same pool of search workers.
+  Requirement 1: ingest logs from all services with a 30-day retention.
+  Requirement 2: users can type any regular expression, including backreferences and look-arounds, and it is run directly against each log line on the shared workers.
+  Requirement 3: saved searches can be shared by link.
+  Requirement 4: results stream to the browser as they are found.
+  Requirement 5: access is limited to members of the owning team.
+  Success: median search under 3 seconds for a day of logs.
+expect:
+  traps:
+  - theory-complexity.backtracking-regex-on-untrusted-input
+  min_severity: high

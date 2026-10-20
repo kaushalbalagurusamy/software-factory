@@ -1,0 +1,14 @@
+schema_version: 1
+id: privacy-regulated-data-collect-all-clean
+kind: clean
+twin: privacy-regulated-data-collect-all-planted
+brief: |
+  Northwind Shop: loyalty programme relaunch (EU customers)
+
+  1. Members earn points on purchases and redeem them in the app.
+  2. Collect only name, email and purchase history needed to run the points ledger; purchase history
+     is kept for 24 months and then deleted by a scheduled job.
+  3. Our analytics vendor has a signed data processing agreement.
+  4. Data is stored in the EU.
+expect:
+  none_from_lens: true

@@ -1,0 +1,16 @@
+schema_version: 1
+id: distributed-systems-consensus-guaranteed-termination-planted
+kind: planted
+twin: distributed-systems-consensus-guaranteed-termination-clean
+brief: |
+  Project: replicated inventory ledger for a regional food bank network.
+  Fault model: crash faults only; five replicas run in two data centres operated by our own team.
+  - Stock movements are appended to a replicated log via a Raft group, totally ordered by log index; replicas authenticate each other with mutual TLS.
+  - Warehouse clients retry submissions with a movement id; the ledger ignores duplicates.
+  - The ledger must always commit every movement within two seconds, whatever happens to the network or to any one replica, with no assumptions about message delays.
+  - Pick lists for volunteers are generated from the ledger every morning.
+  - Reports for donors summarise monthly inflows.
+expect:
+  traps:
+  - distributed-systems.consensus-guaranteed-termination
+  min_severity: medium

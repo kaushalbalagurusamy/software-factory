@@ -1,0 +1,13 @@
+schema_version: 1
+id: rubric-inversion-states-counter-metric
+kind: clean
+twin: rubric-inversion-omits-counter-metric
+brief: |
+  Team brief: improving the internal developer platform this quarter.
+  Goal: help product teams ship changes faster without more incidents.
+  KPI: deployments per team per week, which stands in for how quickly teams deliver changes; paired with change failure rate and incidents per deployment, which must not rise.
+  The platform team is reviewed on both measures at the end of the quarter.
+  Work items: faster CI, one-click rollback, preview environments.
+  Deliverable: a quarterly report on both measures.
+expect:
+  none_from_lens: true

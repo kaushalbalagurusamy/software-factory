@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "minesweeper/register.v1.json",
+  "title": "Trap register (step 6 output: register.json)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "brief", "run", "findings", "quarantine", "convergence"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "brief": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+    },
+    "run": {
+      "type": "object",
+      "required": ["date", "mode", "calibrated", "lenses"],
+      "properties": {
+        "date": {"type": "string"},
+        "mode": {"enum": ["full", "eval"], "description": "eval: retrieval and checks only, no external research hand-offs."},
+        "calibrated": {"type": "boolean", "description": "True only if every applied lens has passed evaluation at its current version."},
+        "lenses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "version", "calibrated"],
+            "properties": {"id": {"type": "string"}, "version": {"type": "string"}, "calibrated": {"type": "boolean"}}
+          }
+        },
+        "claims_path": {"type": "string"},
+        "skill_version": {"type": "string"}
+      }
+    },
+    "findings": {"type": "array", "items": {"$ref": "finding.v1.json"}},
+    "quarantine": {
+      "description": "Poisoned-instruction autopsy: brief lines or rubric items that will not be followed as written.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["locator", "text", "finding_ids", "reason"],
+        "properties": {
+          "locator": {"type": "string"},
+          "text": {"type": "string"},
+          "finding_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "reason": {"type": "string"},
+          "replacement": {"type": "string"}
+        }
+      }
+    },
+    "problem_definition_path": {"type": "string"},
+    "convergence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passes", "converged", "stop_reason"],
+      "properties": {
+        "passes": {"type": "integer", "minimum": 1},
+        "converged": {"type": "boolean"},
+        "stop_reason": {"enum": ["converged", "iteration-cap", "token-ceiling", "wall-clock", "repeat-halt", "eval-single-pass"]},
+        "new_findings_last_pass": {"type": "integer", "minimum": 0},
+        "problem_definition_changed_last_pass": {"type": "boolean"},
+        "open": {"type": "array", "items": {"type": "string"}, "description": "Finding ids still open at stop."},
+        "routed_calls": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "gates": {
+      "type": "object",
+      "properties": {
+        "blocking": {"type": "array", "items": {"type": "string"}, "description": "Critical finding ids awaiting owner sign-off."},
+        "needs_disposition": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

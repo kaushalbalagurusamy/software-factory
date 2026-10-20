@@ -1,0 +1,173 @@
+schema_version: 1
+traps:
+  - id: databases.cap-strong-and-available
+    aliases: [DIST-02]
+    title: Linearizable cross-region data that also stays writable everywhere during partitions, at local latency
+    kind: requirement
+    cues:
+      - "strongly consistent reads in every region and 100% write availability even if regions are cut off"
+      - "every region sees the latest write instantly"
+      - "zero data loss and no downtime during network outages between data centres"
+      - "single-digit-millisecond writes with global linearizability"
+      - "active-active multi-region with strong consistency and no conflicts"
+    principle: >-
+      Consistency, availability and partition tolerance cannot all be achieved (Gilbert and Lynch's proof
+      of Brewer's conjecture, asynchronous model). Even with no partition, a replicated system trades
+      latency against consistency (PACELC): a strongly consistent cross-region write waits for at least
+      a cross-region round trip.
+    sources: [gilbert-lynch-2012, abadi-pacelc-blog]
+    severity:
+      default: high
+      blast_radius: >-
+        The SLA is unattainable: during a partition the system either refuses writes in some region or
+        accepts divergent writes; without a partition it either misses the latency target or serves
+        stale reads.
+    remediation:
+      safe_route: >-
+        Split data by consistency tier: pin strongly consistent records to a home region with a
+        synchronous quorum (PC/EC), and replicate other data asynchronously with explicit staleness
+        bounds and merge rules (PA/EL). State per data class what happens during a partition.
+      invariant: >-
+        For each data class the spec names its consistency model, its partition behaviour (reject or
+        diverge) and a latency target no lower than the round trip its quorum requires.
+      spec_section: trust-consensus
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'
+    notes: >-
+      Speed-of-light round-trip figures in the report (about 200 km/ms in fibre, US-APAC RTT over 120 ms)
+      are not quoted here; they are physics arithmetic to be computed or measured for the actual routes.
+      The original 2002 proof could not be fetched as text; the 2012 paper by the same authors is used.
+  - id: databases.dual-write-without-outbox
+    aliases: [DIST-05]
+    title: Handler writes to the database and separately publishes to a broker, cache or index
+    kind: requirement
+    cues:
+      - "save the order to the database and then publish an event to the message bus"
+      - "after the commit, update the cache and the search index"
+      - "write to postgres and send to kafka in the same request handler"
+      - "the api writes the row and emits a webhook"
+      - "keep the cache in sync by writing to both"
+    principle: >-
+      A transaction is all-or-nothing only within one database; a second network write to another
+      system (broker, cache, search index) is outside it, so a crash or timeout between the two leaves
+      them permanently divergent. Exactly-once effects across systems require the destination's
+      cooperation.
+    sources: [pg-transactions, kafka-semantics]
+    severity:
+      default: high
+      blast_radius: >-
+        Silent drift: orders without events, events for rolled-back orders, stale caches and indexes,
+        discovered only by reconciliation or customers.
+    remediation:
+      safe_route: >-
+        Transactional outbox: write the domain change and an outbox row in one local transaction; a relay
+        or change-data-capture process publishes from the outbox or log; consumers are idempotent by event
+        id. Or a saga with idempotent compensations where several services own the state.
+      invariant: >-
+        Every published event corresponds to a committed database change and every committed change
+        eventually produces its event; consumers deduplicate by a stable event id.
+      spec_section: trust-consensus
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'
+  - id: databases.isolation-anomaly
+    aliases: []
+    title: Check-then-write invariants assumed safe under the default (non-serializable) isolation level
+    kind: requirement
+    cues:
+      - "check the balance is sufficient, then insert the withdrawal"
+      - "read available seats and book if any remain, inside a transaction"
+      - "a transaction guarantees no double booking"
+      - "ensure at least one doctor stays on call by checking before removing"
+      - "transactions prevent race conditions"
+    principle: >-
+      Being inside a transaction does not make concurrent transactions serial. PostgreSQL's default is
+      Read Committed; even Repeatable Read prevents every listed phenomenon except serialization
+      anomalies, where committed results match no serial order. ANSI phenomena do not fully characterize
+      isolation levels (Berenson et al.), so the level's name is not a guarantee of the invariant.
+    sources: [pg-isolation, berenson-1995]
+    severity:
+      default: high
+      blast_radius: >-
+        Under concurrency, invariants spanning rows break: overdrafts, double bookings, violated staffing
+        or inventory constraints, with no error raised.
+    remediation:
+      safe_route: >-
+        Run invariant-bearing transactions at SERIALIZABLE with retry on serialization failure, or
+        materialise the conflict (row lock with SELECT FOR UPDATE, a constraint, or a conditional single
+        statement update) and test with concurrent clients.
+      invariant: >-
+        Each multi-row business invariant names the mechanism that enforces it under concurrency
+        (serializable isolation with retries, a constraint, or an explicit lock) and has a concurrent test.
+      spec_section: trust-consensus
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'
+  - id: databases.monotonic-key-hot-partition
+    aliases: []
+    title: Monotonically increasing key on a range-partitioned store for high-rate inserts
+    kind: requirement
+    cues:
+      - "use an auto-increment id as the primary key in the distributed database"
+      - "key time-series rows by timestamp"
+      - "partition the ledger by insertion time"
+      - "sequential ids so rows sort naturally"
+      - "the cluster will scale writes linearly by adding nodes"
+    principle: >-
+      On a store that distributes data by key ranges, a monotonically increasing key (sequence,
+      timestamp) sends every new insert to the same range and therefore one server, so adding nodes does
+      not add write throughput.
+    sources: [spanner-schema]
+    severity:
+      default: medium
+      blast_radius: >-
+        Write throughput is capped at one shard's capacity; latency and throttling rise with load while
+        the rest of the cluster idles.
+    remediation:
+      safe_route: >-
+        Use a key with high-cardinality leading bits (hashed or bit-reversed sequence, UUIDv4, or a
+        shard prefix) for write-heavy tables, keep time ordering in a secondary column or index, and
+        load-test the write path at target rate.
+      invariant: >-
+        Under the target insert rate, no single partition receives more than its share of writes plus a
+        stated skew allowance, verified by a load test.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'
+    notes: >-
+      Applies to range-partitioned stores; hash-partitioned stores spread sequential keys but can still
+      hot-spot on a low-cardinality partition key. Throughput ratios must be measured, not quoted.
+  - id: databases.secondary-index-read-after-write
+    aliases: []
+    title: Secondary or global index assumed to reflect a write immediately
+    kind: requirement
+    cues:
+      - "query by email right after signup to confirm the account exists"
+      - "the lookup index is always up to date"
+      - "read-after-write through the secondary index"
+      - "add an index on every field so any query is fast and current"
+      - "use the global index to enforce uniqueness"
+    principle: >-
+      In stores that maintain global secondary indexes asynchronously, a write to the base table is not
+      visible through the index until the index catches up, and such indexes support only eventually
+      consistent reads; they cannot enforce uniqueness or give read-after-write.
+    sources: [dynamodb-gsi]
+    severity:
+      default: medium
+      blast_radius: >-
+        Just-written records appear missing, duplicate accounts slip past uniqueness checks, and each
+        additional index adds write cost and lag.
+    remediation:
+      safe_route: >-
+        Read your own writes from the base table by primary key; enforce uniqueness with a conditional
+        write on a key-structured item or a database constraint; index only fields with a named query.
+      invariant: >-
+        No correctness decision (uniqueness, existence, authorisation) depends on an eventually
+        consistent index read.
+      spec_section: trust-consensus
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'
+    notes: Behaviour varies by store; local indexes in a single-node relational database are updated transactionally. The sweeper asks which store and checks that store's documentation.

@@ -1,0 +1,12 @@
+{
+  "licensing": {
+    "recall": 1.0,
+    "false_alarm_rate": 0.0,
+    "omission_recall": null,
+    "citation_rate": 1.0,
+    "crashed_cases": 0,
+    "tokens_mean": 583554,
+    "minutes_mean": 1.02,
+    "passed": true
+  }
+}

@@ -1,0 +1,151 @@
+schema_version: 1
+sources:
+  - id: mcp-security-best-practices
+    title: Model Context Protocol - Security Best Practices (revision 2026-07-28 docs)
+    url: https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices
+    adapter: web_page
+    tier: primary
+    kind: spec
+    notes: >-
+      The report calls this the "July 2026 MCP Security Best Practices specification". The current
+      protocol revision is dated 2026-07-28 and this page is published under that revision's docs, so
+      the date is consistent. Earlier revisions (2025-06-18, 2025-11-25) carry the same token
+      passthrough and confused deputy text; the state-handle wording replaced the older session-ID wording.
+    quotes:
+      - text: "“Token passthrough” is an anti-pattern where an MCP server accepts tokens from an MCP client without validating that the tokens were properly issued to the MCP server and passes them through to the downstream API."
+        locator: Attacks and Mitigations - Token Passthrough
+        fetched: "2026-10-14"
+        supports: [agent-security.token-passthrough]
+      - text: "MCP servers MUST NOT accept any tokens that were not explicitly issued for the MCP server."
+        locator: Token Passthrough - Mitigation
+        fetched: "2026-10-14"
+        supports: [agent-security.token-passthrough]
+      - text: "Attackers can exploit MCP proxy servers that connect to third-party APIs, creating “confused deputy” vulnerabilities. This attack allows malicious clients to obtain authorization codes without proper user consent by exploiting the combination of static client IDs, dynamic client registration, and consent cookies."
+        locator: Confused Deputy Problem
+        fetched: "2026-10-14"
+        supports: [agent-security.confused-deputy]
+      - text: "To prevent confused deputy attacks, MCP proxy servers MUST implement per-client consent and proper security controls as detailed below."
+        locator: Confused Deputy Problem - Mitigation
+        fetched: "2026-10-14"
+        supports: [agent-security.confused-deputy]
+      - text: "Implement a progressive, least-privilege scope model:"
+        locator: Scope Minimization - Mitigation
+        fetched: "2026-10-14"
+        supports: [agent-security.confused-deputy]
+      - text: "MCP servers that implement authorization MUST verify all inbound requests. MCP servers MUST NOT treat possession of a state handle as authentication. MCP servers SHOULD use secure, non-deterministic handles generated with secure random number generators. Avoid predictable or sequential identifiers that could be guessed by an attacker."
+        locator: Session Hijacking - Mitigation
+        fetched: "2026-10-14"
+        supports: [agent-security.guessable-state-handle]
+      - text: "Without proper sandboxing and consent requirements in place, the following attacks become possible:"
+        locator: Local MCP Server Compromise - Attack Description
+        fetched: "2026-10-14"
+        supports: [agent-security.local-server-command-execution]
+      - text: "Show the exact command that will be executed, without truncation (include arguments and parameters)"
+        locator: Local MCP Server Compromise - Mitigation - Pre-Configuration Consent
+        fetched: "2026-10-14"
+        supports: [agent-security.local-server-command-execution]
+      - text: "Execute MCP server commands in a sandboxed environment with minimal default privileges"
+        locator: Local MCP Server Compromise - Mitigation
+        fetched: "2026-10-14"
+        supports: [agent-security.local-server-command-execution]
+  - id: mcp-authorization
+    title: Model Context Protocol specification 2026-07-28 - Authorization
+    url: https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: "MCP servers MUST only accept tokens that are valid for use with their own resources. MCP servers MUST NOT accept or transit any other tokens."
+        locator: Token Handling
+        fetched: "2026-10-14"
+        supports: [agent-security.token-passthrough]
+  - id: mcp-tools
+    title: Model Context Protocol specification 2026-07-28 - Server features - Tools
+    url: https://modelcontextprotocol.io/specification/2026-07-28/server/tools
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: "be a human in the loop with the ability to deny tool invocations."
+        locator: Tools - User Interaction Model
+        fetched: "2026-10-14"
+        supports: [agent-security.untrusted-content-drives-tools]
+      - text: "Show tool inputs to the user before calling the server, to avoid malicious or accidental data exfiltration"
+        locator: Security Considerations - Clients SHOULD
+        fetched: "2026-10-14"
+        supports: [agent-security.untrusted-content-drives-tools]
+  - id: mcp-spec-overview
+    title: Model Context Protocol specification 2026-07-28 - Overview (Security and Trust and Safety)
+    url: https://modelcontextprotocol.io/specification/2026-07-28
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: "In particular, descriptions of tool behavior such as annotations should be considered untrusted, unless obtained from a trusted server."
+        locator: Security and Trust & Safety - Tool Safety
+        fetched: "2026-10-14"
+        supports: [agent-security.untrusted-tool-servers]
+  - id: mcp-local-server-security
+    title: Model Context Protocol - Local Server Security (revision 2026-07-28 docs)
+    url: https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: "A poisoned tool catalog. Tool names and descriptions are instructions your model reads. A server can hide directives in them that steer the agent — including how it uses other servers’ tools — without the poisoned tool ever being invoked (often called tool poisoning, or tool shadowing when it targets another server’s tools)."
+        locator: Threats - A poisoned tool catalog
+        fetched: "2026-10-14"
+        supports: [agent-security.untrusted-tool-servers, agent-security.cross-server-tool-shadowing]
+      - text: "Definitions are not fixed at install time either: a server can quietly change them after you approved it (a rug pull), so a one-time consent dialog and package pinning do not cover this surface."
+        locator: Threats - A poisoned tool catalog
+        fetched: "2026-10-14"
+        supports: [agent-security.silent-tool-redefinition]
+      - text: "Prefer clients that pin tool definitions. Some clients record tool definitions when you first approve a server and ask again when they change. The protocol does not require this, so it is a property worth choosing a client for."
+        locator: Treat Tool Definitions as Untrusted Input
+        fetched: "2026-10-14"
+        supports: [agent-security.silent-tool-redefinition]
+      - text: "Keep the roster small. Because all configured servers share the model’s context, every server you add extends the surface the others are exposed to."
+        locator: Treat Tool Definitions as Untrusted Input
+        fetched: "2026-10-14"
+        supports: [agent-security.cross-server-tool-shadowing]
+      - text: "Process isolation is the single highest-leverage mitigation in this guide."
+        locator: Run Servers in an Isolated Environment
+        fetched: "2026-10-14"
+        supports: [agent-security.local-server-command-execution]
+  - id: greshake-2023-indirect-prompt-injection
+    title: "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection (Greshake et al., 2023)"
+    url: https://arxiv.org/abs/2302.12173
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: "We argue that LLM-Integrated Applications blur the line between data and instructions. We reveal new attack vectors, using Indirect Prompt Injection, that enable adversaries to remotely (without a direct interface) exploit LLM-integrated applications by strategically injecting prompts into data likely to be retrieved."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [agent-security.untrusted-content-drives-tools]
+      - text: "We show how processing retrieved prompts can act as arbitrary code execution, manipulate the application's functionality, and control how and if other APIs are called."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [agent-security.untrusted-content-drives-tools]
+  - id: wang-2025-mcptox
+    title: "MCPTox: A Benchmark for Tool Poisoning Attack on Real-World MCP Servers (Wang et al., 2025)"
+    url: https://arxiv.org/abs/2508.14925
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: "we investigate a more fundamental vulnerability: Tool Poisoning, where malicious instructions are embedded within a tool's metadata without execution."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [agent-security.untrusted-tool-servers]
+  - id: song-2025-mcp-attack-vectors
+    title: "Beyond the Protocol: Unveiling Attack Vectors in the Model Context Protocol (MCP) Ecosystem (Song et al., 2025)"
+    url: https://arxiv.org/abs/2506.02040
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: "We identify four categories of attacks, i.e., Tool Poisoning Attacks, Puppet Attacks, Rug Pull Attacks, and Exploitation via Malicious External Resources."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [agent-security.silent-tool-redefinition, agent-security.untrusted-tool-servers]

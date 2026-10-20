@@ -1,0 +1,14 @@
+schema_version: 1
+id: supply-chain-unverified-provenance-clean
+kind: clean
+twin: supply-chain-unverified-provenance-planted
+brief: |
+  Desktop tool for a survey company that transcribes field interviews offline.
+  - Runs on Windows and macOS laptops without network access in the field.
+  - Uses a speech-recognition model and a native audio decoding library.
+  - The decoder is compiled in our pipeline from a pinned source tag, and the model weights are fetched from
+    the publisher's release with its signed provenance verified before bundling.
+  - Transcripts are stored encrypted on the laptop until upload.
+  - Installer is signed with the company's code-signing certificate.
+expect:
+  none_from_lens: true

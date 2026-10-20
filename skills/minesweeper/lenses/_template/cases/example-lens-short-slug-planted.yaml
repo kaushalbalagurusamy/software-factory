@@ -1,0 +1,10 @@
+schema_version: 1
+id: example-lens-short-slug-planted
+kind: planted
+twin: example-lens-short-slug-clean
+brief: |
+  A short, realistic synthetic brief (6-15 lines) that plants exactly one trap, phrased the way a
+  real brief would phrase it, never naming the trap. No real company, programme or project names.
+expect:
+  traps: [example-lens.short-slug]
+  min_severity: high

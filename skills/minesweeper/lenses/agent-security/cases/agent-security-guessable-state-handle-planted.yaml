@@ -1,0 +1,15 @@
+schema_version: 1
+id: agent-security-guessable-state-handle-planted
+kind: planted
+twin: agent-security-guessable-state-handle-clean
+brief: |
+  A support platform lets customers continue a troubleshooting conversation with an agent across devices.
+  - The agent server keeps conversation state between visits.
+  - Each conversation gets the next number in sequence; anyone who opens the link with that number can
+    pick the conversation back up, no sign-in needed.
+  - Conversations are deleted after 14 days.
+  - Agent replies are reviewed by a human before any refund is issued.
+expect:
+  traps:
+  - agent-security.guessable-state-handle
+  min_severity: high

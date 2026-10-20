@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "brief": {
+    "path": "runs/2026-10-15-smoke/licensing-agpl-network-planted/brief.md",
+    "sha256": "b0682f2c93718296c4796afadabec372f0b273c3a96ba0603ebc704b0025ddfb"
+  },
+  "lenses_applied": [
+    {
+      "id": "company-context",
+      "version": "0.1.0",
+      "why": "always"
+    },
+    {
+      "id": "cryptography",
+      "version": "0.1.0",
+      "why": "signals: encrypt"
+    },
+    {
+      "id": "supply-chain",
+      "version": "0.1.0",
+      "why": "signals: open-source, install"
+    },
+    {
+      "id": "licensing",
+      "version": "0.1.0",
+      "why": "signals: open-source, gpl, agpl, licence"
+    },
+    {
+      "id": "privacy-regulated-data",
+      "version": "0.1.0",
+      "why": "signals: retention"
+    },
+    {
+      "id": "security-ethics",
+      "version": "0.1.0",
+      "why": "signals: 0-day"
+    }
+  ],
+  "lenses_skipped": [
+    "accessibility",
+    "agent-orchestration",
+    "agent-security",
+    "ai-regulation",
+    "copyright-data-rights",
+    "cyber-physical",
+    "databases",
+    "distributed-systems",
+    "market-reality",
+    "media-pipelines",
+    "ml-evaluation",
+    "numeric-representation",
+    "os-systems",
+    "performance",
+    "professional-duty",
+    "provider-terms",
+    "realtime-transport",
+    "rubric-inversion",
+    "theory-complexity"
+  ],
+  "claims": [
+    {
+      "id": "C-001",
+      "kind": "requirement",
+      "text": "Northwind Docs: hosted document collaboration (paid SaaS, browser only, nothing is installed)",
+      "locator": "L1",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-002",
+      "kind": "assumption",
+      "text": "The product is delivered only as a hosted service reached through a browser; no copy of the software reaches customers and the service is commercial (paid).",
+      "locator": "L1",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-003",
+      "kind": "dependency",
+      "text": "Start from the AGPLv3 open-source collaborative editor server.",
+      "locator": "L3",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-004",
+      "kind": "requirement",
+      "text": "Patch its storage layer and permissions model for our multi-tenant design.",
+      "locator": "L4",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-005",
+      "kind": "requirement",
+      "text": "Keep our patches in a private repository; customers only reach the service over HTTPS.",
+      "locator": "L5",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-006",
+      "kind": "assumption",
+      "text": "Customers interacting with the service over HTTPS only means no source obligation arises toward them.",
+      "locator": "L5",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-007",
+      "kind": "requirement",
+      "text": "List the SPDX licence of every server component in the architecture doc.",
+      "locator": "L6",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-008",
+      "kind": "metric",
+      "text": "Support 2,000 concurrent editors per tenant.",
+      "locator": "L7",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-009",
+      "kind": "requirement",
+      "text": "Daily encrypted backups with 30-day retention.",
+      "locator": "L8",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-010",
+      "kind": "metric",
+      "text": "Backup retention of 30 days.",
+      "locator": "L8",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-011",
+      "kind": "omission",
+      "text": "The brief states how backup keys are generated, stored and rotated (and nonce uniqueness).",
+      "locator": "cryptography.key-nonce-management",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-012",
+      "kind": "omission",
+      "text": "The brief states the adversary and how long confidentiality must hold.",
+      "locator": "cryptography.protection-lifetime",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-013",
+      "kind": "omission",
+      "text": "The brief names standard algorithms and maintained libraries for encryption.",
+      "locator": "cryptography.standard-algorithms",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-014",
+      "kind": "omission",
+      "text": "The brief states where dependencies come from and how a new one is vetted.",
+      "locator": "supply-chain.dependency-vetting",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-015",
+      "kind": "omission",
+      "text": "The brief states that dependencies are pinned and how updates are reviewed.",
+      "locator": "supply-chain.pinning-policy",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-016",
+      "kind": "omission",
+      "text": "The brief states whether automated agents may install packages and what approval is needed.",
+      "locator": "supply-chain.agent-install-policy",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-017",
+      "kind": "omission",
+      "text": "The brief lists the classes of personal data processed (documents, tenant users).",
+      "locator": "privacy-regulated-data.data-classes",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-018",
+      "kind": "omission",
+      "text": "The brief names every third party receiving personal data and the agreement covering it.",
+      "locator": "privacy-regulated-data.processors-and-agreements",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-019",
+      "kind": "omission",
+      "text": "The brief states where data is stored and processed, including backups, and retention per class.",
+      "locator": "privacy-regulated-data.residency-and-retention",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-020",
+      "kind": "omission",
+      "text": "The brief names the organisation's buyer versus user and its governing regulators.",
+      "locator": "company-context.governing-regulators",
+      "pass": 1,
+      "origin": "brief"
+    }
+  ]
+}

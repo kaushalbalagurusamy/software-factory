@@ -1,0 +1,58 @@
+schema_version: 1
+sources:
+  - id: turing-1936
+    title: Turing, On Computable Numbers, with an Application to the Entscheidungsproblem (Proc. London Math. Soc. s2-42(1):230-265, 1937)
+    url: https://doi.org/10.1112/plms/s2-42.1.230
+    adapter: paper
+    tier: primary
+    kind: paper
+    notes: Publisher page returns HTTP 403 to the adapter (2026-10-14); free copies are PDF only, which the adapters do not parse. No quote recorded.
+  - id: rice-1953
+    title: Rice, Classes of Recursively Enumerable Sets and Their Decision Problems (Trans. AMS 74:358-366, 1953)
+    url: https://www.ams.org/journals/tran/1953-074-02/S0002-9947-1953-0053041-6/
+    adapter: paper
+    tier: primary
+    kind: paper
+    notes: AMS landing page and doi.org both return HTTP 403 to the adapter (2026-10-14); full text is PDF only. No quote recorded.
+  - id: karp-1972
+    title: Karp, Reducibility among Combinatorial Problems (Complexity of Computer Computations, Plenum 1972, pp 85-103)
+    url: https://link.springer.com/chapter/10.1007/978-1-4684-2001-2_9
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: We show that a large number of classic unsolved problems of covering, matching, packing, routing, assignment and sequencing are equivalent, in the sense that either each of them possesses a polynomial-bounded algorithm or none of them does.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [theory-complexity.np-hard-optimal-at-scale]
+      - text: It is reasonable to consider such a problem satisfactorily solved when an algorithm for its solution is found which terminates within a number of steps bounded by a polynomial in the length of the input.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [theory-complexity.np-hard-optimal-at-scale]
+  - id: cohen-1987
+    title: Cohen, Computer Viruses - Theory and Experiments (Computers & Security 6(1), 1987; author-hosted copy, summary section)
+    url: http://all.net/books/virus/part6.html
+    adapter: web_page
+    tier: primary
+    kind: paper
+    notes: Author-hosted copy of the original paper (publisher DOI 10.1016/0167-4048(87)90122-2 returns 403).
+    quotes:
+      - text: Precise detection is undecidable, however statistical methods may be used to limit undetected spreading either in time or in extent.
+        locator: Summary, Conclusions, and Further Work
+        fetched: "2026-10-14"
+        supports: [theory-complexity.perfect-semantic-detection]
+  - id: re2-readme
+    title: RE2 project README (linear-time regular expression engine)
+    url: https://raw.githubusercontent.com/google/re2/main/README.md
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: The only excluded ones are those that require backtracking (and its potential for exponential runtime) to implement.
+        locator: Syntax
+        fetched: "2026-10-14"
+        supports: [theory-complexity.backtracking-regex-on-untrusted-input]
+      - text: RE2 was designed and implemented with an explicit goal of being able to handle regular expressions from untrusted users without risk. One of its primary guarantees is that the match time is linear in the length of the input string.
+        locator: Introduction
+        fetched: "2026-10-14"
+        supports: [theory-complexity.backtracking-regex-on-untrusted-input]

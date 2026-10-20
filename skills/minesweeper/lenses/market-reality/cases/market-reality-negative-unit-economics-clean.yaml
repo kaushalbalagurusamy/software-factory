@@ -1,0 +1,17 @@
+schema_version: 1
+id: market-reality-negative-unit-economics-clean
+kind: clean
+twin: market-reality-negative-unit-economics-planted
+brief: |
+  Acme Tutor is a homework-help chat app for secondary-school students, paid by parents at $4 per
+  month after app-store fees of 30%.
+  Expected volume: 50,000 subscribers, each sending about 600 messages a month.
+  Requirements:
+  - Messages go to a small model with a short rolling context and cached instructions; a monthly
+    message cap per plan keeps the computed cost per subscriber, at the provider's current price
+    page, below 40% of net revenue per subscriber.
+  - The one thing that must work: worked solutions are mathematically correct.
+  - Answers appear within five seconds.
+  Success: 60% of subscribers renew after three months.
+expect:
+  none_from_lens: true

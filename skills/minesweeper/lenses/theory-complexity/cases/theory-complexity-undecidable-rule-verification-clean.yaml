@@ -1,0 +1,15 @@
+schema_version: 1
+id: theory-complexity-undecidable-rule-verification-clean
+kind: clean
+twin: theory-complexity-undecidable-rule-verification-planted
+brief: |
+  Product brief: workflow automation for a mid-size accounting firm.
+  Administrators build automations that react to events such as "invoice received".
+  Requirement 1: an event log shows every automation run with inputs and outputs.
+  Requirement 2: automations are written in a restricted expression language with no loops or recursion; each run is limited to 10,000 evaluation steps, 64 MB of memory and 2 seconds, trigger chains stop at depth 5, and data access is limited by a per-automation allow-list enforced at run time.
+  Requirement 3: automations can call the internal approval API and send email.
+  Requirement 4: each automation has an owner and can be disabled with one click.
+  Requirement 5: runs are retried up to three times on transient errors.
+  Success: the firm retires its spreadsheet macros within one quarter.
+expect:
+  none_from_lens: true

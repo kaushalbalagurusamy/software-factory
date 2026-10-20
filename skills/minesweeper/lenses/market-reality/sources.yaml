@@ -1,0 +1,90 @@
+schema_version: 1
+sources:
+  - id: census-susb
+    title: U.S. Census Bureau - Statistics of U.S. Businesses (SUSB)
+    url: https://www.census.gov/programs-surveys/susb.html
+    adapter: web_page
+    tier: primary
+    kind: dataset
+    notes: Example of primary bottom-up sizing data (firm and establishment counts by industry and size).
+    quotes:
+      - text: >-
+          Statistics of U.S. Businesses (SUSB) is an annual series that provides subnational economic
+          data for U.S. establishments with paid employees by establishment industry and enterprise size.
+        locator: Program overview
+        fetched: '2026-10-14'
+        supports: [market-reality.top-down-tam]
+  - id: bls-oews
+    title: U.S. Bureau of Labor Statistics - Occupational Employment and Wage Statistics
+    url: https://www.bls.gov/oes/
+    adapter: web_page
+    tier: primary
+    kind: dataset
+    notes: Example of primary data for counting practitioners by occupation and region.
+    quotes:
+      - text: >-
+          The Occupational Employment and Wage Statistics (OEWS) program produces employment and wage
+          estimates annually for approximately 830 occupations.
+        locator: Home
+        fetched: '2026-10-14'
+        supports: [market-reality.top-down-tam]
+  - id: eurostat-sbs
+    title: Eurostat - Structural business statistics
+    url: https://ec.europa.eu/eurostat/web/structural-business-statistics
+    adapter: web_page
+    tier: primary
+    kind: dataset
+    notes: Example of primary EU business counts for bottom-up sizing.
+    quotes:
+      - text: >-
+          Structural business statistics (SBS) describe the detailed structure, economic activity, and
+          performance of businesses over time.
+        locator: Overview
+        fetched: '2026-10-14'
+        supports: [market-reality.top-down-tam]
+  - id: sec-edgar-search
+    title: U.S. SEC - EDGAR full text search (company filings, 10-K and 10-Q)
+    url: https://www.sec.gov/edgar/search/
+    adapter: web_page
+    tier: primary
+    kind: dataset
+    notes: >-
+      Filings are the primary source for public-company revenue, customer counts and pricing
+      disclosures; press releases and analyst summaries are secondary.
+    quotes:
+      - text: >-
+          The new EDGAR advanced search gives you access to the full text of electronic filings since 2001.
+        locator: Search page header
+        fetched: '2026-10-14'
+        supports: [market-reality.unsourced-willingness-to-pay, market-reality.top-down-tam]
+  - id: anthropic-pricing
+    title: Anthropic - Claude API pricing (example provider price page)
+    url: https://platform.claude.com/docs/en/about-claude/pricing
+    adapter: web_page
+    tier: primary
+    kind: terms
+    freshness_days: 30
+    notes: >-
+      An example of the provider's own price page as the input to unit-economics arithmetic. Use the
+      price page of whichever provider the brief names; prices change, so re-fetch within 30 days.
+    quotes:
+      - text: >-
+          This page provides detailed pricing information for Anthropic's models and features. All
+          prices are in USD.
+        locator: Introduction
+        fetched: '2026-10-14'
+        supports: [market-reality.negative-unit-economics, market-reality.unbounded-free-tier]
+  - id: nng-response-times
+    title: Nielsen Norman Group - Response Times, The 3 Important Limits
+    url: https://www.nngroup.com/articles/response-times-3-important-limits/
+    adapter: web_page
+    tier: secondary
+    kind: guidance
+    notes: Practitioner guidance on perceived latency thresholds; secondary.
+    quotes:
+      - text: >-
+          1.0 second is about the limit for the user's flow of thought to stay uninterrupted, even though
+          the user will notice the delay.
+        locator: The 3 response-time limits
+        fetched: '2026-10-14'
+        supports: [market-reality.latency-over-correctness-floor]

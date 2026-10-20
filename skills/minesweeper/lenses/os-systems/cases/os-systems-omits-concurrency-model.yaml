@@ -1,0 +1,15 @@
+schema_version: 1
+id: os-systems-omits-concurrency-model
+kind: omission
+twin: os-systems-omits-concurrency-model-clean
+brief: |
+  A regional clinic network - lab result notifier
+
+  - When a lab result is finalised, the patient receives a secure message and the clinician a task.
+  - Expect up to 3,000 results per minute at the morning peak.
+  - Each worker container has a 1 GB memory limit; a notification uses under 2 MB.
+  - Messages must be sent within 60 seconds of finalisation.
+  - Delivery failures are retried with backoff and alerted after an hour.
+expect:
+  omissions:
+  - os-systems.concurrency-model

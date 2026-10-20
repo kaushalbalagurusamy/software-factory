@@ -1,0 +1,84 @@
+schema_version: 1
+traps:
+  - id: copyright-data-rights.tdm-ignoring-opt-out
+    title: Mining or training on web content while ignoring rightholders' machine-readable opt-outs
+    kind: requirement
+    cues:
+      - "crawl the whole web for training data, ignore robots rules"
+      - "scrape every news and publisher site for the corpus"
+      - "public pages are free to train on"
+      - "strip the no-AI tags so the crawler gets more data"
+      - "maximise corpus size; filtering by licence slows us down"
+    principle: >-
+      In the EU, the general text-and-data-mining exception (Directive (EU) 2019/790 Article 4(1)) covers only
+      lawfully accessible works, and applies only where rightholders have not expressly reserved that use in an
+      appropriate manner, such as machine-readable means for content made publicly available online (Article
+      4(3)). Providers of general-purpose AI models must have a policy to identify and comply with such
+      reservations (Regulation (EU) 2024/1689 Article 53(1)(c)).
+    sources: [dsm-2019-790, eu-ai-act]
+    severity:
+      default: critical
+      blast_radius: Training corpus includes works mined outside the exception; infringement exposure and possible retraining.
+    remediation:
+      safe_route: >-
+        Honour machine-readable reservations (robots directives, TDM reservation protocols, licence metadata) at
+        crawl time, record provenance per document, and license content where reservations apply.
+      invariant: No document whose rightholder has reserved text and data mining by machine-readable means enters the corpus without a licence.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Outside the EU the analysis differs (for example US fair use is decided case by case); disposition
+      ask-owner per jurisdiction. The seed report's claim that scraping violates the CFAA and DMCA in general is
+      too broad: it depends on authorisation and on circumvention (see circumvent-access-controls and security-ethics).
+  - id: copyright-data-rights.circumvent-access-controls
+    title: Bypassing paywalls, logins or DRM to acquire content or data
+    kind: requirement
+    cues:
+      - "get past the paywall with a headless browser"
+      - "strip DRM from the e-books to build the dataset"
+      - "reuse a subscriber's session cookie to pull articles"
+      - "rotate residential proxies to beat the anti-bot wall"
+      - "decrypt the streaming video to extract frames"
+    principle: >-
+      US: no person shall circumvent a technological measure that effectively controls access to a copyrighted
+      work (17 U.S.C. 1201(a)(1)(A)). EU: the text-and-data-mining exception covers only lawfully accessible
+      works (Directive (EU) 2019/790 Article 4(1)), so content obtained by defeating access controls falls outside it.
+    sources: [usc-17-1201, dsm-2019-790]
+    severity:
+      default: critical
+      blast_radius: Statutory anti-circumvention liability and a dataset that cannot be used; possible computer-misuse exposure too.
+    remediation:
+      safe_route: Acquire content through licences, official APIs or bulk-data agreements; accept the access controls as the boundary.
+      invariant: No pipeline component defeats an access control (paywall, authentication, encryption, DRM) to obtain content.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Section 1201 has statutory exemptions and triennial rulemakings; whether one applies is ask-owner. Unauthorised access to a computer is security-ethics.
+  - id: copyright-data-rights.gpai-without-copyright-policy-or-summary
+    title: Releasing a general-purpose AI model in the EU with no copyright policy or public training-content summary
+    kind: omission
+    cues:
+      - "release our foundation model weights to EU developers"
+      - "training data sources are a trade secret, publish nothing"
+      - "offer the base model via API across Europe"
+      - "no need to document what we trained on"
+    principle: >-
+      Providers of general-purpose AI models placed on the EU market must put in place a copyright-compliance
+      policy that identifies and honours Article 4(3) reservations, and draw up and publish a sufficiently
+      detailed summary of the content used for training, per the AI Office template (Regulation (EU) 2024/1689
+      Article 53(1)(c) and (d)).
+    sources: [eu-ai-act]
+    severity:
+      default: high
+      blast_radius: Provider obligations unmet for the model's EU release; enforcement by the AI Office.
+    remediation:
+      safe_route: Keep training-data provenance from day one, adopt a written copyright policy, and publish the training-content summary using the AI Office template before EU release.
+      invariant: Every training source is recorded with its licence or legal basis, sufficient to produce the Article 53(1)(d) summary.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Article 53(2) relieves certain free and open-source model releases of points (a) and (b) only, not (c) and
+      (d). Whether the brief's model is a general-purpose AI model under Article 3 is ask-owner. The seed
+      report's dates for GPAI obligations were not checked here.

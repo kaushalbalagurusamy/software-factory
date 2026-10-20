@@ -1,0 +1,50 @@
+{
+  "skill_name": "grounded-research",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm reading a 2019 blog post that says Node's child_process.exec only buffers 200KB of stdout by default and silently truncates anything past that. I'm about to shell out to `git log --stat` on a huge monorepo using the Node installed on this machine. Is the blog right? What happens if output goes over the limit, and what should I do about it?",
+      "expected_output": "Checks installed Node version; states default maxBuffer is 1MB (1024*1024) on Node 20, not 200KB; exceeding it errors (ERR_CHILD_PROCESS_STDIO_MAXBUFFER) and kills the child rather than silently truncating; confirmed by an experiment; recommends spawn/streaming or raising maxBuffer.",
+      "files": [],
+      "expectations": [
+        "Checked the installed Node version (v20.x) before answering",
+        "States the default maxBuffer on the installed Node is 1 MiB (1024*1024 bytes), so the blog's 200KB figure is outdated",
+        "States that exceeding maxBuffer errors out (ERR_CHILD_PROCESS_STDIO_MAXBUFFER) and kills the child, rather than silently truncating",
+        "Ran an experiment against the installed Node that overflowed maxBuffer and reported the actual error output",
+        "Recommends spawn/streaming (or an explicitly raised maxBuffer) for large git output",
+        "Answer distinguishes what was confirmed by experiment from what comes from docs/sources",
+        "Saved a research-notes/<topic>.md note with Finding, Confidence and Evidence sections"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I want to use `claude plugin eval` to benchmark a skill I have in ~/.claude/skills. Which flag points it at an eval directory that isn't the default, does it run a no-plugin baseline automatically or do I have to ask for one, and what model does it use for the LLM judge by default? Don't actually kick off an eval run, I just want to know how to set it up.",
+      "expected_output": "Reads `claude plugin eval --help` locally; --eval-dir; baseline arm is on by default (--ablation with-without) whenever a plugin resolves; default judge model is haiku (--judge-model overrides); does not launch a paid eval run.",
+      "files": [],
+      "expectations": [
+        "Ran `claude plugin eval --help` (or equivalent) locally to ground the answer",
+        "Identifies --eval-dir as the flag for a non-default eval directory",
+        "States a no-plugin baseline arm runs automatically by default (--ablation with-without) when a plugin resolves",
+        "States the default LLM judge model is haiku, overridable with --judge-model",
+        "Does not invent flags or behaviors absent from the local help output",
+        "Did not launch an actual eval run",
+        "Saved a research-notes/<topic>.md note with Finding, Confidence and Evidence sections"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Quick sanity check before I merge: our backup-restore script does `tarfile.open(path).extractall(dest)` with no filter argument, run with the python3 on this machine. A teammate says that's still the old fully-trusted behavior, so a malicious archive with a symlink pointing outside dest would get extracted as-is. Are they right?",
+      "expected_output": "Checks python3 version (3.14); states default extraction filter became 'data' in 3.14, which refuses links pointing outside dest (raises an error), so the teammate is wrong for this interpreter; confirmed with a sandboxed experiment in a temp dir; notes older Pythons behave differently and recommends passing filter='data' explicitly.",
+      "files": [],
+      "expectations": [
+        "Checked the python3 version on this machine (3.14.x)",
+        "States the default extraction filter on Python 3.14 is 'data', so the teammate's claim is wrong for this interpreter",
+        "Ran a sandboxed experiment with an archive containing an outside-pointing symlink and reported the actual exception (LinkOutsideDestinationError)",
+        "Experiment files were confined to a temp dir or the outputs dir",
+        "Notes that older Pythons (3.13 and earlier) default to fully-trusted extraction and recommends passing filter='data' explicitly",
+        "Answer distinguishes what was confirmed by experiment from what comes from docs/sources",
+        "Saved a research-notes/<topic>.md note with Finding, Confidence and Evidence sections"
+      ]
+    }
+  ]
+}

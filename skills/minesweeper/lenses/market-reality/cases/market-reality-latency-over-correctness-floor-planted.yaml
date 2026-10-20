@@ -1,0 +1,15 @@
+schema_version: 1
+id: market-reality-latency-over-correctness-floor-planted
+kind: planted
+twin: market-reality-latency-over-correctness-floor-clean
+brief: |
+  Acme Compliance sells a monthly report to 300 small accounting firms at $200 per firm per month.
+  Each firm uploads its ledgers once a month and reads a report flagging likely filing errors.
+  Requirements:
+  - Reports must be generated in under 50 milliseconds and the system must sustain one million
+    concurrent uploads from day one.
+  - Accuracy of the flagged errors will be tuned after launch.
+  - Firms download the report as a PDF.
+expect:
+  traps: [market-reality.latency-over-correctness-floor]
+  min_severity: medium

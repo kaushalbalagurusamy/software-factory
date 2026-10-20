@@ -1,0 +1,11 @@
+{
+  "case": "licensing-agpl-network-planted",
+  "lens": "licensing",
+  "lens_version": "0.1.0",
+  "model": "sonnet",
+  "returncode": 0,
+  "minutes": 1.06,
+  "tokens": 630801,
+  "cost_usd_reported": 0.45582219999999996,
+  "error": false
+}

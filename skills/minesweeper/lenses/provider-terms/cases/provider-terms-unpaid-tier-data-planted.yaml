@@ -1,0 +1,15 @@
+schema_version: 1
+id: provider-terms-unpaid-tier-data-planted
+kind: planted
+twin: provider-terms-unpaid-tier-data-clean
+brief: |
+  Fabrikam HR Assistant: pilot
+
+  1. Summarise employee grievance case files for HR partners.
+  2. For the pilot, use the hosted model's free API quota and the real case files from last year
+     so the summaries are realistic.
+  3. Summaries are shown to HR partners only and are not used for anything else.
+  4. Pilot runs for six weeks with ten HR partners.
+expect:
+  traps: [provider-terms.sensitive-data-on-unpaid-tier]
+  min_severity: critical

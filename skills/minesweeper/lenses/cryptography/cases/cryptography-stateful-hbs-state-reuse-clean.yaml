@@ -1,0 +1,13 @@
+schema_version: 1
+id: cryptography-stateful-hbs-state-reuse-clean
+kind: clean
+twin: cryptography-stateful-hbs-state-reuse-planted
+brief: |
+  A device maker signs firmware updates for its routers.
+  - Signatures use XMSS so the update chain stays secure against quantum attacks.
+  - Routers verify the signature before installing.
+  - One HSM holds the XMSS key and persists the state index before releasing each signature; the key
+    is never exported, cloned or restored from backup.
+  - Release cadence is about one update per month.
+expect:
+  none_from_lens: true

@@ -1,0 +1,14 @@
+schema_version: 1
+id: agent-security-confused-deputy-clean
+kind: clean
+twin: agent-security-confused-deputy-planted
+brief: |
+  A property-management firm wants a chat assistant over its tenant database.
+  - Tenants and staff sign in through the firm's portal.
+  - The assistant uses a tool server to look up leases, payments and maintenance tickets.
+  - The tool server queries on behalf of the signed-in user with that user's row-level permissions, and
+    requests only the scopes each operation needs.
+  - All tool calls are logged with the requesting user.
+  - The portal must stay usable on mobile.
+expect:
+  none_from_lens: true

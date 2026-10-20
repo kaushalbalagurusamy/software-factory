@@ -1,0 +1,15 @@
+schema_version: 1
+id: ai-regulation-annex-iii-hiring-clean
+kind: clean
+twin: ai-regulation-annex-iii-hiring-planted
+brief: |
+  Brightline Talent: hiring support for EU retail chains
+
+  1. A team of agents reads CVs, runs a chat interview, and proposes a score for each applicant.
+  2. The system is treated as high-risk under EU AI Act Annex III; a trained recruiter reviews every
+     proposed rejection and can override or halt the pipeline.
+  3. Every agent step and score is logged automatically to tamper-evident storage, kept at least six months.
+  4. Applicants are told the chat interviewer is an AI.
+  5. Shortlist delivered within 24 hours of the posting closing.
+expect:
+  none_from_lens: true

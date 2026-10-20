@@ -1,0 +1,15 @@
+schema_version: 1
+id: numeric-representation-fixed-width-counter-overflow-clean
+kind: clean
+twin: numeric-representation-fixed-width-counter-overflow-planted
+brief: |
+  Product brief: event ingestion API for a mobile analytics service.
+  Customers send app events; the service expects to reach 40 million events per day within two years.
+  All timestamps are stored in UTC.
+  There is no money handling in this service.
+  Requirement 1: accept batches of events over HTTPS.
+  Requirement 2: each event gets a sequential id from a 64-bit integer column, and the lifetime total per customer is kept in a 64-bit counter; inserts fail loudly rather than wrap if a limit is ever reached.
+  Requirement 3: customers see daily and lifetime event totals.
+  Success: customers can query yesterday's events by 06:00 UTC.
+expect:
+  none_from_lens: true

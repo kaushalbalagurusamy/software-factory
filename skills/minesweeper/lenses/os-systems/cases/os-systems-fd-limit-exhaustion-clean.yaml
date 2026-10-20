@@ -1,0 +1,14 @@
+schema_version: 1
+id: os-systems-fd-limit-exhaustion-clean
+kind: clean
+twin: os-systems-fd-limit-exhaustion-planted
+brief: |
+  A regional clinic network - appointment status board
+
+  - Front-desk tablets show live appointment status pushed from the server.
+  - Expect up to 120,000 tablets and kiosks connected at peak.
+  - Devices connect through 8 gateway processes behind a load balancer; each process accepts at most 20,000 sockets with its descriptor limit set to 32,768, and refuses new connections above that.
+  - Status changes must appear on screens within 3 seconds.
+  - Each gateway container has a 4 GB memory limit and handles at most 20,000 connections; the gateway uses one event loop, not a thread per client.
+expect:
+  none_from_lens: true

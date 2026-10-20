@@ -1,0 +1,95 @@
+schema_version: 1
+sources:
+  - id: kernel-ip-sysctl
+    title: IP Sysctl - Linux kernel documentation (networking/ip-sysctl)
+    url: https://docs.kernel.org/networking/ip-sysctl.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: Defines the local port range that is used by TCP and UDP to choose the local port.
+        locator: ip_local_port_range
+        fetched: "2026-10-14"
+        supports: [os-systems.ephemeral-port-exhaustion]
+      - text: The default values are 32768 and 60999 respectively.
+        locator: ip_local_port_range
+        fetched: "2026-10-14"
+        supports: [os-systems.ephemeral-port-exhaustion]
+  - id: man-connect2
+    title: connect(2) - Linux man-pages
+    url: https://man7.org/linux/man-pages/man2/connect.2.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: upon attempting to bind it to an ephemeral port, it was determined that all port numbers in the ephemeral port range are currently in use.
+        locator: ERRORS, EADDRNOTAVAIL
+        fetched: "2026-10-14"
+        supports: [os-systems.ephemeral-port-exhaustion]
+  - id: rfc9293
+    title: RFC 9293 Transmission Control Protocol (TCP)
+    url: https://www.rfc-editor.org/rfc/rfc9293.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: To support this, the TIME-WAIT state limits the rate of connection reuse
+        locator: Section 3.4.1 (Initial Sequence Number Selection)
+        fetched: "2026-10-14"
+        supports: [os-systems.ephemeral-port-exhaustion]
+      - text: For this specification the MSL is taken to be 2 minutes.
+        locator: Section 3.4.2 (Knowing When to Keep Quiet)
+        fetched: "2026-10-14"
+        supports: [os-systems.ephemeral-port-exhaustion]
+  - id: man-getrlimit2
+    title: getrlimit(2) - Linux man-pages
+    url: https://man7.org/linux/man-pages/man2/getrlimit.2.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: This specifies a value one greater than the maximum file descriptor number that can be opened by this process. Attempts (open(2), pipe(2), dup(2), etc.) to exceed this limit yield the error EMFILE.
+        locator: RLIMIT_NOFILE
+        fetched: "2026-10-14"
+        supports: [os-systems.fd-limit-exhaustion]
+  - id: kernel-cgroup-v2
+    title: Control Group v2 - Linux kernel documentation
+    url: https://docs.kernel.org/admin-guide/cgroup-v2.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: If a cgroup's memory usage reaches this limit and can't be reduced, the OOM killer is invoked in the cgroup.
+        locator: Memory Interface Files, memory.max
+        fetched: "2026-10-14"
+        supports: [os-systems.memory-limit-oom-kill]
+      - text: Userland memory - page cache and anonymous memory.
+        locator: Memory, list of tracked memory usages
+        fetched: "2026-10-14"
+        supports: [os-systems.page-cache-as-free-memory]
+  - id: man-proc-oom
+    title: proc_pid_oom_score_adj(5) - Linux man-pages
+    url: https://man7.org/linux/man-pages/man5/proc_pid_oom_score_adj.5.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: If it is due to a memory limit (or swap limit) being reached, the allowed memory is that configured limit.
+        locator: /proc/pid/oom_score_adj
+        fetched: "2026-10-14"
+        supports: [os-systems.memory-limit-oom-kill]
+  - id: man-pthread-create3
+    title: pthread_create(3) - Linux man-pages
+    url: https://man7.org/linux/man-pages/man3/pthread_create.3.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: the RLIMIT_NPROC soft resource limit (set via setrlimit(2)), which limits the number of processes and threads for a real user ID, was reached
+        locator: ERRORS, EAGAIN
+        fetched: "2026-10-14"
+        supports: [os-systems.thread-or-process-per-request]
+      - text: if the RLIMIT_STACK soft resource limit at the time the program started has any value other than "unlimited", then it determines the default stack size of new threads.
+        locator: NOTES
+        fetched: "2026-10-14"
+        supports: [os-systems.thread-or-process-per-request]

@@ -1,0 +1,11 @@
+{
+  "case": "licensing-agpl-network-clean",
+  "lens": "licensing",
+  "lens_version": "0.1.0",
+  "model": "sonnet",
+  "returncode": 0,
+  "minutes": 0.99,
+  "tokens": 536308,
+  "cost_usd_reported": 0.4165964999999999,
+  "error": false
+}

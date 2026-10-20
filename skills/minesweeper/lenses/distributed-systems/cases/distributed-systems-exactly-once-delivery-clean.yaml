@@ -1,0 +1,15 @@
+schema_version: 1
+id: distributed-systems-exactly-once-delivery-clean
+kind: clean
+twin: distributed-systems-exactly-once-delivery-planted
+brief: |
+  Project: billing events for a subscription meal-kit company.
+  - The checkout service emits a PaymentCaptured event to the message broker for each charge.
+  - The fulfilment, loyalty-points and receipt-email services consume these events.
+  - Delivery is at-least-once with retries for 24 hours; every event has a stable event id, and each consumer records processed ids in the same transaction as its effect so a redelivered event is ignored.
+  - Fault model: services may crash and restart at any time; all run in one cluster we operate, and broker access uses per-service credentials.
+  - Events are ordered per customer by using the customer id as the partition key.
+  - Event schemas are versioned in a shared repository.
+  - Dead-lettered events are reviewed daily by the on-call engineer.
+expect:
+  none_from_lens: true

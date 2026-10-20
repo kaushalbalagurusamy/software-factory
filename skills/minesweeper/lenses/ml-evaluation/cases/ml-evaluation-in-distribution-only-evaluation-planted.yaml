@@ -1,0 +1,17 @@
+schema_version: 1
+id: ml-evaluation-in-distribution-only-evaluation-planted
+kind: planted
+twin: ml-evaluation-in-distribution-only-evaluation-clean
+brief: |
+  Product brief: defect detection from photos on a packaging line.
+  The model is trained on photos from two plants and will run in all seven plants.
+  Defects are about 2% of items; the model must beat the current manual spot-check rate.
+  Training and test photos are split by production day.
+  Scores trigger a human check and are not shown as probabilities.
+  Requirement 1: accept the model when it reaches 90% recall at 20% precision on held-out days from the two training plants.
+  Requirement 2: flagged items are diverted to a manual inspection station.
+  Success: fewer defective packs reach customers.
+expect:
+  traps:
+  - ml-evaluation.in-distribution-only-evaluation
+  min_severity: medium

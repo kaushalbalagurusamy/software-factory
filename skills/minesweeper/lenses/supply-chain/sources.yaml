@@ -1,0 +1,125 @@
+schema_version: 1
+sources:
+  - id: spracklen-2024-package-hallucination
+    title: "We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs (Spracklen et al., USENIX Security 2025)"
+    url: https://arxiv.org/abs/2406.10279
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: "These hallucinations, which arise from fact-conflicting errors when generating code using LLMs, represent a novel form of package confusion attack that poses a critical threat to the integrity of the software supply chain."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [supply-chain.unverified-package-name, supply-chain.autonomous-agent-install]
+      - text: "Our findings reveal that that the average percentage of hallucinated packages is at least 5.2% for commercial models and 21.7% for open-source models, including a staggering 205,474 unique examples of hallucinated package names"
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [supply-chain.unverified-package-name]
+    notes: >-
+      The abstract page carries the headline rates only. The report's recurrence figures (43% in all ten
+      runs, 58% more than once), the 38%/49%/13% category split and the 8.7% cross-registry figure are
+      in the paper body and were not confirmed from the fetched text; do not quote them as facts.
+  - id: slsa-threats
+    title: SLSA specification v1.0 - Threats and mitigations
+    url: https://slsa.dev/spec/v1.0/threats
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: "Threat: Register a package name that is similar looking to a popular package and get users to use your malicious package instead of the benign one."
+        locator: Package threats - Typosquatting
+        fetched: "2026-10-14"
+        supports: [supply-chain.unverified-package-name]
+      - text: "You may be able to mitigate this threat by pinning your build dependencies, preferably by digest rather than version number."
+        locator: Dependency threats - (D) Use compromised build dependency
+        fetched: "2026-10-14"
+        supports: [supply-chain.unpinned-dependencies]
+      - text: "SLSA mitigates dependency threats when you verify your dependencies’ SLSA provenance."
+        locator: Dependency threats
+        fetched: "2026-10-14"
+        supports: [supply-chain.unverified-provenance]
+  - id: slsa-provenance
+    title: SLSA specification v1.0 - Provenance
+    url: https://slsa.dev/spec/v1.0/provenance
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: "Describe how an artifact or set of artifacts was produced so that: Consumers of the provenance can verify that the artifact was built according to expectations."
+        locator: Purpose
+        fetched: "2026-10-14"
+        supports: [supply-chain.unverified-provenance]
+  - id: slsa-verifying-artifacts
+    title: SLSA specification v1.0 - Verifying artifacts
+    url: https://slsa.dev/spec/v1.0/verifying-artifacts
+    adapter: web_page
+    tier: primary
+    kind: spec
+  - id: npm-scripts
+    title: npm Docs - scripts (lifecycle scripts)
+    url: https://docs.npmjs.com/cli/v10/using-npm/scripts
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: "These all run after the actual installation of modules into node_modules, in order, with no internal actions happening in between"
+        locator: Life Cycle Operation Order (npm ci / npm install - preinstall, install, postinstall)
+        fetched: "2026-10-14"
+        supports: [supply-chain.install-time-scripts, supply-chain.autonomous-agent-install]
+  - id: npm-config
+    title: npm Docs - config (ignore-scripts)
+    url: https://docs.npmjs.com/cli/v10/using-npm/config
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: "If true, npm does not run scripts specified in package.json files."
+        locator: ignore-scripts
+        fetched: "2026-10-14"
+        supports: [supply-chain.install-time-scripts]
+  - id: npm-ci
+    title: npm Docs - npm ci
+    url: https://docs.npmjs.com/cli/v10/commands/npm-ci
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: "If dependencies in the package lock do not match those in package.json, npm ci will exit with an error, instead of updating the package lock."
+        locator: Description
+        fetched: "2026-10-14"
+        supports: [supply-chain.unpinned-dependencies]
+  - id: pip-secure-installs
+    title: pip documentation - Secure installs (hash-checking mode)
+    url: https://pip.pypa.io/en/stable/topics/secure-installs/
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: "By default, pip does not perform any checks to protect against remote tampering and involves running arbitrary code from distributions."
+        locator: Secure installs (introduction)
+        fetched: "2026-10-14"
+        supports: [supply-chain.autonomous-agent-install, supply-chain.install-time-scripts, supply-chain.unpinned-dependencies]
+      - text: "This mode uses local hashes, embedded in a requirements.txt file, to protect against remote tampering and network issues."
+        locator: Hash-checking Mode
+        fetched: "2026-10-14"
+        supports: [supply-chain.unpinned-dependencies]
+  - id: osv-pysec-2026-2
+    title: OSV PYSEC-2026-2 - malicious releases of a widely used LLM proxy package published with a stolen token
+    url: https://osv.dev/vulnerability/PYSEC-2026-2
+    adapter: osv
+    tier: primary
+    kind: advisory
+    quotes:
+      - text: "two new releases of `litellm` were uploaded to PyPI containing automatically activated malware, harvesting sensitive credentials and files, and exfiltrating to a remote API."
+        locator: details
+        fetched: "2026-10-14"
+        supports: [supply-chain.unpinned-dependencies]
+  - id: osv-pysec-2026-3
+    title: OSV PYSEC-2026-3 - malicious releases of a telephony SDK package (same campaign)
+    url: https://osv.dev/vulnerability/PYSEC-2026-3
+    adapter: osv
+    tier: primary
+    kind: advisory
+    notes: >-
+      Confirms the report's March 2026 campaign claim: the record says the code "uses the encryption key
+      observed in previous TeamPCP actions". Kept as context; not cited by a trap.

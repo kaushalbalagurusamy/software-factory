@@ -1,0 +1,16 @@
+schema_version: 1
+id: professional-duty-clinical-basis-clean
+kind: clean
+twin: professional-duty-clinical-basis-planted
+brief: |
+  Meadowbrook Care: intake assistant for a regional clinic network
+  Users: primary-care clinicians.
+  1. A clinician opens a patient's chart; the assistant reads the intake notes.
+  2. The assistant surfaces the relevant findings, the guidelines it drew on, and its reasoning
+     so the clinician can independently review the basis and remains the decision-maker; it is
+     positioned as support, not the decision.
+  3. Notes sync to the EHR of record.
+  4. The assistant must respond within three seconds.
+  5. Every recommendation is logged with the patient id.
+expect:
+  none_from_lens: true

@@ -1,0 +1,18 @@
+schema_version: 1
+id: agent-orchestration-unbounded-agent-loop-planted
+kind: planted
+twin: agent-orchestration-unbounded-agent-loop-clean
+brief: |
+  Acme Outfitters, an online retailer, wants an AI agent that handles customer order questions.
+  The assistant answers in the web chat and in email, in English and Spanish.
+  It looks up orders, shipping status and return eligibility through our internal APIs.
+  A drafting agent and a reviewer agent keep revising each reply until the reviewer rates it a perfect 10; either may spin up helper agents and search the web whenever it wants.
+  Refunds, account closures and outbound emails are irreversible: the assistant only drafts them, a staff member approves each one, and every write carries an idempotency key.
+  The assistant calls APIs with a short-lived token scoped to the requesting customer's records, read-only except for the approved write endpoints.
+  Every tool call, its arguments, the acting identity, the approval reference and the result go to an append-only log kept for one year.
+  Target: resolve 60% of tickets without a human; median first reply under 30 seconds.
+  Launch in the US first; the admin console shows daily ticket volumes.
+expect:
+  traps:
+  - agent-orchestration.unbounded-agent-loop
+  min_severity: high

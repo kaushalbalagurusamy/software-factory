@@ -1,0 +1,17 @@
+schema_version: 1
+id: market-reality-omit-correctness-floor-clean
+kind: clean
+twin: market-reality-omit-correctness-floor-omission
+brief: |
+  Acme Freight offers a shipment-tracking dashboard to mid-sized importers at $500 per month.
+  We expect 400 customers, each tracking about 300 containers a month, with status checks every
+  hour. Each status check costs us one carrier API call at the carrier's published per-call price,
+  well under our revenue per customer.
+  The one thing that must work: a delay is alerted within two hours of the carrier reporting it,
+  and no container is shown with a stale status as if it were current.
+  Requirements:
+  - Show every container on a map with its latest status.
+  - Email an alert when a container is delayed.
+  - Pages load within two seconds.
+expect:
+  none_from_lens: true

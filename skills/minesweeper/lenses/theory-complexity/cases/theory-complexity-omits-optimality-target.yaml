@@ -1,0 +1,15 @@
+schema_version: 1
+id: theory-complexity-omits-optimality-target
+kind: omission
+twin: theory-complexity-states-optimality-target
+brief: |
+  Product brief: delivery van loading tool for a parcel depot.
+  The depot loads 60 vans each morning with up to 300 parcels each.
+  Requirement 1: import parcel dimensions and weights from the sorter.
+  Requirement 2: the tool proposes which parcels go in which van and in what order to load them.
+  Requirement 3: the plan for the whole depot must be ready within 2 minutes of the sorter closing.
+  Requirement 4: loaders see the plan on handheld scanners.
+  Success: fewer vans sent out half empty.
+expect:
+  omissions:
+  - theory-complexity.optimality-target

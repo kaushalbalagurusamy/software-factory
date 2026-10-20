@@ -1,0 +1,17 @@
+schema_version: 1
+id: agent-orchestration-omits-action-audit
+kind: omission
+twin: agent-orchestration-complete-clean
+brief: |
+  Acme Outfitters, an online retailer, wants an AI agent that handles customer order questions.
+  The assistant answers in the web chat and in email, in English and Spanish.
+  It looks up orders, shipping status and return eligibility through our internal APIs.
+  Each agent run is capped at 8 iterations, 200k tokens and 10 minutes; if it hits a cap without an accepted answer it stops and hands the ticket to the human queue.
+  Refunds, account closures and outbound emails are irreversible: the assistant only drafts them, a staff member approves each one, and every write carries an idempotency key.
+  The assistant calls APIs with a short-lived token scoped to the requesting customer's records, read-only except for the approved write endpoints.
+  Target: resolve 60% of tickets without a human; median first reply under 30 seconds.
+  Launch in the US first; the admin console shows daily ticket volumes.
+expect:
+  omissions:
+  - agent-orchestration.action-audit
+notes: Same as agent-orchestration-complete-clean with the action-audit statement removed.

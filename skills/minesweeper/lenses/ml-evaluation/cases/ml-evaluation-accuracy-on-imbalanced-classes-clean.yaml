@@ -1,0 +1,15 @@
+schema_version: 1
+id: ml-evaluation-accuracy-on-imbalanced-classes-clean
+kind: clean
+twin: ml-evaluation-accuracy-on-imbalanced-classes-planted
+brief: |
+  Product brief: fraud flagging for card payments at a small online retailer.
+  Evaluation: train on the first ten months, test on the last two, grouped by card.
+  Scores are used only as a ranking for manual review.
+  Fraud is about 1 in 500 orders.
+  Requirement 1: the model ships when, at the threshold that sends 1% of orders to review, it catches at least 60% of fraud with at least 10% precision on the test months, beating the flag-nothing baseline.
+  Requirement 2: flagged orders go to a manual review queue.
+  Requirement 3: reviewers can mark a flag as wrong to feed retraining.
+  Success: lower chargeback losses.
+expect:
+  none_from_lens: true

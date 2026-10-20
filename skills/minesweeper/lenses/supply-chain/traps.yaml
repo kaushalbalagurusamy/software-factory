@@ -1,0 +1,151 @@
+schema_version: 1
+traps:
+  - id: supply-chain.unverified-package-name
+    aliases: [SEC-01]
+    title: The brief names packages to install without anyone confirming they exist and are the intended project
+    kind: dependency
+    cues:
+      - "install the following packages"
+      - "use the package the assistant suggested"
+      - "add the helper library recommended in the generated code"
+      - "pip install <name> / npm install <name> as listed below"
+      - "copy the install command from the README"
+      - "the same library is available on both npm and PyPI"
+    principle: >-
+      Code-generating models recommend package names that do not exist, and an attacker can register
+      such a name (or a lookalike of a popular one) so that following the recommendation installs their
+      code. A package name in a brief is a claim to check against the registry, not a fact.
+    sources: [spracklen-2024-package-hallucination, slsa-threats]
+    severity:
+      default: high
+      blast_radius: >-
+        Attacker code runs on developer machines and CI runners with their credentials; tokens and
+        secrets leak and the product ships the attacker's code.
+    remediation:
+      safe_route: >-
+        Resolve every named package against its registry before it enters the spec: it exists, it is
+        the project the documentation means, its age, publisher and download history are plausible, and
+        the same name on the other registry is not being confused for it. Route installs through an
+        allowlisted internal mirror.
+      invariant: No dependency is added unless its registry record has been checked and the name is on the project allowlist.
+      spec_section: crypto-agent-security
+    checks: [registry.exists, registry.age, registry.cross_registry]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      The report's recurrence, category and cross-registry percentages, and its named example packages
+      and download counts, are not confirmed from primary text and are left out on purpose.
+
+  - id: supply-chain.autonomous-agent-install
+    aliases: [SEC-01-agent-install]
+    title: A coding agent is allowed to install and run packages without human confirmation
+    kind: requirement
+    cues:
+      - "let the agent install whatever dependencies it needs"
+      - "run in bypass / auto-approve mode so the build is not blocked"
+      - "the assistant can npx or pip install tools on the fly"
+      - "no human in the loop for dependency changes"
+      - "agent fixes import errors by installing the missing package"
+    principle: >-
+      Installing a package runs code from it: npm runs preinstall, install and postinstall scripts
+      during install, and pip by default runs arbitrary code from distributions without tamper checks.
+      An agent that installs names it generated itself is the shortest path from a hallucinated name to
+      code execution.
+    sources: [pip-secure-installs, npm-scripts, spracklen-2024-package-hallucination]
+    severity:
+      default: high
+      blast_radius: >-
+        Unreviewed third-party code executes in the agent's environment, which usually holds source
+        access, cloud credentials and deploy tokens.
+    remediation:
+      safe_route: >-
+        The agent may propose dependency changes; a human approves them after a registry check. Agent
+        sandboxes install only from an allowlisted mirror with scripts disabled and no production secrets
+        in the environment.
+      invariant: No package is installed in an agent session without a recorded human approval and a passing registry check.
+      spec_section: crypto-agent-security
+    checks: [registry.exists, registry.age]
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: supply-chain.install-time-scripts
+    title: Builds run dependency install scripts in an environment that holds secrets
+    kind: requirement
+    cues:
+      - "CI runs npm install with the deploy credentials loaded"
+      - "postinstall step downloads the native binary"
+      - "install dependencies on the release runner"
+      - "the build machine has the cloud keys so it can publish"
+      - "build from source distributions"
+    principle: >-
+      Package managers run lifecycle scripts from every dependency at install time unless told not to
+      (npm ignore-scripts), and pip runs code from source distributions. Any dependency, direct or
+      transitive, therefore executes with whatever secrets the install environment holds.
+    sources: [npm-scripts, npm-config, pip-secure-installs]
+    severity:
+      default: high
+      blast_radius: Credential theft from CI and release infrastructure; a single compromised transitive package suffices.
+    remediation:
+      safe_route: >-
+        Install with scripts disabled by default and allow scripts only for named packages that need a
+        native build; prefer prebuilt wheels; separate the install step from the step that holds
+        publish or deploy secrets.
+      invariant: Dependency installation never runs in a job that holds deploy, publish or production credentials.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: supply-chain.unpinned-dependencies
+    title: Dependencies float to the latest version with no lockfile or hash pinning
+    kind: requirement
+    cues:
+      - "always use the latest version"
+      - "no need to commit the lockfile"
+      - "auto-update dependencies on every build"
+      - "install with a caret or wildcard range"
+      - "pull the newest image tag at deploy time"
+    principle: >-
+      A floating version installs whatever is published next, including a malicious release pushed with
+      a stolen maintainer token. Lockfiles enforced at install (npm ci), hash-checking (pip
+      --require-hashes) and pinning by digest make the installed set reproducible and tamper-evident.
+    sources: [npm-ci, pip-secure-installs, slsa-threats, osv-pysec-2026-2]
+    severity:
+      default: high
+      blast_radius: Every environment that builds after a malicious release installs it automatically.
+    remediation:
+      safe_route: >-
+        Commit lockfiles and install from them in CI (npm ci, pip with hashes, images by digest);
+        update through reviewed pull requests with advisory checks.
+      invariant: Every build installs exactly the locked, hashed dependency set; any drift fails the build.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: supply-chain.unverified-provenance
+    title: Prebuilt artifacts are taken from any source without checking who built them
+    kind: requirement
+    cues:
+      - "download the prebuilt binary from the mirror"
+      - "grab the model weights from wherever is fastest"
+      - "use the community build of the tool"
+      - "vendor the compiled library into the repo"
+      - "the checksum on the download page is enough"
+    principle: >-
+      Provenance describes how an artifact was produced so consumers can verify it was built as
+      expected; SLSA's dependency mitigation is to verify dependencies' provenance. An artifact with no
+      verifiable provenance cannot be tied to reviewed source.
+    sources: [slsa-provenance, slsa-threats]
+    severity:
+      default: medium
+      blast_radius: A tampered binary or model enters the product with no way to detect or trace it.
+    remediation:
+      safe_route: >-
+        Prefer artifacts with signed provenance and verify it (builder identity, source repository,
+        digest) before use; otherwise build from pinned source in the project's own pipeline.
+      invariant: Every third-party binary artifact is either built in-house from pinned source or has verified provenance recorded.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"

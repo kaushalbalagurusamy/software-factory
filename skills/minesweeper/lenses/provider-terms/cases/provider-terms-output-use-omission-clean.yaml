@@ -1,0 +1,15 @@
+schema_version: 1
+id: provider-terms-output-use-omission-clean
+kind: clean
+twin: provider-terms-output-use-omission
+brief: |
+  Acme Contract Digest: clause extractor
+
+  1. Extract renewal dates and liability caps from uploaded supplier contracts using a hosted
+     frontier model on our paid API account.
+  2. Only contract text is sent to the model.
+  3. Show extracted fields in a review table; reviewers can correct them.
+  4. Model responses are kept for 90 days for audit only and are never used to train or evaluate other models.
+  5. 95 percent field-level accuracy on our labelled sample.
+expect:
+  none_from_lens: true

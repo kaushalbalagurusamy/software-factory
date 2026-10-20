@@ -1,0 +1,15 @@
+schema_version: 1
+id: numeric-representation-omits-integer-ranges
+kind: omission
+twin: numeric-representation-states-integer-ranges
+brief: |
+  Product brief: page-view counter service for a publishing platform.
+  The platform serves about 30 million page views a day across 200,000 articles.
+  All timestamps are stored in UTC; no money is handled.
+  Requirement 1: increment a per-article view counter on each page view.
+  Requirement 2: keep a platform-wide lifetime total of views.
+  Requirement 3: editors see daily and lifetime views per article.
+  Success: editors stop using a third-party analytics script.
+expect:
+  omissions:
+  - numeric-representation.integer-ranges

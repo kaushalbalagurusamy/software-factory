@@ -1,0 +1,15 @@
+schema_version: 1
+id: performance-omits-load-model
+kind: omission
+twin: performance-omits-load-model-clean
+brief: |
+  Acme Travel - fare search API
+
+  - Partners query fares by origin, destination and date.
+  - Results come from a cached fare index refreshed every 10 minutes.
+  - Search must answer within 250 ms at p99, measured at the API edge.
+  - Infrastructure and data-transfer cost must stay under $0.0005 per search.
+  - Partners authenticate with API keys.
+expect:
+  omissions:
+  - performance.load-model

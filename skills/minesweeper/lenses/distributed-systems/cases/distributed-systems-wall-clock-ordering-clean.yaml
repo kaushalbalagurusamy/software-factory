@@ -1,0 +1,16 @@
+schema_version: 1
+id: distributed-systems-wall-clock-ordering-clean
+kind: clean
+twin: distributed-systems-wall-clock-ordering-planted
+brief: |
+  Project: offline-capable field notes app for a home-care agency.
+  - Carers record visit notes on phones, often without signal.
+  - Notes sync to the server when the phone reconnects; phones are agency-managed devices that authenticate per carer over TLS.
+  - Fault model: phones may be offline for days or lose unsynced data if broken; no participant is adversarial.
+  - Each edit has a client-generated id; sync retries until acknowledged and the server ignores ids it has already seen.
+  - A visit note can be edited by the carer and later by the coordinator.
+  - Each edit carries a per-note version vector; edits that are not causally ordered are both kept and shown to the coordinator as a conflict to merge, and server receive order is used only as a display hint.
+  - Coordinators see a daily list of visits with missing notes.
+  - All edits are kept in an audit history.
+expect:
+  none_from_lens: true

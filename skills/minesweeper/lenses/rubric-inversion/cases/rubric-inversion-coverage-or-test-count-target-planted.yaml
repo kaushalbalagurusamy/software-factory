@@ -1,0 +1,16 @@
+schema_version: 1
+id: rubric-inversion-coverage-or-test-count-target-planted
+kind: planted
+twin: rubric-inversion-coverage-or-test-count-target-clean
+brief: |
+  Engineering brief: payment reconciliation microservice.
+  Requirement 1: match bank statement lines to invoices.
+  Requirement 2: unmatched lines go to a review queue.
+  Quality gate for every merge request:
+  Line coverage must reach 100% and the suite must contain at least 300 unit tests.
+  Code review by one other engineer.
+  Deliverable: service, tests, runbook.
+expect:
+  traps:
+  - rubric-inversion.coverage-or-test-count-target
+  min_severity: medium

@@ -1,0 +1,21 @@
+schema_version: 1
+id: broadcast-captioning-clean
+kind: integration
+brief: |
+  Larkspur Captions: live captions for a regional sports broadcaster (internal tool)
+
+  1. Ingest the broadcaster's 1080p60 SDR feed as H.264 over SRT from their encoder.
+  2. Decode audio only on the caption workers; video stays compressed and is passed through.
+  3. Speech-to-text runs on a model the broadcaster licenses under a signed enterprise agreement
+     that allows this use; no audio leaves their cloud account.
+  4. Captions are sent as CEA-708 alongside the stream; a human captioner can override any line.
+  5. Target: captions within 3 seconds of speech at p95, measured on last season's recorded games
+     replayed at real time, with a 2-worker load model of 4 concurrent feeds each.
+  6. Dependencies are pinned in a lockfile and reviewed before upgrade; no runtime installs.
+  7. Word error rate is reported alongside a sampled human review, not as the only success metric.
+expect:
+  none_from_lens: true
+notes: >-
+  Integration clean case: a brief that states its format, licence, data path, oversight, load model,
+  pinning policy and counter-metric. A sweep should raise nothing above low that survives grounding;
+  evaluate.py scores any surviving finding above low as a false alarm.

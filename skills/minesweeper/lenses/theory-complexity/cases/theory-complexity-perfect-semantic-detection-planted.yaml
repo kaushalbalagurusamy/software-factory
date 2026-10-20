@@ -1,0 +1,17 @@
+schema_version: 1
+id: theory-complexity-perfect-semantic-detection-planted
+kind: planted
+twin: theory-complexity-perfect-semantic-detection-clean
+brief: |
+  Product brief: plugin marketplace for a self-hosted team wiki.
+  Third-party developers upload plugins; site administrators install them.
+  Requirement 1: developers sign plugins with a key registered to their account.
+  Requirement 2: each listing shows permissions the plugin requests.
+  Requirement 3: an automated scanner examines every upload and guarantees that no plugin containing malicious behaviour is ever published, with no false alarms on legitimate plugins.
+  Requirement 4: administrators can uninstall a plugin and revoke its data access.
+  Requirement 5: a public changelog accompanies every plugin version.
+  Success: 200 published plugins in the first year.
+expect:
+  traps:
+  - theory-complexity.perfect-semantic-detection
+  min_severity: high

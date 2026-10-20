@@ -1,0 +1,145 @@
+schema_version: 1
+sources:
+  - id: owasp-llm06-excessive-agency
+    title: OWASP Top 10 for LLM Applications 2025, LLM06 Excessive Agency
+    url: https://genai.owasp.org/llmrisk/llm062025-excessive-agency/
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: Standard-body document (OWASP GenAI Security Project); primary for the definition of Excessive Agency and its mitigations.
+    quotes:
+      - text: "Excessive Agency is the vulnerability that enables damaging actions to be performed in response to unexpected, ambiguous or manipulated outputs from an LLM, regardless of what is causing the LLM to malfunction."
+        locator: LLM06 definition
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.irreversible-action-without-gate]
+      - text: "An LLM-based application or extension fails to independently verify and approve high-impact actions. E.g., an extension that allows a user’s documents to be deleted performs deletions without any confirmation from the user."
+        locator: Common Examples of Risks, 6. Excessive Autonomy
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.irreversible-action-without-gate]
+      - text: "Utilise human-in-the-loop control to require a human to approve high-impact actions before they are taken."
+        locator: Prevention and Mitigation Strategies, 6. Require user approval
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.irreversible-action-without-gate]
+      - text: "An LLM extension that is designed to perform operations in the context of an individual user accesses downstream systems with a generic high-privileged identity."
+        locator: Common Examples of Risks, 5. Excessive Permissions
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.standing-broad-credentials]
+      - text: "Limit the permissions that LLM extensions are granted to other systems to the minimum necessary in order to limit the scope of undesirable actions."
+        locator: Prevention and Mitigation Strategies, 4. Minimize extension permissions
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.standing-broad-credentials]
+      - text: "direct/indirect prompt injection from a malicious user, an earlier invocation of a malicious/compromised extension, or (in multi-agent/collaborative systems) a malicious/compromised peer agent."
+        locator: LLM06 common triggers
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.delegation-without-least-privilege]
+      - text: "Track user authorization and security scope to ensure actions taken on behalf of a user are executed on downstream systems in the context of that specific user, and with the minimum privileges necessary."
+        locator: Prevention and Mitigation Strategies, 5. Execute extensions in user's context
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.delegation-without-least-privilege]
+      - text: "Implement authorization in downstream systems rather than relying on an LLM to decide if an action is allowed or not."
+        locator: Prevention and Mitigation Strategies, 7. Complete mediation
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.delegation-without-least-privilege]
+      - text: "Log and monitor the activity of LLM extensions and downstream systems to identify where undesirable actions are taking place, and respond accordingly."
+        locator: Damage-limiting options (after Prevention and Mitigation Strategies)
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.no-action-audit-trail]
+  - id: owasp-llm10-unbounded-consumption
+    title: OWASP Top 10 for LLM Applications 2025, LLM10 Unbounded Consumption
+    url: https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "Unbounded Consumption occurs when a Large Language Model (LLM) application allows users to conduct excessive and uncontrolled inferences, leading to risks such as denial of service (DoS), economic losses, model theft, and service degradation."
+        locator: LLM10 definition
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.unbounded-agent-loop]
+      - text: "Set timeouts and throttle processing for resource-intensive operations to prevent prolonged resource consumption."
+        locator: Prevention and Mitigation Strategies, 5. Timeouts and Throttling
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.unbounded-agent-loop]
+      - text: "Implement restrictions on the number of queued actions and total actions, while incorporating dynamic scaling and load balancing to handle varying demands and ensure consistent system performance."
+        locator: Prevention and Mitigation Strategies, 10. Limit Queued Actions and Scale Robustly
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.unbounded-agent-loop]
+  - id: mcp-spec-tools
+    title: Model Context Protocol specification 2025-06-18, Server features, Tools
+    url: https://modelcontextprotocol.io/specification/2025-06-18/server/tools
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: "For trust & safety and security, there SHOULD always be a human in the loop with the ability to deny tool invocations."
+        locator: User Interaction Model
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.irreversible-action-without-gate]
+      - text: "Prompt for user confirmation on sensitive operations"
+        locator: Security Considerations, Clients SHOULD
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.irreversible-action-without-gate]
+      - text: "Implement timeouts for tool calls"
+        locator: Security Considerations, Clients SHOULD
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.unbounded-agent-loop]
+  - id: mcp-spec-security-best-practices
+    title: Model Context Protocol specification, Security Best Practices
+    url: https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: "Poor scope design increases token compromise impact, elevates user friction, and obscures audit trails."
+        locator: Scope Minimization
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.standing-broad-credentials]
+      - text: "Implement a progressive, least-privilege scope model:"
+        locator: Scope Minimization, Mitigation
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.standing-broad-credentials]
+      - text: "MCP servers MUST NOT accept any tokens that were not explicitly issued for the MCP server."
+        locator: Token Passthrough, Mitigation
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.delegation-without-least-privilege]
+      - text: "The downstream Resource Server’s logs may show requests that appear to come from a different source with a different identity, rather than the MCP server that is actually forwarding the tokens."
+        locator: Token Passthrough, Accountability and Audit Trail Issues
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.no-action-audit-trail]
+  - id: mcp-spec-overview
+    title: Model Context Protocol specification 2025-06-18, overview (Security and Trust and Safety)
+    url: https://modelcontextprotocol.io/specification/2025-06-18
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: "Hosts must obtain explicit user consent before invoking any tool"
+        locator: Security and Trust & Safety, Tool Safety
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.irreversible-action-without-gate]
+  - id: rfc9110-idempotent
+    title: RFC 9110 HTTP Semantics, section 9.2.2 Idempotent Methods
+    url: https://www.rfc-editor.org/rfc/rfc9110.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "A client SHOULD NOT automatically retry a request with a non- idempotent method unless it has some means to know that the request semantics are actually idempotent, regardless of the method, or some means to detect that the original request was never applied."
+        locator: Section 9.2.2
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.non-idempotent-retry]
+      - text: "A request method is considered \"idempotent\" if the intended effect on the server of multiple identical requests with that method is the same as the effect for a single such request."
+        locator: Section 9.2.2
+        fetched: "2026-10-14"
+        supports: [agent-orchestration.non-idempotent-retry]
+  - id: anthropic-building-effective-agents
+    title: Anthropic, Building effective agents (engineering guidance)
+    url: https://www.anthropic.com/engineering/building-effective-agents
+    adapter: web_page
+    tier: secondary
+    kind: guidance
+    notes: Vendor guidance; secondary. Used for lens principles only, never to verify a trap.
+    quotes:
+      - text: "The task often terminates upon completion, but it’s also common to include stopping conditions (such as a maximum number of iterations) to maintain control."
+        locator: Agents
+        fetched: "2026-10-14"
+        supports: []

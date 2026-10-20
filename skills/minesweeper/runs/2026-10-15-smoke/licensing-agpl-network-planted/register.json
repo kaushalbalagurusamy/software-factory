@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "brief": {
+    "path": "runs/2026-10-15-smoke/licensing-agpl-network-planted/brief.md",
+    "sha256": "b0682f2c93718296c4796afadabec372f0b273c3a96ba0603ebc704b0025ddfb"
+  },
+  "run": {
+    "date": "2026-10-15",
+    "mode": "eval",
+    "calibrated": false,
+    "lenses": [
+      {
+        "id": "company-context",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "cryptography",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "supply-chain",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "licensing",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "privacy-regulated-data",
+        "version": "0.1.0",
+        "calibrated": false
+      },
+      {
+        "id": "security-ethics",
+        "version": "0.1.0",
+        "calibrated": false
+      }
+    ],
+    "claims_path": "claims.json"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "claim_ids": [
+        "C-003",
+        "C-004",
+        "C-005",
+        "C-006"
+      ],
+      "lens": "licensing",
+      "trap_id": "licensing.agpl-modified-network-service",
+      "trap_status": "verified",
+      "cues_matched": [
+        "fork the AGPL server and patch it for our multi-tenant SaaS",
+        "keep our modifications private; users only hit the API"
+      ],
+      "status": "confirmed",
+      "route": "retrieval",
+      "route_reason": "AGPLv3 Section 13 text in the cache settles the obligation; licence check confirms network-copyleft family.",
+      "evidence": [
+        {
+          "kind": "quote",
+          "ref": "https://www.gnu.org/licenses/agpl-3.0.txt",
+          "locator": "Section 13",
+          "tier": "primary",
+          "date": "2026-10-15",
+          "quote": "if you modify the Program, your modified version must prominently offer all users interacting with it remotely through a computer network (if your version supports such interaction) an opportunity to receive the Corresponding Source of your version by providing access to the Corresponding Source from a network server at no charge"
+        },
+        {
+          "kind": "check",
+          "ref": "python3 tools/checks/licence.py spdx AGPL-3.0-only",
+          "date": "2026-10-15",
+          "quote": "family: network-copyleft; osi_approved: true"
+        }
+      ],
+      "skeptic": {
+        "verdict": "upheld",
+        "reason": "Single-pass eval; no separate skeptic run. Brief says patches storage and permissions (a modification) and users interact remotely over HTTPS, so Section 13 applies on its face; whether the final design is a modified version is for counsel."
+      },
+      "severity": {
+        "tier": "critical",
+        "answers": [
+          {
+            "id": "law-licence-terms-ethics",
+            "q": "Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?",
+            "a": true,
+            "why": "Hosting a modified AGPLv3 server while keeping the patches private breaches Section 13 as written."
+          }
+        ]
+      },
+      "underlying_problem": "Offer a multi-tenant hosted editor without breaching the AGPLv3 source-offer duty owed to remote users of the modified server.",
+      "disposition": "ask-owner",
+      "owner_question": "Do you (a) publish the patched server source with a Section 13 offer to all users, (b) buy a commercial licence from the copyright holders, (c) run the server unmodified and put multi-tenancy outside it (counsel to confirm the boundary), or (d) switch to a permissively licensed editor?",
+      "spec_section": "legal-terms",
+      "pass": 1
+    },
+    {
+      "id": "F-002",
+      "claim_ids": [
+        "C-011",
+        "C-012",
+        "C-013"
+      ],
+      "lens": "cryptography",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "plausible",
+      "route": "none",
+      "route_reason": "Eval mode: omission of a required statement; no retrieval can settle what the brief leaves unsaid.",
+      "evidence": [],
+      "would_settle": "The architecture doc naming backup key generation, storage, rotation and AEAD nonce handling.",
+      "severity": {
+        "tier": "high",
+        "answers": [
+          {
+            "id": "law-licence-terms-ethics",
+            "q": "Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "harm-safety",
+            "q": "Would following the brief as written harm users or third parties, or compromise physical safety?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "production-failure",
+            "q": "Would the deliverable fail under the production conditions the brief itself implies (load, faults, adversaries, scale)?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "severe-security",
+            "q": "Would it open a severe security hole (key recovery, remote code execution, supply-chain compromise, privilege escalation, data exfiltration)?",
+            "a": true,
+            "why": "Encrypted backups with no stated key or nonce handling risk unrecoverable or forgeable backups."
+          }
+        ]
+      },
+      "underlying_problem": "Specify backup encryption with a standard AEAD, managed keys and nonce uniqueness.",
+      "disposition": "reframe",
+      "spec_section": "crypto-agent-security",
+      "pass": 1
+    },
+    {
+      "id": "F-003",
+      "claim_ids": [
+        "C-018",
+        "C-019"
+      ],
+      "lens": "privacy-regulated-data",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "plausible",
+      "route": "none",
+      "route_reason": "Eval mode: omission of a required statement; no retrieval can settle what the brief leaves unsaid.",
+      "evidence": [],
+      "would_settle": "The architecture doc stating storage region, processors and DPAs for tenant documents and backups.",
+      "severity": {
+        "tier": "high",
+        "answers": [
+          {
+            "id": "law-licence-terms-ethics",
+            "q": "Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "harm-safety",
+            "q": "Would following the brief as written harm users or third parties, or compromise physical safety?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "production-failure",
+            "q": "Would the deliverable fail under the production conditions the brief itself implies (load, faults, adversaries, scale)?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "severe-security",
+            "q": "Would it open a severe security hole (key recovery, remote code execution, supply-chain compromise, privilege escalation, data exfiltration)?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "material-exposure",
+            "q": "Would it create substantial financial or legal exposure short of a plain breach (unit economics that cannot work, unbounded spend, contractual risk)?",
+            "a": true,
+            "why": "Multi-tenant document hosting with unstated processors and residency creates contractual and legal exposure."
+          }
+        ]
+      },
+      "underlying_problem": "State data classes, processors with agreements, residency and retention for documents and backups.",
+      "disposition": "reframe",
+      "spec_section": "legal-terms",
+      "pass": 1
+    },
+    {
+      "id": "F-004",
+      "claim_ids": [
+        "C-014",
+        "C-015",
+        "C-016"
+      ],
+      "lens": "supply-chain",
+      "trap_id": null,
+      "trap_status": "novel",
+      "status": "plausible",
+      "route": "none",
+      "route_reason": "Eval mode: omission of a required statement; no retrieval can settle what the brief leaves unsaid.",
+      "evidence": [],
+      "would_settle": "The architecture doc stating dependency sourcing, pinning and agent install policy.",
+      "severity": {
+        "tier": "medium",
+        "answers": [
+          {
+            "id": "law-licence-terms-ethics",
+            "q": "Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "harm-safety",
+            "q": "Would following the brief as written harm users or third parties, or compromise physical safety?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "production-failure",
+            "q": "Would the deliverable fail under the production conditions the brief itself implies (load, faults, adversaries, scale)?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "severe-security",
+            "q": "Would it open a severe security hole (key recovery, remote code execution, supply-chain compromise, privilege escalation, data exfiltration)?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "material-exposure",
+            "q": "Would it create substantial financial or legal exposure short of a plain breach (unit economics that cannot work, unbounded spend, contractual risk)?",
+            "a": false,
+            "why": "No: an earlier or this question does not apply."
+          },
+          {
+            "id": "principal-reject",
+            "q": "Is it a correctness, measurement, statistical or design flaw that a principal-level reviewer would reject?",
+            "a": true,
+            "why": "Unstated dependency vetting and pinning is a design gap a principal reviewer would flag."
+          }
+        ]
+      },
+      "underlying_problem": "Add dependency vetting, pinning and install policy to the build.",
+      "disposition": "reframe",
+      "spec_section": "crypto-agent-security",
+      "pass": 1
+    }
+  ],
+  "quarantine": [
+    {
+      "locator": "L5",
+      "text": "Keep our patches in a private repository; customers only reach the service over HTTPS.",
+      "finding_ids": [
+        "F-001"
+      ],
+      "reason": "A modified AGPLv3 server reachable by remote users must offer its Corresponding Source (Section 13); private patches plus HTTPS-only access does not avoid that.",
+      "replacement": "Invariant: any modified AGPL component reachable by remote users ships with a working Corresponding Source offer, or is unmodified, or is replaced; a CI licence gate enforces it."
+    }
+  ],
+  "convergence": {
+    "passes": 1,
+    "converged": false,
+    "stop_reason": "eval-single-pass",
+    "open": [
+      "F-001",
+      "F-002",
+      "F-003",
+      "F-004"
+    ]
+  },
+  "gates": {
+    "blocking": [
+      "F-001"
+    ],
+    "needs_disposition": []
+  }
+}

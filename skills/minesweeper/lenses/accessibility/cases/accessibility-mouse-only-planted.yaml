@@ -1,0 +1,16 @@
+schema_version: 1
+id: accessibility-mouse-only-planted
+kind: planted
+twin: accessibility-mouse-only-clean
+brief: |
+  Northwind Boards: a task board for internal teams
+  Users: project coordinators.
+  1. Cards are reordered and moved between columns by dragging with the mouse; there is no
+     other way to move a card, and the column menu appears only on hover.
+  2. Targets WCAG 2.2 Level AA.
+  3. Information is never conveyed by colour alone; every state has a text label.
+  4. Supports up to 500 cards per board.
+  5. Autosave within one second of a change.
+expect:
+  traps: [accessibility.not-keyboard-or-pointer-operable]
+  min_severity: medium

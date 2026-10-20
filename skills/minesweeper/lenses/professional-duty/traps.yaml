@@ -1,0 +1,135 @@
+schema_version: 1
+traps:
+  - id: professional-duty.sign-off-without-basis
+    title: Approving or signing off software without a well-founded belief it is safe and tested
+    kind: requirement
+    cues:
+      - "mark the release as approved so we can ship today"
+      - "sign the safety review; we'll run the tests afterwards"
+      - "the engineer certifies the model is production-ready to hit the date"
+      - "skip the remaining verification, we'll fix forward"
+      - "rubric: approval recorded counts as the acceptance gate"
+    principle: >-
+      A software engineer approves software only with a well-founded belief that it is safe, meets specification,
+      and passes appropriate tests (`se-code` 1.03), endorses only documents within their competence and with which
+      they agree (`se-code` 4.02), and ensures adequate testing, debugging and review (`se-code` 3.10). A brief that
+      demands the approval before the basis for it exists asks the engineer to breach that duty.
+    sources: [se-code]
+    severity:
+      default: high
+      blast_radius: >-
+        An unfounded sign-off removes the last human check before release; defects reach users and the approver is
+        personally accountable for a certification they could not support.
+    remediation:
+      safe_route: >-
+        Make the gate the evidence (tests passed, review done, risks assessed), not a signature; if the date cannot
+        wait for the evidence, escalate the schedule-versus-safety trade-off to the owner rather than signing.
+      invariant: >-
+        No approval or certification is recorded for a deliverable until the testing, review and safety evidence it
+        attests to actually exists and is attached.
+      spec_section: product-scope
+    checks: []
+    status: verified
+    verified_on: "2026-10-15"
+    notes: Generic trap (no report seed). Statutory sign-off regimes (medical devices, aviation, structural engineering) add further duties; which apply is ask-owner.
+  - id: professional-duty.suppress-danger-disclosure
+    title: Being told not to disclose or document a danger or likely failure
+    kind: requirement
+    cues:
+      - "do not put the safety concern in writing"
+      - "keep the known defect out of the release notes and the ticket"
+      - "don't tell the client the project is going to miss and overrun"
+      - "bury the incident; it will scare users"
+      - "the NDA means we never report this upstream"
+    principle: >-
+      Engineers must disclose to appropriate persons or authorities any actual or potential danger they reasonably
+      believe is associated with the software (`se-code` 1.04) and must identify, document and promptly report to the
+      client or employer a project likely to fail, overrun or otherwise be problematic (`se-code` 2.06). Confidentiality
+      is kept only where it is consistent with the public interest and the law (`se-code` 2.05), so it cannot be used
+      to silence a danger.
+    sources: [se-code]
+    severity:
+      default: high
+      blast_radius: >-
+        A hidden danger or failing project keeps running toward harm with no one empowered to act; silence converts a
+        known risk into an avoidable incident.
+    remediation:
+      safe_route: >-
+        Document the danger or risk and report it to the people who can act (client, employer, or the appropriate
+        authority where public safety is at stake); scope any confidentiality to what is lawful and in the public interest.
+      invariant: >-
+        No requirement prevents an engineer from recording a reasonably believed danger or a likely project failure and
+        reporting it to those responsible.
+      spec_section: product-scope
+    checks: []
+    status: verified
+    verified_on: "2026-10-15"
+    notes: Generic trap. Whether a specific matter must go to an external authority (a whistleblowing duty) turns on jurisdiction and contract, so that disposition is ask-owner.
+  - id: professional-duty.deceptive-capability-claims
+    title: Stating capabilities, metrics or estimates the engineer knows are not supported
+    kind: rubric
+    cues:
+      - "say it is 99.9% accurate on the landing page regardless of the eval"
+      - "quote a delivery date we know we cannot meet to win the deal"
+      - "describe the beta as fully autonomous and clinically validated"
+      - "the pitch must claim real-time even though it is batch"
+      - "rubric: marketing claims scored on impact, not on evidence"
+    principle: >-
+      Engineers must be fair and avoid deception in all statements, particularly public ones, about software, its
+      methods and tools (`se-code` 1.06), and must give realistic quantitative estimates with an uncertainty
+      assessment (`se-code` 3.09). A brief that scripts an unsupported capability or metric asks for deception.
+    sources: [se-code]
+    severity:
+      default: high
+      blast_radius: >-
+        Users, buyers and regulators rely on a claim the product cannot meet; the gap surfaces as failed expectations,
+        liability and loss of trust.
+    remediation:
+      safe_route: >-
+        State what the evidence supports, with ranges and the conditions measured; label pre-release capability as such;
+        route any claim you cannot substantiate back to the owner before it is published.
+      invariant: >-
+        Every externally stated capability, metric or delivery estimate is backed by current evidence or labelled as a
+        target with its uncertainty.
+      spec_section: verification-calibration
+    checks: []
+    status: verified
+    verified_on: "2026-10-15"
+    notes: Generic trap. Overlaps ml-evaluation (how a metric is measured) and market-reality (business viability); this lens covers the duty not to state it deceptively. Advertising-law exposure is ask-owner.
+  - id: professional-duty.clinical-advice-without-reviewable-basis
+    title: Clinical recommendation software that the clinician cannot independently review the basis of
+    kind: requirement
+    cues:
+      - "the app tells the clinician the diagnosis and they just confirm it"
+      - "output a single treatment recommendation with no sources or reasoning"
+      - "auto-triage patients and push the decision without a human able to check why"
+      - "hide the model's basis; just show the answer to save time"
+      - "clinicians should rely on the recommendation to decide"
+    principle: >-
+      US law excludes certain clinical decision support from the medical-device definition only where, among other
+      criteria, the software lets the health care professional independently review the basis for its recommendations,
+      so that they are not intended to rely primarily on it to make a clinical decision (`usc-21-360j` 360j(o)(1)(E)(ii),
+      (iii)). Software that gives a recommendation whose basis cannot be reviewed does not meet the Non-Device CDS
+      criteria, and FDA's device policies then apply (`fda-cds-guidance`).
+    sources: [usc-21-360j, fda-cds-guidance]
+    severity:
+      default: high
+      blast_radius: >-
+        Either clinicians act on an unreviewable recommendation (patient-safety risk), or the product is an uncleared
+        medical device marketed unlawfully; both land on real patients.
+    remediation:
+      safe_route: >-
+        Present the inputs, evidence and reasoning so the clinician can independently reach their own conclusion, and
+        position the tool as support rather than the decision; if it is meant to drive decisions, treat it as a device
+        and pursue the required FDA pathway.
+      invariant: >-
+        Any software giving clinical recommendations exposes a reviewable basis for each one, or is handled under the
+        medical-device regime.
+      spec_section: legal-terms
+    checks: []
+    status: verified
+    verified_on: "2026-10-15"
+    notes: >-
+      Generic trap. The device analysis is US (FD&C Act); EU MDR and other regimes differ, and whether a given function
+      is a device turns on its exact intended use: disposition ask-owner. EU AI Act high-risk duties for such systems
+      are ai-regulation's.

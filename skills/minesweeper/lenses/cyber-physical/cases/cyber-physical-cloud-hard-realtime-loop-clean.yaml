@@ -1,0 +1,15 @@
+schema_version: 1
+id: cyber-physical-cloud-hard-realtime-loop-clean
+kind: clean
+twin: cyber-physical-cloud-hard-realtime-loop-planted
+brief: |
+  Contoso Chemicals wants an optimisation assistant for its solvent blending unit.
+  The unit stores flammable solvents above the process-safety threshold quantity.
+  Engineers want shorter batch times and fewer off-spec batches.
+  The high-pressure interlocks and the safety instrumented system are owned by the site process-safety engineer, sit outside this software, and any change goes through the site's management-of-change procedure.
+  The blending pump's PID loop stays in the local controller; the cloud service suggests tuning values that an engineer reviews and loads in a maintenance window, and the local loop runs unchanged if the link drops.
+  The unit is a covered process under the US process safety management rule; the site's PSM coordinator signs off on the design.
+  Office IT, a DMZ and the plant control network are separate zones; data leaves the plant through a historian replica in the DMZ.
+  Results are shown in a weekly report and on a dashboard in the control room.
+expect:
+  none_from_lens: true

@@ -1,0 +1,16 @@
+schema_version: 1
+id: licensing-source-available-service-planted
+kind: planted
+twin: licensing-source-available-service-clean
+brief: |
+  Contoso Cloud Data: managed database offering
+
+  1. Launch a fully managed, multi-tenant hosted version of a popular document database,
+     using its latest release, which is published under the Server Side Public License.
+  2. Our provisioning, monitoring and backup tooling stays closed source.
+  3. Customers pay per cluster-hour; it is a commercial service only, no installs.
+  4. Keep a licence inventory for every component.
+  5. Offer point-in-time restore for the last seven days.
+expect:
+  traps: [licensing.source-available-managed-service]
+  min_severity: critical

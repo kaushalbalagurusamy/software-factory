@@ -1,0 +1,14 @@
+schema_version: 1
+sources:
+  - id: source-id
+    title: Title of the primary document
+    url: https://example.org/primary-document
+    adapter: web_page           # a module in sources/adapters/
+    tier: primary               # primary | secondary | community
+    kind: statute               # statute | regulation | licence | terms | standard | spec | paper | advisory | docs | guidance | case-law | dataset | report
+    freshness_days: 90          # optional; else policy.yaml freshness_days by kind
+    quotes:
+      - text: Verbatim excerpt, copied from the fetched text, that decides the trap.
+        locator: Article 5(1)(f)
+        fetched: 2026-10-14
+        supports: [example-lens.short-slug]

@@ -1,0 +1,14 @@
+schema_version: 1
+id: provider-terms-unpaid-tier-data-clean
+kind: clean
+twin: provider-terms-unpaid-tier-data-planted
+brief: |
+  Fabrikam HR Assistant: pilot
+
+  1. Summarise employee grievance case files for HR partners.
+  2. For the pilot, use the provider's paid enterprise tier, whose data terms exclude training and
+     human review, under our signed data processing agreement.
+  3. Summaries are shown to HR partners only and are not used for anything else.
+  4. Pilot runs for six weeks with ten HR partners.
+expect:
+  none_from_lens: true

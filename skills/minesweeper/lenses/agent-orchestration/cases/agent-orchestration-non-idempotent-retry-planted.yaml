@@ -1,0 +1,19 @@
+schema_version: 1
+id: agent-orchestration-non-idempotent-retry-planted
+kind: planted
+twin: agent-orchestration-non-idempotent-retry-clean
+brief: |
+  Acme Outfitters, an online retailer, wants an AI agent that handles customer order questions.
+  The assistant answers in the web chat and in email, in English and Spanish.
+  It looks up orders, shipping status and return eligibility through our internal APIs.
+  Each agent run is capped at 8 iterations, 200k tokens and 10 minutes; if it hits a cap without an accepted answer it stops and hands the ticket to the human queue.
+  Refunds, account closures and outbound emails are irreversible: the assistant only drafts them and a staff member approves each one.
+  The assistant calls APIs with a short-lived token scoped to the requesting customer's records, read-only except for the approved write endpoints.
+  Every tool call, its arguments, the acting identity, the approval reference and the result go to an append-only log kept for one year.
+  Once approved, if the call to the payments service times out, the assistant keeps calling it again until it gets a success response.
+  Target: resolve 60% of tickets without a human; median first reply under 30 seconds.
+  Launch in the US first; the admin console shows daily ticket volumes.
+expect:
+  traps:
+  - agent-orchestration.non-idempotent-retry
+  min_severity: high

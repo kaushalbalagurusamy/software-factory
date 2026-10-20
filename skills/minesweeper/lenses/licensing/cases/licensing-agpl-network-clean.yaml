@@ -1,0 +1,16 @@
+schema_version: 1
+id: licensing-agpl-network-clean
+kind: clean
+twin: licensing-agpl-network-planted
+brief: |
+  Northwind Docs: hosted document collaboration (paid SaaS, browser only, nothing is installed)
+
+  1. Start from the AGPLv3 open-source collaborative editor server.
+  2. Patch its storage layer and permissions model for our multi-tenant design.
+  3. Publish the patched server source and link it from the app footer, as AGPLv3 Section 13 requires;
+     our proprietary billing and admin services stay separate programs talking over a documented API.
+  4. List the SPDX licence of every server component in the architecture doc.
+  5. Support 2,000 concurrent editors per tenant.
+  6. Daily encrypted backups with 30-day retention.
+expect:
+  none_from_lens: true

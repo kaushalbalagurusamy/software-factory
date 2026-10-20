@@ -1,0 +1,14 @@
+schema_version: 1
+id: agent-security-token-passthrough-clean
+kind: clean
+twin: agent-security-token-passthrough-planted
+brief: |
+  A regional health insurer wants an assistant that answers staff questions about their own leave and payroll.
+  - Staff sign in with the company identity provider (OAuth 2.1).
+  - The assistant talks to an MCP server that wraps the HR and payroll APIs.
+  - The MCP server validates that inbound tokens were issued for it, then obtains its own token for the HR
+    and payroll APIs on behalf of the signed-in user, scoped to that user's records.
+  - Every answer cites the record it came from.
+  - Responses within 3 seconds at the 95th percentile.
+expect:
+  none_from_lens: true

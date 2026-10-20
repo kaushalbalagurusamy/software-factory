@@ -1,0 +1,134 @@
+schema_version: 1
+traps:
+  - id: provider-terms.output-distillation
+    aliases: [LEG-01]
+    title: Harvesting a provider's model outputs to train a competing or replacement model
+    kind: requirement
+    cues:
+      - "log every completion from the hosted model and fine-tune our own model on it"
+      - "distil the frontier model into a cheaper in-house student"
+      - "generate synthetic training data with the API, then drop the API"
+      - "use the vendor model as a teacher to cut inference cost"
+      - "collect model answers as labels for our replacement classifier"
+    principle: >-
+      Major model providers' own terms forbid using their services or outputs to build competing models
+      without authorisation: one provider's commercial terms bar accessing the services to build a competing
+      product, including to train competing AI models, and its usage policy bars using outputs to train an AI
+      model ("model scraping" or "model distillation") without prior authorisation; another provider's API
+      terms bar using the services to develop models that compete with them. Each provider's current terms
+      decide; enterprise agreements can differ.
+    sources: [anthropic-commercial, anthropic-consumer, anthropic-aup, gemini-terms]
+    severity:
+      default: critical
+      blast_radius: >-
+        Account suspension and loss of API access, breach-of-contract exposure, and a trained model whose
+        training data was obtained in breach of terms.
+    remediation:
+      safe_route: >-
+        Train on data the team owns or has licensed for training (human-labelled corpora, permissively
+        licensed datasets, outputs of models whose licence allows it), or obtain written authorisation from the
+        provider. Tag provider completions so they cannot reach a training sink.
+      invariant: >-
+        No output from a provider whose terms forbid it is used as training, fine-tuning or distillation data;
+        the data pipeline enforces this by provenance tags.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      OpenAI's terms of use and services agreement pages return HTTP 403 to automated fetches, so they are not
+      in sources.yaml; a sweeper must read the provider's current page by hand when a brief names that provider.
+      Report claims about "forced destruction of trained model weights" are unconfirmed and left out.
+  - id: provider-terms.unauthorised-resale-proxy
+    title: Reselling or proxying a provider's model access, including via consumer subscriptions
+    kind: requirement
+    cues:
+      - "route our users' requests through a pool of consumer chat subscriptions"
+      - "wrap the provider API and resell raw model access at a markup"
+      - "share one team login across all our customers"
+      - "present the vendor model as our own model to end users"
+    principle: >-
+      Provider terms restrict reselling access and proxying through unauthorised means: one provider's
+      commercial terms bar reselling the services except as expressly approved, and its usage policy bars
+      reselling, proxying or providing access through unauthorised means, including routing requests through
+      consumer subscriptions or misrepresenting the product or client being used.
+    sources: [anthropic-commercial, anthropic-aup]
+    severity:
+      default: critical
+      blast_radius: Accounts banned mid-service; every downstream customer loses the feature at once.
+    remediation:
+      safe_route: >-
+        Use a commercial API account under terms that permit building applications for end users, or a
+        provider-approved reseller or partner programme; never pool consumer accounts.
+      invariant: All production model traffic runs under an account and agreement whose terms permit the product's use and audience.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+  - id: provider-terms.limit-evasion-multi-account
+    title: Rotating accounts or keys to get around provider limits or guardrails
+    kind: requirement
+    cues:
+      - "create extra accounts or API keys and rotate them to beat rate limits"
+      - "spread requests over many free accounts"
+      - "if a key is blocked, automatically sign up a new one"
+      - "retry with rephrased prompts until the filter lets it through"
+    principle: >-
+      Provider usage policies prohibit creating multiple accounts to avoid detection or circumvent guardrails,
+      and intentionally bypassing capabilities, restrictions or guardrails in their products, including by
+      circumventing the sign-up or log-in process. Rate and quota limits are restrictions the provider sets.
+    sources: [anthropic-aup]
+    severity:
+      default: high
+      blast_radius: Coordinated account bans; the design's throughput assumption is false from day one.
+    remediation:
+      safe_route: >-
+        Size throughput against the documented limits of one properly provisioned account, request a limit
+        increase or enterprise tier, and add queueing and backoff.
+      invariant: The system uses only the accounts and limits granted to it; capacity planning cites the granted limits.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+  - id: provider-terms.unsupported-region-or-tier
+    title: Serving users in regions or on tiers the provider's terms do not allow
+    kind: requirement
+    cues:
+      - "launch to users worldwide on day one using the free API tier"
+      - "use the free quota for our EU and UK customers"
+      - "proxy requests from countries the provider does not serve"
+      - "available in every country"
+    principle: >-
+      Provider terms tie access to supported regions and, for some providers, to paid tiers in particular
+      regions: one provider's API terms allow access only within available regions and only Paid Services
+      when making API clients available to users in the EEA, Switzerland or the UK; another's usage policy
+      bars providing access in violation of its Supported Regions Policy.
+    sources: [anthropic-aup, gemini-terms]
+    severity:
+      default: high
+      blast_radius: The product cannot lawfully serve part of its intended market under the planned tier.
+    remediation:
+      safe_route: Check each provider's current supported-regions list and tier rules against the launch markets; choose paid tiers or other providers where required.
+      invariant: Every launch market is on the provider's supported-region list for the tier in use.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Region lists change often; refresh the provider's regions page at sweep time (not cached here).
+  - id: provider-terms.sensitive-data-on-unpaid-tier
+    title: Sending confidential or personal data to an unpaid tier whose terms allow training and human review
+    kind: requirement
+    cues:
+      - "prototype on the free API tier with real customer records"
+      - "paste production support tickets into the free model endpoint"
+      - "use the no-cost quota for the pilot with patient or employee data"
+    principle: >-
+      Some providers' unpaid tiers use submitted content to improve their products and allow human reviewers to
+      read inputs and outputs; one provider's API terms state directly not to submit sensitive, confidential or
+      personal information to its unpaid services.
+    sources: [gemini-terms]
+    severity:
+      default: critical
+      blast_radius: Confidential or personal data disclosed to a third party for training and human review; privacy and contract breach.
+    remediation:
+      safe_route: Use a paid or enterprise tier whose data terms exclude training and cover the data class, or synthetic or redacted data for prototypes.
+      invariant: No real personal, confidential or regulated data reaches a model tier whose terms permit training or human review on it.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"

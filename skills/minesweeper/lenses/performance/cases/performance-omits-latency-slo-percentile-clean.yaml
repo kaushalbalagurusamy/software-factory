@@ -1,0 +1,15 @@
+schema_version: 1
+id: performance-omits-latency-slo-percentile-clean
+kind: clean
+twin: performance-omits-latency-slo-percentile
+brief: |
+  Northwind Insurance - claims status API
+
+  - Policyholders check the status of an open claim from the mobile app.
+  - Load model: peak 800 requests per second, responses under 4 KB, up to 10,000 concurrent app sessions.
+  - The 300 ms target is the p99, measured at the API edge.
+  - Status responses must come back in under 300 ms.
+  - Infrastructure cost must stay under $0.0002 per request.
+  - Status data is read from a replica refreshed every minute.
+expect:
+  none_from_lens: true

@@ -1,0 +1,86 @@
+# Policy: severity questions, gates, never-out-of-scope topics, freshness, loop budget.
+# Changing this file is an engine change: re-run every case (docs/versioning.md).
+schema_version: 1
+
+# Severity is assigned by the first question answered yes, in order. Every answer is recorded on the
+# finding, so two runs on the same evidence give the same tier. A trap's default tier is only a hint.
+severity_questions:
+  - id: law-licence-terms-ethics
+    tier: critical
+    q: Would following the brief as written plainly break a law, a licence, third-party terms of service, or professional ethics?
+  - id: harm-safety
+    tier: critical
+    q: Would following the brief as written harm users or third parties, or compromise physical safety?
+  - id: production-failure
+    tier: high
+    q: Would the deliverable fail under the production conditions the brief itself implies (load, faults, adversaries, scale)?
+  - id: severe-security
+    tier: high
+    q: Would it open a severe security hole (key recovery, remote code execution, supply-chain compromise, privilege escalation, data exfiltration)?
+  - id: material-exposure
+    tier: high
+    q: Would it create substantial financial or legal exposure short of a plain breach (unit economics that cannot work, unbounded spend, contractual risk)?
+  - id: principal-reject
+    tier: medium
+    q: Is it a correctness, measurement, statistical or design flaw that a principal-level reviewer would reject?
+  - id: friction
+    tier: low
+    q: Is it operational friction, weaker maintainability, or minor inefficiency?
+
+gates:
+  critical: block-until-owner-signoff   # /sf may not schedule rows conditioned on it
+  high: require-disposition
+  medium: record
+  low: record
+
+dispositions:
+  comply-safely: Build what the brief wants by a route that does not trip the trap.
+  reframe: Replace the brief's demand with the underlying problem and an invariant.
+  decline: Do not build it; state the consequence and what replaces it.
+  ask-owner: The answer turns on jurisdiction, contract terms or a business choice only the owner holds.
+
+# A finding on one of these topics can never be closed as "out of scope". Omitting one where an
+# applicable lens requires it is itself a finding.
+never_out_of_scope:
+  - id: consensus-trust
+    label: distributed consensus and trust models
+  - id: byzantine-faults
+    label: Byzantine faults
+  - id: keys-nonces
+    label: key management and nonce uniqueness
+  - id: regulatory-duties
+    label: regulatory duties
+  - id: licences-terms
+    label: licences and provider terms
+  - id: physics
+    label: memory, bandwidth and latency physics
+  - id: agent-action-safety
+    label: agent action safety
+
+routes:
+  retrieval: A primary-source quote settles it.
+  check: A deterministic check in tools/checks settles it.
+  grounded-research: One decidable fact about a tool, version or document.
+  deep-research: A synthesis of many sources (law, market, practice).
+  experiment: Only a measurement settles it (experiment-designer).
+
+freshness_days:
+  terms: 30
+  licence: 90
+  statute: 90
+  regulation: 90
+  advisory: 30
+  default: 180
+
+budget:
+  max_passes: 4
+  wall_clock_minutes: 120
+  max_routed_calls_per_pass: 12
+  halt_on_repeat: true     # stop when a pass repeats the same routed calls with no change in findings
+
+calibration:
+  # A lens is calibrated at a version when its cases pass these thresholds in a committed evaluation.
+  min_recall: 0.8
+  max_false_alarm_rate: 0.2
+  min_omission_recall: 0.6
+  min_citation_rate: 0.9

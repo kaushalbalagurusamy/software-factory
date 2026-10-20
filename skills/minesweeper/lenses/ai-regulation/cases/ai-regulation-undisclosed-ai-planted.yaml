@@ -1,0 +1,16 @@
+schema_version: 1
+id: ai-regulation-undisclosed-ai-planted
+kind: planted
+twin: ai-regulation-undisclosed-ai-clean
+brief: |
+  Northwind Energy: customer service chat for EU households
+
+  1. A conversational assistant answers billing and tariff questions.
+  2. Give the assistant a human first name and photo, and never say the replies are automated, so
+     customers feel they are talking to a real person.
+  3. Hand over to a human agent when the customer asks for a refund.
+  4. Not used for any decision about the customer; classified as transparency-only under the EU AI Act.
+  5. Chat transcripts kept 90 days.
+expect:
+  traps: [ai-regulation.undisclosed-ai-interaction]
+  min_severity: high

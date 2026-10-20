@@ -1,0 +1,274 @@
+{
+  "schema_version": 1,
+  "brief": {
+    "path": "runs/2026-10-15-smoke/licensing-agpl-network-clean/brief.md",
+    "sha256": "85cad60c5867618e398d7657733a8d91e7e2545ff3af4b80a9a73dc684620361"
+  },
+  "lenses_applied": [
+    {
+      "id": "accessibility",
+      "version": "0.1.0",
+      "why": "signals: ui"
+    },
+    {
+      "id": "licensing",
+      "version": "0.1.0",
+      "why": "signals: open-source, gpl, agpl, licence"
+    },
+    {
+      "id": "privacy-regulated-data",
+      "version": "0.1.0",
+      "why": "signals: retention"
+    },
+    {
+      "id": "security-ethics",
+      "version": "0.1.0",
+      "why": "signals: 0-day"
+    },
+    {
+      "id": "company-context",
+      "version": "0.1.0",
+      "why": "always"
+    },
+    {
+      "id": "cryptography",
+      "version": "0.1.0",
+      "why": "signals: encrypt"
+    },
+    {
+      "id": "supply-chain",
+      "version": "0.1.0",
+      "why": "signals: open-source, install"
+    }
+  ],
+  "lenses_skipped": [
+    "agent-orchestration",
+    "agent-security",
+    "ai-regulation",
+    "copyright-data-rights",
+    "cyber-physical",
+    "databases",
+    "distributed-systems",
+    "market-reality",
+    "media-pipelines",
+    "ml-evaluation",
+    "numeric-representation",
+    "os-systems",
+    "performance",
+    "professional-duty",
+    "provider-terms",
+    "realtime-transport",
+    "rubric-inversion",
+    "theory-complexity"
+  ],
+  "claims": [
+    {
+      "id": "C-001",
+      "kind": "assumption",
+      "text": "Northwind Docs is a paid SaaS, browser only, nothing installed (hosted only, no copy conveyed, commercial)",
+      "locator": "line 1",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-002",
+      "kind": "dependency",
+      "text": "AGPLv3 open-source collaborative editor server is the starting point",
+      "locator": "line 3 (item 1)",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-003",
+      "kind": "requirement",
+      "text": "Patch the server's storage layer and permissions model for a multi-tenant design (modification)",
+      "locator": "item 2",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-004",
+      "kind": "requirement",
+      "text": "Publish the patched server source and link it from the app footer, as AGPLv3 Section 13 requires",
+      "locator": "item 3",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-005",
+      "kind": "requirement",
+      "text": "Proprietary billing and admin services stay separate programs talking over a documented API",
+      "locator": "item 3",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-006",
+      "kind": "requirement",
+      "text": "List the SPDX licence of every server component in the architecture doc",
+      "locator": "item 4",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-007",
+      "kind": "metric",
+      "text": "Support 2,000 concurrent editors per tenant",
+      "locator": "item 5",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-008",
+      "kind": "requirement",
+      "text": "Daily encrypted backups with 30-day retention",
+      "locator": "item 6",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-009",
+      "kind": "metric",
+      "text": "Backup retention of 30 days",
+      "locator": "item 6",
+      "pass": 1,
+      "origin": "brief"
+    },
+    {
+      "id": "C-010",
+      "kind": "omission",
+      "text": "Brief does not state how backup encryption keys are generated, stored, rotated",
+      "locator": "cryptography.key-nonce-management",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-011",
+      "kind": "omission",
+      "text": "Brief does not state the adversary or the required confidentiality lifetime for backups",
+      "locator": "cryptography.protection-lifetime",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-012",
+      "kind": "omission",
+      "text": "Brief does not name standard algorithms or libraries for backup encryption",
+      "locator": "cryptography.standard-algorithms",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-013",
+      "kind": "omission",
+      "text": "Brief does not list the classes of personal data in hosted documents",
+      "locator": "privacy-regulated-data.data-classes",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-014",
+      "kind": "omission",
+      "text": "Brief names no third party processors or data processing agreements",
+      "locator": "privacy-regulated-data.processors-and-agreements",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-015",
+      "kind": "omission",
+      "text": "Brief states no storage location or retention for live documents (only backups: 30 days)",
+      "locator": "privacy-regulated-data.residency-and-retention",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-016",
+      "kind": "omission",
+      "text": "Brief does not state where dependencies come from or how they are vetted",
+      "locator": "supply-chain.dependency-vetting",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-017",
+      "kind": "omission",
+      "text": "Brief does not state dependency pinning or update review",
+      "locator": "supply-chain.pinning-policy",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-018",
+      "kind": "omission",
+      "text": "Brief does not state whether agents may install packages",
+      "locator": "supply-chain.agent-install-policy",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-019",
+      "kind": "omission",
+      "text": "Brief states no accessibility standard or level for the browser UI",
+      "locator": "accessibility.a11y-standard",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-020",
+      "kind": "omission",
+      "text": "Brief does not state ADA/EAA coverage",
+      "locator": "accessibility.legal-coverage",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-021",
+      "kind": "omission",
+      "text": "Brief does not state non-visual/keyboard operability",
+      "locator": "accessibility.non-visual-operable",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-022",
+      "kind": "omission",
+      "text": "Brief names Northwind Docs but not the buyer/payer segment",
+      "locator": "company-context.organisation-and-payer",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-023",
+      "kind": "omission",
+      "text": "Brief names no governing regulator nor states none applies",
+      "locator": "company-context.governing-regulators",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-024",
+      "kind": "omission",
+      "text": "Not applicable: product is not a security testing tool; no active testing is described",
+      "locator": "security-ethics.authorised-targets",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-025",
+      "kind": "omission",
+      "text": "Not applicable: no third-party findings are produced",
+      "locator": "security-ethics.disclosure-route",
+      "pass": 1,
+      "origin": "lens"
+    },
+    {
+      "id": "C-026",
+      "kind": "omission",
+      "text": "Not applicable: no security testing tool",
+      "locator": "security-ethics.sensitive-data-handling",
+      "pass": 1,
+      "origin": "lens"
+    }
+  ]
+}

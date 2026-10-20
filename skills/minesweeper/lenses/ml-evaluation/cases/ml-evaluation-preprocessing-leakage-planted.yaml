@@ -1,0 +1,17 @@
+schema_version: 1
+id: ml-evaluation-preprocessing-leakage-planted
+kind: planted
+twin: ml-evaluation-preprocessing-leakage-clean
+brief: |
+  Product brief: churn prediction for a subscription software company.
+  About 8% of customers cancel in a given quarter; the model must beat the always-stay baseline on recall at 50% precision.
+  Data: 3 years of monthly account snapshots for 40,000 customers.
+  Evaluation: train on snapshots before 1 January of last year, test on snapshots after, with no customer in both.
+  Scores are used only to rank accounts for outreach, not shown as probabilities.
+  Requirement 1: before splitting, scale every feature using the mean and spread of the full dataset and replace each category with its average churn rate over all rows.
+  Requirement 2: the customer success team receives a weekly ranked list.
+  Success: outreach reaches more of the customers who would cancel.
+expect:
+  traps:
+  - ml-evaluation.preprocessing-leakage
+  min_severity: medium

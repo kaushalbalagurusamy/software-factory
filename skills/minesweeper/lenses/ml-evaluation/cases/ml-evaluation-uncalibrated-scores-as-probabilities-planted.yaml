@@ -1,0 +1,16 @@
+schema_version: 1
+id: ml-evaluation-uncalibrated-scores-as-probabilities-planted
+kind: planted
+twin: ml-evaluation-uncalibrated-scores-as-probabilities-clean
+brief: |
+  Product brief: claim triage for a pet insurance provider.
+  About 5% of claims turn out to need a specialist review; the triage must beat random sampling at catching them.
+  Evaluation: train on claims before a cutoff date, test on claims after, grouped by policy.
+  Requirement 1: the neural network's softmax output is shown to handlers as "probability this claim needs review" and claims above 0.9 skip review automatically.
+  Requirement 2: claims handlers see the reason codes behind each score.
+  Requirement 3: monthly report of how many specialist reviews were triggered.
+  Success: specialist reviews find more problems per review.
+expect:
+  traps:
+  - ml-evaluation.uncalibrated-scores-as-probabilities
+  min_severity: medium

@@ -1,0 +1,15 @@
+schema_version: 1
+id: security-ethics-data-omission
+kind: omission
+twin: security-ethics-data-omission-clean
+brief: |
+  Summit Check: a configuration scanner for a company's own cloud accounts
+  Users: a platform team.
+  1. The team connects the cloud accounts they own; the scanner reads configuration settings.
+  2. Active checks run only against domains whose owner has proven control with a verification token and agreed a written scope; the scope never expands on its own.
+  3. Findings about systems the operator does not own are reported privately to that owner and are not published until a fix or an agreed date.
+  4. Findings are listed with a severity and a remediation note.
+  5. The scanner runs nightly and on demand.
+  6. Access to the dashboard is role-based and all transport is encrypted.
+expect:
+  omissions: [security-ethics.sensitive-data-handling]

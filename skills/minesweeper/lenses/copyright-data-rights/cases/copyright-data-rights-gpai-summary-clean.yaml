@@ -1,0 +1,15 @@
+schema_version: 1
+id: copyright-data-rights-gpai-summary-clean
+kind: clean
+twin: copyright-data-rights-gpai-summary-planted
+brief: |
+  Contoso Labs: open release of a general-purpose base model
+
+  1. Pretrain a 7B-parameter general-purpose language model on web, code and book data.
+  2. Publish the weights for download, including to developers in the EU.
+  3. Adopt a written copyright policy and publish a training-content summary using the AI Office
+     template; exact mixing ratios stay internal.
+  4. Crawling honours robots rules and machine-readable mining reservations.
+  5. Provide a model card with evaluation results.
+expect:
+  none_from_lens: true

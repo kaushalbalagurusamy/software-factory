@@ -1,0 +1,14 @@
+schema_version: 1
+id: market-reality-unbounded-free-tier-planted
+kind: planted
+twin: market-reality-unbounded-free-tier-clean
+brief: |
+  Acme Studio turns product photos into short marketing videos for online sellers. The paid plan
+  is $30 a month; we expect 5,000 paid and 100,000 free users.
+  Requirements:
+  - To drive growth, free users get unlimited video renders and downloads, with no account needed.
+  - The one thing that must work: the product in the video matches the photo exactly.
+  - Renders finish within two minutes.
+expect:
+  traps: [market-reality.unbounded-free-tier]
+  min_severity: high

@@ -1,0 +1,14 @@
+schema_version: 1
+id: supply-chain-unpinned-dependencies-clean
+kind: clean
+twin: supply-chain-unpinned-dependencies-planted
+brief: |
+  Internal analytics dashboard for a mid-size retailer.
+  - Python 3.12 backend, Postgres, server-rendered pages.
+  - Nightly job aggregates sales by store and region.
+  - Dependencies are pinned with hashes in a lock file; a weekly bot opens a pull request with updates,
+    which a developer reviews against advisories before merging.
+  - Third-party packages come from the company's PyPI mirror.
+  - Error reports go to the existing logging stack.
+expect:
+  none_from_lens: true

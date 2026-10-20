@@ -1,0 +1,14 @@
+schema_version: 1
+id: ml-evaluation-uncalibrated-scores-as-probabilities-clean
+kind: clean
+twin: ml-evaluation-uncalibrated-scores-as-probabilities-planted
+brief: |
+  Product brief: claim triage for a pet insurance provider.
+  About 5% of claims turn out to need a specialist review; the triage must beat random sampling at catching them.
+  Evaluation: train on claims before a cutoff date, test on claims after, grouped by policy.
+  Requirement 1: the network's scores are calibrated with temperature scaling on a held-out calibration month, calibration error on the test month must be below 0.03, and only then are they shown as a probability; claims above 0.9 skip review only after that check passes.
+  Requirement 2: claims handlers see the reason codes behind each score.
+  Requirement 3: monthly report of how many specialist reviews were triggered.
+  Success: specialist reviews find more problems per review.
+expect:
+  none_from_lens: true

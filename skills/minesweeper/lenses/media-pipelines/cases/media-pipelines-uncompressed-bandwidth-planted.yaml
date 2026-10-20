@@ -1,0 +1,16 @@
+schema_version: 1
+id: media-pipelines-uncompressed-bandwidth-planted
+kind: planted
+twin: media-pipelines-uncompressed-bandwidth-clean
+brief: |
+  A sports broadcaster's analytics team - live player tracking
+
+  - Four stadium cameras capture 3840 x 2160 at 60 frames per second, 10-bit 4:2:2, BT.709.
+  - A tracking model locates players in each frame and overlays positions for the commentary team.
+  - The capture service decodes each camera feed and sends every raw frame as an RGBA half-float array over the stadium's 10 Gbit/s network to a separate tracking service in the cloud.
+  - Each tracking host has 64 GB RAM and processes one camera feed.
+  - Overlays must lag the live picture by under 500 ms.
+expect:
+  traps:
+  - media-pipelines.uncompressed-bandwidth
+  min_severity: high

@@ -1,0 +1,8 @@
+Northwind Docs: hosted document collaboration (paid SaaS, browser only, nothing is installed)
+
+1. Start from the AGPLv3 open-source collaborative editor server.
+2. Patch its storage layer and permissions model for our multi-tenant design.
+3. Keep our patches in a private repository; customers only reach the service over HTTPS.
+4. List the SPDX licence of every server component in the architecture doc.
+5. Support 2,000 concurrent editors per tenant.
+6. Daily encrypted backups with 30-day retention.

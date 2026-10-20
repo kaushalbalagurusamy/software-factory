@@ -1,0 +1,32 @@
+# Sweep agents. One agent per group loads its lenses. A tuning knob, not structure: moving a lens
+# between groups changes cost and context size, never lens content. Every lens appears exactly once.
+schema_version: 1
+groups:
+  law-terms-ethics:
+    title: Law, terms and ethics
+    model: sonnet
+    lenses: [licensing, provider-terms, ai-regulation, privacy-regulated-data, copyright-data-rights, security-ethics, professional-duty, accessibility]
+  supply-chain-security-crypto:
+    title: Supply chain, agent security and cryptography
+    model: opus
+    lenses: [supply-chain, agent-security, cryptography]
+  distributed-data:
+    title: Distributed systems and data
+    model: opus
+    lenses: [distributed-systems, databases]
+  systems-performance:
+    title: Systems and performance
+    model: opus
+    lenses: [os-systems, performance, media-pipelines, realtime-transport]
+  theory-measurement:
+    title: Theory and measurement
+    model: opus
+    lenses: [theory-complexity, numeric-representation, ml-evaluation, rubric-inversion]
+  agents-cyber-physical:
+    title: Agents and cyber-physical systems
+    model: opus
+    lenses: [agent-orchestration, cyber-physical]
+  business:
+    title: Business context
+    model: sonnet
+    lenses: [company-context, market-reality]
