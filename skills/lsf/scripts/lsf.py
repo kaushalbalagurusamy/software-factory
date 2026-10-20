@@ -1623,6 +1623,7 @@ def summarize(text, limit=200):
 
 _COMMIT = re.compile(r"(?:^|&&|\|\||;|\n|\()\s*(?:\w+=\S+\s+)*git\s+(?:-\S+\s+(?:[^-\s]\S*\s+)?)*commit\b")
 _DENY_RELEASE = re.compile(r"hitl\s+(?:release|repair)\b")
+_DENY_ROLLBACK = re.compile(r"\blsf(?:\.py)?\b[^\n;|&]*\brollback\b[^\n;|&]*--yes")
 _STOPS_TOUCH = re.compile(r"\.lsf/(?:stops|\.lock)|stops\.(?:jsonl|head)")
 _WRITES = re.compile(r"(?:>|\brm\b|\bmv\b|\btruncate\b|\btee\b|\bsed\b[^|;&]*\s-i|\bcp\b|\bdd\b|\bperl\b|\bpython|\bnode\b|\bln\b|\bchmod\b|\bsh\s+-c)")
 
@@ -1633,6 +1634,10 @@ def guard_reason(command):
         return "lsf hitl release and repair are human acts; ask the owner to run them in their own terminal"
     if _STOPS_TOUCH.search(command) and _WRITES.search(command):
         return "the human stop ledger (.lsf/stops*) must not be written by an agent"
+    if _DENY_ROLLBACK.search(command):
+        return "lsf rollback --yes is a human act; ask the owner to run it in their own terminal"
+    if re.search(r"/api/rollback", command):
+        return "the rollback route is for the human's browser; an agent must not call it"
     if re.search(r"/api/hitl/release", command):
         return "the release route is for the human's browser; an agent must not call it"
     return None
