@@ -17,8 +17,9 @@ D-3. Answering = releasing. `hitl_release(root, name, note, by, via, answer=None
 `Fail("stale ...")` (HTTP 409). Before releasing, the hash is recomputed from the current artifacts; a difference from the stored
 hash is `Fail("proposal changed since it was asked; ask again")` (HTTP 409) and nothing is released. A stop with options and
 no `answer` is refused. The release entry stores `answer` and `proposal_hash`.
-D-4. Dashboard `POST /api/hitl/release` body is `{name, note, answer, proposal_hash}`. When the stop has a `proposal_hash`, a body
-without `proposal_hash` is 400. Token, host and size checks are unchanged. The CLI release gains `--answer`; the strict-mode TTY
+D-4. Dashboard `POST /api/hitl/release` body is `{name, note, answer, proposal_hash}`. When the stop has options, a body
+without `proposal_hash` is 400 (a stop without options keeps accepting a body with no hash, per D-11; the server-side drift
+check of D-3 still applies to it). Token, host and size checks are unchanged. The CLI release gains `--answer`; the strict-mode TTY
 rule is unchanged and applies to it.
 D-5. `lsf hitl recorded NAME --where PATH [--note N]` is valid only when state is `answered`; PATH must be an existing file or
 directory inside the repo root (no escape, symlink resolved). It appends a chained `recorded` entry. Otherwise `Fail`.
