@@ -327,21 +327,22 @@ function renderTelemetry(){
 /* ---------- historical tabs ---------- */
 function list(t,fn){var it=items(t);if(!it){return emptyTab(t);}var l=h("ul",{class:"list card"});it.forEach(function(x){l.appendChild(h("li",{},fn(x)));});return l;}
 function renderResearch(){return list(tabData("research"),function(x){return [h("b",{},x.title)," ",x.as_of?chip("as of "+x.as_of,"v-mute"):null,h("div",{class:"refs"},[ref(x.path)])];});}
-function renderExperiments(){return list(tabData("experiments"),function(x){var r=x.results||x.resolved;var k=[h("b",{},x.name)," ",chip(x.kind==="resolved"?"resolved by research":"experiment","v-mute"),x.error?h("div",{class:"err small"},x.error):null];
+function renderExperiments(){return list(tabData("experiments"),function(x){var r=x.kind==="resolved"?x:x.results;var k=[h("b",{},x.name)," ",chip(x.kind==="resolved"?"resolved by research":"experiment","v-mute"),x.error?h("div",{class:"err small"},x.error):null];
  if(r&&typeof r==="object"){var s=r.winner||r.decision||r.verdict||r.resolved_by||r.question;if(s){k.push(h("div",{class:"small"},typeof s==="string"?s:JSON.stringify(s)));}}
  k.push(h("div",{class:"refs"},[ref(x.path)]));return k;});}
 function renderAdrs(){return list(tabData("adrs"),function(x){return [h("b",{},x.id+": "+x.title)," ",x.status?chip(x.status,"v-mute"):null,x.date?h("span",{class:"small mute"}," "+x.date):null,h("div",{class:"refs"},[ref(x.path)])];});}
-function renderPrd(){return list(tabData("prd_journeys"),function(x){
- if(x.kind==="journey"){return [h("b",{},"Journey: "+x.name),x.warning?h("div",{class:"v-wait small"},x.warning):null,h("ol",{},(x.steps||[]).map(function(s){return h("li",{},s);})),
-  h("div",{class:"small"},(x.slices||[]).map(function(s){return chip(s.id+(s.exists?"":" (unknown slice)"),s.exists?"v-mute":"v-fail");})),h("div",{class:"refs"},[ref(x.path)])];}
+function renderPrd(){var pt=tabData("prd_journeys"),w=pt&&pt.warning;var lst=list(pt,function(x){
+ if(x.kind==="journey"){return [h("b",{},"Journey: "+x.name),(x.flags||[]).length?h("div",{class:"v-wait small"},x.flags.join("; ")):null,h("ol",{},(x.steps||[]).map(function(s){return h("li",{},s);})),
+  h("div",{class:"small"},(x.slices||[]).map(function(s){return chip(s.id+(s.exists?"":" (unknown slice)"),s.exists?"v-mute":"v-fail");})),h("div",{class:"refs"},[ref("docs/prd/onepager.md")])];}
  if(x.kind==="prd"){return [h("b",{},x.title)," ",chip("PRD","v-mute"),x.delivers?h("div",{class:"small mute"},x.delivers):null,h("div",{class:"refs"},[ref(x.path)])];}
- return [h("b",{},x.title)," ",x.priority?chip("priority "+x.priority,"v-mute"):null,h("ul",{},(x.stories||[]).map(function(s){return h("li",{},s);})),h("div",{class:"refs"},[ref(x.path)])];});}
+ return [h("b",{},x.title)," ",x.priority?chip("priority "+x.priority,"v-mute"):null,h("ul",{},(x.stories||[]).map(function(s){return h("li",{},s);})),h("div",{class:"refs"},[ref(x.path)])];});
+ if(!w){return lst;}var box=h("div",{});box.appendChild(h("p",{class:"v-wait small"},"Warning: the one-page PRD is "+w));box.appendChild(lst);return box;}
 function renderEvals(){
  var n=h("div",{});n.appendChild(h("h2",{},"Bug log and QA notes"));
  n.appendChild(list(tabData("bug_log"),function(x){
-  if(x.kind==="qa-notes"){return [h("b",{},"QA notes: "+x.title)," ",chip("repeated failures","v-wait"),h("ul",{},(x.failures||[]).map(function(f){return h("li",{},f);})),h("div",{class:"refs"},[ref(x.path)])];}
+  if(x.kind==="qa-note"){return [h("b",{},"QA note, slice "+x.slice)," ",chip("repeated failure"+(x.attempts?" x"+x.attempts:""),"v-wait"),h("div",{class:"small"},x.text),h("div",{class:"refs"},[ref(x.path)])];}
   if(x.error){return [h("span",{class:"err"},x.error)];}
-  if(x.path){return [h("b",{},x.title)," ",x.status?chip(x.status,x.status==="open"?"v-fail":"v-pass"):null,h("div",{class:"refs"},[ref(x.path)])];}
+  if(x.path){return [h("b",{},x.title)," ",x.status?chip(x.status,x.status==="open"||x.status==="invalid"?"v-fail":"v-pass"):null,h("div",{class:"refs"},[ref(x.path)])];}
   return [h("code",{},JSON.stringify(x))];}));
  n.appendChild(h("h2",{},"Verdicts logged by agents"));
  var ev=(S.state.runtime.events||[]).filter(function(e){var c=verdictClass(e.verdict);return (c==="v-pass"||c==="v-fail")&&e.source!=="hook";});

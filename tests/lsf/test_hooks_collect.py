@@ -62,14 +62,31 @@ def _fixture(repo):
     subprocess.run(["git", "-C", str(repo), "commit", "-qm", "fixture"], check=True)
 
 
+EXTRA = {
+    "experiments/e3/resolved.json": json.dumps({"question": "q", "resolved_by": "research", "sources": ["s"], "as_of": "2026-10-01"}),
+    "experiments/e4/resolved.json": "{bad",
+    "docs/prd/onepager.md": "# Core\n## Journey: Buy\nSlices: s1, ghost\n- one\n- two\n## Journey: Lonely\n- x\n",
+    "docs/prds/P-1.md": "# P1\n| **Delivers** | a thing |\n",
+    "docs/bugs/b1.md": "# Bug one\nStatus: Fixed\nSlice: s1\nCriterion: C-1\n",
+    "docs/bugs/b2.md": "# Bug two\nStatus: nonsense\n",
+    "docs/slices/s1/qa-notes.md": "# QA\n## Signature abc\nattempts 3\ncriteria: C-1, C-2\nobserved boom\n",
+}
+
+
 def test_parity_with_factory_collectors(repo):
     sys.path.insert(0, str(ROOT))
     from factory.ops import collect
     _fixture(repo)
+    for p, t in EXTRA.items():
+        f = repo / p
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(t)
     mine = json.loads(run(repo, "bundle", "--json").stdout)["tabs"]
     theirs = collect.collect_all(collect.WorkTreeSource(repo))
     for tab in ("architecture", "research", "experiments", "adrs", "prd_journeys", "bug_log", "git"):
         assert mine[tab]["available"] is True and mine[tab]["items"] == theirs[tab]["items"], tab
+        assert mine[tab]["summary"] == theirs[tab]["summary"], tab
+    assert mine["prd_journeys"].get("warning") == theirs["prd_journeys"].get("warning")
 
 
 def test_unavailable_tabs_name_the_path_and_never_empty_available(repo):
@@ -91,18 +108,20 @@ def test_docs_tab_reads_eli12_index(repo):
     assert t["available"] and t["items"][0]["symbols"] == [{"name": "go", "line": 3}]
 
 
-def test_onepager_and_resolved_and_qa_notes(repo):
-    for p, t in {"docs/prd/onepager.md": "# P\n## Journey: Buy\nSlices: s1, ghost\n- step one\n",
-                 "docs/slices/s1/qa-notes.md": "# QA\n## flaky thing\n",
-                 "experiments/r1/resolved.json": '{"question": "q"}'}.items():
+def test_onepager_resolved_and_qa_notes_shapes(repo):
+    for p, x in EXTRA.items():
         f = repo / p
         f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_text(t)
+        f.write_text(x)
     tabs = json.loads(run(repo, "bundle", "--json").stdout)["tabs"]
     j = tabs["prd_journeys"]["items"][0]
-    assert j["name"] == "Buy" and j["unknown_slices"] == ["ghost"] and j["steps"] == ["step one"]
-    assert tabs["bug_log"]["items"][0]["failures"] == ["flaky thing"]
-    assert tabs["experiments"]["items"][0]["kind"] == "resolved"
+    assert j["kind"] == "journey" and j["name"] == "Buy" and "unknown slice ghost" in j["flags"] and j["steps"] == ["one", "two"]
+    assert tabs["prd_journeys"]["title"] == "Core"
+    kinds = {(i["name"], i["kind"]) for i in tabs["experiments"]["items"]}
+    assert ("e3", "resolved") in kinds and any("error" in i for i in tabs["experiments"]["items"])
+    bugs = {i.get("id"): i for i in tabs["bug_log"]["items"]}
+    assert bugs["b1"]["status"] == "fixed" and bugs["b2"]["status"] == "invalid"
+    assert any(i.get("kind") == "qa-note" and i["attempts"] == 3 for i in tabs["bug_log"]["items"])
 
 
 def test_bundle_at_sha(repo):
