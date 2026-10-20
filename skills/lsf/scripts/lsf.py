@@ -799,21 +799,24 @@ def c_research(src):
 
 
 def c_experiments(src):
-    paths = src.glob("experiments/*/results.json")
-    resolved = src.glob("experiments/*/resolved.json")
-    if not paths and not resolved:
+    res, rsv = src.glob("experiments/*/results.json"), src.glob("experiments/*/resolved.json")
+    if not res and not rsv:
         return unavailable("no experiments/*/results.json and no experiments/*/resolved.json in %s" % src.where)
     items = []
-    for p in paths:
+    for p in res:
         data, err = _json(src, p)
-        row = {"path": p, "name": p.split("/")[1]}
+        row = {"path": p, "name": p.split("/")[1], "kind": "experiment"}
         row.update({"error": err} if err else {"results": data})
         items.append(row)
-    for p in resolved:
+    for p in rsv:
         data, err = _json(src, p)
-        row = {"kind": "resolved", "path": p, "name": p.split("/")[1]}
-        row.update({"error": err} if err else {"resolved": data})
+        row = {"path": p, "name": p.split("/")[1], "kind": "resolved"}
+        if err or not isinstance(data, dict):
+            row["error"] = err or "%s must be an object" % p
+        else:
+            row.update({k: data.get(k) for k in ("question", "resolved_by", "sources", "as_of")})
         items.append(row)
+    items.sort(key=lambda i: (i["name"], i["kind"]))
     return ok(items)
 
 
@@ -854,48 +857,105 @@ def _stories(text):
     return out
 
 
-def _onepager(src, path):
-    t = src.text(path) or ""
-    lines = t.splitlines()
-    rows, cur = [], None
+ONEPAGER = "docs/prd/onepager.md"
+_JOURNEY = re.compile(r"^##[ \t]+Journey:[ \t]*(.*?)[ \t]*$")
+
+
+def _onepager(src):
+    text = src.text(ONEPAGER)
+    if text is None:
+        return [], None, None
+    lines = text.splitlines()
+    tm = re.search(r"^#[ \t]+(.+?)[ \t]*$", text, re.M)
+    existing = {p.split("/")[2] for p in src.ls("docs/slices") if p.count("/") >= 3}
+    journeys, cur = [], None
     for ln in lines:
-        h = re.match(r"##\s+Journey:\s*(.+?)\s*$", ln)
-        if h:
-            cur = {"kind": "journey", "path": path, "name": h.group(1), "steps": [], "slices": []}
-            rows.append(cur)
+        m = _JOURNEY.match(ln)
+        if m:
+            cur = {"kind": "journey", "name": m.group(1), "steps": [], "slices": [], "flags": [], "_has_slices": False}
+            journeys.append(cur)
+            continue
+        if re.match(r"#{1,6}\s", ln):
+            cur = None
             continue
         if cur is None:
             continue
-        s = re.match(r"\s*Slices:\s*(.*)$", ln)
-        if s:
-            ids = [x.strip() for x in s.group(1).split(",") if x.strip()]
-            cur["slices"] = [{"id": i, "exists": src.has_dir("docs/slices/%s" % i)} for i in ids]
-            cur["unknown_slices"] = [i for i in ids if not src.has_dir("docs/slices/%s" % i)]
-        elif re.match(r"\s*(?:[-*]|\d+\.)\s+\S", ln):
-            cur["steps"].append(re.sub(r"^\s*(?:[-*]|\d+\.)\s+", "", ln).strip())
-    if len(lines) > 80:
-        for r in rows:
-            r["warning"] = "longer than one page"
-    return rows
+        sm = re.match(r"^\s*Slices:[ \t]*(.*?)\s*$", ln)
+        if sm:
+            cur["_has_slices"] = True
+            for sid in (x.strip() for x in sm.group(1).split(",")):
+                if sid and sid not in (x["id"] for x in cur["slices"]):
+                    cur["slices"].append({"id": sid, "exists": sid in existing})
+            continue
+        bm = re.match(r"^\s*[-*]\s+(.*\S)\s*$", ln)
+        if bm:
+            cur["steps"].append(bm.group(1))
+    for j in journeys:
+        if not j.pop("_has_slices"):
+            j["flags"].append("missing Slices line")
+        for s_ in j["slices"]:
+            if not s_["exists"]:
+                j["flags"].append("unknown slice %s" % s_["id"])
+        if not 1 <= len(j["steps"]) <= 5:
+            j["flags"].append("%d steps (expected 1 to 5)" % len(j["steps"]))
+    return journeys, ("longer than one page" if len(lines) > 80 else None), (tm.group(1) if tm else None)
 
 
 def c_prd_journeys(src):
-    items = []
+    items, warning, title = _onepager(src)
+    rows = []
     for p in src.glob("docs/slices/*/proposal.md"):
         t = src.text(p) or ""
         pri = re.search(r"^priority:\s*(\S+)", t, re.I | re.M) or re.search(r"\*\*Priority:?\*\*:?\s*(\S+)", t, re.I)
-        items.append({"slice": p.split("/")[2], "path": p, "title": _title(t, p.split("/")[2]),
-                      "priority": pri.group(1) if pri else None, "stories": _stories(t)})
-    items.sort(key=lambda i: (str(i["priority"] or "~"), i["slice"]))
-    if src.has("docs/prd/onepager.md"):
-        items.extend(_onepager(src, "docs/prd/onepager.md"))
+        rows.append({"slice": p.split("/")[2], "path": p, "title": _title(t, p.split("/")[2]),
+                     "priority": pri.group(1) if pri else None, "stories": _stories(t)})
+    rows.sort(key=lambda i: (str(i["priority"] or "~"), i["slice"]))
+    items += rows
     for p in src.glob("docs/prds/*.md"):
         t = src.text(p) or ""
-        d = re.search(r"\*\*Delivers\*\*\s*\|\s*([^|]+)\|", t)
-        items.append({"kind": "prd", "path": p, "title": _title(t, stem(p)), "delivers": d.group(1).strip() if d else None})
+        d = re.search(r"\*\*Delivers\*\*\s*\|\s*(.+?)\s*\|?\s*$|^Delivers:\s*(.+)$", t, re.M)
+        items.append({"kind": "prd", "path": p, "title": _title(t, stem(p)),
+                      "delivers": next((g.strip() for g in d.groups() if g), None) if d else None})
     if not items:
-        return unavailable("no docs/slices/*/proposal.md, docs/prd/onepager.md or docs/prds/*.md in %s" % src.where)
-    return ok(items)
+        return unavailable("no slices (docs/slices/*/proposal.md), no %s and no docs/prds/*.md in %s" % (ONEPAGER, src.where))
+    res = ok(items, journeys=sum(1 for i in items if i.get("kind") == "journey"))
+    if title:
+        res["title"] = title
+        res["summary"]["title"] = title
+    if warning:
+        res["warning"] = warning
+        res["summary"]["warning"] = warning
+    return res
+
+
+BUG_STATUSES = ("open", "fixed", "wontfix")
+
+
+def _first_heading(text, fallback):
+    m = re.search(r"^#{1,6}\s+(.+?)\s*$", text, re.M)
+    return m.group(1) if m else fallback
+
+
+def _line(text, key):
+    m = re.search(r"^\s*(?:\*\*)?%s:?(?:\*\*)?:?[ \t]*(.*?)\s*$" % key, text, re.I | re.M)
+    return m.group(1).strip().strip("*_ \t") if m else None
+
+
+def _qa_notes(src):
+    items = []
+    for p in src.glob("docs/slices/*/qa-notes.md"):
+        text = src.text(p) or ""
+        slice_id = p.split("/")[2]
+        for blk in re.split(r"^(?=## Signature )", text, flags=re.M):
+            m = re.match(r"## Signature (\S+)", blk)
+            if not m:
+                continue
+            att = re.search(r"attempts\s+(\d+)", blk)
+            items.append({"kind": "qa-note", "slice": slice_id, "path": p, "signature": m.group(1),
+                          "attempts": int(att.group(1)) if att else None,
+                          "criteria": [c.strip() for c in (_line(blk, "criteria") or "").split(",") if c.strip()],
+                          "text": "signature %s: " % m.group(1) + " ".join(blk.split("\n", 1)[1].split())})
+    return items
 
 
 def c_bug_log(src):
@@ -910,13 +970,13 @@ def c_bug_log(src):
                     items.append({"error": "docs/bug-log.jsonl line %d is not valid JSON" % i})
     for p in src.glob("docs/bugs/*.md"):
         tx = src.text(p) or ""
-        items.append({"path": p, "title": _title(tx, stem(p)), "status": _field(tx, "Status")})
-    for p in src.glob("docs/slices/*/qa-notes.md"):
-        tx = src.text(p) or ""
-        items.append({"kind": "qa-notes", "path": p, "slice": p.split("/")[2], "title": _title(tx, p.split("/")[2]),
-                      "failures": re.findall(r"^#{2,}\s+(.+)$", tx, re.M)})
+        st = (_line(tx, "Status") or "").lower()
+        items.append({"id": stem(p), "path": p, "title": _first_heading(tx, stem(p)),
+                      "status": st if st in BUG_STATUSES else "invalid",
+                      "slice": _line(tx, "Slice") or None, "criterion": _line(tx, "Criterion") or None})
+    items += _qa_notes(src)
     if not items:
-        return unavailable("no docs/bugs/*.md, no docs/bug-log.jsonl and no docs/slices/*/qa-notes.md in %s" % src.where)
+        return unavailable("no entries in docs/bugs/*.md, docs/bug-log.jsonl or docs/slices/*/qa-notes.md in %s" % src.where)
     return ok(items)
 
 
