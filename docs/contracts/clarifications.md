@@ -179,3 +179,11 @@ Binding for slice SFN-02 (`docs/prds/SFN-02-roles-and-doctor.md`). Source: the o
 4. Doctor lines are `PASS|WARN|FAIL role <id> skill <name>: <detail>` for role skills (not beginning with `skill `, which the existing per-skill count uses) and `PASS|WARN|FAIL external <name>: <detail>` for pins; the changed-pin detail contains the words `changed since pinned`. A WARN does not change the exit code; a FAIL does.
 5. Where the default graph lists stages, `qa` sits between `implement` and `review`; `test` stays as the runner stage reached from `qa`.
 6. Amendment of earlier acceptance material: the earlier seven-role, Opus-declaration and `prd-designer` expectations in `evals/agents/` and `tests/` are superseded by this slice. They are updated by the maintainer after the slice lands (never by the implementer), each edit listed with its reason in ADR-0005.
+
+## C-41 (2026-10-20, SFN-02b): amendments after the automated security review of SFN-02
+
+Supersedes C-40.1 where it differs; binding for the SFN-02 follow-up.
+1. `allow_models` in a project's profile never widens the allowed models on its own: a model outside `sonnet` is allowed only when the operator passes it on the command line (`--allow-model M`), and a profile list is honoured only for models that are also given there. `install` and `doctor` print any extra model they were asked to allow. Role-file loading takes the already-combined list from its caller.
+2. `path_guard` enforces the `qa_paths` writes class: a role whose writes class is `qa_paths` may write only paths matching `**/qa-notes.md`, `**/qa-feedback/**` and `.sf/qa/**` (never `evals/**`, held-out, frozen-test or control directories), and the `app` branch denies writes to those `qa_paths` globs by implement-style roles. The globs come from the hook configuration, with the three above as defaults.
+3. The `qa` role's Bash mode is `full` only so it can run the protected suites. It receives the implement-style git restrictions (no `git add -A`/`.`, no history rewrite, no checkout of protected paths), and the QA feedback files are subject to the existing feedback leak check before a blind role may read them.
+4. `python -m factory.install` gains the `pin-external` subcommand (flags in C-40.3), dispatching to the existing function.
