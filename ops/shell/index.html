@@ -248,7 +248,7 @@ var HIST={
    if(sm.results_committed)h+='<div class="card"><details open><summary>Committed results (latest.json)</summary><pre><code>'+esc(JSON.stringify(d.items[0].results,null,1))+"</code></pre></details></div>";
    else h+='<div class="card">'+badge("unavailable")+" No results committed. "+esc(sm.note||"")+"</div>";
    return h},
- bug_log:function(d){return table([["title","Title"],["status","Status"],["slice","Slice"],["criterion","Criterion"],["path","Source"]],d.items.map(function(b){return {title:b.kind==="qa-note"?b.text:(b.title||b.id||b.error||""),status:b.kind==="qa-note"?"qa note, attempts "+(b.attempts==null?"?":b.attempts):(b.status||""),slice:b.slice||"",criterion:b.criterion||(b.criteria||[]).join(", "),path:b.path||""}}))},
+ bug_log:function(d){return table([["title","Title"],["status","Status"],["slice","Slice"],["criterion","Criterion"],["path","Source"]],d.items.map(function(b){return {title:b.kind==="qa-note"?b.text:(b.title||b.id||b.error||""),status:b.kind==="qa-note"?"qa note, attempts "+(b.attempts==null?"?":b.attempts):b.kind==="qa-report"?"qa report":(b.status||""),slice:b.slice||"",criterion:b.criterion||(b.criteria||[]).join(", "),path:b.path||""}}))},
  git:function(d){return table([["sha","Commit"],["date","Date"],["subject","Subject"]],d.items.map(function(c){return {sha:short(c.sha),date:c.date,subject:c.subject}}))}
 };
 function histPanel(key,title){

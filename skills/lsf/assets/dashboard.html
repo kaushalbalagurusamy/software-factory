@@ -414,9 +414,10 @@ function renderEvals(){
  var n=h("div",{});n.appendChild(h("h2",{},"Bug log and QA notes"));
  n.appendChild(list(tabData("bug_log"),function(x){
   if(x.kind==="qa-note"){return [h("b",{},"QA note, slice "+x.slice)," ",chip("repeated failure"+(x.attempts?" x"+x.attempts:""),"v-wait"),h("div",{class:"small"},x.text),h("div",{class:"refs"},[ref(x.path)])];}
+  if(x.kind==="qa-report"){return [h("b",{},x.title)," ",chip("QA report, slice "+x.slice,"v-pass"),h("div",{class:"small"},x.text),h("div",{class:"refs"},[ref(x.path)])];}
   if(x.error){return [h("span",{class:"err"},x.error)];}
   if(x.path){return [h("b",{},x.title)," ",x.status?chip(x.status,x.status==="open"||x.status==="invalid"?"v-fail":"v-pass"):null,x.log?null:h("span",{class:"small mute"}," log: none recorded"),h("div",{class:"refs"},[ref(x.path)])];}
-  return [h("code",{},JSON.stringify(x))];},function(li,x){return x.kind!=="qa-note"&&!x.error&&x.path?logRow(li,"bug:"+x.path,x.log||null):li;}));
+  return [h("code",{},JSON.stringify(x))];},function(li,x){return x.kind!=="qa-note"&&x.kind!=="qa-report"&&!x.error&&x.path?logRow(li,"bug:"+x.path,x.log||null):li;}));
  n.appendChild(h("h2",{},"Verdicts logged by agents"));
  var ev=(S.state.runtime.events||[]).filter(function(e){var c=verdictClass(e.verdict);return (c==="v-pass"||c==="v-fail")&&e.source!=="hook";});
  var bugsT=tabData("bug_log");
