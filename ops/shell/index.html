@@ -21,6 +21,9 @@ main{padding:1rem;max-width:1100px;margin:0 auto}
 #banner{margin:0;padding:.6rem 1rem;font-weight:600}
 #banner.snap{background:color-mix(in srgb,var(--warn) 18%,var(--bg));border-bottom:1px solid var(--warn)}
 #banner.rt{background:color-mix(in srgb,var(--live) 14%,var(--bg));border-bottom:1px solid var(--live)}
+#stops{margin:0;padding:.5rem 1rem;font-weight:700;border-bottom:1px solid var(--bad);background:color-mix(in srgb,var(--bad) 16%,var(--bg))}
+#stops:empty{display:none}
+#stops.unk{border-bottom-color:var(--warn);background:color-mix(in srgb,var(--warn) 18%,var(--bg))}
 #stale{margin:0;padding:.4rem 1rem;font-size:.9rem;border-bottom:1px solid var(--line)}
 #stale.behind{background:color-mix(in srgb,var(--warn) 18%,var(--bg));border-bottom-color:var(--warn);font-weight:600}
 #banner.err{background:color-mix(in srgb,var(--bad) 18%,var(--bg));border-bottom:1px solid var(--bad)}
@@ -49,6 +52,7 @@ header>div{min-width:0;max-width:100%}#sel{width:100%;text-overflow:ellipsis}
   <select id="sel" aria-describedby="selnote"></select></div>
 </header>
 <p id="banner" role="status"></p>
+<p id="stops" role="status"></p>
 <p id="stale" role="status"></p>
 <nav id="nav" aria-label="Dashboard tabs"></nav>
 <main id="main" tabindex="-1"></main>
@@ -119,7 +123,7 @@ var SFEditorLinks = (function (root, factory) {
 (function(){
 "use strict";
 var TABS=[
- ["overview","Overview","mix"],["ops","Ops","rt"],["architecture","Architecture","hist"],["research","Research","hist"],
+ ["overview","Overview","mix"],["hitl","Human stops","mix"],["ops","Ops","rt"],["architecture","Architecture","hist"],["research","Research","hist"],
  ["experiments","Experiments","hist"],["adrs","ADRs","hist"],["prd","PRD journeys","hist"],["langfuse","Langfuse","rt"],
  ["evals","Evals & bugs","hist"],["journey","Dev journey","hist"],["git","Git history","hist"]];
 var KEY={prd:"prd_journeys",journey:"dev_journey",git:"git"};
@@ -158,8 +162,30 @@ function langfuseHtml(){
   if(S.runtimeErr)return errBox("ops/runtime.json: "+S.runtimeErr);
   var l=S.runtime&&S.runtime.langfuse;if(!l)return '<p class="mute">Loading...</p>';
   var h='<p class="mute">Runtime, as of '+esc(S.runtime.as_of)+', not tied to a commit.</p>';
-  if(!l.applicable)return h+'<div class="card">'+badge("unavailable")+' '+esc(l.reason)+'</div>';
-  return h+'<div class="grid">'+fig("configured",l.configured)+fig("traces",l.traces)+"</div>";
+  var note=l.message?'<div class="card">'+badge("unavailable")+' '+esc(l.message)+'</div>':'';
+  if(!l.applicable)return h+note+'<div class="card">'+badge("unavailable")+' '+esc(l.reason)+'</div>';
+  return h+note+'<div class="grid">'+fig("configured",l.configured)+fig("traces",l.traces)+"</div>";
+}
+function stopsState(){
+  var h=S.runtime&&S.runtime.hitl;
+  if(S.runtimeErr||!h||!Array.isArray(h.open))return {unknown:true,n:0};
+  return {unknown:false,n:h.open.length,failed:h.verified===false};
+}
+function renderStops(){
+  var el=$("stops"),st=stopsState();
+  if(st.unknown){el.className="unk";el.textContent="human stops unknown"}
+  else if(st.n>0){el.className="";el.textContent=st.n+" open human stop(s)"}
+  else{el.className="";el.textContent=""}
+}
+function hitlHtml(){
+  var st=stopsState(),h='<h3>Open now (runtime)</h3>';
+  if(st.unknown)h+='<div class="card">'+badge("unavailable")+' human stops unknown: runtime.json has no stop ledger reading.</div>';
+  else{
+    if(st.failed)h+='<div class="card bad" role="alert"><strong>stop ledger failed verification</strong><br><span class="mute">'+esc(S.runtime.hitl.detail||"")+'</span></div>';
+    else if(!st.n)h+='<div class="card">'+badge("live")+' No open human stops (ledger verified).</div>';
+    if(!st.failed)h+=table([["name","Name"],["scope","Stage / scope"],["reason","Reason"],["opened_at","Opened at"],["release_by","Release by"]],S.runtime.hitl.open);
+  }
+  return h+'<p class="mute">Runtime, as of '+esc(S.runtime?S.runtime.as_of:"unknown")+', not tied to a commit.</p>';
 }
 
 function wsConf(){
@@ -198,9 +224,17 @@ var HIST={
      '<iframe title="Architecture explorer: '+esc(it.title)+'" src="../viewer.html?model='+encodeURIComponent("blobs/"+it.model_blob+".json")+'"></iframe>';
    });return h},
  research:function(d){return table([["title","Title"],["as_of","As of"],["path","File"]],d.items)},
- experiments:function(d){return table([["name","Experiment"],["path","File"]],d.items)+d.items.map(function(i){return "<details><summary>"+esc(i.name)+"</summary><pre><code>"+esc(JSON.stringify(i.results||i.error,null,1))+"</code></pre></details>"}).join("")},
+ experiments:function(d){return table([["name","Experiment"],["kind","Kind"],["path","File"]],d.items)+d.items.map(function(i){return "<details><summary>"+esc(i.name)+" ("+esc(i.kind||"experiment")+")</summary><pre><code>"+esc(JSON.stringify(i.kind==="resolved"&&!i.error?{question:i.question,resolved_by:i.resolved_by,sources:i.sources,as_of:i.as_of}:(i.results||i.error),null,1))+"</code></pre></details>"}).join("")},
  adrs:function(d){return table([["id","ID"],["title","Title"],["status","Status"],["date","Date"]],d.items)},
- prd_journeys:function(d){return d.items.map(function(s){return '<div class="card"><strong>'+esc(s.title)+'</strong> <span class="mute">slice '+esc(s.slice)+", priority "+esc(s.priority||"unset")+"</span><ul>"+(s.stories.length?s.stories.map(function(x){return "<li>"+esc(x)+"</li>"}).join(""):'<li class="mute">no UX stories recorded</li>')+"</ul></div>"}).join("")},
+ prd_journeys:function(d){
+   var h=d.warning?'<div class="card bad" role="alert">'+esc(d.warning)+'</div>':"";
+   return h+d.items.map(function(s){
+     if(s.kind==="journey")return '<div class="card"><strong>Journey: '+esc(s.name)+'</strong><ul>'+s.steps.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ul><span class="mute">Slices: '+(s.slices.map(function(x){return esc(x.id)+(x.exists?"":" (unknown slice)")}).join(", ")||"none")+'</span>'+(s.flags.length?'<br><span class="bad">'+s.flags.map(esc).join("; ")+'</span>':"")+'</div>';
+     if(s.kind==="prd")return '<div class="card"><strong>'+esc(s.title)+'</strong> <span class="mute">PRD '+fileRef(s.path)+'</span><br>'+esc(s.delivers||"")+'</div>';
+     return '<div class="card"><strong>'+esc(s.title)+'</strong> <span class="mute">slice '+esc(s.slice)+", priority "+esc(s.priority||"unset")+"</span><ul>"+(s.stories.length?s.stories.map(function(x){return "<li>"+esc(x)+"</li>"}).join(""):'<li class="mute">no UX stories recorded</li>')+"</ul></div>"}).join("")},
+ hitl:function(d){
+   return table([["kind","Kind"],["id","ID / stage"],["title","Title / verdict"],["status","Status / at"]],d.items.map(function(i){
+     return i.kind==="adr"?{kind:"ADR",id:i.id,title:i.title,status:i.status}:{kind:"event",id:i.stage,title:(i.verdict||"")+(i.note?": "+i.note:""),status:i.at}}))},
  dev_journey:function(d){
    var h=table([["slice","Slice"],["t","Tasks done/total"],["v","Verified/total"],["a","Amendments"]],d.items.map(function(s){
      return {slice:s.slice,t:s.tasks.total!=null?s.tasks.done+"/"+s.tasks.total:"n/a: "+s.tasks.reason,v:s.verification.total!=null?s.verification.verified+"/"+s.verification.total:"n/a: "+s.verification.reason,a:s.amendments.count!=null?s.amendments.count:"n/a"}}));
@@ -211,7 +245,7 @@ var HIST={
    if(sm.results_committed)h+='<div class="card"><details open><summary>Committed results (latest.json)</summary><pre><code>'+esc(JSON.stringify(d.items[0].results,null,1))+"</code></pre></details></div>";
    else h+='<div class="card">'+badge("unavailable")+" No results committed. "+esc(sm.note||"")+"</div>";
    return h},
- bug_log:function(d){return table([["title","Title"],["status","Status"],["path","Source"]],d.items.map(function(b){return {title:b.title||b.id||b.error||"",status:b.status||"",path:b.path||""}}))},
+ bug_log:function(d){return table([["title","Title"],["status","Status"],["slice","Slice"],["criterion","Criterion"],["path","Source"]],d.items.map(function(b){return {title:b.kind==="qa-note"?b.text:(b.title||b.id||b.error||""),status:b.kind==="qa-note"?"qa note, attempts "+(b.attempts==null?"?":b.attempts):(b.status||""),slice:b.slice||"",criterion:b.criterion||(b.criteria||[]).join(", "),path:b.path||""}}))},
  git:function(d){return table([["sha","Commit"],["date","Date"],["subject","Subject"]],d.items.map(function(c){return {sha:short(c.sha),date:c.date,subject:c.subject}}))}
 };
 function histPanel(key,title){
@@ -234,7 +268,7 @@ function renderStale(){
   else{el.className="";el.textContent="Repository state unknown"}
 }
 function render(){
-  renderStale();
+  renderStale();renderStops();
   var p=parseHash(),main=$("main");
   var nav=$("nav");
   nav.innerHTML=TABS.map(function(t){return '<a href="#/'+t[0]+(S.sha?"?sha="+encodeURIComponent(S.sha):"")+'"'+(t[0]===p.tab?' aria-current="page"':"")+(t[2]==="rt"?' class="rt" title="runtime, not tied to a commit"':"")+">"+esc(t[1])+"</a>"}).join("");
@@ -245,6 +279,7 @@ function render(){
   var t=p.tab,pt=function(h){if(parseHash().tab===t)main.innerHTML=h};
   if(t==="overview"){pt("<h2>Runtime (now)</h2>"+runtimeHtml()+"<h2>Latest snapshot</h2>"+snapSummary());return}
   if(t==="ops"){pt("<h2>Ops</h2>"+runtimeHtml());return}
+  if(t==="hitl"){histPanel("hitl","Historical: proposed or pending decisions and hitl events").then(function(h){pt("<h2>Human stops</h2>"+hitlHtml()+h)});return}
   if(t==="langfuse"){pt("<h2>Langfuse</h2>"+langfuseHtml());return}
   main.innerHTML='<p class="mute">Loading...</p>';
   if(t==="evals"){Promise.all([histPanel("evals","Evals"),histPanel("bug_log","Bug log")]).then(function(a){pt(a.join(""))});return}
@@ -274,7 +309,7 @@ getJSON("../index.json").then(function(ix){
 }).catch(function(e){S.manifestErr="ops/index.json: "+e.message;$("sel").innerHTML='<option value="">unavailable</option>'}).then(function(){
   getJSON("../runtime.json").then(function(r){S.runtime=r}).catch(function(e){S.runtimeErr=e.message}).then(function(){route()});
 });
-setInterval(function(){delete S.cache["../runtime.json"];getJSON("../runtime.json").then(function(r){S.runtime=r;S.runtimeErr=null;renderStale();var t=parseHash().tab;if(t==="ops"||t==="overview"||t==="langfuse")render()}).catch(function(){})},30000);
+setInterval(function(){delete S.cache["../runtime.json"];getJSON("../runtime.json").then(function(r){S.runtime=r;S.runtimeErr=null;renderStale();renderStops();var t=parseHash().tab;if(t==="ops"||t==="overview"||t==="langfuse"||t==="hitl")render()}).catch(function(){})},30000);
 })();
 </script>
 </body>
