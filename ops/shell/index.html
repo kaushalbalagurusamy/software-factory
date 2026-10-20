@@ -21,6 +21,8 @@ main{padding:1rem;max-width:1100px;margin:0 auto}
 #banner{margin:0;padding:.6rem 1rem;font-weight:600}
 #banner.snap{background:color-mix(in srgb,var(--warn) 18%,var(--bg));border-bottom:1px solid var(--warn)}
 #banner.rt{background:color-mix(in srgb,var(--live) 14%,var(--bg));border-bottom:1px solid var(--live)}
+#stale{margin:0;padding:.4rem 1rem;font-size:.9rem;border-bottom:1px solid var(--line)}
+#stale.behind{background:color-mix(in srgb,var(--warn) 18%,var(--bg));border-bottom-color:var(--warn);font-weight:600}
 #banner.err{background:color-mix(in srgb,var(--bad) 18%,var(--bg));border-bottom:1px solid var(--bad)}
 label{font-size:.9rem;color:var(--mute)}
 select,button{font:inherit;min-height:44px;padding:.3rem .6rem;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:.5rem;max-width:100%}
@@ -47,6 +49,7 @@ header>div{min-width:0;max-width:100%}#sel{width:100%;text-overflow:ellipsis}
   <select id="sel" aria-describedby="selnote"></select></div>
 </header>
 <p id="banner" role="status"></p>
+<p id="stale" role="status"></p>
 <nav id="nav" aria-label="Dashboard tabs"></nav>
 <main id="main" tabindex="-1"></main>
 <script>
@@ -224,7 +227,14 @@ function snapSummary(){
   return h+"</div>";
 }
 
+function renderStale(){
+  var el=$("stale"),b=S.runtime&&S.runtime.behind;
+  if(typeof b==="number"&&b>0){el.className="behind";el.textContent="Snapshot is "+b+" commits behind the repository"}
+  else if(b===0){el.className="";el.textContent="Up to date"}
+  else{el.className="";el.textContent="Repository state unknown"}
+}
 function render(){
+  renderStale();
   var p=parseHash(),main=$("main");
   var nav=$("nav");
   nav.innerHTML=TABS.map(function(t){return '<a href="#/'+t[0]+(S.sha?"?sha="+encodeURIComponent(S.sha):"")+'"'+(t[0]===p.tab?' aria-current="page"':"")+(t[2]==="rt"?' class="rt" title="runtime, not tied to a commit"':"")+">"+esc(t[1])+"</a>"}).join("");
@@ -264,7 +274,7 @@ getJSON("../index.json").then(function(ix){
 }).catch(function(e){S.manifestErr="ops/index.json: "+e.message;$("sel").innerHTML='<option value="">unavailable</option>'}).then(function(){
   getJSON("../runtime.json").then(function(r){S.runtime=r}).catch(function(e){S.runtimeErr=e.message}).then(function(){route()});
 });
-setInterval(function(){delete S.cache["../runtime.json"];getJSON("../runtime.json").then(function(r){S.runtime=r;S.runtimeErr=null;var t=parseHash().tab;if(t==="ops"||t==="overview"||t==="langfuse")render()}).catch(function(){})},30000);
+setInterval(function(){delete S.cache["../runtime.json"];getJSON("../runtime.json").then(function(r){S.runtime=r;S.runtimeErr=null;renderStale();var t=parseHash().tab;if(t==="ops"||t==="overview"||t==="langfuse")render()}).catch(function(){})},30000);
 })();
 </script>
 </body>

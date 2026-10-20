@@ -139,7 +139,28 @@ def langfuse(cfg: dict) -> dict:
     return {"applicable": True, "configured": fig, "traces": not_measured("trace ingestion is not checked by this collector")}
 
 
-def collect_runtime(config_path: Path | None) -> dict:
+def _git_out(repo: Path, *args: str) -> str | None:
+    try:
+        p = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return p.stdout.strip() if p.returncode == 0 else None
+
+
+def repo_state(repo: Path, ops_dir: Path) -> dict:
+    """HEAD and how many commits the newest snapshot (index.json ``head``) is behind it; None when unknown."""
+    head = _git_out(repo, "rev-parse", "--verify", "-q", "HEAD")
+    snap = None
+    try:
+        idx = json.loads((ops_dir / "index.json").read_text(encoding="utf-8"))
+        snap = idx.get("head") or (idx.get("commits") or [{}])[0].get("sha")
+    except (OSError, ValueError, AttributeError, IndexError):
+        pass
+    n = _git_out(repo, "rev-list", "--count", f"{snap}..HEAD") if head and isinstance(snap, str) and snap else None
+    return {"repo_head": head, "behind": int(n) if n and n.isdigit() else None}
+
+
+def collect_runtime(config_path: Path | None, ops_dir: Path | None = None) -> dict:
     cfg, base, note = {}, Path("."), None
     if config_path is not None and Path(config_path).exists():
         try:
@@ -160,12 +181,14 @@ def collect_runtime(config_path: Path | None) -> dict:
     figs["version_match"] = (
         measured(d["value"] == e["value"], "deployed_version vs expected_version", "live" if "live" in (d["label"], e["label"]) else "static")
         if d["measured"] and e["measured"] else not_measured("needs both deployed_version and expected_version"))
+    repo = base if ops_dir is None else Path(ops_dir).resolve().parent
+    state = repo_state(repo, Path(ops_dir) if ops_dir is not None else base / "ops")
     return {"schema": SCHEMA, "kind": "runtime", "as_of": now_iso(), "note": note, "figures": figs,
-            "langfuse": langfuse(cfg), "not_tied_to_commit": True}
+            "langfuse": langfuse(cfg), "not_tied_to_commit": True, **state}
 
 
 def write_runtime(config_path: Path | None, out_path: Path) -> dict:
-    data = collect_runtime(config_path)
+    data = collect_runtime(config_path, out_path.parent)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = out_path.with_name(out_path.name + f".tmp{os.getpid()}")
     tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
