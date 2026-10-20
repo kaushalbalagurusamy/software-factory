@@ -25,10 +25,15 @@ def decide(root, role, tool, cfg=None, **tool_input):
     return path_guard.decide(p, cfg).kind
 
 
-QA_OK = ["qa-notes.md", "docs/qa-notes.md", "slices/s1/qa-feedback/t1.md", "qa-feedback/x.md", ".sf/qa/attempts.json"]
-QA_NO = ["src/app.py", "tests/test_x.py", "qa-notes.md.bak", "qa-notes.md/x.py", "evals/qa-notes.md",
-         "evals/qa-feedback/x.md", "held/qa-feedback/x.md", "tests/frozen_a.py", ".factory/qa-feedback/x.md",
-         ".claude/qa-notes.md", ".sf/other.json", "../outside/qa-notes.md"]
+QA_OK = ["docs/slices/s1/qa-notes.md", "docs/slices/s1/qa-feedback/t1.md", ".sf/slices/s1/attempts.jsonl",
+         ".sf/slices/s1/failures.json", ".sf/slices/s1/notes.txt", ".sf/slices/s1/x.tsv"]
+QA_NO = ["src/app.py", "tests/test_x.py", "qa-notes.md", "docs/qa-notes.md", "docs/slices/s1/qa-notes.md.bak",
+         "docs/slices/s1/qa-feedback/t1.py", "docs/slices/s1/qa-feedback/sub/t1.md",
+         "tests/qa-feedback/conftest.py", "src/qa-feedback/conftest.py", "scripts/qa-feedback/run.sh",
+         "docs/slices/s1/qa-feedback/conftest.py", ".sf/slices/s1/run.sh", ".sf/slices/s1/a.py",
+         ".sf/slices/s1/tests/a.md", ".sf/slices/tests/x.md", "docs/slices/tests/qa-notes.md",
+         "evals/qa-notes.md", "held/a.md", "tests/frozen_a.py", ".factory/x.md", ".claude/x.md", ".git/x.md",
+         ".sf/qa/a.json", ".sf/other.json", ".sf/slices", "../outside/qa-notes.md"]
 
 
 @pytest.mark.parametrize("path", QA_OK)
@@ -45,15 +50,16 @@ def test_qa_denied_elsewhere(root, path):
 def test_qa_symlink_cannot_reach_app_code(root):
     (root / "src").mkdir()
     (root / "src/app.py").write_text("x")
-    (root / "qa-notes.md").symlink_to(root / "src/app.py")
-    assert decide(root, "qa", "Write", file_path=str(root / "qa-notes.md")) == "deny"
+    (root / "docs/slices/s1").mkdir(parents=True)
+    (root / "docs/slices/s1/qa-notes.md").symlink_to(root / "src/app.py")
+    assert decide(root, "qa", "Write", file_path=str(root / "docs/slices/s1/qa-notes.md")) == "deny"
 
 
 def test_qa_malformed_target_denied(root):
     assert decide(root, "qa", "Write", file_path=None) == "deny"
 
 
-@pytest.mark.parametrize("path", ["qa-notes.md", "x/qa-feedback/a.md", ".sf/qa/a.json"])
+@pytest.mark.parametrize("path", ["docs/slices/s1/qa-notes.md", "docs/slices/s1/qa-feedback/a.md", ".sf/slices/s1/a.json"])
 def test_implement_denied_qa_paths(root, path):
     assert decide(root, "implement", "Write", file_path=str(root / path)) == "deny"
 
@@ -66,7 +72,7 @@ def test_qa_globs_from_config_override(root):
     cfg = HookConfig.from_profile(parse_profile(PROFILE), root)
     object.__setattr__(cfg, "qa_paths", ("notes/**",))
     assert decide(root, "qa", "Write", cfg, file_path=str(root / "notes/a.md")) == "allow"
-    assert decide(root, "qa", "Write", cfg, file_path=str(root / "qa-notes.md")) == "deny"
+    assert decide(root, "qa", "Write", cfg, file_path=str(root / "docs/slices/s1/qa-notes.md")) == "deny"
     assert decide(root, "implement", "Write", cfg, file_path=str(root / "notes/a.md")) == "deny"
 
 
@@ -88,3 +94,35 @@ def test_qa_bash_git_restrictions(root, cmd):
 def test_qa_bash_malformed_command_denied(root):
     assert decide(root, "qa", "Bash", command=None) == "deny"
     assert decide(root, "qa", "Bash", command=["git", "add"]) == "deny"
+
+
+NOTES = "docs/slices/s1/qa-notes.md"
+
+
+@pytest.mark.parametrize("cmd", [
+    f"echo x > {NOTES}", f"echo x >> {NOTES}", f"pytest -q > .sf/slices/s1/out.txt 2>&1",
+    "pytest -q 2>&1 | tee .sf/slices/s1/run.txt", "pytest -q > /dev/null 2>&1", "pytest -q 2>/dev/null",
+    f"sed -i s/a/b/ {NOTES}", f"cp /etc/hostname {NOTES}", f"mv .sf/slices/s1/a.json .sf/slices/s1/b.json",
+    f"rm .sf/slices/s1/a.json", "dd if=/dev/zero of=.sf/slices/s1/z.txt count=1",
+    "python -c \"print(open('data.json').read())\"", "python -m pytest -p no:cacheprovider -q",
+    f"bash -c 'echo x > {NOTES}'"])
+def test_qa_bash_allowed_writes(root, cmd):
+    assert decide(root, "qa", "Bash", command=cmd) == "allow"
+
+
+@pytest.mark.parametrize("cmd", [
+    "echo x > src/app.py", "echo x >> src/app.py", "echo x >src/app.py", "echo x 1>src/app.py",
+    "echo x &> src/app.py", "echo x > evals/golden.txt", "pytest -q | tee src/a.py", "tee -a tests/t.py",
+    "sed -i s/a/b/ src/app.py", "sed -i.bak s/a/b/ src/app.py", "sed -ni 1p src/app.py",
+    "sed --in-place s/a/b/ src/app.py", "cp /etc/hostname src/a", "cp -t src /etc/hostname",
+    "mv src/a.py src/b.py", "mv x.md src/x.md", "rm src/app.py", "rm -rf tests", "touch tests/t.py",
+    "dd if=/dev/zero of=src/a count=1", "python -c \"open('src/a','w').write('x')\"",
+    "python3 -c 'from pathlib import Path; Path(\"a\").write_text(\"x\")'",
+    "bash -c 'echo x > src/a'", "sh -c \"rm src/a\"", "echo x > $HOME/a", "echo x > ~/a", "echo x >",
+    "cat y > docs/slices/s1/qa-feedback/c.py"])
+def test_qa_bash_denied_writes(root, cmd):
+    assert decide(root, "qa", "Bash", command=cmd) == "deny"
+
+
+def test_other_full_bash_roles_are_not_inspected(root):
+    assert decide(root, "implement", "Bash", command="echo x > src/app.py") == "allow"
