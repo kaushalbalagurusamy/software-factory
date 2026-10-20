@@ -185,7 +185,18 @@ def imported_modules(tree):
 def test_L13_only_standard_library_imports():
     mods = imported_modules(ast.parse(lsf_source()))
     assert mods, "lsf.py must import something"
-    assert mods <= set(sys.stdlib_module_names), sorted(mods - set(sys.stdlib_module_names))
+    std = getattr(sys, "stdlib_module_names", None)  # 3.10+; on 3.9 fall back to where the module lives
+    if std is None:
+        import importlib.util
+        import sysconfig
+        libdir = sysconfig.get_paths()["stdlib"]
+
+        def is_std(m):
+            spec = importlib.util.find_spec(m)
+            return spec is not None and (spec.origin in ("built-in", "frozen") or
+                                         (spec.origin or "").startswith(libdir) and "site-packages" not in spec.origin)
+        std = {m for m in mods if is_std(m)}
+    assert mods <= set(std), sorted(mods - set(std))
     assert "tomllib" not in mods  # 3.11+
 
 
