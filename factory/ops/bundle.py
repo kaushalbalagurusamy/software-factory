@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .collect import COLLECTOR_VERSION, GitSource, WorkTreeSource, _git, collect_all
+from .collect import COLLECTOR_VERSION, GitSource, WorkTreeSource, _git, collect_all, unavailable
 
 SCHEMA = 1
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -81,6 +81,27 @@ def _commit_meta(repo: Path, sha: str) -> dict:
     return {"sha": h, "date": d, "subject": s}
 
 
+def _when(text):
+    try:
+        d = datetime.fromisoformat(str(text).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+
+
+def _stage_events(tab: dict, commit_date: str, worktree: bool) -> dict:
+    """Stage events are history: drop those stamped after the commit, and report none as unavailable, not an empty table."""
+    if not tab["available"]:
+        return unavailable(f"no stage events recorded ({tab['reason']})")
+    cut = None if worktree else _when(commit_date)
+    keep = [e for e in tab["events"] if "error" in e or cut is None or (_when(e.get("at")) or cut) <= cut]
+    if not any("error" not in e for e in keep):
+        return unavailable("no stage events recorded")
+    tab["events"] = keep
+    tab["summary"]["events"] = len(keep)
+    return tab
+
+
 def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
     """Build (or find) the snapshot for one commit; returns its index entry. Idempotent per sha."""
     meta = _commit_meta(repo, "HEAD" if worktree else sha)
@@ -91,6 +112,7 @@ def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
     else:
         src = WorkTreeSource(repo) if worktree else GitSource(repo, meta["sha"])
         tabs_out, tabs = {}, collect_all(src)
+        tabs["dev_journey"] = _stage_events(tabs["dev_journey"], meta["date"], worktree)
         for name, tab in tabs.items():
             entry: dict = {"available": tab["available"]}
             if not tab["available"]:
@@ -123,13 +145,15 @@ def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
             "tabs": {k: manifest["tabs"][k]["available"] for k in sorted(manifest["tabs"])}, "latest_stage_event": latest}
 
 
-def update_index(out: Path, entries: list[dict]) -> dict:
+def update_index(out: Path, entries: list[dict], head: str | None = None) -> dict:
     ip = out / "index.json"
     idx = json.loads(ip.read_text(encoding="utf-8")) if ip.exists() else {"schema": SCHEMA, "commits": []}
     by = {c["sha"]: c for c in idx["commits"]}
     for e in entries:
         if e["sha"] != "worktree":
             by[e["sha"]] = e
+    if head:
+        idx["head"] = head  # the commit the latest default (--sha HEAD) bundle ran from
     idx["commits"] = sorted(by.values(), key=lambda c: (c["date"], c.get("n", 0)), reverse=True)
     _atomic(ip, json.dumps(idx, indent=1).encode("utf-8"), out)
     return idx
@@ -145,7 +169,7 @@ def bundle(repo: Path, sha: str = "HEAD", out: Path = Path("ops"), backfill: int
     if backfill > 0 and not worktree:
         shas = _git(repo, "rev-list", f"-n{backfill}", sha).decode().split()[::-1]
     entries = [snapshot(repo, s, out, worktree) for s in shas]
-    update_index(out, entries)
+    update_index(out, entries, entries[-1]["sha"] if sha == "HEAD" and not worktree else None)
     if viewer:
         build_viewer(out)
     install_shell(out)
