@@ -9,6 +9,7 @@ import fcntl
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -22,8 +23,15 @@ _CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 _PEM = re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----(?:.*?-----END [A-Z ]*PRIVATE KEY-----|.*)", re.S)
 
 
+_BEARER = re.compile(r"(?i)\b(bearer\s+)[A-Za-z0-9._~+/=-]{8,}")
+_USERINFO = re.compile(r"(?<=://)[^/\s:@]+:[^/\s@]+@")
+
+
 def _redact(text: str) -> str:
-    from factory.hooks.ledger_audit import REDACTED, redact  # the redaction used by factory.hooks
+    from factory.hooks.ledger_audit import REDACTED, redact as base  # the redaction used by factory.hooks
+
+    def redact(t: str) -> str:  # plus bearer tokens and scheme://user:password@host userinfo
+        return _USERINFO.sub(REDACTED + "@", _BEARER.sub(lambda m: m.group(1) + REDACTED, base(t)))
 
     text = _PEM.sub(REDACTED, text)  # an unterminated block hides everything after its header
     spaced = redact(_CONTROL.sub(" ", text))
@@ -48,16 +56,13 @@ def _head(root: Path) -> str:
 
 
 def _target(root: Path) -> Path:
-    """The events file, refusing any symlink that leads outside root."""
-    real_root = Path(os.path.realpath(root))
+    """The events file; a symlink at ops/ or ops/events.jsonl is refused whatever its target."""
+    if not root.is_dir():
+        raise FileNotFoundError(f"repository root does not exist: {root}")
     ops = root / "ops"
     for p in (ops, ops / "events.jsonl"):
         if p.is_symlink():
-            r = Path(os.path.realpath(p))
-            if r != real_root and real_root not in r.parents:
-                raise ValueError(f"{p} is a symlink that resolves outside the repository")
-    if not root.is_dir():
-        raise FileNotFoundError(f"repository root does not exist: {root}")
+            raise ValueError(f"{p} is a symlink")
     ops.mkdir(exist_ok=True)
     return ops / "events.jsonl"
 
@@ -80,8 +85,10 @@ def emit(root, stage: str, slice_id: str, verdict: str, note: str = "", source: 
             event["role"] = _clean(role, FIELD_LIMIT)
         line = (json.dumps(event, ensure_ascii=False) + "\n").encode("utf-8")
         path = _target(root)
-        fd = os.open(path, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o644)
+        fd = os.open(path, os.O_RDWR | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW, 0o644)
         try:
+            if not stat.S_ISREG(os.fstat(fd).st_mode):
+                raise ValueError(f"{path} is not a regular file")
             fcntl.flock(fd, fcntl.LOCK_EX)  # the newline repair reads then writes; closing the fd unlocks
             size = os.fstat(fd).st_size
             if size and os.pread(fd, 1, size - 1) != b"\n":
