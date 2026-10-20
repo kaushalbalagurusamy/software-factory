@@ -356,7 +356,7 @@ def _chain(prev, text):
 
 
 def _entry_text(e):
-    return json.dumps({k: v for k, v in e.items() if k != "chain"}, sort_keys=True, separators=(",", ":"), default=_jd)
+    return json.dumps({k: v for k, v in e.items() if k not in ("chain", "hash")}, sort_keys=True, separators=(",", ":"), default=_jd)
 
 
 def stops_raw(root):
@@ -381,7 +381,8 @@ def stops_raw(root):
             e = json.loads(ln)
         except ValueError:
             raise bad
-        if not isinstance(e, dict) or e.get("seq") != i or not isinstance(e.get("chain"), str):
+        if not isinstance(e, dict) or e.get("seq") != i or not isinstance(e.get("chain"), str) \
+                or e.get("prev") != prev or e.get("hash") != e.get("chain"):
             raise bad
         want = _chain(prev, _entry_text(e))
         if not hmac.compare_digest(want, e["chain"]):
@@ -419,7 +420,8 @@ def stops_append(root, entry):
     prev = entries[-1]["chain"] if entries else GENESIS
     entry = dict(entry)
     entry["seq"] = len(entries) + 1
-    entry["chain"] = _chain(prev, _entry_text(entry))
+    entry["prev"] = prev
+    entry["chain"] = entry["hash"] = _chain(prev, _entry_text(entry))
     append_line(lpath(root, "stops.jsonl"), entry)
     atomic_write(lpath(root, "stops.head"), json.dumps({"seq": entry["seq"], "chain": entry["chain"]}, default=_jd) + "\n")
 
@@ -1209,7 +1211,7 @@ def cmd_hook(a, root):
     try:
         raw = sys.stdin.buffer.read(MAX_READ)
         try:
-            p = json.loads(raw.decode("utf-8", "replace"))
+            p = json.loads(raw.decode("utf-8", "replace").replace("\x00", " "))
         except ValueError:
             return 0
         if not isinstance(p, dict):
