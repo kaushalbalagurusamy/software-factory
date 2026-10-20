@@ -150,3 +150,12 @@ affected criteria; proposed builder handoff with dependencies and regression
 checks; an advisory HITL recommendation; and what was not checked. Explicit owner
 delegation may authorize a bounded edit. Prompt rules are behavioral guidance,
 not filesystem permissions. Live IDE rule ingestion has not been visually tested.
+
+## Personal dashboard extension
+
+The Load simulator extension is versioned separately from the coordinator's
+release. `~/.cache/lsf-personal-ready.json` on the VPS can select a tested personal
+commit for new fallback projects only while its `base_commit` matches the
+coordinator ready marker. A newer coordinator release invalidates that override.
+Already-running projects retain their existing runtime. The simulator executes
+browser arithmetic only; its declared topology lives in `docs/load-model.json`.

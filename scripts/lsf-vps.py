@@ -67,7 +67,12 @@ def pin_runtime(p):
 import subprocess,tempfile,re,os,hashlib
 repo=Path('/home/linuxuser/Projects/software-factory')
 marker=Path('/home/linuxuser/.cache/lsf-ready-for-codex-20261020.json')
-ready=json.loads(marker.read_text());sha=ready.get('commit','')
+ready=json.loads(marker.read_text())
+personal=marker.with_name('lsf-personal-ready.json')
+if personal.exists():
+ overlay=json.loads(personal.read_text())
+ if overlay.get('ready') is True and overlay.get('base_commit')==ready.get('commit'):ready=overlay
+sha=ready.get('commit','')
 if ready.get('ready') is not True or not re.fullmatch('[0-9a-f]{40}',sha):raise SystemExit('No tested LSF runtime is marked ready')
 versions=Path('/home/linuxuser/.local/share/lsf-vps/versions');versions.mkdir(parents=True,exist_ok=True)
 target=versions/sha
