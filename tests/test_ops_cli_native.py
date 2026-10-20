@@ -302,3 +302,16 @@ def test_exclude_in_linked_worktree_and_missing_file(proj, tmp_path_factory):
     assert exclude_lines(wt) == ["ops/events.jsonl"] and exclude_lines(proj) == ["ops/events.jsonl"]
     assert "events.jsonl" not in subprocess.run(["git", "status", "--porcelain"], cwd=wt, capture_output=True,
                                                 text=True).stdout
+
+
+def test_event_goes_to_the_repo_of_the_path_argument(proj, fake_tool, tmp_path_factory):
+    other = tmp_path_factory.mktemp("other")
+    subprocess.run(["git", "init", "-q", str(other)], check=True)
+    (other / "docs" / "slices" / "s9").mkdir(parents=True)
+    assert cli.main(["slice", "check", str(other / "docs" / "slices" / "s9")]) == 0
+    assert cli.main(["ops", "bundle", "--repo", str(other)]) == 0
+    assert cli.main(["qa", "--root", str(other), "state"]) == 0
+    assert [e["stage"] for e in events(other)] == ["4-slice", "11-commit", "7-qa"]
+    assert events(proj) == []
+    assert cli.main(["slice", "lock", "plain"]) == 0  # no path argument that leaves the cwd repo
+    assert [e["stage"] for e in events(proj)] == ["5-evals"]

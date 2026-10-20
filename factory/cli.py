@@ -387,16 +387,46 @@ def _event_slice(group: str, argv: List[str]) -> str:
     return "-"
 
 
-def _event_root() -> Path:
+def _arg_value(argv: List[str], name: str) -> Optional[str]:
+    for i, a in enumerate(argv):
+        if a == name and i + 1 < len(argv):
+            return argv[i + 1]
+        if a.startswith(name + "="):
+            return a[len(name) + 1:]
+    return None
+
+
+def _toplevel(path: Path) -> Optional[Path]:
     import subprocess
 
+    d = path if path.is_absolute() else Path.cwd() / path
+    while not d.is_dir() and d != d.parent:  # the nearest existing ancestor
+        d = d.parent
     try:
-        p = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=10)
+        p = subprocess.run(["git", "-C", str(d), "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=10)
         if p.returncode == 0 and p.stdout.strip():
             return Path(p.stdout.strip())
     except (OSError, subprocess.SubprocessError):
         pass
-    return Path.cwd()
+    return None
+
+
+def _event_root(group: str, argv: List[str]) -> Path:
+    """The repository an event belongs to: that of the --root/--repo/--repo-root/--slice (or slice DIR) path argument, else the cwd's."""
+    for name in ("--root", "--repo", "--repo-root", "--slice"):
+        v = _arg_value(argv, name)
+        if v:
+            top = _toplevel(Path(v))
+            if top is not None:
+                return top
+    if group == "slice":
+        d = _event_slice(group, argv)
+        for a in argv[1:]:
+            if not a.startswith("-") and Path(a.rstrip("/")).name == d and d != "-":
+                top = _toplevel(Path(a))
+                if top is not None:
+                    return top
+    return _toplevel(Path.cwd()) or Path.cwd()
 
 
 def _record_event(group: str, argv: List[str], code: int) -> None:
@@ -410,7 +440,7 @@ def _record_event(group: str, argv: List[str], code: int) -> None:
         verdict = "pass" if code == 0 else "fail"
         if group == "hitl" and code == 0:
             verdict = "open" if argv[0] == "request" else "released"
-        emit(_event_root(), stage, _event_slice(group, argv), verdict, f"exit={code}", source="sf")
+        emit(_event_root(group, argv), stage, _event_slice(group, argv), verdict, f"exit={code}", source="sf")
     except Exception as e:  # noqa: BLE001
         print(f"event not recorded: {type(e).__name__}", file=sys.stderr)
 
