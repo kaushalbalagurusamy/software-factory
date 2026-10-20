@@ -83,3 +83,8 @@ monospace block with a `Copy` button, and turns every `path:line` occurrence tha
 using the shared editor-links builder (so a traceback line opens in the owner's editor). A row without a log shows `No log
 recorded. Record one with: lsf event STAGE fail --log-file FILE`. Loading failures show the error text, never an empty panel.
 Clicking again collapses. The log is never executed or inserted as HTML.
+
+D-9. `lsf hitl supersede OLD --by-stop NEW [--by WHO] [--note N]` appends a chained `supersede` record (`old`, `new`, `by`, `at`, `note`)
+only when OLD is `asked`, NEW exists and is released, and OLD != NEW (else exit 1; missing `--by-stop` exits 2). OLD then has state and
+status `superseded by NEW`, is not open (exit 0 from `hitl status`), and emits an `hitl`/`superseded` event. A human act: the agent guard
+denies it like release, and `--strict-hitl` requires a terminal.
