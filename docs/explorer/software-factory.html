@@ -3830,8 +3830,9 @@ var SFEditorLinks = (function (root, factory) {
     return null;
   }
   function validRoot(r) {
-    return typeof r === "string" && r.length > 0 && r.length <= MAX_PATH && r.indexOf("\0") < 0 &&
-      r.indexOf("\\") < 0 && (r.charAt(0) === "/" || /^[A-Za-z]:\//.test(r));
+    if (typeof r !== "string" || r.length === 0 || r.length > MAX_PATH || r.indexOf("\0") >= 0) { return false; }
+    if (/^[A-Za-z]:[\\\/]/.test(r)) { return true; }
+    return r.indexOf("\\") < 0 && r.charAt(0) === "/";
   }
   function validRel(p) {
     var i, segs;
@@ -3847,7 +3848,7 @@ var SFEditorLinks = (function (root, factory) {
     if (typeof editor !== "string") { return null; }
     for (i = 0; i < EDITORS.length; i++) { if (EDITORS[i] === editor) { found = true; } }
     if (!found || !validRoot(rootDir) || !validRel(relPath)) { return null; }
-    base = rootDir.replace(/\/+$/, "");
+    base = (/^[A-Za-z]:/.test(rootDir) ? rootDir.replace(/\\/g, "/") : rootDir).replace(/\/+$/, "");
     n = lineOf(line);
     if (editor === "idea") {
       return "idea://open?file=" + encodeURIComponent(base + "/" + relPath) + (n ? "&line=" + n : "");
@@ -3856,7 +3857,7 @@ var SFEditorLinks = (function (root, factory) {
     q = n ? "&line=" + n : "";
     if (editor === "sublime") { return "subl://open?url=file://" + abs + q; }
     if (editor === "textmate") { return "txmt://open?url=file://" + abs + q; }
-    return editor + "://file/" + abs + (n ? ":" + n : "");
+    return editor + "://file/" + abs.replace(/^\//, "") + (n ? ":" + n : "");
   }
   return { editorUrl: editorUrl, editors: EDITORS.slice(), validRoot: validRoot };
 });
