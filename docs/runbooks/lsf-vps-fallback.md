@@ -122,3 +122,12 @@ label (`cli-nontty` for the dashboard route); its existing audit history is
 retained, and a regression-tested fix was sent to the VPS coordinator for new
 releases. Native IDE window inspection was unavailable; protocol registration,
 URL construction and OS dispatch were checked separately.
+
+## Switch during an existing local run
+
+Pause the local builder at a clean handoff before `prepare`, while leaving
+Antigravity and Codex open. The helper transfers on-disk files, Git history and
+existing `.lsf` state; it does not migrate Claude's conversation or unsaved IDE
+buffers. Give the remote agent the brief, current PRD, latest QA feedback and
+next action. Keep one active builder after the switch. Existing human stops
+must remain stops; the new agent should read them before proceeding.
