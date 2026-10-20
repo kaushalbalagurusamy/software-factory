@@ -24,7 +24,7 @@ def url(*args):
 
 def test_schemes_with_line():
     r, p = "/home/me/proj", "src/qa.py"
-    assert url("vscode", r, p, 120) == "vscode://file//home/me/proj/src/qa.py:120"
+    assert url("vscode", r, p, 120) == "vscode://file/home/me/proj/src/qa.py:120"
     assert url("cursor", r, p, 1).startswith("cursor://file/")
     assert url("windsurf", r, p, 1).startswith("windsurf://file/")
     assert url("zed", r, p, "7").endswith(":7")
@@ -34,13 +34,13 @@ def test_schemes_with_line():
 
 
 def test_encoding_and_windows_root():
-    assert url("vscode", "/a b", "d/x y#1.py", 2) == "vscode://file//a%20b/d/x%20y%231.py:2"
+    assert url("vscode", "/a b", "d/x y#1.py", 2) == "vscode://file/a%20b/d/x%20y%231.py:2"
     assert url("vscode", "C:/Users/me", "a.py", 3) == "vscode://file/C:/Users/me/a.py:3"
 
 
 @pytest.mark.parametrize("line", [None, 0, -1, 1.5, True, "x", "1.5", "-2", 10000001, "10000001"])
 def test_bad_line_is_omitted(line):
-    assert url("vscode", "/r", "a.py", line) == "vscode://file//r/a.py"
+    assert url("vscode", "/r", "a.py", line) == "vscode://file/r/a.py"
     assert url("idea", "/r", "a.py", line) == "idea://open?file=%2Fr%2Fa.py"
     assert url("sublime", "/r", "a.py", line) == "subl://open?url=file:///r/a.py"
 
@@ -94,3 +94,13 @@ def test_inlined_copies_are_byte_identical():
     src = inlined(JS)
     assert inlined(SKILL / "assets" / "template.html") == src
     assert inlined(ROOT / "ops" / "shell" / "index.html") == src
+
+
+def test_backslash_drive_root_is_converted():
+    assert url("vscode", "D:\\Users\\me\\proj", "a.py", 3) == "vscode://file/D:/Users/me/proj/a.py:3"
+    assert url("vscode", "/a\\b", "x") is None and url("vscode", "\\srv\\x", "x") is None
+
+
+def test_dotted_names_ok_and_odd_lines_omitted():
+    assert url("zed", "/r", "a..b/c.py", 2) == "zed://file/r/a..b/c.py:2"
+    assert url("vscode", "/r", "a", "abc") == "vscode://file/r/a"

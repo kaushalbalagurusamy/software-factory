@@ -73,8 +73,9 @@ var SFEditorLinks = (function (root, factory) {
     return null;
   }
   function validRoot(r) {
-    return typeof r === "string" && r.length > 0 && r.length <= MAX_PATH && r.indexOf("\0") < 0 &&
-      r.indexOf("\\") < 0 && (r.charAt(0) === "/" || /^[A-Za-z]:\//.test(r));
+    if (typeof r !== "string" || r.length === 0 || r.length > MAX_PATH || r.indexOf("\0") >= 0) { return false; }
+    if (/^[A-Za-z]:[\\\/]/.test(r)) { return true; }
+    return r.indexOf("\\") < 0 && r.charAt(0) === "/";
   }
   function validRel(p) {
     var i, segs;
@@ -90,7 +91,7 @@ var SFEditorLinks = (function (root, factory) {
     if (typeof editor !== "string") { return null; }
     for (i = 0; i < EDITORS.length; i++) { if (EDITORS[i] === editor) { found = true; } }
     if (!found || !validRoot(rootDir) || !validRel(relPath)) { return null; }
-    base = rootDir.replace(/\/+$/, "");
+    base = (/^[A-Za-z]:/.test(rootDir) ? rootDir.replace(/\\/g, "/") : rootDir).replace(/\/+$/, "");
     n = lineOf(line);
     if (editor === "idea") {
       return "idea://open?file=" + encodeURIComponent(base + "/" + relPath) + (n ? "&line=" + n : "");
@@ -99,7 +100,7 @@ var SFEditorLinks = (function (root, factory) {
     q = n ? "&line=" + n : "";
     if (editor === "sublime") { return "subl://open?url=file://" + abs + q; }
     if (editor === "textmate") { return "txmt://open?url=file://" + abs + q; }
-    return editor + "://file/" + abs + (n ? ":" + n : "");
+    return editor + "://file/" + abs.replace(/^\//, "") + (n ? ":" + n : "");
   }
   return { editorUrl: editorUrl, editors: EDITORS.slice(), validRoot: validRoot };
 });
@@ -175,7 +176,7 @@ function na(d){return '<div class="card">'+badge("unavailable")+" <strong>Not av
 function table(cols,rows){
   if(!rows.length)return '<p class="mute">No rows.</p>';
   return "<table><thead><tr>"+cols.map(function(c){return "<th scope=col>"+esc(c[1])+"</th>"}).join("")+"</tr></thead><tbody>"+
-   rows.map(function(r){return "<tr>"+cols.map(function(c){var v=r[c[0]];return "<td>"+(c[2]?fileRef(v):esc(v==null?"":v))+"</td>"}).join("")+"</tr>"}).join("")+"</tbody></table>";
+   rows.map(function(r){return "<tr>"+cols.map(function(c){var v=r[c[0]];return "<td>"+(c[0]==="path"?fileRef(v):esc(v==null?"":v))+"</td>"}).join("")+"</tr>"}).join("")+"</tbody></table>";
 }
 var HIST={
  architecture:function(d){
@@ -184,9 +185,9 @@ var HIST={
      h+='<div class="card"><strong>'+esc(it.title)+'</strong> <span class="mute">'+fileRef(it.path)+", "+it.nodes+" nodes, "+it.diagrams+' diagrams</span></div>'+
      '<iframe title="Architecture explorer: '+esc(it.title)+'" src="../viewer.html?model='+encodeURIComponent("blobs/"+it.model_blob+".json")+'"></iframe>';
    });return h},
- research:function(d){return table([["title","Title"],["as_of","As of"],["path","File",1]],d.items)},
- experiments:function(d){return table([["name","Experiment"],["path","File",1]],d.items)+d.items.map(function(i){return "<details><summary>"+esc(i.name)+"</summary><pre><code>"+esc(JSON.stringify(i.results||i.error,null,1))+"</code></pre></details>"}).join("")},
- adrs:function(d){return table([["id","ID"],["title","Title"],["status","Status"],["date","Date"],["path","File",1]],d.items)},
+ research:function(d){return table([["title","Title"],["as_of","As of"],["path","File"]],d.items)},
+ experiments:function(d){return table([["name","Experiment"],["path","File"]],d.items)+d.items.map(function(i){return "<details><summary>"+esc(i.name)+"</summary><pre><code>"+esc(JSON.stringify(i.results||i.error,null,1))+"</code></pre></details>"}).join("")},
+ adrs:function(d){return table([["id","ID"],["title","Title"],["status","Status"],["date","Date"]],d.items)},
  prd_journeys:function(d){return d.items.map(function(s){return '<div class="card"><strong>'+esc(s.title)+'</strong> <span class="mute">slice '+esc(s.slice)+", priority "+esc(s.priority||"unset")+"</span><ul>"+(s.stories.length?s.stories.map(function(x){return "<li>"+esc(x)+"</li>"}).join(""):'<li class="mute">no UX stories recorded</li>')+"</ul></div>"}).join("")},
  dev_journey:function(d){
    var h=table([["slice","Slice"],["t","Tasks done/total"],["v","Verified/total"],["a","Amendments"]],d.items.map(function(s){
@@ -198,7 +199,7 @@ var HIST={
    if(sm.results_committed)h+='<div class="card"><details open><summary>Committed results (latest.json)</summary><pre><code>'+esc(JSON.stringify(d.items[0].results,null,1))+"</code></pre></details></div>";
    else h+='<div class="card">'+badge("unavailable")+" No results committed. "+esc(sm.note||"")+"</div>";
    return h},
- bug_log:function(d){return table([["title","Title"],["status","Status"],["path","Source",1]],d.items.map(function(b){return {title:b.title||b.id||b.error||"",status:b.status||"",path:b.path||""}}))},
+ bug_log:function(d){return table([["title","Title"],["status","Status"],["path","Source"]],d.items.map(function(b){return {title:b.title||b.id||b.error||"",status:b.status||"",path:b.path||""}}))},
  git:function(d){return table([["sha","Commit"],["date","Date"],["subject","Subject"]],d.items.map(function(c){return {sha:short(c.sha),date:c.date,subject:c.subject}}))}
 };
 function histPanel(key,title){
