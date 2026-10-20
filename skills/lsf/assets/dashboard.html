@@ -376,7 +376,7 @@ function stepRow(st){var at=0;STEPS.forEach(function(x,i){if(x[0]===st){at=i;}})
   return h("li",{class:st==="applied"||i<at?"done":(i===at?"open":""),"aria-current":i===at?"step":null},x[1]);}));}
 function stopCard(s){
  var st=stateOf(s),open=st==="asked",opts=s.options||[],kids=[];
- kids.push(h("div",{class:"row2",style:"margin-top:0"},[chip(open?"waiting for you":st,open?"v-wait":"v-pass"),h("span",{class:"mono small mute"},s.name),h("span",{class:"small mute"},"opened "+hhmmss(s.opened_at))]));
+ kids.push(h("div",{class:"row2",style:"margin-top:0"},[chip(open?"waiting for you":(s.status||st),open?"v-wait":"v-pass"),h("span",{class:"mono small mute"},s.name),h("span",{class:"small mute"},"opened "+hhmmss(s.opened_at))]));
  kids.push(h("div",{class:"q"},s.question||"Approve?"));
  if(s.reason){kids.push(h("div",{class:"small mute"},s.reason));}
  kids.push(stepRow(st));
@@ -386,10 +386,10 @@ function stopCard(s){
   var dl=h("dl",{class:"dl"});
   function row(k,v){dl.appendChild(h("dt",{},k));dl.appendChild(h("dd",{},v));}
   if(s.answer){row("Answer",h("b",{},s.answer));}
-  row("Answered",(s.released_by||"?")+" at "+hhmmss(s.released_at)+(s.note?": "+s.note:""));
+  row(s.superseded_by?"Superseded":"Answered",(s.released_by||"?")+" at "+hhmmss(s.released_at)+(s.note?": "+s.note:""));
   if(s.recorded_where){row("Recorded in",ref(s.recorded_where));}
   if(st==="applied"){row("Evidence",s.applied_evidence||"");row("Applied",hhmmss(s.applied_at));}
-  else{row("Status","not applied yet");}
+  else if(!s.superseded_by){row("Status","not applied yet");}
   kids.push(dl);
  }else{
   var msg=h("div",{class:"small err",role:"alert"});

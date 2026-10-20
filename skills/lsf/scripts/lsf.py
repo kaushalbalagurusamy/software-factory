@@ -475,6 +475,14 @@ def derive_stops(entries):
                           "options": e.get("options") or [], "proposal_hash": e.get("proposal_hash"), "unbound": e.get("unbound") or [], "answer": None,
                           "answered_at": None, "recorded_where": None, "recorded_at": None,
                           "applied_evidence": None, "applied_at": None})
+        elif e.get("kind") == "supersede":
+            for s in reversed(stops):
+                if s["name"] == e.get("old"):
+                    if s["state"] == "asked":
+                        # released_at closes it everywhere open stops are counted; state/status say why
+                        s.update(state="superseded", status="superseded by %s" % e.get("new"), superseded_by=e.get("new"),
+                                 released_at=e.get("at"), released_by=e.get("by"), note=e.get("note"), via="supersede")
+                    break
         elif e.get("kind") in ("release", "recorded", "applied"):
             # a release closes the latest asked stop of that name; recorded/applied advance the latest stop of that name
             want = {"release": "asked", "recorded": "answered", "applied": "recorded"}[e["kind"]]
@@ -611,6 +619,33 @@ def hitl_release(root, name, note="", by=None, via="cli-nontty", answer=None, pr
         if stored:
             entry["answer"], entry["proposal_hash"] = answer, stored
         stops_append(root, entry)
+    return t
+
+
+def hitl_supersede(root, old, new, by=None, note=""):
+    """Retire open stop `old` because released stop `new` already answers it. Appends only; same by/event recording as release."""
+    check_name(old)
+    check_name(new)
+    by = by or os.environ.get("LSF_BY") or os.environ.get("USER") or "human"
+    if old == new:
+        raise Fail("a stop cannot supersede itself")
+    with locked(root):
+        stops = stops_state(root)
+        o = [s for s in stops if s["name"] == old]
+        n = [s for s in stops if s["name"] == new]
+        if not o:
+            raise Fail("unknown stop %s" % old)
+        if not n:
+            raise Fail("unknown stop %s" % new)
+        if o[-1]["state"] != "asked":
+            raise Fail("stop %s is not open (%s)" % (old, o[-1].get("status") or o[-1]["state"]))
+        if "released_at" not in n[-1] or n[-1]["state"] == "superseded":
+            raise Fail("stop %s is not released; release it first" % new)
+        t = iso(now())
+        if not emit_event(root, "hitl", "superseded", "%s superseded by %s (by %s)%s" % (old, new, by, (": " + note) if note else ""),
+                          phase=old, extra={"stop": old}, force=True):
+            raise Fail("supersede event could not be recorded; nothing changed")
+        stops_append(root, {"kind": "supersede", "old": old, "new": new, "by": clean_note(by, 120), "at": t, "note": clean_note(note, 500)})
     return t
 
 
@@ -1530,7 +1565,7 @@ def cmd_rollback(a, root):
 
 def fmt_stop(s):
     st = s.get("state") or ("answered" if "released_at" in s else "asked")
-    when = "released %s by %s" % (s["released_at"], s.get("released_by")) if "released_at" in s else "OPEN since %s" % s["opened_at"]
+    when = s["status"] if s.get("status") else "released %s by %s" % (s["released_at"], s.get("released_by")) if "released_at" in s else "OPEN since %s" % s["opened_at"]
     line = "%s: %s [%s, %s]%s" % (s["name"], s["question"], st, when, (" artifacts: " + ", ".join(s["artifact"])) if s["artifact"] else "")
     if s.get("options"):
         line += " options: " + " | ".join(s["options"])
@@ -1561,6 +1596,11 @@ def cmd_hitl(a, root):
         via = "cli-tty" if sys.stdin.isatty() else "cli-nontty"
         t = hitl_release(root, a.name, a.note or "", a.by, via, answer=a.answer)
         out("released %s at %s via %s (a recorded procedure, not proof of identity)" % (a.name, t, via))
+        return 0
+    if a.action == "supersede":
+        require_tty_if_strict(root, "hitl supersede")
+        t = hitl_supersede(root, a.name, a.by_stop, a.by, a.note or "")
+        out("superseded %s by %s at %s" % (a.name, a.by_stop, t))
         return 0
     if a.action == "repair":
         if not a.yes:
@@ -1765,7 +1805,7 @@ def summarize(text, limit=200):
 
 
 _COMMIT = re.compile(r"(?:^|&&|\|\||;|\n|\()\s*(?:\w+=\S+\s+)*git\s+(?:-\S+\s+(?:[^-\s]\S*\s+)?)*commit\b")
-_DENY_RELEASE = re.compile(r"hitl\s+(?:release|repair)\b")
+_DENY_RELEASE = re.compile(r"hitl\s+(?:release|repair|supersede)\b")
 _DENY_ROLLBACK = re.compile(r"\blsf\b[^\n;|&]*\brollback\b")
 _STOPS_TOUCH = re.compile(r"\.lsf/(?:stops|\.lock)|stops\.(?:jsonl|head)")
 _WRITES = re.compile(r"(?:>|\brm\b|\bmv\b|\btruncate\b|\btee\b|\bsed\b[^|;&]*\s-i|\bcp\b|\bdd\b|\bperl\b|\bpython|\bnode\b|\bln\b|\bchmod\b|\bsh\s+-c)")
@@ -1774,7 +1814,7 @@ _WRITES = re.compile(r"(?:>|\brm\b|\bmv\b|\btruncate\b|\btee\b|\bsed\b[^|;&]*\s-
 def guard_reason(command):
     """Friction, not proof: a PreToolUse hook cannot stop every way of editing a file. Returns a denial reason or None."""
     if _DENY_RELEASE.search(command):
-        return "lsf hitl release and repair are human acts; ask the owner to run them in their own terminal"
+        return "lsf hitl release, supersede and repair are human acts; ask the owner to run them in their own terminal"
     if _STOPS_TOUCH.search(command) and _WRITES.search(command):
         return "the human stop ledger (.lsf/stops*) must not be written by an agent"
     if _DENY_ROLLBACK.search(command):
@@ -2271,7 +2311,7 @@ def build_parser():
     p.add_argument("--yes", action="store_true", help="do it; without this only show what would be reverted")
 
     p = mk("hitl", cmd_hitl, "human decisions: request, status, release, recorded, applied")
-    hs = p.add_subparsers(dest="action", metavar="request|status|release|recorded|applied|repair")
+    hs = p.add_subparsers(dest="action", metavar="request|status|release|supersede|recorded|applied|repair")
     hs.required = True
     q = hs.add_parser("request")
     q.add_argument("name")
@@ -2294,6 +2334,12 @@ def build_parser():
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
     q = hs.add_parser("repair", description="Quarantine a failed stop ledger and rebuild it from its valid prefix. A human act.")
     q.add_argument("--yes", action="store_true")
+    q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
+    q = hs.add_parser("supersede", description="Retire an open stop whose question a released stop already answers. A human act; agents must never run it.")
+    q.add_argument("name", help="the open stop to retire")
+    q.add_argument("--by-stop", required=True, help="a released stop that replaces it")
+    q.add_argument("--by")
+    q.add_argument("--note")
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
     q = hs.add_parser("release", description="Release is a human act; agents must never run it. It records who and when; it is a procedure, not proof of identity.")
     q.add_argument("name")
