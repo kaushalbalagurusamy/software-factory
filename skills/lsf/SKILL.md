@@ -23,6 +23,9 @@ Run the tool as `lsf` (installed by `install.sh`) or `python3 <skill dir>/script
    - **Applied**: once the change is made, the agent runs `lsf hitl applied NAME --evidence "what changed"`; only then does the card say Applied.
    - **Stale**: if the question or an artifact changed after it was asked, the answer is refused (409) and the agent must ask again.
 
+Error logs: `lsf event STAGE fail --slice S --log-file out.txt` (or `--log -` with the output piped in) stores the last 64 KiB, redacted, in `.lsf/logs/`; click a failing row in the Evals & bugs tab to read it, with `path:line` editor links. A bug links to a log with a `Log: .lsf/logs/FILE` line in `docs/bugs/*.md`, or by matching slice and stage of the latest failing event.
+Rollback: the Git tab has a **Rollback** button per commit (confirm in the page), or `lsf rollback SHA` to preview and `--yes` to do it. It adds a revert commit; history is never rewritten. Human only; agents are denied.
+
 ## Start
 
 1. `lsf doctor` and fix any FAIL.
