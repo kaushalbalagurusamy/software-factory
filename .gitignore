@@ -20,3 +20,4 @@ ops/snapshots/
 ops/index.json
 ops/runtime.json
 ops/viewer.html
+ops/events.jsonl

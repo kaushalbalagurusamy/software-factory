@@ -255,3 +255,7 @@ Binding for `docs/prds/SFN-01-live-dashboard.md`.
 10. A symlink that resolves inside the root is allowed; one resolving outside is refused (E-02).
 11. A commit counts as already snapshotted for backfill only if `ops/snapshots/<sha>/manifest.json` exists. A commit that fails to bundle is listed and counted as failed.
 12. A pre-existing `events.jsonl` without a trailing newline gets one before the next event is appended.
+
+## C-50 (2026-10-20, SFN-01): the event log is local history, not a tracked file
+
+Supersedes the `SF_EVENTS=off` instruction given for the post-commit block (it contradicts E-04, which makes `ops bundle` emit `11-commit`, and E-10). `ops/events.jsonl` is a local, append-only record read from the working tree and filtered to a snapshot's commit date (E-13); it is not committed. `sf ops init` adds `ops/events.jsonl` to the repository's local exclude file (`.git/info/exclude`, via `git rev-parse --git-path info/exclude`; idempotent, never edits a tracked `.gitignore`), and `sf ops autobundle install` does the same. The post-commit block therefore runs the normal `sf ops bundle --sha HEAD` (event on) and a commit still leaves `git status --porcelain` clean because the log is excluded. In this repository the log is untracked and listed in `.gitignore`.
