@@ -48,3 +48,21 @@ bypass permissions and caffeinate assertions tied to Claude. Away-mode completed
 and the agent waited without creating .lsf or starting the phase clock.
 VPS HEAD 8e612b4 had no changes to the three pinned skill directories at final
 comparison; its newer decision-record contract is separate from this launcher.
+
+## Dashboard screenshots
+
+Captured from a local server using the real committed VPS rehearsal artifacts
+and its `.lsf` event log; the checkpoint image uses the separate gate exercise.
+Chrome rendered the actual pages. No checkpoint was approved and no approval
+token appears in the screenshots.
+
+- [Overview and phase completion](screenshots/lsf-overview.png)
+- [UX stories and prioritized PRD](screenshots/lsf-prd.png)
+- [Architecture and nesting-dolls entry points](screenshots/lsf-architecture.png)
+- [Evaluation verdicts](screenshots/lsf-evals.png)
+- [Pending human checkpoint](screenshots/lsf-checkpoint.png)
+
+The first evaluation capture exposed a collector limitation: a free-form
+`qa-notes.md` exists but is omitted because only `## Signature` blocks are parsed.
+The verdict stream remains visible. This was reported to the active VPS Claude
+for its next integration pass; do not interpret the empty QA list as a missing report.
