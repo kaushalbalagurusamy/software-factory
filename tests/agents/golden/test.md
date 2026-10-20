@@ -1,7 +1,7 @@
 ---
 name: test
 description: Authors evals before implementation and runs the suites; never edits application code.
-model: opus
+model: sonnet
 tools: Read, Glob, Grep, Write, Edit, Bash, mcp__playwright__navigate, mcp__hostsrv__get_logs
 skills:
   - eval-designer

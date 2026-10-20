@@ -52,7 +52,7 @@ def split(text):
     return yaml.safe_load(fm), fm, body
 
 
-def test_seven_entries_keys_and_determinism(profile, roles):
+def test_eight_entries_keys_and_determinism(profile, roles):
     a = generate_agents(profile, roles)
     b = generate_agents(profile, roles)
     assert list(a) == [f".claude/agents/{r}.md" for r in ROLE_IDS]
@@ -94,7 +94,7 @@ def test_tools_built_from_core_then_mcp(profile, roles):
     d, _, _ = split(out[".claude/agents/test.md"])
     assert "mcp__playwright__navigate" in d["tools"] and "mcp__hostsrv__get_logs" in d["tools"]
     d, _, _ = split(out[".claude/agents/orchestrator.md"])
-    assert "Agent(research, design, audit, implement, test, review)" in d["tools"]
+    assert "Agent(research, design, audit, implement, qa, test, review)" in d["tools"]
     assert "mcp__hostsrv__get_logs" in d["tools"]
 
 
@@ -201,7 +201,7 @@ def test_project_name_in_role_body_raises(profile, roles):
 
 def test_project_name_substring_is_not_whole_word(roles):
     out = generate_agents(parse_profile(base(project={"name": "mple"})), roles)
-    assert len(out) == 7
+    assert len(out) == 8
 
 
 def test_body_sections_order_and_skills(profile, roles):
