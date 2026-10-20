@@ -107,8 +107,16 @@ class Rig:
             a += ["--project", self.proj]
         return self.run(*a, *extra)
 
-    def pin(self, *extra):
-        return self.run("pin-external", "--skills-dir", self.skills, "--factory-root", self.root, *extra)
+    def pin(self, *extra, accept_changed=True):
+        # Amended after the independent review (finding: pin-external must not launder a changed skill): re-pinning
+        # skills whose hash differs from the shipped pin needs --accept-changed NAME. The fixture's stub skills always
+        # differ from the shipped pins, so --yes calls here accept them explicitly; test_pin_external_requires_accept_changed
+        # covers the refusal.
+        acc = []
+        if accept_changed and "--yes" in extra:
+            for n in EXTERNAL:
+                acc += ["--accept-changed", n]
+        return self.run("pin-external", "--skills-dir", self.skills, "--factory-root", self.root, *extra, *acc)
 
     @property
     def pins(self) -> Path:

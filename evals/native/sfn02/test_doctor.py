@@ -158,3 +158,12 @@ def test_A07_repo_ships_pins_for_exactly_the_ten_external_skills():
     for name in EXTERNAL:
         assert name in text, name
     assert len([h for h in text.replace('"', " ").split() if len(h) == 64 and all(c in "0123456789abcdef" for c in h)]) == 10
+
+
+def test_A07_pin_external_requires_accept_changed_for_changed_skills(stocked):
+    """Review finding: --yes alone must not launder a skill whose hash differs from its existing pin."""
+    before = stocked.pins.read_bytes()
+    p = stocked.pin("--yes", accept_changed=False)
+    assert p.returncode == 2, p.stdout + p.stderr
+    assert "changed since pinned" in (p.stdout + p.stderr)
+    assert stocked.pins.read_bytes() == before, "nothing may be written without --accept-changed"
