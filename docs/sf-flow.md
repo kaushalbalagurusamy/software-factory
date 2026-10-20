@@ -2,7 +2,7 @@
 
 This document reconciles three things: the owner's authoritative workflow (`/home/linuxuser/sf-workflow-owner-request-verbatim.md`), the verification follow-up (`/home/linuxuser/sf-verification-followup.md`), and what the repository actually contains today. It is not aspirational: each node says what exists, what checks it, and what does not.
 
-Evidence base (all run under `scripts/bounded-pytest.sh`, commit `agent-graph` head at time of writing): 4,551 unit tests pass; 1,498 agent-layer eval cases: 1,496 pass, 1 open (`TB06-D-035`, see `docs/adr/ADR-0004-blindness-guard-glob-through-symlinks.md`), 1 library self-check blocked by design; the golden gate is green, 141 of 141.
+Evidence base (all run under `scripts/bounded-pytest.sh`, 2026-10-20, `agent-graph`): 4,967 unit tests pass (4,906 plus 61 for `lsf`, run as two batches because two test modules share a basename); agent-layer evals: 1,502 pass, 1 open (`TB06-D-035`, see `docs/adr/ADR-0004-blindness-guard-glob-through-symlinks.md`), 1 library self-check skipped by design; native-flow evals (`evals/native`, slices SFN-01, 02, 03, 06, 07, 08): 840 pass; the golden gate is green, 141 of 141. Real-session rehearsals: `docs/native-verification/2026-10-19/REPORT.md` and `docs/native-verification/2026-10-20/REPORT.md`.
 
 ## Diagram
 
