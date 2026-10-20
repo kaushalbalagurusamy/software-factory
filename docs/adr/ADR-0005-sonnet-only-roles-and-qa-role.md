@@ -15,7 +15,7 @@ Update the existing tests and evals to the new spec. Rules followed for every ed
 ## 3. Evidence
 * The owner approved the plan (artifact https://claude.ai/artifact/QvGeDjn8CkfoHrbATXFH11) with "Do it" on 2026-10-20; the plan fixes the eight roles, Sonnet-only rule and qa role.
 * C-40 and C-41 (binding clarifications) state the names, formats and the supersession in C-40.6.
-* After the edits: `evals/agents` 1501 passed, 1 failed (`TB06-D-035`, open on purpose, ADR-0004), 1 skipped; see the report that accompanied this change for the other suites.
+* After the edits, on this branch merged with `agent-graph` at 71c0679: `evals/agents` 1501 passed, 1 failed (`TB06-D-035`, open on purpose, ADR-0004), 1 skipped; `evals/native` 529 passed; `tests/` (run as `tests --ignore=tests/lsf` plus `tests/lsf`, because `tests/lsf/test_core.py` and `tests/hooks/test_core.py` share a module basename and collide in one pytest run) 4720 passed plus 43 passed, 0 failed.
 
 ## 4. Edits, per file
 Counts are tests in the file or family that changed value, not total tests.
@@ -106,7 +106,7 @@ Counts are tests in the file or family that changed value, not total tests.
 | `test_allow_model_widens_explicitly` | relied on the shipped orchestrator being opus | uses `opus_orchestrator`; with `--allow-model opus` the orchestrator agent file is opus, implement stays sonnet, settings model stays sonnet | same behaviour, shipped data changed |
 | `test_doctor_fails_on_non_sonnet_agent_unless_allowed` | same reliance | uses `opus_orchestrator`; doctor FAILs `agent orchestrator`, passes with `--allow-model opus` | same |
 | `env` fixture (all doctor tests) | symlinked repo skills only | also stocks: minimal `SKILL.md` stubs for the ten external names and for every non-repo, non-plugin skill a role names; a throwaway `HOME` with a plugin registry and stub plugin skills for each `plugin:skill`; an external pin file (absolute path via `doctor.EXTERNAL_PINS`) pinning exactly those stubs | rule 4: the new role-skill and external checks must pass because the skills resolve and the pins match, not because the checks are bypassed |
-| `test_doctor_all_pass` | `joined.count("PASS skill ") == 13` | `== 14` | the repo has 14 `skills/*/SKILL.md`; the per-skill count is one per repo skill and the number moved with the repo, not with this change |
+| `test_doctor_all_pass` | `joined.count("PASS skill ") == 13` | `== 15` | the repo has 15 `skills/*/SKILL.md` after merging agent-graph (lsf and others landed since the test was written); the per-skill count is one per repo skill and the number moved with the repo, not with this change |
 | `test_doctor_json`, `test_doctor_without_project_runs_global_checks`, `test_doctor_trusts_arguments_not_the_manifest` | failed once the new checks ran against the old fixture | unchanged assertions, pass with the stocked fixture | rule 4 |
 | new `test_doctor_reports_role_skills_and_external_pins` | none | PASS lines for `role qa skill qa-supervisor`, `role review skill minesweeper`, `role design skill prd-writer`, `external minesweeper: matches pin` | C-40.4 |
 | new `test_doctor_fails_on_unresolved_role_skill` | none | removing a role skill gives `FAIL role audit skill legacy-audit`, exit 1 | A-06 |

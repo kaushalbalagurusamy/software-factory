@@ -353,7 +353,7 @@ def test_doctor_all_pass(proj, env, capsys):
     out = lines(capsys)
     assert all(l.startswith(("PASS", "SKIP")) for l in out), out
     joined = "\n".join(out)
-    assert "hook bash_guard deny" in joined and joined.count("PASS skill ") == 14  # one per repo skill (ls skills/*/SKILL.md)
+    assert "hook bash_guard deny" in joined and joined.count("PASS skill ") == 15  # one per repo skill (ls skills/*/SKILL.md)
 
 
 def test_doctor_json(proj, env, capsys):
