@@ -89,7 +89,8 @@ def test_E12_a_snapshot_with_committed_events_shows_them_in_dev_journey(repo):
     from factory.ops.events import emit
     for stage in ("4-slice", "5-evals", "7-qa"):
         assert emit(repo, stage, "s1", "pass")
-    git(repo, "add", "-f", "--", "ops/events.jsonl")  # C-50: the log is excluded locally; force-add it for this case
+    # C-50 + review finding 1 (docs/reviews/2026-10-20-sfn-review.md): the log stays untracked and local; the snapshot
+    # must still show it (events dated up to the commit date), so nothing is force-added here.
     sha = commit(repo, "with events")
     assert sf(repo, "ops", "bundle", env=child_env(SF_EVENTS="off")).returncode == 0
     m = manifest(repo, sha)["tabs"]["dev_journey"]
@@ -103,7 +104,7 @@ def test_E12_events_emitted_by_sf_commands_reach_the_dev_journey_tab(repo):
     (repo / "docs" / "slices").mkdir(parents=True)
     sf(repo, "slice", "triage", "--root", "docs/slices")  # E-04 writes the event
     assert len(read_events(repo)) == 1
-    git(repo, "add", "-f", "--", "ops/events.jsonl")  # C-50: the log is excluded locally; force-add it for this case
+    # (untracked local log, see above)
     sha = commit(repo, "commit the events")
     sf(repo, "ops", "bundle", env=child_env(SF_EVENTS="off"))
     evs = tab_blob(repo, sha, "dev_journey")["events"]
