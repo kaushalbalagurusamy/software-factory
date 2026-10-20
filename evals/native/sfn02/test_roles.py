@@ -82,11 +82,20 @@ def test_A01_installer_refuses_opus_role_by_default_and_honours_allow_model(rig)
     assert rig.agent_fm("qa")["model"] == "sonnet"
 
 
-def test_A01_profile_allow_models_key_allows_the_model(rig):
+def test_A01_profile_allow_models_key_alone_does_not_allow_the_model(rig):
+    # Amended by C-41.1 (security review): project data cannot widen the model allowlist by itself.
     rig.set_role("implement", model="opus")
     prof = rig.tmp / "prof.yaml"
     prof.write_text("schema_version: 1\nproject: {name: p}\npaths: {eval: ['evals/**']}\nallow_models: [opus]\n")
     r = rig.install("--profile", prof)
+    assert r.returncode == 1, r.stdout + r.stderr
+
+
+def test_A01_profile_allow_models_key_with_cli_opt_in_allows_the_model(rig):
+    rig.set_role("implement", model="opus")
+    prof = rig.tmp / "prof.yaml"
+    prof.write_text("schema_version: 1\nproject: {name: p}\npaths: {eval: ['evals/**']}\nallow_models: [opus]\n")
+    r = rig.install("--profile", prof, "--allow-model", "opus")
     assert r.returncode == 0, r.stderr
     assert rig.agent_fm("implement")["model"] == "opus"
 
