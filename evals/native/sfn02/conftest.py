@@ -65,7 +65,8 @@ class Rig:
         """Make every skill any role names, plus the ten external ones, resolvable."""
         for d in (self.root / "skills").iterdir():
             if d.is_dir() and (d / "SKILL.md").is_file() and not d.name.startswith("_"):
-                (self.skills / d.name).symlink_to(d)
+                if not (self.skills / d.name).is_symlink():
+                    (self.skills / d.name).symlink_to(d)
         plugins: dict = {}
         for name in self.role_skills() | set(EXTERNAL):
             if ":" in name:
