@@ -1,10 +1,12 @@
-# Default seven-role stage graph (TB-12). Data only; see docs/hooks/graph.md.
+# Default eight-role stage graph (TB-12, SFN-02). Data only; see docs/hooks/graph.md.
+# qa supervises implement and invokes the test stage as its runner.
 stages:
   - {id: orchestrate, role: orchestrator}
   - {id: research, role: research}
   - {id: design, role: design}
   - {id: audit, role: audit, gate: true}
   - {id: implement, role: implement}
+  - {id: qa, role: qa}
   - {id: test, role: test}
   - {id: review, role: review, gate: true}
 edges:
@@ -12,10 +14,11 @@ edges:
   - [research, design]
   - [design, audit]
   - [audit, implement]
-  - [implement, test]
+  - [implement, qa]
+  - [qa, test]
   - [test, review]
 loops:
-  - [test, implement]
+  - [qa, implement]
   - [review, implement]
 subsets:
-  small: [orchestrator, implement, test, review]
+  small: [orchestrator, implement, qa, test, review]
