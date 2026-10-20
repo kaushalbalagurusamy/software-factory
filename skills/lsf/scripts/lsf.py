@@ -1453,7 +1453,7 @@ def make_handler(root, token, assets_html):
                 path = self.path.partition("?")[0]
                 if path != "/api/hitl/release":
                     return self._err(404, "not found")
-                if not hmac.compare_digest(self.headers.get("X-LSF-Token", ""), token):
+                if not hmac.compare_digest(self.headers.get("X-LSF-Token", "").encode("utf-8", "replace"), token.encode()):
                     return self._err(403, "missing or wrong token")
                 try:
                     n = int(self.headers.get("Content-Length", ""))
