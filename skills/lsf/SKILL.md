@@ -27,12 +27,12 @@ Time split for the hour: about **60% alignment** (phases 0 to 6, informed by res
 | `1-sweep` | align | Minesweep: core business value, traps, best practices in networking, crypto, performance, ethics | sweep notes in `docs/requirements/` | 0 |
 | `2-research` | align | Multi-agent research seeds on state of the art, dated sources, "could not verify" | `research/<topic>.md` (include `As of: DATE`) | 1 |
 | `3-experiments` | align | Experiments only where research did not settle the choice | `experiments/<id>/results.json`, or `resolved.json` `{question, resolved_by, sources, as_of}` | 2 |
-| `4-prd` | align | Tracer-bullet PRDs, UX stories first, triaged by priority and dependency | `docs/slices/<id>/proposal.md` (heading "UX stories"; `priority:`) | 4 |
+| `4-prd` | align | Tracer-bullet PRDs, UX stories first, triaged by priority and dependency | `docs/slices/<id>/proposal.md` (heading "UX stories"; `priority:`), `docs/prds/*.md` | 4 |
 | `5-evals` | align | MECE eval surface: golden gates, invariants, boundaries, regressions, written before code | eval files, criteria in the slice | 5 |
 | `6-decide` | align | ADRs for consequential choices | `docs/adr/ADR-NNN-title.md` with `Status:` and `Date:` | 3 |
 | `7-implement` | build | Blind implementers build from the PRD; they tick tasks off, they do not read the evals | code, tasks marked `[x]` | 6 |
 | `8-qa` | build | QA agents run the evals, send feedback to the implementer, note repeat failures | `docs/slices/<id>/qa-notes.md`, `docs/bugs/<id>.md` (`Status: open|fixed|wontfix`) | 7 |
-| `9-review` | review | Mechanistic review with the nesting dolls (`mermaid-nesting-dolls`), the Ponytail rubric and the minesweeper lenses; failures amend the PRD and go back to 7 and 8 | amendments, bug notes | 8b |
+| `9-review` | review | Mechanistic review with the nesting dolls (`mermaid-nesting-dolls`), the Ponytail rubric and the minesweeper lenses; failures amend the PRD and go back to 7 and 8 | amendments, bug notes; the dolls model and page in `docs/explorer/*.model.json` and `.html` (Architecture tab) | 8b |
 | `10-docs` | review | ELI12 docs, ADR sync, drift check against the verbatim brief | `docs/eli12/`, updated ADRs | 10 |
 
 Stage ids are an alias map to `/sf` (last column) so events from both tools read the same. If a phase finds the earlier work wrong, go back: start the earlier phase again.

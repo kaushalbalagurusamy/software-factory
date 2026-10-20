@@ -138,3 +138,71 @@ def test_root_before_or_after(repo):
     import sys
     r = subprocess.run([sys.executable, str(LSF), "--root", str(repo), "init"], capture_output=True, text=True)
     assert r.returncode == 0 and (repo / ".lsf").is_dir()
+
+
+def test_control_chars_and_secrets_in_every_field(repo):
+    tok = "ghp_" + "a1B2c3D4e5F6g7H8i9J0"
+    r = run(repo, "event", "st\x01age", "ver" + tok, "--note", "n\x07ote " + tok, "--role", "r" + tok, "--slice", "s" + tok)
+    assert r.returncode in (0, 1, 2)
+    import subprocess
+    import sys
+    r = subprocess.run([sys.executable, str(LSF), "event", "stage" + tok, "v" + tok, "--note", "x\x1fy", "--role", "r" + tok,
+                        "--slice", "s" + tok, "--root", str(repo)], capture_output=True, text=True)
+    e = events(repo)[-1]
+    assert tok not in json.dumps(e) and "\x1f" not in json.dumps(e)
+    h = run(repo, "hook", "SubagentStop", stdin=json.dumps({"agent_type": "a\x00b" + tok, "last_assistant_message": "m\x00" + tok}))
+    assert h.returncode == 0 and h.stdout == ""
+    e = events(repo)[-1]
+    assert tok not in json.dumps(e) and "\\u0000" not in json.dumps(e)
+
+
+def test_partial_checkpoints_follow_default_mode(repo):
+    run(repo, "init")
+    prof = repo / ".lsf" / "profile.json"
+    d = json.loads(prof.read_text())
+    d["checkpoints"] = {"1-sweep": False}
+    prof.write_text(json.dumps(d))
+    run(repo, "phase", "start", "1-sweep")
+    run(repo, "phase", "end", "1-sweep")
+    assert run(repo, "hitl", "status").returncode == 0
+    run(repo, "phase", "start", "0-intake")
+    run(repo, "phase", "end", "0-intake")
+    assert run(repo, "hitl", "status").returncode == 3
+
+
+def test_many_stops_release_and_inspect(repo):
+    run(repo, "init")
+    for n in "abc":
+        run(repo, "hitl", "request", n, "--question", "q", "--artifact", "x", "--artifact", "x")
+    assert run(repo, "hitl", "release", "b").returncode == 0
+    for cmd in (("hitl", "status", "--json"), ("status", "--json"), ("status",), ("budget", "--json")):
+        r = run(repo, *cmd)
+        assert "Traceback" not in r.stderr, cmd
+
+
+def test_doctor_editors_git_missing_and_syntax(repo, tmp_path):
+    import os
+    import shutil
+    import subprocess
+    import sys
+    run(repo, "init")
+    prof = repo / ".lsf" / "profile.json"
+    for ed, want in (("windsurf", 0), ("none", 0), ("vscode", 0), ("emacs", 1)):
+        d = json.loads(prof.read_text())
+        d["editor"] = ed
+        prof.write_text(json.dumps(d))
+        assert run(repo, "doctor").returncode == want, ed
+    empty = tmp_path / "emptybin"
+    empty.mkdir()
+    r = run(repo, "doctor", env={"PATH": str(empty)}) if False else subprocess.run(
+        [sys.executable, str(LSF), "doctor", "--root", str(repo)], capture_output=True, text=True, env={"PATH": str(empty)})
+    assert r.returncode == 1
+    for ln in r.stdout.splitlines():
+        if ln.split(":")[0].split(" ")[-1] in ("git", "repository"):
+            assert ln.startswith("FAIL"), ln
+    # the file that is executing is the one checked
+    copy = tmp_path / "lsf_new.py"
+    copy.write_text(LSF.read_text() + "\nmatch 1:\n    case 1:\n        pass\n")
+    r = subprocess.run([sys.executable, str(copy), "doctor", "--root", str(repo)], capture_output=True, text=True)
+    line = [x for x in r.stdout.splitlines() if "self-check" in x][0]
+    assert line.startswith("FAIL") and "line" in line and r.returncode == 1
