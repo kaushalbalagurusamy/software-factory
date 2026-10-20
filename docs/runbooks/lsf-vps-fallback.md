@@ -68,6 +68,24 @@ The human remains the interviewer/build approver. Codex may act as delegated
 HITL for the owner's rehearsals, with that delegation recorded in the approval
 note. Checkpoint answers should progress Asked -> Answered -> Recorded -> Applied.
 
+## Bound test resources
+
+Prepared remote sessions have `lsf-vps-test` on PATH. Run tests through it:
+
+```sh
+lsf-vps-test python -m pytest -q
+lsf-vps-test npm test -- --runInBand
+```
+
+Defaults: 4 GiB sampled process-tree resident memory, 180 seconds, and a shared
+lock with the factory test runner so heavy test runs wait their turn. The command
+keeps the real exit status; memory stops return 137 and timeouts 124. This avoids
+Node virtual-address reservation failures from an address-space cap. Sampling
+is not a kernel allocation quota. The child-process, timeout, and lock behavior
+were tested locally; actual memory and timeout stops were also verified on VPS.
+Set `LSF_TEST_MEM_MB` or `LSF_TEST_WALL_S` explicitly if a scoped test needs a
+different budget. The launcher tells the agent to use this runner when present.
+
 ## Inspect state and retrieve commits
 
 ```sh

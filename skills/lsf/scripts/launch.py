@@ -20,7 +20,9 @@ def prepare(argv, binary, cwd, environment):
         'On Linux, verify the persistent host/session instead of Mac power settings. Remote Control '
         'and bypass permissions are enabled by the launcher. When initializing a new '
         'project, use --editor antigravity-ide for dashboard code links. Use the selected '
-        'model for subagents as well. Follow /lsf including its human checkpoints; '
+        'model for subagents as well. When lsf-vps-test is on PATH, run test commands '
+        'through it so process-tree memory and wall time are bounded; serialize heavy tests. '
+        'Follow /lsf including its human checkpoints; '
         'never approve a checkpoint on behalf of the owner. '
     )
     if args.task:

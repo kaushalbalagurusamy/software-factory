@@ -64,7 +64,7 @@ def shallow_boundary(source):
 
 def pin_runtime(p):
     result = remote("""from pathlib import Path
-import subprocess,tempfile,re,os
+import subprocess,tempfile,re,os,hashlib
 repo=Path('/home/linuxuser/Projects/software-factory')
 marker=Path('/home/linuxuser/.cache/lsf-ready-for-codex-20261020.json')
 ready=json.loads(marker.read_text());sha=ready.get('commit','')
@@ -78,14 +78,21 @@ if not target.exists():
    subprocess.run(['git','-C',str(repo),'archive',sha,'skills/lsf','skills/eli12-docs','skills/mermaid-nesting-dolls'],stdout=out,check=True)
   subprocess.run(['tar','-xf',str(archive),'-C',str(stage)],check=True)
   stage.rename(target)
-config={'commit':sha,'source':str(target),'bin':str(target/'bin')}
+guard_source=data['guard_source']
+guard_sha=hashlib.sha256(guard_source.encode()).hexdigest()
+tools=versions.parent/'tools';tools.mkdir(exist_ok=True)
+guard=tools/('resource-'+guard_sha+'.py')
+guard.write_text(guard_source)
+config={'commit':sha,'source':str(target),'bin':str(Path(data['runtime'])/'bin'),'resource_guard_sha':guard_sha}
 config_file=Path(data['runtime'])/'runtime.json'
 old=json.loads(config_file.read_text()) if config_file.exists() else None
 live=any(subprocess.run(['tmux','has-session','-t','='+data[key]],capture_output=True).returncode==0 for key in ('agent','dashboard'))
 if old and old.get('commit')!=sha and live:raise SystemExit('Running project stays pinned; use a new project name for a newer runtime')
-Path(config['bin']).mkdir(exist_ok=True)
+Path(config['bin']).mkdir(parents=True,exist_ok=True)
 w=Path(config['bin'])/'lsf'
 w.write_text('#!/bin/sh\\nexec python3 "'+str(target/'skills/lsf/scripts/lsf.py')+'" "$@"\\n');w.chmod(0o755)
+guarded=Path(config['bin'])/'lsf-vps-test'
+guarded.write_text('#!/bin/sh\\nexec python3 "'+str(guard)+'" --memory-mb "${LSF_TEST_MEM_MB:-4096}" --wall-s "${LSF_TEST_WALL_S:-180}" --lock /tmp/sf-factory-pytest.lock -- "$@"\\n');guarded.chmod(0o755)
 project=Path(data['remote'])/'.claude/skills';project.mkdir(parents=True,exist_ok=True)
 for name in ('lsf','eli12-docs','mermaid-nesting-dolls'):
  dest=project/name;wanted=target/'skills'/name
@@ -102,7 +109,8 @@ ex.write_text(text)
 runtime=Path(data['runtime']);runtime.mkdir(parents=True,exist_ok=True)
 (runtime/'runtime.json').write_text(json.dumps(config,indent=2)+'\\n')
 print(json.dumps(config))
-""", {'remote':p['remote'],'runtime':p['runtime'],'agent':p['agent'],'dashboard':p['dashboard']})
+""", {'remote':p['remote'],'runtime':p['runtime'],'agent':p['agent'],'dashboard':p['dashboard'],
+          'guard_source':(Path(__file__).resolve().parents[1]/'factory/resource_limits.py').read_text()})
     print('Pinned tested LSF runtime:',result['commit'][:12])
     return result
 
