@@ -702,6 +702,37 @@ def check_entry(proj, rel, e, s, add0):
             for it in its:
                 if not PARAM_RE.match(it) and it != "TODO":
                     add(rel, ln, "bad-param", "write '%s' as 'name (type): meaning'" % it[:50])
+    if "Expects" in lab and s is not None:
+        _, ln, raw = lab["Expects"]
+        its = items_of(raw)
+        want = params_of(s, proj.symmap)
+        if its and all(PARAM_RE.match(i) or i.lower() in ("nothing", "todo") for i in its):
+            got = []
+            for i in its:
+                mm = re.match(r"^`?([*\w]+)`? \((.+?)\): ", i)
+                if mm:
+                    got.append((mm.group(1), mm.group(2).strip()))
+            bad = None
+            if [n for n, _ in got] != [n for n, _ in want]:
+                bad = "expected parameters (%s), the page lists (%s)" % (
+                    ", ".join(n for n, _ in want) or "none", ", ".join(n for n, _ in got) or "nothing")
+            else:
+                for (n, t), (_, wt) in zip(got, want):
+                    if wt != "TODO" and t != "TODO" and re.sub(r"\s+", "", t) != re.sub(r"\s+", "", wt):
+                        bad = "parameter %s is %s in the code but %s on the page" % (n, wt, t)
+                        break
+            if bad:
+                add(rel, ln, "format", "%s: Expects does not match the signature: %s" % (e.name, bad))
+    if "Gives back" in lab and s is not None and not s.is_class:
+        _, ln, raw = lab["Gives back"]
+        t = " ".join(x.strip() for x in raw if x.strip())
+        r = s.node.returns
+        if r is not None and t != "TODO" and not t.startswith("TODO:"):
+            ret = ast.unparse(r)
+            dt = "nothing" if t.lower() == "nothing" else t.split(": ", 1)[0].strip()
+            ok = (dt == "nothing" and ret == "None") or re.sub(r"\s+", "", dt) == re.sub(r"\s+", "", ret)
+            if not ok and not (ret == "None" and dt == "None"):
+                add(rel, ln, "format", "%s: Gives back does not match the signature: the code returns %s, the page says %s" % (e.name, ret, dt))
     if "Gives back" in lab:
         _, ln, raw = lab["Gives back"]
         t = " ".join(x.strip() for x in raw if x.strip())

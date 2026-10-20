@@ -384,3 +384,34 @@ def test_changed_scope_includes_neighbours(tmp_path, capsys):
     p.write_text(p.read_text().replace("**Used by:** nothing", "**Used by:**\n- x.y (z.py:1)", 1))
     eli12.main(["check", "--root", str(tmp_path), "--changed", "HEAD"])
     assert "app.md" in capsys.readouterr().out
+
+
+def test_expects_and_gives_back_follow_signature(tmp_path, capsys):
+    make(tmp_path, {"m.py": "def f(a: int, b, *rest, **kw) -> str:\n    return ''\n\n\nclass C:\n    def g(self, x: int) -> None:\n        pass\n"})
+    run(tmp_path, "scaffold", "m.py")
+    fill(tmp_path, "docs/eli12/m.md")
+    capsys.readouterr()
+    assert run(tmp_path, "check") == 0, capsys.readouterr().out
+    p = tmp_path / "docs/eli12/m.md"
+    good = p.read_text()
+    f_sec = good.split("## f")[1].split("## ")[0]
+    cases = [
+        (f_sec.replace(f_sec[f_sec.index("**Expects:**"):f_sec.index("**Gives back:**")], "**Expects:** nothing\n\n"), "Expects does not match"),
+        (f_sec.replace("- b (", "- bb ("), "Expects does not match"),
+        (f_sec.replace("- a (int)", "- a (str)"), "Expects does not match"),
+        (f_sec.replace("**Gives back:** str", "**Gives back:** int"), "Gives back does not match"),
+    ]
+    for bad, msg in cases:
+        p.write_text(good.replace(f_sec, bad))
+        capsys.readouterr()
+        run(tmp_path, "check")
+        out = capsys.readouterr().out
+        assert msg in out and "f:" in out and ": format:" in out, (msg, out)
+    # swapped order
+    swapped = f_sec.replace("- a (int)", "- TMP (int)").replace("- b (", "- a (int): x\n- b (").replace("- TMP (int)", "- zz (int)")
+    p.write_text(good.replace(f_sec, swapped))
+    run(tmp_path, "check")
+    assert "Expects does not match" in capsys.readouterr().out
+    # methods: self excluded, None return accepted as nothing
+    p.write_text(good)
+    assert run(tmp_path, "check") == 0
