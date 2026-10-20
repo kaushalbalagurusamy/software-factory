@@ -55,17 +55,34 @@ def test_note_bounds_controls_surrogates_secrets(tmp_path):
     assert "sk-ant-" not in s["note"] and "[REDACTED]" in s["note"]
 
 
-def test_symlink_outside_refused_inside_allowed(tmp_path, capsys):
+def test_any_symlink_is_refused(tmp_path, capsys):
     root, out = tmp_path / "r", tmp_path / "elsewhere"
     root.mkdir(); out.mkdir()
     (root / "ops").symlink_to(out)
     assert emit(root, "a", "b", "c") is False
     assert not (out / "events.jsonl").exists()
     assert capsys.readouterr().err.startswith("event not recorded: ")
-    root2, real = tmp_path / "r2", tmp_path / "r2" / "real"
-    real.mkdir(parents=True)
-    (root2 / "ops").symlink_to(real)
-    assert emit(root2, "a", "b", "c") is True
+    # in-repo targets too: a link to a protected file must not be appended to
+    root2 = tmp_path / "r2"
+    (root2 / "ops").mkdir(parents=True)
+    (root2 / "golden.txt").write_text("keep\n")
+    (root2 / "ops" / "events.jsonl").symlink_to("../golden.txt")
+    assert emit(root2, "a", "b", "c") is False
+    assert (root2 / "golden.txt").read_text() == "keep\n"
+    root3 = tmp_path / "r3"
+    (root3 / "real").mkdir(parents=True)
+    (root3 / "ops").symlink_to(root3 / "real")
+    assert emit(root3, "a", "b", "c") is False
+
+
+@pytest.mark.parametrize("note,secret", [
+    ("Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dBjftJeZ4CVPmB92K27uhbUJU1p1r", "eyJhbGci"),
+    ("clone https://alice:hunter2pass@example.com/r.git now", "hunter2pass"),
+])
+def test_bearer_and_userinfo_redacted(tmp_path, note, secret):
+    emit(tmp_path, "a", "b", "c", note)
+    n = lines(tmp_path)[0]["note"]
+    assert secret not in n and "[REDACTED]" in n
 
 
 def test_failure_returns_false_with_one_stderr_line(tmp_path, capsys):
@@ -182,3 +199,21 @@ def test_missing_root_creates_nothing(tmp_path, capsys):
     missing = tmp_path / "a" / "b"
     assert emit(missing, "a", "b", "c") is False
     assert not (tmp_path / "a").exists() and capsys.readouterr().err.startswith("event not recorded: ")
+
+
+@pytest.mark.parametrize("note", [
+    "Authorization: Bearer\nabcdef1234567890XYZ", "Authorization: Bearer\tabcdef1234567890XYZ",
+    "Bearer\x00abcdef1234567890XYZ", "t sk-ant-" + "a1b2" * 3 + "\x00" + "c3d4" * 3,
+    "t sk-ant-" + "a1b2" * 3 + "\t" + "c3d4" * 3, "t sk-ant-" + "a1b2" * 3 + "\n" + "c3d4" * 3,
+])
+def test_both_views_are_redacted(tmp_path, note):
+    emit(tmp_path, "a", "b", "c", note)
+    n = lines(tmp_path)[0]["note"]
+    assert "[REDACTED]" in n and "abcdef12" not in n and "a1b2" not in n and "c3d4" not in n
+
+
+def test_ordinary_text_is_unchanged_by_the_control_handling(tmp_path):
+    emit(tmp_path, "a", "b", "c", "ran 12 tests, all passed; see docs/x.md")
+    emit(tmp_path, "a", "b", "c", "line one\nline two\ttabbed")
+    a, b = (e["note"] for e in lines(tmp_path))
+    assert a == "ran 12 tests, all passed; see docs/x.md" and b == "line one line two tabbed"

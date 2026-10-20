@@ -195,7 +195,8 @@ def repo_state(repo: Path, ops_dir: Path) -> dict:
         snap = idx.get("head") or (idx.get("commits") or [{}])[0].get("sha")
     except (OSError, ValueError, AttributeError, IndexError):
         pass
-    n = _git_out(repo, "rev-list", "--count", f"{snap}..HEAD") if head and isinstance(snap, str) and snap else None
+    ok = head and isinstance(snap, str) and snap and _git_out(repo, "merge-base", "--is-ancestor", snap, "HEAD") is not None
+    n = _git_out(repo, "rev-list", "--count", f"{snap}..HEAD") if ok else None  # not an ancestor: unknown, never zero
     return {"repo_head": head, "behind": int(n) if n and n.isdigit() else None}
 
 
