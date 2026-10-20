@@ -1957,6 +1957,27 @@ def read_repo_file(root, rel):
         return 404, str(e), None
 
 
+def log_view(root, text):
+    """The log (last 64 KiB, redacted again) plus {reference: repo path} for each path:line naming a real file in the repo."""
+    text = redact(text[-MAX_LOG:])
+    base = os.path.realpath(root)
+    files = {}
+    for m in re.finditer(r"((?:/|\./)?[\w.@+\-]+(?:/[\w.@+\-]+)*\.[A-Za-z0-9]{1,8}):(\d+)", text):
+        raw = m.group(1)
+        if raw in files or len(files) >= 200:
+            continue
+        real = os.path.realpath(raw if os.path.isabs(raw) else os.path.join(base, raw))
+        try:
+            inside = os.path.commonpath([real, base]) == base
+        except ValueError:
+            inside = False
+        if inside and os.path.isfile(real):
+            rel = os.path.relpath(real, base).replace(os.sep, "/")
+            if safe_rel(rel)[0] and not forbidden_rel(rel):
+                files[raw] = rel
+    return {"text": text, "files": files}
+
+
 def make_handler(root, token, assets_html):
     class H(BaseHTTPRequestHandler):
         server_version = "lsf"
