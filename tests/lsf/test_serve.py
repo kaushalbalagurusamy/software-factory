@@ -110,3 +110,14 @@ def test_localhost_only(server):
         with pytest.raises(OSError):
             c.request("GET", "/")
             c.getresponse()
+
+
+def test_dashboard_release_records_the_actual_transport(server):
+    port, token, repo = server
+    headers = {'Content-Type':'application/json','X-LSF-Token':token}
+    body = json.dumps({'name':'gate','note':'Codex acting as delegated HITL reviewer'})
+    assert req(port,'POST','/api/hitl/release',headers,body)[0] == 200
+    entries = [json.loads(line) for line in (repo/'.lsf/stops.jsonl').read_text().splitlines()]
+    release = next(e for e in entries if e['kind'] == 'release')
+    assert release['via'] == 'dashboard'
+    assert 'delegated HITL' in release['note']

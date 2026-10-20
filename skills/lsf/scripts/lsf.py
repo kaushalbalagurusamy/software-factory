@@ -2123,7 +2123,7 @@ def make_handler(root, token, assets_html):
                     mine = [x for x in stops_state(root) if x["name"] == name]
                     if ph is None and mine and mine[-1]["state"] == "asked" and mine[-1].get("proposal_hash") and mine[-1].get("options"):
                         return self._err(400, "proposal_hash is required for this stop")
-                    t = hitl_release(root, name, note, "dashboard", answer=answer or None, proposal_hash=ph)
+                    t = hitl_release(root, name, note, "dashboard", via="dashboard", answer=answer or None, proposal_hash=ph)
                 except Usage as e:
                     return self._err(400, str(e))
                 except Fail as e:
