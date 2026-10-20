@@ -30,7 +30,7 @@ MAX_FILES = 20000
 MAX_FILE_API = 1024 * 1024
 MAX_NOTE = 2000
 SKIP_DIRS = (".git", "node_modules", ".venv")
-EDITORS = ["vscode", "cursor", "windsurf", "zed", "idea", "sublime", "textmate"]
+EDITORS = ["vscode", "cursor", "windsurf", "zed", "idea", "sublime", "textmate", "none"]
 GROUPS = ("align", "review", "build")
 PHASES = [
     ("0-intake", "align"), ("1-sweep", "align"), ("2-research", "align"), ("3-experiments", "align"),
@@ -45,6 +45,12 @@ SF_ALIAS = {
 }
 DEFAULT_WEIGHTS = {"align": 0.6, "review": 0.2, "build": 0.2}
 GENESIS = "0" * 64
+
+
+def _jd(o):
+    if isinstance(o, (set, frozenset, tuple)):
+        return sorted(o) if not isinstance(o, tuple) else list(o)
+    raise TypeError("not JSON serializable: %s" % type(o).__name__)
 
 
 class Usage(Exception):
@@ -101,7 +107,7 @@ def lpath(root, name):
 def append_line(path, obj):
     """One O_APPEND write per record, so concurrent writers never interleave inside a line."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    data = (json.dumps(obj, separators=(",", ":")) + "\n").encode("utf-8")
+    data = (json.dumps(obj, separators=(",", ":"), default=_jd) + "\n").encode("utf-8")
     fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
     try:
         os.write(fd, data)
@@ -210,13 +216,13 @@ def find_root(arg):
 # ---------------------------------------------------------------- redaction
 _SECRETS = [
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"),
-    re.compile(r"\bsk-[A-Za-z0-9_\-]{12,}"),
-    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{12,}"),
-    re.compile(r"\bgithub_pat_[A-Za-z0-9_]{12,}"),
-    re.compile(r"\bglpat-[A-Za-z0-9_\-]{10,}"),
-    re.compile(r"\bAKIA[0-9A-Z]{12,}"),
-    re.compile(r"\bxox[abprs]-[A-Za-z0-9\-]{10,}"),
-    re.compile(r"\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{6,}\.[A-Za-z0-9_\-]*"),
+    re.compile(r"sk-[A-Za-z0-9_\-]{12,}"),
+    re.compile(r"gh[pousr]_[A-Za-z0-9]{12,}"),
+    re.compile(r"github_pat_[A-Za-z0-9_]{12,}"),
+    re.compile(r"glpat-[A-Za-z0-9_\-]{10,}"),
+    re.compile(r"AKIA[0-9A-Z]{12,}"),
+    re.compile(r"xox[abprs]-[A-Za-z0-9\-]{10,}"),
+    re.compile(r"eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{6,}\.[A-Za-z0-9_\-]*"),
     re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._~+/=\-]{12,}"),
 ]
 _KV = re.compile(r"(?i)\b([A-Za-z0-9_\-]*(?:api[_-]?key|secret|token|passw(?:or)?d|authorization|credential)[A-Za-z0-9_\-]*)"
@@ -297,10 +303,13 @@ def emit_event(root, stage, verdict, note="", source="lsf", phase=None, slice_=N
     if os.environ.get("SF_EVENTS") == "off" or os.environ.get("LSF_EVENTS") == "off":
         return False
     try:
-        ev = {"at": iso(now()), "stage": stage, "slice": slice_, "phase": phase, "verdict": verdict,
+        one = lambda v: None if v is None else clean_note(v, 200)
+        ev = {"at": iso(now()), "stage": one(stage), "slice": one(slice_), "phase": one(phase), "verdict": one(verdict),
               "note": clean_note(note), "source": source, "sha": head_sha(root)}
         if role:
             ev["role"] = clean_note(role, 80)
+        if extra and extra.get("model"):
+            extra = dict(extra, model=clean_note(extra["model"], 120))
         if duration_s is not None:
             ev["duration_s"] = duration_s
         if extra:
@@ -347,7 +356,7 @@ def _chain(prev, text):
 
 
 def _entry_text(e):
-    return json.dumps({k: v for k, v in e.items() if k != "chain"}, sort_keys=True, separators=(",", ":"))
+    return json.dumps({k: v for k, v in e.items() if k != "chain"}, sort_keys=True, separators=(",", ":"), default=_jd)
 
 
 def stops_raw(root):
@@ -412,7 +421,7 @@ def stops_append(root, entry):
     entry["seq"] = len(entries) + 1
     entry["chain"] = _chain(prev, _entry_text(entry))
     append_line(lpath(root, "stops.jsonl"), entry)
-    atomic_write(lpath(root, "stops.head"), json.dumps({"seq": entry["seq"], "chain": entry["chain"]}) + "\n")
+    atomic_write(lpath(root, "stops.head"), json.dumps({"seq": entry["seq"], "chain": entry["chain"]}, default=_jd) + "\n")
 
 
 def stops_state(root):
@@ -934,7 +943,7 @@ def cmd_init(a, root):
             raise Usage("bad weight %r" % item)
     prof = default_profile(root, a.minutes, a.checkpoints, a.editor, w)
     check_weights(prof)
-    atomic_write(lpath(root, "profile.json"), json.dumps(prof, indent=2) + "\n")
+    atomic_write(lpath(root, "profile.json"), json.dumps(prof, indent=2, default=_jd) + "\n")
     out("initialised %s (session %d min, checkpoints: %s, editor: %s)" % (d, a.minutes, a.checkpoints, a.editor))
     out("next: lsf phase start 0-intake   |   dashboard: lsf serve --open")
     return 0
@@ -979,7 +988,9 @@ def cmd_phase(a, root):
     emit_event(root, a.name, verdict, a.note or "", phase=a.name, slice_=a.slice,
                duration_s=int((at - op["start"]).total_seconds()), extra={"type": "phase_end", "sf_stage": SF_ALIAS.get(a.name)})
     out("ended %s (%s, %.1f min)" % (a.name, verdict, minutes_between(op["start"], at)))
-    if (prof.get("checkpoints") or {}).get(a.name):
+    cps = prof.get("checkpoints") if isinstance(prof.get("checkpoints"), dict) else {}
+    mode_default = group_of(prof, a.name) == "align"
+    if cps.get(a.name, mode_default):
         name = a.name + "-review"
         hitl_open(root, name, a.ask or "Approve %s?" % a.name, a.artifact or [],
                   "checkpoint after %s (%s)" % (a.name, verdict))
@@ -1018,7 +1029,7 @@ def cmd_hitl(a, root):
         return 1
     op = [s for s in stops if "released_at" not in s]
     if a.json:
-        out(json.dumps(stops, indent=2))
+        out(json.dumps(stops, indent=2, default=_jd))
     elif not stops:
         out("no human stops recorded")
     else:
@@ -1034,7 +1045,7 @@ def cmd_status(a, root):
         out(str(e))
         raise
     if a.json:
-        out(json.dumps(d, indent=2))
+        out(json.dumps(d, indent=2, default=_jd))
         return 0
     op = d["open_phase"]
     out("lsf status  %s" % d["now"])
@@ -1051,7 +1062,7 @@ def cmd_status(a, root):
 def cmd_budget(a, root):
     d = budget_data(root)
     if a.json:
-        out(json.dumps({"groups": d["groups"], "waiting_on_human_minutes": d["waiting_on_human_minutes"]}, indent=2))
+        out(json.dumps({"groups": d["groups"], "waiting_on_human_minutes": d["waiting_on_human_minutes"]}, indent=2, default=_jd))
         return 0
     for g in GROUPS:
         x = d["groups"][g]
@@ -1080,7 +1091,7 @@ def cmd_cost(a, root):
         return 0
     s = cost_summary(root)
     if a.json:
-        out(json.dumps(s, indent=2))
+        out(json.dumps(s, indent=2, default=_jd))
         return 0
     out("cost summary (manual entries, nothing is estimated)")
     for m, d in sorted(s["by_model"].items()):
@@ -1097,7 +1108,7 @@ def cmd_bundle(a, root):
         src = WorkTree(root)
     tabs = collect_tabs(src)
     if a.json:
-        out(json.dumps({"tabs": tabs}))
+        out(json.dumps({"tabs": tabs}, default=_jd))
         return 0
     for name, t in tabs.items():
         out("%-13s %s" % (name, ("available, %d items" % len(t["items"])) if t["available"] else "not available: " + t["reason"]))
@@ -1124,7 +1135,7 @@ def _own(cmd):
 
 
 def merge_hooks(settings, install):
-    s = json.loads(json.dumps(settings))
+    s = json.loads(json.dumps(settings, default=_jd))
     hooks = s.setdefault("hooks", {}) if install else s.get("hooks", {})
     if not isinstance(hooks, dict):
         raise Fail("settings 'hooks' is not an object")
@@ -1159,7 +1170,7 @@ def merge_hooks(settings, install):
 
 def cmd_hooks(a, root):
     if a.action == "print":
-        out(json.dumps(hooks_config(), indent=2))
+        out(json.dumps(hooks_config(), indent=2, default=_jd))
         return 0
     proj = os.path.abspath(a.project)
     if not os.path.isdir(proj):
@@ -1173,8 +1184,8 @@ def cmd_hooks(a, root):
     except ValueError as e:
         raise Fail("%s is not valid JSON: %s" % (target, e))
     new = merge_hooks(cur, a.action == "install")
-    before = json.dumps(cur, indent=2, sort_keys=True).splitlines()
-    after = json.dumps(new, indent=2, sort_keys=True).splitlines()
+    before = json.dumps(cur, indent=2, sort_keys=True, default=_jd).splitlines()
+    after = json.dumps(new, indent=2, sort_keys=True, default=_jd).splitlines()
     diff = list(difflib.unified_diff(before, after, "a/settings.local.json", "b/settings.local.json", lineterm=""))
     if not diff:
         out("no change: %s" % ("lsf hooks already installed" if a.action == "install" else "no lsf hooks found"))
@@ -1184,7 +1195,7 @@ def cmd_hooks(a, root):
     if not a.apply:
         out("dry run: nothing written; add --apply to write %s" % target)
         return 0
-    atomic_write(target, json.dumps(new, indent=2) + "\n")
+    atomic_write(target, json.dumps(new, indent=2, default=_jd) + "\n")
     out("wrote %s" % target)
     return 0
 
@@ -1237,7 +1248,7 @@ def self_check():
     try:
         tree = ast.parse(src, filename=path, feature_version=(3, 9))
     except SyntaxError as e:
-        return False, "does not parse as Python 3.9: %s" % e
+        return False, "does not parse as Python 3.9: line %s: %s" % (e.lineno, e.msg)
     bad = []
     for n in ast.walk(tree):
         mods = []
@@ -1250,7 +1261,7 @@ def self_check():
             if top not in _ALLOWED_IMPORTS or top in _FORBIDDEN:
                 bad.append(m)
         if n.__class__.__name__ in ("Match", "TryStar"):
-            bad.append("3.10+ syntax")
+            bad.append("3.10+ syntax (%s at line %s)" % (n.__class__.__name__, getattr(n, "lineno", "?")))
     if bad:
         return False, "disallowed: %s" % ", ".join(sorted(set(bad)))
     return True, "Python 3.9 syntax, standard library only"
@@ -1402,7 +1413,7 @@ def make_handler(root, token, assets_html):
             self.wfile.write(body)
 
         def _err(self, status, msg):
-            self._send(status, json.dumps({"error": msg}))
+            self._send(status, json.dumps({"error": msg}, default=_jd))
 
         def _host_ok(self):
             host = self.headers.get("Host", "")
@@ -1427,7 +1438,7 @@ def make_handler(root, token, assets_html):
                                       {"Content-Security-Policy": "default-src 'self'; script-src 'unsafe-inline'; "
                                        "style-src 'unsafe-inline'; img-src 'self' data:; frame-src 'self'"})
                 if path == "/api/state":
-                    return self._send(200, json.dumps(full_state(root)))
+                    return self._send(200, json.dumps(full_state(root), default=_jd))
                 if path == "/api/file":
                     status, msg, text = read_repo_file(root, qs.get("path", ""))
                     if status != 200:
@@ -1441,7 +1452,7 @@ def make_handler(root, token, assets_html):
                         full = resolve_sha(root, qs.get("sha", ""))
                     except (Usage, Fail) as e:
                         return self._err(400, str(e))
-                    return self._send(200, json.dumps({"sha": full, "tabs": collect_tabs(Source(root, full))}))
+                    return self._send(200, json.dumps({"sha": full, "tabs": collect_tabs(Source(root, full))}, default=_jd))
                 return self._err(404, "not found")
             except Exception as e:
                 return self._err(500, "internal error: %s" % e.__class__.__name__)
@@ -1474,7 +1485,7 @@ def make_handler(root, token, assets_html):
                     return self._err(400, str(e))
                 except Fail as e:
                     return self._err(409, str(e))
-                return self._send(200, json.dumps({"ok": True, "name": name, "released_at": t}))
+                return self._send(200, json.dumps({"ok": True, "name": name, "released_at": t}, default=_jd))
             except Exception as e:
                 return self._err(500, "internal error: %s" % e.__class__.__name__)
 
