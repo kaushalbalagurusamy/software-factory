@@ -316,14 +316,10 @@ def run_doctor(a) -> int:
     py = os.path.abspath(a.python) if a.python else str(root / ".venv" / "bin" / "python")
     skills = Path(a.skills_dir) if a.skills_dir else Path.home() / ".claude" / "skills"
     allowed = {MODEL, *a.allow_model}
-    if proj:  # the project's own allow_models counts, as at install time
-        try:
-            from factory.agents.profile import load_profile
-            allowed |= set(load_profile(proj / PROFILE).allow_models)
-        except Exception:  # noqa: BLE001  the profile check below reports it
-            pass
     checks = (check_tools(py, root) + check_skills(root, skills) + check_roles(root, skills, allowed)
               + check_external(root, skills) + check_sf())
+    if allowed - {MODEL} and not a.json:
+        print(f"extra allowed models: {', '.join(sorted(allowed - {MODEL}))}")
     if proj:
         checks += check_project(proj, allowed, root, py)[0]
     failed = [c for c in checks if c[1] == "FAIL"]

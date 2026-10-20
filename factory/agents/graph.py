@@ -189,7 +189,7 @@ def _from_spec(spec: GraphSpec) -> Graph:
 
 
 def default_graph() -> Graph:
-    """The shipped seven-role graph, validated."""
+    """The shipped eight-role graph, validated."""
     data = yaml.safe_load(DEFAULT_GRAPH_PATH.read_text(encoding="utf-8"))
     spec = parse_profile({"schema_version": 1, "project": {"name": "default"},
                           "paths": {"eval": ["evals/**"]}, "graph": data}).graph

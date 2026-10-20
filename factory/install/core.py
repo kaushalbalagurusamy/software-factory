@@ -210,7 +210,10 @@ def install(project, *, factory_root=None, python=None, profile_src=None, hooks=
         new_files[PROFILE] = text.encode()
         profile_state = "created"
 
-    allowed = {MODEL, *allow_models, *profile.allow_models}
+    # C-41.1: only models given on the command line widen the allowlist; a profile list never does alone
+    allowed = {MODEL, *allow_models}
+    if allowed - {MODEL}:
+        out(f"extra allowed models: {', '.join(sorted(allowed - {MODEL}))}")
     roles = None
     agent_models: dict = {}
     if agents or hooks:
