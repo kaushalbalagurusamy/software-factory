@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "f0f710e",
+  "commit": "723bf010ee89c96f957959586c3b4cf575d4ed36",
   "generated": "2026-10-20"
  },
  "root": "factory",
@@ -3428,13 +3428,13 @@
      "path": "skills/lsf/SKILL.md",
      "contains": "# lsf: the lite software factory",
      "note": "The skill: flow, per-phase procedure, rules",
-     "lines": "7-74"
+     "lines": "7-82"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def main",
      "note": "Entry point",
-     "lines": "1937-1957"
+     "lines": "2349-2369"
     },
     {
      "path": "docs/prds/SFN-06-lsf-lite.md",
@@ -3482,31 +3482,31 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def build_parser",
      "note": "All commands",
-     "lines": "1815-1917"
+     "lines": "2209-2329"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_init",
      "note": "Writes .lsf/profile.json",
-     "lines": "1129-1155"
+     "lines": "1332-1358"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_phase",
      "note": "start and end; start refuses under an open stop",
-     "lines": "1172-1204"
+     "lines": "1375-1407"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_doctor",
      "note": "python, git, repository, port and the self-check",
-     "lines": "1542-1590"
+     "lines": "1865-1913"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_bundle",
      "note": "Prints which dashboard tabs have data",
-     "lines": "1330-1342"
+     "lines": "1648-1660"
     }
    ],
    "coverage": {
@@ -3548,13 +3548,13 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def budget_data",
      "note": "Planned versus actual, minus waiting",
-     "lines": "597-646"
+     "lines": "707-756"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def wait_intervals",
      "note": "Time under an open stop",
-     "lines": "574-582"
+     "lines": "684-692"
     }
    ],
    "coverage": {
@@ -3581,31 +3581,31 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def hitl_open",
      "note": "Opens a stop",
-     "lines": "514-522"
+     "lines": "563-578"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def hitl_release",
      "note": "Records the release and its channel",
-     "lines": "525-544"
+     "lines": "581-614"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def hitl_repair",
      "note": "Quarantine and rebuild",
-     "lines": "547-566"
+     "lines": "657-676"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cross_check",
      "note": "Ledger versus events.jsonl",
-     "lines": "440-464"
+     "lines": "440-466"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def require_tty_if_strict",
      "note": "--strict-hitl",
-     "lines": "508-511"
+     "lines": "523-526"
     }
    ],
    "coverage": {
@@ -3625,25 +3625,25 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def make_handler",
      "note": "Handler with every route",
-     "lines": "1668-1771"
+     "lines": "2012-2156"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_serve",
      "note": "Prints the URL with #token= once",
-     "lines": "1774-1811"
+     "lines": "2159-2196"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def read_repo_file",
      "note": "Path and size checks for /api/file",
-     "lines": "1637-1665"
+     "lines": "1960-1988"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def resolve_sha",
      "note": "Used by /api/at",
-     "lines": "1043-1049"
+     "lines": "1190-1196"
     }
    ],
    "coverage": {
@@ -3663,43 +3663,43 @@
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "var TABS=",
      "note": "The ten tabs",
-     "lines": "185"
+     "lines": "202"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderNow",
      "note": "Now tab: clock, stops, Approve button",
-     "lines": "292-302"
+     "lines": "339-349"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderTelemetry",
      "note": "Telemetry tab",
-     "lines": "305-328"
+     "lines": "352-375"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderArch",
      "note": "Architecture tab (the explorer in an iframe)",
-     "lines": "355-376"
+     "lines": "428-449"
     },
     {
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "function renderDocs",
      "note": "Docs tab (reads docs/eli12/index.json)",
-     "lines": "389-403"
+     "lines": "462-476"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "COLLECTORS = [",
      "note": "Collectors behind the tabs",
-     "lines": "1022-1023"
+     "lines": "1169-1170"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def c_experiments",
      "note": "Experiments and resolved.json",
-     "lines": "801-820"
+     "lines": "911-930"
     }
    ],
    "coverage": {
@@ -3720,19 +3720,19 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def hooks_config",
      "note": "The four hooks",
-     "lines": "1350-1358"
+     "lines": "1668-1676"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_hook",
      "note": "Always exits 0 except the guard's denial",
-     "lines": "1399-1428"
+     "lines": "1717-1746"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def guard_reason",
      "note": "What the guard denies",
-     "lines": "1441-1449"
+     "lines": "1760-1772"
     },
     {
      "path": "skills/lsf/scripts/lsf.py",
@@ -3750,7 +3750,7 @@
      "path": "skills/lsf/scripts/lsf.py",
      "contains": "def cmd_hooks",
      "note": "print, install, uninstall",
-     "lines": "1399-1428"
+     "lines": "1717-1746"
     }
    ],
    "coverage": {
@@ -4088,7 +4088,7 @@
      "path": "skills/lsf/assets/dashboard.html",
      "contains": "editor-links:begin",
      "note": "lsf dashboard copy",
-     "lines": "114"
+     "lines": "131"
     },
     {
      "path": "skills/lsf/assets/editor-links.js",
@@ -4336,7 +4336,7 @@
      "path": "factory/ops/collect.py",
      "contains": "COLLECTORS = {",
      "note": "All tab collectors",
-     "lines": "487-491"
+     "lines": "492-496"
     },
     {
      "path": "docs/ops-tabs.md",
@@ -4417,13 +4417,13 @@
      "path": "factory/ops/collect.py",
      "contains": "def bug_log",
      "note": "Tab source",
-     "lines": "353-372"
+     "lines": "358-377"
     },
     {
      "path": "factory/ops/collect.py",
      "contains": "def _qa_notes",
      "note": "QA note blocks",
-     "lines": "336-350"
+     "lines": "336-355"
     }
    ],
    "coverage": {
@@ -4440,7 +4440,7 @@
      "path": "factory/ops/collect.py",
      "contains": "def hitl",
      "note": "Tab source",
-     "lines": "456-484"
+     "lines": "461-489"
     }
    ],
    "coverage": {
@@ -4656,7 +4656,7 @@
      "path": "skills/lsf/SKILL.md",
      "contains": "failures amend the PRD and go back to 7 and 8",
      "note": "lsf wording",
-     "lines": "43"
+     "lines": "51"
     }
    ],
    "coverage": {
@@ -4716,7 +4716,7 @@
      "path": "skills/lsf/SKILL.md",
      "contains": "| lsf phase | group |",
      "note": "The table with the /sf stage column",
-     "lines": "32"
+     "lines": "40"
     }
    ],
    "coverage": {

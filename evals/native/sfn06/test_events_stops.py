@@ -202,6 +202,9 @@ def test_L07_phase_start_refused_while_a_stop_is_open(inited):
 
 
 def test_L07_manual_request_status_release_roundtrip(inited):
+    # SFN-09 D-2 amendment: a requested stop's artifacts must exist (they are hashed to bind the proposal)
+    inited.write("docs/adr/x.md", "adr\n")
+    inited.write("research/db.md", "db\n")
     p = inited.run("hitl", "request", "pick-db", "--question", "SQLite or Postgres?", "--artifact", "docs/adr/x.md",
                    "--artifact", "research/db.md", now=1)
     assert p.returncode == 0, p.stderr

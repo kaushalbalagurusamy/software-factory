@@ -189,3 +189,19 @@ def test_onepager_title_and_langfuse_host_only(repo, tmp_path):
     lf = R.collect_runtime(cfg)["langfuse"]
     assert lf["applicable"] and "lf.example.com" in json.dumps(lf["configured"])
     assert "not checked" in lf["traces"]["reason"]
+
+
+def test_free_form_qa_report_is_a_linked_entry_and_signatures_still_parse(repo):
+    put(repo, "docs/slices/prefix/qa-notes.md", "# QA report: prefix\n\nRan 12 cases. 11 pass, 1 fails: login returns 500.\nSee attempt log.\n")
+    put(repo, "docs/slices/s1/qa-notes.md", "# QA\n\n## Signature abc\n- attempts 3\n- criteria: AC-1\n- observed: boom\n")
+    put(repo, "docs/slices/s2/qa-notes.md", "# QA notes\n\nManual pass finished, nothing odd.\n\n## Signature def\n- attempts 2\n\n## Notes\nReviewer remarks stay visible.\n")
+    put(repo, "docs/slices/s3/qa-notes.md", "# QA notes\n")
+    d = C.bug_log(src(repo))
+    reps = {i["slice"]: i for i in d["items"] if i.get("kind") == "qa-report"}
+    assert set(reps) == {"prefix", "s2"}, "heading-only and signature-only files give no report entry"
+    r = reps["prefix"]
+    assert r["path"] == "docs/slices/prefix/qa-notes.md" and r["title"] == "QA report: prefix"
+    assert "login returns 500" in r["text"]
+    assert "Manual pass finished" in reps["s2"]["text"] and "Reviewer remarks stay visible" in reps["s2"]["text"]
+    assert "Signature" not in reps["s2"]["text"] and "attempts 2" not in reps["s2"]["text"]
+    assert sorted(i["signature"] for i in d["items"] if i.get("kind") == "qa-note") == ["abc", "def"]
