@@ -320,11 +320,12 @@ class Project:
             self.symmap[src] = _ModSym(src, line_path)
 
     def lists(self, s):
-        """(used_by, depends_on) display lists; every line number is the call site."""
+        """(used_by, depends_on): Used by cites call sites, Depends on cites definitions."""
         def shown(key, path, line, tag=""):
             return "%s.%s (%s:%d)%s" % (key[0], key[1], path, line, tag)
-        dep = [shown(t, s.path, n) for t, n in self.certain.get(s.key, {}).items() if t in self.symmap]
-        dep += [shown(t, s.path, n, " (maybe)") for t, n in self.maybe.get(s.key, {}).items() if t in self.symmap]
+        dep = [shown(t, self.symmap[t].path, self.symmap[t].line) for t in self.certain.get(s.key, {}) if t in self.symmap]
+        dep += [shown(t, self.symmap[t].path, self.symmap[t].line, " (maybe)")
+                for t in self.maybe.get(s.key, {}) if t in self.symmap]
         dep += ["%s (%s:%d) (maybe)" % (k, s.path, n) for k, n in self.unres.get(s.key, {}).items()]
         used = []
         for src, targets in self.certain.items():
@@ -625,11 +626,16 @@ def check_doc(proj, m, jargon, gloss, add):
         add(rel, 1, "format", "first line must be '# %s'" % m.path)
     if not doc.purpose:
         add(rel, 2, "format", "missing one-sentence purpose paragraph after the title")
+    starts = [(e.line, e.name) for e in doc.entries]
+
+    def owner(n):
+        o = [nm for ln0, nm in starts if ln0 <= n]
+        return (o[-1] + ": ") if o else ""
     for n, ln in enumerate(doc.lines, 1):
         if len(ln) > 160:
-            add(rel, n, "too-long", "line is %d characters (limit 160)" % len(ln))
+            add(rel, n, "too-long", "%sline is %d characters (limit 160)" % (owner(n), len(ln)))
         if "TODO" in ln:
-            add(rel, n, "todo", "unfilled TODO")
+            add(rel, n, "todo", "%sunfilled TODO" % owner(n))
     prose = []
     if doc.purpose:
         prose.append((doc.purpose[0], doc.purpose[1]))
@@ -662,7 +668,10 @@ def check_doc(proj, m, jargon, gloss, add):
                 add(rel, ln, "jargon", "'%s' needs an entry in %s/GLOSSARY.md" % (term, DOCDIR))
 
 
-def check_entry(proj, rel, e, s, add):
+def check_entry(proj, rel, e, s, add0):
+    def add(path, line, code, msg):
+        add0(path, line, code, msg if e.name in msg else "%s: %s" % (e.name, msg))
+
     for ln, t in e.stray:
         add(rel, ln, "format", "text before the first labelled line: %s" % t.strip()[:40])
     if e.sig is None:
@@ -750,6 +759,11 @@ def run_check(root, paths=None, changed=None, include=None):
         full = False
         ch = changed_files(root, changed)
         mods = {r for r in proj.mods if r in ch}
+        cnames = {proj.mods[r].name for r in mods}
+        scope = (scope or set()) | mods
+        for src, ts in list(proj.certain.items()) + list(proj.maybe.items()):
+            if src[0] in proj.names and any(t[0] in cnames for t in ts):
+                scope.add(proj.names[src[0]].path)
         for fn in doc_files(root):
             try:
                 d = parse_doc(read_doc(root, fn))
@@ -759,9 +773,9 @@ def run_check(root, paths=None, changed=None, include=None):
                 continue
             for e in d.entries:
                 for lab in e.labels:
-                    if lab[0] in ("Used by", "Depends on") and any(("(%s:" % c) in ln for ln in lab[2] for c in mods):
-                        scope = (scope or set()) | {d.header}
-        scope = (scope or set()) | mods
+                    if lab[0] in ("Used by", "Depends on") and any(
+                            ln.lstrip("- ").startswith(c + ".") for ln in lab[2] for c in cnames):
+                        scope.add(d.header)
     for rel in sorted(proj.mods):
         if scope is not None and rel not in scope:
             continue

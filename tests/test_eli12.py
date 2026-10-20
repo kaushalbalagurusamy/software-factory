@@ -84,8 +84,8 @@ def test_scaffold_computes_lists_and_leaves_todo(tmp_path):
     helper = lib.split("## helper")[1].split("## ")[0]
     assert "app.run (app.py:7)" in helper
     app = (tmp_path / "docs/eli12/app.md").read_text()
-    assert "lib.helper (app.py:7)" in app and "lib.Box (app.py:5)" in app
-    assert "lib.Box.grow (app.py:6) (maybe)" in app  # b.grow: receiver type unknown
+    assert "lib.helper (lib.py:4)" in app and "lib.Box (lib.py:8)" in app
+    assert "lib.Box.grow (lib.py:12) (maybe)" in app  # b.grow: receiver type unknown
     assert json.loads((tmp_path / "docs/eli12/index.json").read_text()) == {
         "app.py": "docs/eli12/app.md", "lib.py": "docs/eli12/lib.md"}
 
@@ -306,7 +306,7 @@ def test_unannotated_placeholders_pass_after_filling(tmp_path, capsys):
     assert "- x (TODO): TODO" in doc and "**Gives back:** TODO: TODO" in doc
     assert "(maybe)" in doc.split("## outer")[1].split("## ")[0]
     assert "mystery_call (messy.py:19) (maybe)" in doc and "len" not in doc
-    assert "messy.plain (messy.py:14)" in doc.split("## waiter")[1].split("## ")[0]
+    assert "messy.plain (messy.py:9)" in doc.split("## waiter")[1].split("## ")[0]
     p = tmp_path / "docs/eli12/messy.md"
     p.write_text(re.sub(r"TODO", "words here", doc.replace("A tiny", "")).replace("\nwords here\n", "\nA file.\n", 1))
     capsys.readouterr()
@@ -346,3 +346,41 @@ def test_symlinked_docs_dir_refused(tmp_path):
     os.symlink(outside, root / "docs/eli12")
     assert run(root, "scaffold", "lib.py") == 2
     assert not list(outside.iterdir())
+
+
+def test_findings_name_their_symbol(tmp_path, capsys):
+    make(tmp_path)
+    run(tmp_path, "scaffold", "lib.py", "app.py")
+    capsys.readouterr()
+    run(tmp_path, "check")
+    for ln in capsys.readouterr().out.splitlines():
+        assert ":3: todo" in ln or re.search(r"helper|Box|run", ln), ln  # line 3 is the module purpose
+    for m in ("lib", "app"):
+        fill(tmp_path, "docs/eli12/%s.md" % m)
+    (tmp_path / "lib.py").write_text(LIB.replace("a: int,", "a: float,"))
+    (tmp_path / "other.py").write_text("from lib import helper\n\n\ndef again():\n    return helper(1, 'y')\n")
+    run(tmp_path, "check")
+    out = capsys.readouterr().out
+    assert any("stale-signature" in l and "helper" in l for l in out.splitlines())
+    assert any("stale-dependencies" in l and "helper" in l for l in out.splitlines())
+
+
+def test_changed_scope_includes_neighbours(tmp_path, capsys):
+    make(tmp_path)
+    run(tmp_path, "scaffold", "lib.py", "app.py")
+    for m in ("lib", "app"):
+        fill(tmp_path, "docs/eli12/%s.md" % m)
+    env = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
+           "GIT_COMMITTER_EMAIL": "t@t", "PATH": os.environ["PATH"], "HOME": str(tmp_path)}
+    for cmd in (["init", "-q"], ["add", "."], ["commit", "-qm", "x"]):
+        subprocess.run(["git"] + cmd, cwd=tmp_path, env=env, check=True)
+    (tmp_path / "lib.py").write_text(LIB + "\n\ndef added(x: int) -> int:\n    return x\n")
+    capsys.readouterr()
+    assert eli12.main(["check", "--root", str(tmp_path), "--changed", "HEAD"]) == 1
+    out = capsys.readouterr().out
+    assert "lib.py" in out and "added" in out
+    # app.py is a caller of lib: its page is in scope, so a break there is seen
+    p = tmp_path / "docs/eli12/app.md"
+    p.write_text(p.read_text().replace("**Used by:** nothing", "**Used by:**\n- x.y (z.py:1)", 1))
+    eli12.main(["check", "--root", str(tmp_path), "--changed", "HEAD"])
+    assert "app.md" in capsys.readouterr().out
