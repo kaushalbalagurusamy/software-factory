@@ -303,7 +303,13 @@ class Server:
         data = body.encode() if isinstance(body, str) else body
         if data is not None:
             c.putheader("Content-Length", str(len(data)))
-        c.endheaders(data)
+        try:
+            c.endheaders(data)
+        except (BrokenPipeError, ConnectionResetError):
+            # Servers may reject Content-Length before consuming a large body.
+            # Require the real HTTP response below; a disconnect is not a pass.
+            if data is None:
+                raise
         r = c.getresponse()
         out = (r.status, {k.lower(): v for k, v in r.getheaders()}, r.read())
         c.close()
