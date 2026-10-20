@@ -3851,7 +3851,7 @@ var SFEditorLinks = (function (root, factory) {
     for (i = 0; i < segs.length; i++) { if (segs[i] === ".." || segs[i] === "." || segs[i] === "") { return false; } }
     return true;
   }
-  function editorUrl(editor, rootDir, relPath, line) {
+  function build(editor, rootDir, relPath, line) {
     var base, abs, n, q, i, found = false;
     if (typeof editor !== "string") { return null; }
     for (i = 0; i < EDITORS.length; i++) { if (EDITORS[i] === editor) { found = true; } }
@@ -3866,6 +3866,9 @@ var SFEditorLinks = (function (root, factory) {
     if (editor === "sublime") { return "subl://open?url=file://" + abs + q; }
     if (editor === "textmate") { return "txmt://open?url=file://" + abs + q; }
     return editor + "://file/" + abs.replace(/^\//, "") + (n ? ":" + n : "");
+  }
+  function editorUrl(editor, rootDir, relPath, line) {
+    try { return build(editor, rootDir, relPath, line); } catch (e) { return null; } // a lone surrogate makes encodeURIComponent throw
   }
   return { editorUrl: editorUrl, editors: EDITORS.slice(), validRoot: validRoot };
 });
