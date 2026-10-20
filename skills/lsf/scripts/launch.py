@@ -15,8 +15,9 @@ def prepare(argv, binary, cwd, environment):
     args = parser.parse_args(argv)
     prompt = (
         '/lsf\n'
-        'Owner launch instructions: invoke the away-mode skill first, keeping this '
-        'plugged-in, open Mac awake indefinitely for this session. Remote Control '
+        'Owner launch instructions: invoke the away-mode skill first. On macOS, '
+        'keep this plugged-in, open Mac awake indefinitely for this session. '
+        'On Linux, verify the persistent host/session instead of Mac power settings. Remote Control '
         'and bypass permissions are enabled by the launcher. Use the selected '
         'model for subagents as well. Follow /lsf including its human checkpoints; '
         'never approve a checkpoint on behalf of the owner. '
