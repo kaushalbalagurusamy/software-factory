@@ -45,10 +45,40 @@ def _exclude_events(repo: Path) -> None:
     path.write_text(text + ("" if not text or text.endswith("\n") else "\n") + line + "\n", encoding="utf-8")
 
 
-def _init(dirp: Path) -> int:
+def _clean_host(url: str) -> str | None:
+    """An https URL without userinfo, query or fragment (a password in the URL is never kept); None if not https."""
+    from urllib.parse import urlsplit
+    try:
+        u = urlsplit(url.strip())
+        host = u.hostname
+        port = f":{u.port}" if u.port else ""
+    except ValueError:
+        return None
+    if u.scheme.lower() != "https" or not host:
+        return None
+    return f"https://{host}{port}{u.path.rstrip('/')}"
+
+
+def _init(dirp: Path, langfuse_host: str | None = None, langfuse_project: str | None = None) -> int:
     dirp = dirp.resolve()
+    host = None
+    if langfuse_host is not None:
+        host = _clean_host(langfuse_host)
+        if host is None:
+            print("error: --langfuse-host must be an https:// URL", file=sys.stderr)
+            return 2
     if _need_commit(dirp) is None:
         return 2
+    cfg_path = dirp / "ops" / "config.json"
+    cfg = None
+    if host is not None:
+        try:
+            cfg = json.loads(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
+            if not isinstance(cfg, dict):
+                raise ValueError("not an object")
+        except (OSError, ValueError) as e:
+            print(f"error: {cfg_path} is not a readable JSON object ({type(e).__name__}); nothing written", file=sys.stderr)
+            return 2
     _exclude_events(dirp)
     out = dirp / "ops"
     for rel, data in (("config.json", b"{}\n"), ("events.jsonl", b"")):
@@ -56,6 +86,14 @@ def _init(dirp: Path) -> int:
         B._check_inside(path, out)
         if not path.exists():
             B._atomic(path, data, out)
+    if cfg is not None:
+        lf = dict(cfg.get("langfuse") or {}) if isinstance(cfg.get("langfuse"), dict) else {}
+        lf["host"] = host
+        if langfuse_project:
+            lf["project"] = langfuse_project
+        cfg["langfuse"] = lf
+        B._atomic(cfg_path, (json.dumps(cfg, indent=2, sort_keys=True) + "\n").encode("utf-8"), out)
+        print(f"langfuse host recorded: {host}")
     es = B.bundle(dirp, "HEAD", out)
     man = json.loads((out / "snapshots" / es[-1]["sha"] / "manifest.json").read_text(encoding="utf-8"))
     for name in TABS:
@@ -187,6 +225,8 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--no-viewer", action="store_true")
     i = sub.add_parser("init", help="create ops/config.json and events.jsonl, install the viewer, bundle HEAD")
     i.add_argument("--dir", default=".", help="the project (repository) directory; output goes to DIR/ops")
+    i.add_argument("--langfuse-host", help="https URL of the Langfuse host, recorded in ops/config.json (no credentials)")
+    i.add_argument("--langfuse-project", help="Langfuse project name, recorded in ops/config.json")
     bf = sub.add_parser("backfill", help="bundle the current branch's commits that have no snapshot yet")
     bf.add_argument("--limit", type=int, default=500)
     bf.add_argument("--repo", default=".")
@@ -207,7 +247,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--refresh-seconds", type=float, default=30)
     a = ap.parse_args(argv)
     if a.cmd == "init":
-        return _init(Path(a.dir))
+        return _init(Path(a.dir), a.langfuse_host, a.langfuse_project)
     if a.cmd == "backfill":
         return _backfill(Path(a.repo), a.limit)
     if a.cmd == "status":
