@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "skills": {
+    "away-mode": {
+      "sha256": "be8f9bf084d5c9afb80c1353b7c633473d43bb83c86a8436a69f0fe848f4df05"
+    },
+    "biz-decomposer": {
+      "sha256": "bc3a6e190af1af87568c2a564e97be4dbf170553f10b254dfd0d3c8f8ae616c9"
+    },
+    "deep-research": {
+      "sha256": "f006512d60f3789d60a914a865ed13dbac3abe4159921df4967f8877cd6e78d1"
+    },
+    "experiment-designer": {
+      "sha256": "b29db762e63750af0a4d7899132c4c5f61e3ddda4bc2298269aae1bf3ecfe2c1"
+    },
+    "good-night": {
+      "sha256": "b29ed94f642ae8c0d67cac93058fab5578c5b8b26a17c14afa18b0de6bc94b2b"
+    },
+    "grounded-research": {
+      "sha256": "02f9c762d81a9280324864d56bf91e318e9d9088ce43d05e78ea6c8ccc8f1650"
+    },
+    "minesweeper": {
+      "sha256": "f18f64d31c50441e26a746a70754286964b89414cea4075a105a11e2970d1bda"
+    },
+    "one-way-door": {
+      "sha256": "9a0218bb724375de2a63a6aacd37f3794f60341afbecebe7eded85f1ac07c65a"
+    },
+    "progress-briefing": {
+      "sha256": "399288ce6d58ea184ec1e11deb7a1e35d566f9dd58d4d3bc940e75b9c1578731"
+    },
+    "spec-recomposition": {
+      "sha256": "5111104f4970564dbd2c242a79408cd5c2ba8706d43f454b66688ced447251fc"
+    }
+  }
+}
