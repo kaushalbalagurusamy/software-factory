@@ -10,6 +10,19 @@ This is `/sf` made fast. Same stage names, same file conventions, same artifacts
 
 Run the tool as `lsf` (installed by `install.sh`) or `python3 <skill dir>/scripts/lsf.py`. Every command takes `--root DIR`.
 
+## Before the phase clock: PRD and repository intake
+
+Always follow `INTAKE.md` first. Ask for the starting PRD/brief **and** whether
+this is greenfield or brownfield. For brownfield, also require the source repo
+URL/local checkout and baseline; for either mode collect the owned GitHub/GitLab
+destination (owner/name/visibility). Reuse supplied answers. Greenfield creates
+an owned repo and local checkout; brownfield clones/reuses the source locally
+and establishes an owned fork/repo while preserving upstream and history.
+Do not initialize the launch directory as a project merely because it is CWD.
+Record provenance/remotes and the original brief before refining the PRD.
+For VPS execution, bootstrap the owned local checkout first, then prepare the
+remote builder; fetch/integrate back locally before pushing to the owned remote.
+
 ## Mac quick start
 
 1. `python3 --version` must print 3.9 or newer (macOS ships it with the Xcode command line tools; `xcode-select --install` if missing). `git --version` too.
@@ -39,7 +52,7 @@ Time split for the hour: about **60% alignment** (phases 0 to 6, informed by res
 
 | lsf phase | group | what you do | writes | /sf stage |
 |---|---|---|---|---|
-| `0-intake` | align | Save the brief verbatim; one-page core PRD of user journeys | `docs/requirements/brief.md`, `docs/prd/onepager.md` | 0 |
+| `0-intake` | align | Verify PRD + source/owned repo intake; save brief verbatim; draft one-page user journeys | `docs/requirements/brief.md`, `docs/prd/onepager.md` | 0 |
 | `1-sweep` | align | Minesweep: core business value, traps, best practices in networking, crypto, performance, ethics | sweep notes in `docs/requirements/` | 0 |
 | `2-research` | align | Multi-agent research seeds on state of the art, dated sources, "could not verify" | `research/<topic>.md` (include `As of: DATE`) | 1 |
 | `3-experiments` | align | Experiments only where research did not settle the choice | `experiments/<id>/results.json`, or `resolved.json` `{question, resolved_by, sources, as_of}` | 2 |

@@ -20,7 +20,39 @@ launcher was smoke-tested, but an equivalent full local feature build was not ru
 5. Approve only when satisfied. Require real test evidence and inspect the final
    diff. VPS users must fetch **and integrate** commits before submitting locally.
 
-## 1. When the interviewer gives you the repo
+## 1. Start with BOTH the initial PRD and the repo
+
+When you begin `/lsf`, supply the initial PRD/assignment/brief **and** the project
+mode. Claude should ask for anything missing, together:
+
+```text
+Mode: greenfield / brownfield
+Initial PRD or assignment: [paste text, file path or link]
+Source repo and branch (brownfield): [URL or existing local checkout]
+Owned destination: [GitHub/GitLab, owner, repo name, visibility]
+Builder: local / VPS
+Time budget: 60 minutes
+```
+
+**Greenfield:** Claude creates the agreed owned GitHub/GitLab repo and a local
+checkout. It gathers the PRD/idea, but waits for the normal plan approval before
+building product code. It must not turn your home folder into the new repo.
+
+**Brownfield:** Claude clones the source locally (or uses your existing checkout),
+records the starting commit, and creates/uses your owned fork or destination repo.
+The original source stays identifiable as upstream. An already-owned source repo
+can also be the destination; no duplicate is needed. Follow the interview's
+submission rules if they specify where changes must go; don't guess visibility.
+
+The initial PRD is the input, not the finished plan. Claude preserves it, then
+refines the business interpretation after minesweeping and writes the scoped
+implementation PRD before the second stop.
+
+Only after this bootstrap, continue below from the correct local checkout.
+For VPS mode, this is the local repo you transfer; the owned remote remains
+here for fetching, integrating and submitting remote work.
+
+### When the interviewer gives you the repo
 
 Clone/open the supplied repo. Open a terminal **inside its folder**. Save any IDE
 buffers before transferring files. Do not use the old python-dotenv rehearsal folder.
@@ -186,8 +218,9 @@ Use lsf-vps-test for tests when available. Serialize heavy tests. Report actual
 commands, exit statuses and failures; timeout or missing dependencies is not a pass.
 Ask me to start the dashboard if it isn't available. Do not access its approval token.
 
-Interview brief:
-[PASTE THE TASK HERE]
+Intake:
+[INITIAL PRD / TASK, GREENFIELD OR BROWNFIELD, SOURCE REPO IF APPLICABLE,
+OWNED GITHUB/GITLAB DESTINATION + VISIBILITY, LOCAL OR VPS]
 ```
 
 ## 4. The complete loop, and what you do

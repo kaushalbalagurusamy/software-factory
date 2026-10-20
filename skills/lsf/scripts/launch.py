@@ -24,6 +24,13 @@ def prepare(argv, binary, cwd, environment):
         'through it so process-tree memory and wall time are bounded; serialize heavy tests. '
         'Follow /lsf including its human checkpoints; '
         'never approve a checkpoint on behalf of the owner. '
+        'Before starting phases, follow INTAKE.md: collect the initial PRD/brief and '
+        'greenfield versus brownfield mode; for brownfield collect the source repo '
+        'URL or local checkout. Collect the owned GitHub/GitLab destination and '
+        'visibility. Reuse supplied answers; bootstrap the correct local checkout '
+        'and owned remote before preparing VPS execution. Do not initialize an '
+        'unrelated launch folder as the project. '
+
     )
     if args.task:
         prompt += '\nOwner task:\n' + ' '.join(args.task)
