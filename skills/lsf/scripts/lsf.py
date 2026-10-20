@@ -1871,12 +1871,17 @@ def make_handler(root, token, assets_html):
                 try:
                     body = json.loads(self.rfile.read(n).decode("utf-8"))
                     name, note = body["name"], body.get("note", "")
-                    if not isinstance(name, str) or not isinstance(note, str):
+                    answer, ph = body.get("answer"), body.get("proposal_hash")
+                    if not isinstance(name, str) or not isinstance(note, str) \
+                            or not all(v is None or isinstance(v, str) for v in (answer, ph)):
                         raise ValueError
-                except (ValueError, KeyError, TypeError):
-                    return self._err(400, "body must be JSON {name, note}")
+                except (ValueError, KeyError, TypeError, AttributeError):
+                    return self._err(400, "body must be JSON {name, note, answer, proposal_hash}")
                 try:
-                    t = hitl_release(root, name, note, "dashboard")
+                    mine = [x for x in stops_state(root) if x["name"] == name]
+                    if ph is None and mine and mine[-1]["state"] == "asked" and mine[-1].get("proposal_hash") and mine[-1].get("options"):
+                        return self._err(400, "proposal_hash is required for this stop")
+                    t = hitl_release(root, name, note, "dashboard", answer=answer or None, proposal_hash=ph)
                 except Usage as e:
                     return self._err(400, str(e))
                 except Fail as e:
