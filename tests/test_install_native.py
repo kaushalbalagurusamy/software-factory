@@ -160,3 +160,60 @@ def test_profile_allow_models_alone_does_not_widen(tmp_path, capsys):
     assert inst(proj, "--allow-model", "opus") == 0
     assert "extra allowed models: opus" in capsys.readouterr().out
     assert core.MODEL == "sonnet"
+
+
+def _bad_root(tmp_path, old="model: sonnet", new="model: opus", role="qa"):
+    root = tmp_path / "root"
+    shutil.copytree(REPO / "factory/agents/roles", root / "factory/agents/roles")
+    p = root / f"factory/agents/roles/{role}.yaml"
+    p.write_text(p.read_text().replace(old, new, 1))
+    return root
+
+
+def _args(root, skills, *allow, project=None):
+    import argparse
+    return argparse.Namespace(project=project, factory_root=str(root), python=sys.executable,
+                              skills_dir=str(skills), json=False, allow_model=list(allow))
+
+
+def test_doctor_non_sonnet_role_is_a_fail_line_not_a_traceback(skills, tmp_path, capsys):
+    root = _bad_root(tmp_path)
+    assert doctor.run_doctor(_args(root, skills)) == 1
+    out = capsys.readouterr().out
+    assert any(l.startswith("FAIL role qa model") and "opus" in l for l in out.splitlines())
+    capsys.readouterr()
+    doctor.run_doctor(_args(root, skills, "opus"))
+    out = capsys.readouterr().out
+    assert "FAIL role qa model" not in out and "extra allowed models: opus" in out
+
+
+def test_doctor_project_checks_survive_a_non_sonnet_role(skills, tmp_path):
+    root = _bad_root(tmp_path)
+    proj = tmp_path / "p"
+    proj.mkdir()
+    assert inst(proj) == 0
+    got = doctor.check_agents(proj, None, {"sonnet"}, root)
+    assert len(got) == 8 and all(n.startswith("agent ") for n, _, _ in got)
+    hooks = doctor.check_hooks(proj, {}, None, root, sys.executable)
+    assert hooks and hooks[0][0] == "hooks registered"  # ran, did not raise
+
+
+def test_doctor_invalid_role_file_is_fail_lines(skills, tmp_path):
+    root = _bad_root(tmp_path, "max_tools: 20", "max_tools: 99", role="qa")
+    proj = tmp_path / "p"
+    proj.mkdir()
+    assert doctor.check_agents(proj, None, {"sonnet"}, root)[0][1] == "FAIL"
+    assert doctor.check_hooks(proj, {}, None, root, sys.executable)[0][1] == "FAIL"
+
+
+def test_doctor_check_that_raises_becomes_fail_line():
+    def boom():
+        raise RuntimeError("x")
+    assert doctor._safe("t", boom) == [("t", "FAIL", "check could not run: RuntimeError: x")]
+
+
+def test_doctor_missing_role_file_does_not_raise(skills, tmp_path, capsys):
+    root = _bad_root(tmp_path)
+    (root / "factory/agents/roles/qa.yaml").unlink()
+    assert doctor.run_doctor(_args(root, skills)) == 1
+    assert "FAIL role qa file" in capsys.readouterr().out
