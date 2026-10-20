@@ -199,3 +199,7 @@ Binding for `docs/prds/SFN-08-editor-links.md`.
 6. `nesting_dolls.py check --assets [--repo DIR]` finds the ops shell at `<repo>/ops/shell/index.html` (repo defaults to the current directory's git root) and the skill assets relative to the script; a mismatch is reported with the text `editor-links` and exits 1. Without `--assets`, drift is not checked.
 7. With no editor or no valid root a file entry shows `Copy path` and a hint containing the word `editor`.
 8. Browser tests in the hidden evals launch Chrome themselves; implementers do not run them.
+
+## C-43 (2026-10-20, SFN-08): URL shape found wrong in review
+
+Amends C-42 and PRD K-02/K-03. The editors' documented URL form puts the absolute path directly after `file`: with a POSIX root `/home/me/proj` and relPath `a.py` and line 120, `vscode://file/home/me/proj/a.py:120` (one slash after `file`, never two). Windows drive roots keep the drive colon: `vscode://file/C:/Users/me/proj/a.py:3`. A root given with backslashes is accepted only when it starts with a drive letter and colon; its backslashes are converted to `/`. A backslash in `relPath` is still rejected. The `..` rule rejects only a whole path segment equal to `..`; a name such as `a..b` is fine. The same one-slash rule applies to `cursor`, `windsurf` and `zed`.
