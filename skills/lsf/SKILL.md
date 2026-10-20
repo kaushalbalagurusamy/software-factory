@@ -13,7 +13,7 @@ Run the tool as `lsf` (installed by `install.sh`) or `python3 <skill dir>/script
 ## Mac quick start
 
 1. `python3 --version` must print 3.9 or newer (macOS ships it with the Xcode command line tools; `xcode-select --install` if missing). `git --version` too.
-2. From the unpacked skill folder: `sh install.sh`. It copies the skill to `~/.claude/skills/lsf` and puts an `lsf` wrapper in `~/.local/bin` (add that folder to `PATH` if it says so). Running it again changes nothing.
+2. From the unpacked skill folder: `sh install.sh`. It copies the skill to `~/.claude/skills/lsf` and puts an `lsf` wrapper in `~/.local/bin` (add that folder to `PATH` if it says so). Running it again changes nothing. An older different copy is kept in `~/.claude/skills-backups`, never inside the skills folder (it would load as a second `lsf`).
 3. In the project folder: `lsf doctor`, then `lsf init`.
 4. `lsf serve --open` prints `http://127.0.0.1:PORT/#token=...` once in that terminal and opens it. The token after `#` is what enables the Approve button, so open that exact URL (if the page has no token it shows the terminal command instead). Keep this terminal running.
 5. To approve a checkpoint: click **Approve** on its card in the Now tab (add a note if you like), or run `lsf hitl release NAME` in another terminal. Agents never release.
@@ -21,9 +21,9 @@ Run the tool as `lsf` (installed by `install.sh`) or `python3 <skill dir>/script
 ## Start
 
 1. `lsf doctor` and fix any FAIL.
-2. `lsf init` (add `--minutes N`, `--checkpoints align|all|none`, `--editor vscode|cursor|zed|idea|...`).
-3. `lsf serve --open` in a second terminal. Tell the owner the URL (it carries a one-time token in the fragment for the Approve button).
-4. `lsf hooks install --project .` shows a diff; add `--apply` only when the owner agrees. It adds automatic telemetry for subagent stops, session stops and `git commit`.
+2. `lsf init` (add `--minutes N`, `--checkpoints align|all|none`, `--editor vscode|cursor|zed|idea|none|...`). `lsf init --strict-hitl` makes `hitl release` and `hitl repair` refuse unless they run in a real terminal.
+3. **The human starts the dashboard**, in their own terminal: `lsf serve --open`. The agent must never run `lsf serve`, never read or print the token (the `#token=...` part of the URL), and never call the release route. If the dashboard is not running, ask the owner to start it.
+4. `lsf hooks install --project .` shows a diff; add `--apply` only when the owner agrees. It adds automatic telemetry (subagent stops, session stops, `git commit`) and a PreToolUse guard that denies `hitl release`, `hitl repair`, and writes to `.lsf/stops*`. The guard is friction, not proof. Hooks write only into a project that already has `.lsf` (found by walking up from the hook's directory); elsewhere they do nothing.
 
 ## The flow, in the owner's order
 
@@ -50,7 +50,7 @@ Stage ids are an alias map to `/sf` (last column) so events from both tools read
 - **At the start of every phase run `lsf hitl status`.** Exit 3 means a human stop is open: stop working and wait. Do not start the phase. (`lsf phase start` also refuses with exit 3.)
 - `lsf phase start NAME`, do the work, write the artifacts the dashboard tabs read (table above), then `lsf phase end NAME --verdict V --note "what happened" --ask "the one question for the owner" --artifact PATH [--artifact PATH ...]`.
 - Ending an alignment phase opens a human checkpoint named `<phase>-review` automatically. Put the question and the artifacts in it. **Do not ask the owner a question in chat when a checkpoint will do**: open one with `lsf hitl request NAME --question "..." --artifact PATH`. The owner approves from the dashboard (Approve button) or the terminal.
-- **Never run `lsf hitl release`.** Release is a human act. You may not approve your own checkpoint, edit `.lsf/stops.jsonl`, or work around a stop. The tool records who and when; it is a procedure, not proof of identity.
+- **Never run `lsf hitl release` or `lsf hitl repair`.** Release is a human act. You may not approve your own checkpoint, edit or delete anything in `.lsf/stops*`, call the release route, or work around a stop. The tool records how each release happened (`via`: dashboard, cli-tty or cli-nontty) and cross-checks the ledger against the event log, but be plain about the limit: no software check can prove who clicked or typed. It is a procedure with an audit trail, not proof of identity.
 - Record evidence as you go: `lsf event STAGE VERDICT --note "..." [--role R] [--slice S]`. Use verdicts `pass` and `fail` for test and review results so the dashboard counts them. Notes are truncated and secrets are redacted, but do not paste secrets anyway.
 - If the owner states cost, log it: `lsf cost add --usd X --tokens N --model M`. Never estimate it.
 - Check `lsf budget` at each phase boundary. If a group is over plan, say so to the owner and propose what to cut (smaller slices, not skipped stages).
@@ -60,6 +60,7 @@ Stage ids are an alias map to `/sf` (last column) so events from both tools read
 - Tests and evals come before code. Implementers are blind to eval files. A separate runner runs tests. Never weaken, skip or delete an assertion to get green.
 - Docs use the ELI12 format (`skills/eli12-docs`, `docs/eli12/<module>.md`): per function, one plain sentence, what it expects, what it gives back, who uses it, what it depends on. Run its `check` in `10-docs`; findings are stale docs. If `docs/eli12/index.json` is missing the Docs tab says so; do not fake it.
 - Review uses the nesting dolls to read code at the right depth, and the Ponytail rubric: does it need to exist, is it already in the codebase, does the standard library do it, is there a smaller change, does the new logic have a check. Findings go back into the slice as amendments; the implement and QA duo runs again.
+- When you build the explorer for the project, pass the editor so the diagram links open files: `python3 skills/mermaid-nesting-dolls/scripts/nesting_dolls.py build model.json -o docs/explorer/NAME.html --workspace-root "$PWD" --editor <editor>` (use the editor in `.lsf/profile.json`).
 - File references in anything the owner reads should be `path:line` so the dashboard opens them in the editor (the editor and workspace root are in `.lsf/profile.json`).
 - Models are a profile choice: optional `models` in `.lsf/profile.json` maps roles (for example `synthesis`, `implementation`, `review`) to whatever the owner has available. Do not assume a model name; read the profile.
 - Atomic commits, explicit paths, no force-push.
