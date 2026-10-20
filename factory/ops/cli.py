@@ -144,23 +144,28 @@ def _status(repo: Path, as_json: bool) -> int:
     out = repo / "ops"
     snap = None
     try:
-        for c in json.loads((out / "index.json").read_text(encoding="utf-8")).get("commits", []):
+        idx = json.loads((out / "index.json").read_text(encoding="utf-8"))
+        for c in idx.get("commits", []):  # newest first (C-49.6)
             if (out / "snapshots" / c["sha"] / "manifest.json").exists():
                 snap = c["sha"]
                 break
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         pass
-    n = _git(repo, "rev-list", "--count", f"{snap}..HEAD") if snap else None
+    diverged = bool(snap) and subprocess.run(["git", "-C", str(repo), "merge-base", "--is-ancestor", snap, "HEAD"],
+                                             capture_output=True).returncode != 0
+    n = _git(repo, "rev-list", "--count", f"{snap}..HEAD") if snap and not diverged else None
     behind = int(n) if n and n.isdigit() else None
     try:
         events = sum(1 for ln in (out / "events.jsonl").read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip())
     except OSError:
         events = 0
     st = {"head": head, "snapshot": snap, "behind": behind, "events": events}
+    if diverged:  # HEAD is older than, or on another line from, the snapshot's commit
+        st["diverged"] = True
     if as_json:
         print(json.dumps(st))
     else:
-        print(f"head: {head}\nsnapshot: {snap}\nbehind: {behind}\nevents: {events}")
+        print(f"head: {head}\nsnapshot: {snap}\nbehind: {behind}\nevents: {events}" + ("\ndiverged" if diverged else ""))
     return 0 if behind == 0 else BEHIND
 
 

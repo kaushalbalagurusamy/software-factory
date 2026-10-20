@@ -468,3 +468,19 @@ def test_autobundle_block_quotes_the_pinned_paths(proj, monkeypatch):
     from factory.ops import cli as opscli
     monkeypatch.setattr(opscli.sys, "executable", "/opt/it's here/python")
     assert "'/opt/it'\"'\"'s here/python'" in opscli._block()
+
+
+def test_status_and_runtime_report_diverged_not_zero(proj):
+    from factory.ops import runtime as R
+    c1 = commit(proj, "one")
+    c2 = commit(proj, "two")
+    assert sf("ops", "bundle", cwd=proj).returncode == 0  # snapshot at c2
+    subprocess.run(["git", "checkout", "-q", c1], cwd=proj, check=True)  # HEAD is older than the snapshot
+    r = sf("ops", "status", "--json", cwd=proj)
+    j = json.loads(r.stdout)
+    assert r.returncode == 4 and j["snapshot"] == c2 and j["behind"] is None and j["diverged"] is True
+    assert "diverged" in sf("ops", "status", cwd=proj).stdout
+    assert R.write_runtime(None, proj / "ops" / "runtime.json")["behind"] is None
+    subprocess.run(["git", "checkout", "-q", "-b", "side"], cwd=proj, check=True)
+    commit(proj, "side")  # a different line
+    assert json.loads(sf("ops", "status", "--json", cwd=proj).stdout)["behind"] is None
