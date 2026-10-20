@@ -130,3 +130,9 @@ def test_lone_surrogates_return_null_not_throw(bad):
 
 def test_valid_astral_character_encodes():
     assert url("vscode", "/r", "\U0001F600.py", 2) == "vscode://file/r/%F0%9F%98%80.py:2"
+
+
+def test_antigravity_ide_registered_scheme_and_encoded_location():
+    assert url('antigravity-ide', '/Users/me/My Repo', 'src/a b#c.py', 12) == (
+        'antigravity-ide://file/Users/me/My%20Repo/src/a%20b%23c.py:12')
+    assert url('antigravity-ide', '/repo', '../private', 1) is None

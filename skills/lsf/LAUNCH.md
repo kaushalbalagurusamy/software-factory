@@ -59,3 +59,15 @@ For this interview setup, the watcher runs as the user LaunchAgent
 ```sh
 launchctl bootout "gui/$(id -u)/com.kaushal.lsf-vps-import"
 ```
+
+## Antigravity IDE file links
+
+Select `antigravity-ide` in the dashboard Editor menu and set Workspace root to
+the absolute checkout path on this Mac. File links use the registered
+`antigravity-ide://file/absolute/path:line` scheme. New sessions launched with
+`claude -lsf` request this editor when initializing LSF. Existing projects can
+keep their own choice. A VPS dashboard needs a matching local checkout and its
+Mac path in Workspace root; a VPS path alone cannot open a file on the Mac.
+
+The VPS importer reapplies this editor integration to verified snapshots so an
+upstream sync cannot silently remove it.

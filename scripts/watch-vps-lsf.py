@@ -90,6 +90,8 @@ def install(sha):
     # Keep the independently tested launcher while importing the native workflow.
     for relative in ('scripts/launch.py', 'LAUNCH.md'):
         shutil.copy2(ROOT / 'skills/lsf' / relative, staging / 'skills/lsf' / relative)
+    subprocess.run([str(PYTHON), str(ROOT / 'scripts/add-antigravity-editor.py'), str(staging)],
+                   check=True, timeout=15)
     checks = ['tests/lsf']
     for suite in ('evals/native/sfn09',):
         if (staging / suite).exists():

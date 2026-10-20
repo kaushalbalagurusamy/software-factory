@@ -75,3 +75,8 @@ def test_exec_path_keeps_arguments_and_exit_status(tmp_path):
     assert data['args'][data['args'].index('--name') + 1] == 'A B'
     assert 'literal $(touch nope)' in data['args'][-1]
     assert data['api'] is False
+
+
+def test_personal_launcher_requests_antigravity_editor_links():
+    command, _ = load().prepare([], 'claude', Path('/tmp/example'), {})
+    assert '--editor antigravity-ide' in command[-1]

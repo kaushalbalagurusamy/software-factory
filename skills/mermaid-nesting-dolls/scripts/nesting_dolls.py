@@ -19,7 +19,7 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parent.parent
 STATUSES = {"built", "partial", "designed", "external", "gap"}
-EDITORS = ("vscode", "cursor", "windsurf", "zed", "idea", "sublime", "textmate")  # keep in step with assets/editor-links.js
+EDITORS = ("vscode", "cursor", "windsurf", "antigravity-ide", "zed", "idea", "sublime", "textmate")  # keep in step with assets/editor-links.js
 MARK_BEGIN, MARK_END = "/* editor-links:begin */", "/* editor-links:end */"
 RESERVED = {"end", "graph", "subgraph", "flowchart", "class", "classdef", "style", "click", "default"}
 

@@ -64,4 +64,4 @@ Leave `coverage` off nodes where status is meaningless. Never mark `built` from 
 
 ## workspace (optional, editor links)
 
-`workspace.root` is the absolute checkout directory (`/abs/path` or `C:/abs/path`) and `workspace.editor` is one of `vscode`, `cursor`, `windsurf`, `zed`, `idea`, `sublime`, `textmate` or `none`. Both are **checked**. The viewer joins `root` and a file's `path` to open it in the editor at the first line of `lines`; `?editor=` and `?root=` in the page address override them. Omit `workspace` for a portable file (files then show `Copy path` only). `build --workspace-root DIR --editor NAME` writes it.
+`workspace.root` is the absolute checkout directory (`/abs/path` or `C:/abs/path`) and `workspace.editor` is one of `vscode`, `cursor`, `windsurf`, `antigravity-ide`, `zed`, `idea`, `sublime`, `textmate` or `none`. Both are **checked**. The viewer joins `root` and a file's `path` to open it in the editor at the first line of `lines`; `?editor=` and `?root=` in the page address override them. Omit `workspace` for a portable file (files then show `Copy path` only). `build --workspace-root DIR --editor NAME` writes it.
