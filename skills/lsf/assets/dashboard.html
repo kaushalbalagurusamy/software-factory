@@ -37,7 +37,9 @@ button{min-height:44px;padding:.35rem .9rem;background:var(--panel);border:1px s
 button.primary{background:var(--acc);color:var(--acc-fg);border-color:var(--acc);font-weight:650}
 button:disabled{opacity:.55;cursor:default}
 #banner{margin:0;padding:.55rem 16px;font-weight:600;font-size:.92rem;text-align:center}
-#banner:empty{display:none}
+#banner:empty,#waiting:empty{display:none}
+#waiting{margin:0;padding:.55rem 16px;font-weight:650;font-size:.95rem;text-align:center;background:color-mix(in srgb,var(--wait) 22%,var(--bg));border-bottom:1px solid var(--wait)}
+#waiting a{margin-left:.6rem;white-space:nowrap}
 #banner.stop{background:color-mix(in srgb,var(--wait) 18%,var(--bg));border-bottom:1px solid var(--wait)}
 #banner.snap{background:color-mix(in srgb,var(--acc) 15%,var(--bg));border-bottom:1px solid var(--acc)}
 #banner.err{background:color-mix(in srgb,var(--bad) 18%,var(--bg));border-bottom:1px solid var(--bad)}
@@ -62,6 +64,15 @@ main{padding:8px 16px 64px;max-width:1180px;margin:0 auto;min-width:0}
 .steps li{padding:.2rem .65rem;border-radius:99px;border:1px solid var(--line);font-size:.8rem;color:var(--mute);background:var(--panel2)}
 .steps li.done{color:var(--fg)}.steps li.done::before{content:"\2713 "}
 .steps li.open{background:var(--acc);color:var(--acc-fg);border-color:var(--acc);font-weight:700}
+.opts{border:0;margin:.7rem 0 0;padding:0;display:grid;gap:.45rem}
+.opts legend{padding:0;font-size:.85rem;color:var(--mute);margin-bottom:.3rem}
+.opt{display:flex;align-items:center;gap:.7rem;min-height:48px;padding:.4rem .8rem;border:1px solid var(--line);border-radius:12px;background:var(--panel2);cursor:pointer;overflow-wrap:anywhere}
+.opt:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--panel2))}
+.opt input{flex:none;width:22px;height:22px;min-height:0;accent-color:var(--acc)}
+.dl{display:grid;grid-template-columns:max-content 1fr;gap:.25rem .8rem;margin:.6rem 0 0;font-size:.9rem}
+.dl dt{color:var(--mute)}.dl dd{margin:0;overflow-wrap:anywhere;min-width:0}
+.dec .note{flex:1 1 220px;min-width:0}
+.dec button.primary{flex:1 1 160px}
 .gb{margin:.9rem 0}
 .wrows{display:flex;flex-direction:column;gap:.35rem;margin-top:.6rem}
 .gb .row{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;font-size:.9rem}
@@ -91,7 +102,7 @@ iframe{width:100%;height:68vh;min-height:360px;border:1px solid var(--line);bord
 .tbl{display:grid;gap:.4rem}
 .hbar{height:10px;border-radius:99px;background:var(--acc);min-width:2px}
 @media (max-width:620px){header.top{position:static}}
-@media (max-width:520px){.clock .t{font-size:1.15rem}.bar{padding:.55rem 16px}.q{font-size:1.05rem}.ev{grid-template-columns:1fr}}
+@media (max-width:520px){.dl{grid-template-columns:1fr}.dl dt{margin-top:.3rem}.clock .t{font-size:1.15rem}.bar{padding:.55rem 16px}.q{font-size:1.05rem}.ev{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -106,6 +117,7 @@ iframe{width:100%;height:68vh;min-height:360px;border:1px solid var(--line);bord
    <label for="ws">Workspace root</label><input id="ws" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="/absolute/path/to/project" size="22">
   </div>
  </div>
+ <p id="waiting" role="status"></p>
  <p id="banner" role="status"></p>
  <nav id="nav" role="tablist" aria-label="Dashboard tabs"></nav>
 </header>
@@ -182,9 +194,9 @@ var SFEditorLinks = (function (root, factory) {
 <script>
 (function(){
 "use strict";
-var TABS=[["now","Now"],["telemetry","Telemetry"],["research","Research"],["experiments","Experiments"],["adrs","ADRs"],["prd","PRD"],["architecture","Architecture"],["docs","Docs"],["evals","Evals & bugs"],["git","Git"]];
+var TABS=[["now","Now"],["stops","Human stops"],["telemetry","Telemetry"],["research","Research"],["experiments","Experiments"],["adrs","ADRs"],["prd","PRD"],["architecture","Architecture"],["docs","Docs"],["evals","Evals & bugs"],["git","Git"]];
 var GROUPS=["align","review","build"];
-var S={state:null,snap:null,tab:"now",token:"",editor:null,wsroot:null,openDoc:null,docText:{},err:"",busy:{},sig:"",gotAt:0,iframe:{}};
+var S={state:null,snap:null,tab:"now",token:"",editor:null,wsroot:null,openDoc:null,docText:{},err:"",busy:{},sig:"",gotAt:0,iframe:{},draft:{}};
 var main=document.getElementById("main"),nav=document.getElementById("nav");
 try{var m=/token=([0-9a-f]+)/.exec(location.hash||"");if(m){S.token=m[1];history.replaceState(null,"",location.pathname+location.search);}}catch(e){}
 function tabFromHash(){var id=(location.hash||"").replace(/^#/,"");for(var i=0;i<TABS.length;i++){if(TABS[i][0]===id){return id;}}return "now";}
@@ -220,6 +232,8 @@ function api(path,opts){return fetch(path,opts).then(function(r){return r.text()
  if(!r.ok){throw new Error((j&&j.error)||("HTTP "+r.status));}return j===null?t:j;});});}
 
 /* ---------- header, banner, nav ---------- */
+function stateOf(s){return s.state||(s.released_at?"answered":"asked");}
+function asked(rt){return ((rt&&rt.stops)||[]).filter(function(x){return stateOf(x)==="asked";});}
 function renderHeader(){
  var st=S.state,rt=st&&st.runtime,s=rt&&rt.status,op=s&&s.open_phase,sess=s&&s.session_elapsed_minutes,tot=s&&s.session_minutes;
  document.getElementById("clk").textContent=sess!==null&&sess!==undefined?clock(sess*60+(Date.now()-S.gotAt)/1000*(S.live?1:0)):"--:--";
@@ -228,20 +242,22 @@ function renderHeader(){
  if(!sel.options.length){(SFEditorLinks.editors||[]).concat(["none"]).forEach(function(e){sel.appendChild(h("option",{value:e,text:e}));});}
  if(document.activeElement!==sel){sel.value=c.editor;}
  var ws=document.getElementById("ws");if(document.activeElement!==ws){ws.value=c.root;}
- var b=document.getElementById("banner"),stops=(rt&&rt.stops||[]).filter(function(x){return !x.released_at;});
+ var b=document.getElementById("banner"),stops=asked(rt),wt=document.getElementById("waiting");
+ wt.textContent="";
+ if(stops.length){wt.appendChild(document.createTextNode(stops.length+" decision"+(stops.length>1?"s":"")+" waiting for you"));
+  if(S.tab!=="stops"){wt.appendChild(h("a",{href:"#stops"},"Review"));}}
  b.className="";
  if(rt&&rt.stop_ledger&&rt.stop_ledger!=="ok"){b.className="err";b.textContent=rt.stop_ledger;}
  else if(S.err){b.className="err";b.textContent=S.err;}
  else if(s&&s.clock_overridden){b.className="stop";b.textContent="Clock overridden by LSF_NOW: every time on this page is a rehearsal value";}
  else if(S.snap){b.className="snap";b.textContent="Viewing commit "+S.snap.sha.slice(0,8)+": the historical tabs show that commit; Now and Telemetry stay live.";}
- else if(stops.length){b.className="stop";b.textContent=stops.length+" human checkpoint"+(stops.length>1?"s":"")+" waiting for approval";}
  else{b.textContent="";}
 }
 function renderNav(){
- var stops=((S.state&&S.state.runtime.stops)||[]).filter(function(x){return !x.released_at;}).length;
+ var stops=S.state?asked(S.state.runtime).length:0;
  nav.textContent="";
  TABS.forEach(function(t){var b=h("button",{type:"button",role:"tab","aria-selected":S.tab===t[0]?"true":"false","data-tab":t[0],onclick:function(){S.tab=t[0];S.sig="";try{if(location.hash!=="#"+t[0]){history.pushState(null,"","#"+t[0]);}}catch(e){}renderNav();renderTab();}},[t[1]]);
-  if(t[0]==="now"&&stops){b.appendChild(h("span",{class:"dot","aria-label":stops+" waiting"},String(stops)));}nav.appendChild(b);});
+  if((t[0]==="stops"||t[0]==="now")&&stops){b.appendChild(h("span",{class:"dot","aria-label":stops+" waiting"},String(stops)));}nav.appendChild(b);});
 }
 
 /* ---------- Now ---------- */
@@ -268,29 +284,55 @@ function phaseCard(){
  return h("div",{class:"card"},[
   h("div",{class:"row2",style:"margin-top:0"},[h("h3",{},op?"Now in "+op.phase:"No phase open"),op?grpChip(op.group):null,op?h("span",{id:"pclk",class:"mono",style:"font-size:1.6rem;font-weight:650"},clock(secs)):null]),
   h("p",{class:"mute small"},op?"Started "+hhmmss(op.started_at)+" UTC":("Next: "+(s.next_phase||"all phases done")+". Start it with lsf phase start "+(s.next_phase||""))),steps]);}
+var STEPS=[["asked","Asked"],["answered","Answered"],["recorded","Recorded"],["applied","Applied"]];
+function stepRow(st){var at=0;STEPS.forEach(function(x,i){if(x[0]===st){at=i;}});
+ return h("ol",{class:"steps","aria-label":"Decision progress"},STEPS.map(function(x,i){
+  return h("li",{class:st==="applied"||i<at?"done":(i===at?"open":""),"aria-current":i===at?"step":null},x[1]);}));}
 function stopCard(s){
- var released=!!s.released_at,kids=[];
- kids.push(h("div",{class:"row2",style:"margin-top:0"},[chip(released?"released":"waiting for you",released?"v-pass":"v-wait"),h("span",{class:"mono small mute"},s.name),h("span",{class:"small mute"},"opened "+hhmmss(s.opened_at))]));
+ var st=stateOf(s),open=st==="asked",opts=s.options||[],kids=[];
+ kids.push(h("div",{class:"row2",style:"margin-top:0"},[chip(open?"waiting for you":st,open?"v-wait":"v-pass"),h("span",{class:"mono small mute"},s.name),h("span",{class:"small mute"},"opened "+hhmmss(s.opened_at))]));
  kids.push(h("div",{class:"q"},s.question||"Approve?"));
  if(s.reason){kids.push(h("div",{class:"small mute"},s.reason));}
+ kids.push(stepRow(st));
  if((s.artifact||[]).length){kids.push(h("div",{class:"refs"},s.artifact.map(function(a){var m=/^(.*?)(?::(\d+))?$/.exec(a);return ref(m[1],m[2]?parseInt(m[2],10):null,a);})));}
- if(released){
+ if(!open){
   if(s.via&&s.via!=="dashboard"){kids.push(h("div",{class:"small v-wait"},[chip("released from the command line","v-wait")," ("+s.via+")"]));}
-  kids.push(h("div",{class:"small mute"},"released by "+(s.released_by||"?")+" at "+hhmmss(s.released_at)+(s.note?": "+s.note:"")));}
- else{
+  var dl=h("dl",{class:"dl"});
+  function row(k,v){dl.appendChild(h("dt",{},k));dl.appendChild(h("dd",{},v));}
+  if(s.answer){row("Answer",h("b",{},s.answer));}
+  row("Answered",(s.released_by||"?")+" at "+hhmmss(s.released_at)+(s.note?": "+s.note:""));
+  if(s.recorded_where){row("Recorded in",ref(s.recorded_where));}
+  if(st==="applied"){row("Evidence",s.applied_evidence||"");row("Applied",hhmmss(s.applied_at));}
+  else{row("Status","not applied yet");}
+  kids.push(dl);
+ }else{
   var msg=h("div",{class:"small err",role:"alert"});
   if(S.token){
-   var note=h("input",{type:"text",placeholder:"Optional note","aria-label":"Note for "+s.name,style:"flex:1 1 180px"});
-   var btn=h("button",{type:"button",class:"primary",onclick:function(){btn.disabled=true;msg.textContent="";
-    api("/api/hitl/release",{method:"POST",headers:{"Content-Type":"application/json","X-LSF-Token":S.token},body:JSON.stringify({name:s.name,note:note.value})})
-     .then(function(){return poll();}).catch(function(e){msg.textContent="Could not approve: "+e.message;btn.disabled=false;});}},"Approve");
+   var dr=S.draft[s.name]=S.draft[s.name]||{},chosen=dr.answer||null,note=h("input",{type:"text",class:"note",placeholder:"Optional note","aria-label":"Note for "+s.name,value:dr.note||"",oninput:function(){dr.note=note.value;}});
+   var btn=h("button",{type:"button",class:"primary",disabled:opts.length>0&&!chosen,onclick:function(){btn.disabled=true;msg.textContent="";
+    api("/api/hitl/release",{method:"POST",headers:{"Content-Type":"application/json","X-LSF-Token":S.token},body:JSON.stringify({name:s.name,note:note.value,answer:chosen,proposal_hash:s.proposal_hash||null})})
+     .then(function(){return poll();}).catch(function(e){msg.textContent="Could not "+(opts.length?"submit":"approve")+": "+e.message;btn.disabled=false;});}},opts.length?"Submit answer":"Approve");
+   if(opts.length){kids.push(h("fieldset",{class:"opts"},[h("legend",{},"Choose one answer")].concat(opts.map(function(o,i){
+    var id="o-"+s.name+"-"+i;
+    return h("label",{class:"opt",for:id},[h("input",{type:"radio",name:"ans-"+s.name,id:id,checked:chosen===o,onchange:function(){chosen=dr.answer=o;btn.disabled=false;}}),h("span",{},o)]);}))));}
    kids.push(h("div",{class:"row2"},[note,btn]));kids.push(msg);
   }else{
-   kids.push(h("div",{class:"small"},["No token in this URL, so run in a terminal: ",h("code",{},"lsf hitl release "+s.name)]));}
+   kids.push(h("div",{class:"small"},["No token in this URL, so run in a terminal: ",h("code",{},"lsf hitl release "+s.name+(opts.length?" --answer \"<one of the options>\"":""))]));}
  }
- return h("div",{class:"card "+(released?"done":"stop")},kids);}
+ return h("div",{class:"card dec "+(open?"stop":"done")},kids);}
+function renderStops(){
+ var rt=S.state.runtime,all=(rt.stops||[]),open=all.filter(function(x){return stateOf(x)==="asked";}),rest=all.filter(function(x){return stateOf(x)!=="asked";});
+ var n=h("div",{});
+ n.appendChild(h("p",{class:"mute small"},"Decisions the agent asked you to make. Pick an answer and submit it; the agent then records it and applies it, and each step shows here."));
+ if(rt.stop_ledger!=="ok"){n.appendChild(h("div",{class:"empty err",role:"alert"},rt.stop_ledger));return n;}
+ if(!all.length){n.appendChild(h("div",{class:"empty"},"No decision has been asked yet (.lsf/stops.jsonl has no entries)."));return n;}
+ n.appendChild(h("h2",{},"Waiting for you ("+open.length+")"));
+ if(!open.length){n.appendChild(h("div",{class:"empty"},"Nothing is waiting."));}
+ open.forEach(function(s){n.appendChild(stopCard(s));});
+ if(rest.length){n.appendChild(h("h2",{},"Answered, recorded and applied"));rest.slice().reverse().forEach(function(s){n.appendChild(stopCard(s));});}
+ return n;}
 function renderNow(){
- var rt=S.state.runtime,stops=rt.stops||[],open=stops.filter(function(x){return !x.released_at;}),rel=stops.filter(function(x){return x.released_at;});
+ var rt=S.state.runtime,stops=rt.stops||[],open=stops.filter(function(x){return stateOf(x)==="asked";}),rel=stops.filter(function(x){return stateOf(x)!=="asked";});
  var n=h("div",{});
  n.appendChild(phaseCard());
  n.appendChild(h("h2",{},"Human checkpoints"+(open.length?" ("+open.length+" waiting)":"")));
@@ -413,7 +455,7 @@ function renderGit(){
  n.appendChild(l);return n;}
 
 function withHelp(text,node){var w=h("div",{});w.appendChild(h("p",{class:"mute small"},text));w.appendChild(node);return w;}
-var RENDER={now:renderNow,telemetry:renderTelemetry,research:renderResearch,experiments:renderExperiments,adrs:renderAdrs,prd:renderPrd,architecture:function(){return withHelp("Looks in docs/explorer/*.model.json and docs/explorer/*.html (the nested diagrams); each node lists its source files as editor links.",renderArch());},docs:function(){return withHelp("Looks in docs/eli12/index.json and the module pages it names under docs/eli12/.",renderDocs());},evals:renderEvals,git:renderGit};
+var RENDER={now:renderNow,stops:renderStops,telemetry:renderTelemetry,research:renderResearch,experiments:renderExperiments,adrs:renderAdrs,prd:renderPrd,architecture:function(){return withHelp("Looks in docs/explorer/*.model.json and docs/explorer/*.html (the nested diagrams); each node lists its source files as editor links.",renderArch());},docs:function(){return withHelp("Looks in docs/eli12/index.json and the module pages it names under docs/eli12/.",renderDocs());},evals:renderEvals,git:renderGit};
 function renderTab(){
  main.textContent="";
  if(!S.state){main.appendChild(h("div",{class:"empty",role:"status"},S.err||"Loading..."));return;}
@@ -426,7 +468,7 @@ function poll(){
   var first=!S.state,tabsChanged=first||strip(S.state.tabs)!==strip(st.tabs),rtChanged=first||strip(S.state.runtime)!==strip(st.runtime);
   S.live=true;S.gotAt=Date.now();S.state=st;S.err="";renderHeader();
   if(first||tabsChanged||rtChanged){renderNav();
-   var liveTab=S.tab==="now"||S.tab==="telemetry"||S.tab==="evals",typing=document.activeElement&&document.activeElement.tagName==="INPUT"&&main.contains(document.activeElement);
+   var liveTab=S.tab==="now"||S.tab==="stops"||S.tab==="telemetry"||S.tab==="evals",typing=document.activeElement&&document.activeElement.tagName==="INPUT"&&main.contains(document.activeElement);
    if((first||tabsChanged||(rtChanged&&liveTab))&&!typing){renderTab();}}
  }).catch(function(e){S.err="Cannot reach the lsf server: "+e.message;renderHeader();if(!S.state){renderTab();}});}
 window.addEventListener("hashchange",function(){var t=tabFromHash();if(t!==S.tab){S.tab=t;S.sig="";render();}});
