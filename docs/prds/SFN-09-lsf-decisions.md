@@ -60,7 +60,10 @@ with `Confirm rollback` and `Cancel`. Confirm posts `confirm_sha`. Without a tok
 command `lsf rollback SHA --yes`. After success the log reloads and the new revert commit appears on top. The commit's historical
 ops state view is unchanged.
 D-16. The PreToolUse `hook guard` also denies agent Bash that calls `/api/rollback`, and treats `lsf rollback` like the human-only
-release path: refused under strict mode without a TTY (same rule and message style as release).
+release path: refused under strict mode without a TTY (same rule and message style as release). The guard denies ANY agent Bash
+command that contains an lsf invocation together with the word `rollback` (no flag requirement, so `--y`/`--ye` abbreviations cannot
+slip through; includes `python3 .../lsf.py rollback`). The lsf parser and every subparser set `allow_abbrev=False`, so abbreviated
+long options are usage errors.
 
 ## Error logs behind failing tests and bugs (owner direction 2026-10-20, added to SFN-09)
 

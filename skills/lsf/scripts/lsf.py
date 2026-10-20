@@ -453,29 +453,44 @@ def cross_check(root, entries):
             led[k] = led.get(k, 0) + 1
     evc = {}
     for e in ev:
-        if e.get("verdict") in ("opened", "released"):
-            k = ("open" if e["verdict"] == "opened" else "release", e.get("stop"))
+        kind = {"opened": "open", "released": "release", "recorded": "recorded", "applied": "applied"}.get(e.get("verdict"))
+        if kind:
+            k = (kind, e.get("stop"))
             evc[k] = evc.get(k, 0) + 1
     for k, n in evc.items():
         if k[0] == "open" and led.get(k, 0) < n:
             raise Fail("stop ledger inconsistent: stop %s was opened (events.jsonl) but is missing from the ledger" % k[1])
     for k, n in led.items():
-        if k[0] == "release" and evc.get(k, 0) < n:
-            raise Fail("stop ledger inconsistent: stop %s is released in the ledger with no release event" % k[1])
+        if k[0] in ("release", "recorded", "applied") and evc.get(k, 0) < n:
+            raise Fail("stop ledger inconsistent: stop %s is %s in the ledger with no %s event"
+                       % (k[1], {"release": "released"}.get(k[0], k[0]), k[0]))
 
 
 def derive_stops(entries):
     stops = []
     for e in entries:
         if e.get("kind") == "open":
-            stops.append({"name": e.get("name"), "question": e.get("question"), "artifact": e.get("artifact") or [],
-                          "reason": e.get("reason"), "opened_at": e.get("opened_at")})
-        elif e.get("kind") == "release":
+            stops.append({"id": e.get("name"), "name": e.get("name"), "question": e.get("question"), "artifact": e.get("artifact") or [],
+                          "reason": e.get("reason"), "opened_at": e.get("opened_at"), "state": "asked",
+                          "options": e.get("options") or [], "proposal_hash": e.get("proposal_hash"), "unbound": e.get("unbound") or [], "answer": None,
+                          "answered_at": None, "recorded_where": None, "recorded_at": None,
+                          "applied_evidence": None, "applied_at": None})
+        elif e.get("kind") in ("release", "recorded", "applied"):
+            # a release closes the latest asked stop of that name; recorded/applied advance the latest stop of that name
+            want = {"release": "asked", "recorded": "answered", "applied": "recorded"}[e["kind"]]
             for s in reversed(stops):
-                if s["name"] == e.get("name") and "released_at" not in s:
-                    s["released_at"], s["released_by"], s["note"] = e.get("released_at"), e.get("released_by"), e.get("note")
-                    s["via"] = e.get("via") or "unknown"
-                    break
+                if s["name"] != e.get("name"):
+                    continue
+                if s["state"] == want:
+                    if e["kind"] == "release":
+                        s["released_at"], s["released_by"], s["note"] = e.get("released_at"), e.get("released_by"), e.get("note")
+                        s["via"] = e.get("via") or "unknown"
+                        s["answer"], s["answered_at"], s["state"] = e.get("answer"), e.get("released_at"), "answered"
+                    elif e["kind"] == "recorded":
+                        s["recorded_where"], s["recorded_at"], s["state"] = e.get("where"), e.get("recorded_at"), "recorded"
+                    else:
+                        s["applied_evidence"], s["applied_at"], s["state"] = e.get("evidence"), e.get("applied_at"), "applied"
+                break
     return stops
 
 
@@ -511,18 +526,59 @@ def require_tty_if_strict(root, what):
         raise StopError()
 
 
-def hitl_open(root, name, question, artifacts, reason):
+MAX_OPTIONS = 6
+MAX_OPTION = 120
+MAX_PROPOSAL_FILE = 1024 * 1024
+
+
+def _artifact_sha(root, path):
+    """sha256 of the file bytes, or None when missing, not a regular file, outside the repo root, or over 1 MiB."""
+    path = re.sub(r":\d+$", "", path)  # a trailing :LINE names a position in the file
+    try:
+        real = os.path.realpath(os.path.join(root, path))
+        base = os.path.realpath(root)
+        if real != base and not real.startswith(base + os.sep):
+            return None
+        if not os.path.isfile(real) or os.path.getsize(real) > MAX_PROPOSAL_FILE:
+            return None
+        with open(real, "rb") as f:
+            return hashlib.sha256(f.read()).hexdigest()
+    except (OSError, ValueError):
+        return None
+
+
+def proposal_hash(root, question, options, artifacts):
+    doc = {"question": question, "options": list(options),
+           "artifacts": [{"path": a, "sha256": _artifact_sha(root, a) or "unbound"} for a in artifacts]}
+    return hashlib.sha256(json.dumps(doc, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def latest_stop(root, name):
+    mine = [s for s in stops_state(root) if s["name"] == name]
+    if not mine:
+        raise Fail("unknown stop %s" % name)
+    return mine[-1]
+
+
+def hitl_open(root, name, question, artifacts, reason, options=None, bind=True):
     check_name(name)
+    opts = [clean_note(o, MAX_OPTION + 1).strip() for o in (options or [])]
+    if len(opts) > MAX_OPTIONS or any(not o or len(o) > MAX_OPTION for o in opts):
+        raise Usage("--option may repeat at most %d times, each 1-%d characters" % (MAX_OPTIONS, MAX_OPTION))
     with locked(root):
         if any(s["name"] == name for s in open_stops(root)):
             raise Fail("stop %s is already open" % name)
-        stops_append(root, {"kind": "open", "name": name, "question": clean_note(question, 500),
-                            "artifact": [clean_note(a, 300) for a in artifacts], "reason": clean_note(reason, 500),
-                            "opened_at": iso(now())})
+        q, arts = clean_note(question, 500), [clean_note(a, 300) for a in artifacts]
+        unbound = [a for a in arts if _artifact_sha(root, a) is None]
+        if unbound and bind:
+            raise Usage("cannot hash artifact(s) (missing, not a regular file, outside the repo, or over 1 MiB): " + ", ".join(unbound))
+        stops_append(root, {"kind": "open", "name": name, "question": q, "artifact": arts, "reason": clean_note(reason, 500),
+                            "opened_at": iso(now()), "options": opts, "proposal_hash": proposal_hash(root, q, opts, arts),
+                            "unbound": unbound})
         emit_event(root, "hitl", "opened", "%s: %s" % (name, question), phase=name, extra={"stop": name}, force=True)
 
 
-def hitl_release(root, name, note="", by=None, via="cli-nontty"):
+def hitl_release(root, name, note="", by=None, via="cli-nontty", answer=None, proposal_hash=None):
     check_name(name)
     by = by or os.environ.get("LSF_BY") or os.environ.get("USER") or "human"
     with locked(root):
@@ -530,17 +586,71 @@ def hitl_release(root, name, note="", by=None, via="cli-nontty"):
         mine = [s for s in stops if s["name"] == name]
         if not mine:
             raise Fail("unknown stop %s" % name)
-        if "released_at" in mine[-1]:
+        st = mine[-1]
+        if "released_at" in st:
             raise Fail("stop %s is already released" % name)
+        if st.get("options"):
+            if answer not in st["options"]:
+                raise Usage("stop %s needs an answer, exactly one of: %s" % (name, " | ".join(st["options"])))
+        elif answer:
+            raise Usage("stop %s has no options; release it without an answer" % name)
+        stored = st.get("proposal_hash")
+        if proposal_hash is not None and proposal_hash != stored:
+            raise Fail("stale proposal hash for stop %s; reload and answer the current proposal" % name)
+        if stored and _stop_hash(root, st) != stored:
+            raise Fail("proposal changed since it was asked; ask again")
         t = iso(now())
-        opened = parse_ts(mine[-1]["opened_at"])
+        opened = parse_ts(st["opened_at"])
         wait = int(minutes_between(opened, parse_ts(t)) * 60) if opened else None
         # the release event goes first so a ledger release can never exist without it
-        if not emit_event(root, "hitl", "released", "%s released by %s via %s%s" % (name, by, via, (": " + note) if note else ""),
+        if not emit_event(root, "hitl", "released", "%s released by %s via %s%s%s" % (name, by, via, (" with answer: " + answer) if answer else "", (": " + note) if note else ""),
                           phase=name, duration_s=wait, extra={"stop": name, "via": via}, force=True):
             raise Fail("release event could not be recorded; nothing released")
-        stops_append(root, {"kind": "release", "name": name, "released_at": t, "released_by": clean_note(by, 120),
-                            "note": clean_note(note, 500), "via": via})
+        entry = {"kind": "release", "name": name, "released_at": t, "released_by": clean_note(by, 120),
+                 "note": clean_note(note, 500), "via": via}
+        if stored:
+            entry["answer"], entry["proposal_hash"] = answer, stored
+        stops_append(root, entry)
+    return t
+
+
+def _stop_hash(root, st):
+    return proposal_hash(root, st.get("question"), st.get("options") or [], st.get("artifact") or [])
+
+
+def _advance(root, name, verdict, kind, want, extra_entry, note):
+    """Shared by recorded/applied: the stop's latest state must be `want`; the event goes first, then the chained entry."""
+    with locked(root):
+        st = latest_stop(root, name)
+        if st["state"] != want:
+            raise Fail("stop %s is %s; %s is only valid after %s" % (name, st["state"], kind, want))
+        if not emit_event(root, "hitl", verdict, "%s %s: %s" % (name, verdict, note), phase=name, extra={"stop": name}, force=True):
+            raise Fail("%s event could not be recorded; nothing changed" % verdict)
+        e = dict(extra_entry, kind=kind, name=name)
+        stops_append(root, e)
+
+
+def hitl_recorded(root, name, where, note=""):
+    check_name(name)
+    real = os.path.realpath(os.path.join(root, where or ""))
+    base = os.path.realpath(root)
+    if not where or (real != base and not real.startswith(base + os.sep)) or not os.path.exists(real) \
+            or not (os.path.isfile(real) or os.path.isdir(real)):
+        raise Fail("--where must be an existing file or directory inside the repository")
+    rel = os.path.relpath(real, base)
+    t = iso(now())
+    _advance(root, name, "recorded", "recorded", "answered",
+             {"where": clean_note(rel, 300), "recorded_at": t, "record_note": clean_note(note, 500)}, rel)
+    return t
+
+
+def hitl_applied(root, name, evidence):
+    check_name(name)
+    ev = clean_note(evidence, 500).strip()
+    if not ev:
+        raise Fail("--evidence is required and must not be blank")
+    t = iso(now())
+    _advance(root, name, "applied", "applied", "recorded", {"evidence": ev, "applied_at": t}, ev)
     return t
 
 
@@ -929,6 +1039,7 @@ def c_prd_journeys(src):
 
 
 BUG_STATUSES = ("open", "fixed", "wontfix")
+FAIL_VERDICTS = ("fail", "error", "red")
 
 
 def _first_heading(text, fallback):
@@ -958,8 +1069,36 @@ def _qa_notes(src):
     return items
 
 
+def _repo_file(root, rel):
+    """rel when it names an existing regular file inside the repo, else None."""
+    if not isinstance(rel, str) or not safe_rel(rel)[0]:
+        return None
+    base = os.path.realpath(root)
+    real = os.path.realpath(os.path.join(base, *rel.split("/")))
+    try:
+        if os.path.commonpath([real, base]) != base or not os.path.isfile(real):
+            return None
+    except ValueError:
+        return None
+    return rel
+
+
+def _bug_log(src, text, slice_, criterion, events):
+    """Log: line in the bug file, else the latest failing event of that slice whose stage is the bug's criterion."""
+    m = re.search(r"(?mi)^\s*Log:\s*(\S+)\s*$", text)
+    if m and _repo_file(src.root, m.group(1)):
+        return m.group(1)
+    if slice_ and criterion:
+        for e in reversed(events):
+            if e.get("verdict") in FAIL_VERDICTS and e.get("slice") == slice_ and e.get("stage") == criterion \
+                    and _repo_file(src.root, e.get("log")):
+                return e["log"]
+    return None
+
+
 def c_bug_log(src):
     items = []
+    events = read_events(src.root)
     t = src.text("docs/bug-log.jsonl")
     if t is not None:
         for i, ln in enumerate(t.splitlines(), 1):
@@ -971,9 +1110,12 @@ def c_bug_log(src):
     for p in src.glob("docs/bugs/*.md"):
         tx = src.text(p) or ""
         st = (_line(tx, "Status") or "").lower()
+        sl, cr = _line(tx, "Slice") or None, _line(tx, "Criterion") or None
         items.append({"id": stem(p), "path": p, "title": _first_heading(tx, stem(p)),
-                      "status": st if st in BUG_STATUSES else "invalid",
-                      "slice": _line(tx, "Slice") or None, "criterion": _line(tx, "Criterion") or None})
+                      "status": st if st in BUG_STATUSES else "invalid", "slice": sl, "criterion": cr})
+        lg = _bug_log(src, tx, sl, cr, events)
+        if lg:  # shape parity with the factory collector: the key exists only when a log does
+            items[-1]["log"] = lg
     items += _qa_notes(src)
     if not items:
         return unavailable("no entries in docs/bugs/*.md, docs/bug-log.jsonl or docs/slices/*/qa-notes.md in %s" % src.where)
@@ -1049,6 +1191,55 @@ def resolve_sha(root, sha):
     return out.decode().strip()
 
 
+# ---------------------------------------------------------------- rollback (a revert commit; history only grows)
+def _vc(root, *args):
+    try:
+        p = subprocess.run(["git", "-C", root] + list(args), stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        raise Fail("version control command failed: %s" % e)
+    return p.returncode, p.stdout.decode("utf-8", "replace"), p.stderr.decode("utf-8", "replace")
+
+
+def rollback_plan(root, sha):
+    """Validate every refusal in D-14 and return (full sha, subject, changed files). Changes nothing."""
+    try:
+        full = resolve_sha(root, sha)
+    except Usage:
+        raise Fail("%s does not resolve to a commit" % sha)
+    code, dirty, _ = _vc(root, "status", "--porcelain", "--untracked-files=no")
+    if code != 0:
+        raise Fail("cannot read the working tree status")
+    if dirty.strip():
+        raise Fail("working tree is not clean (tracked or staged changes); commit or discard them first")
+    if _vc(root, "merge-base", "--is-ancestor", full, "HEAD")[0] != 0:
+        raise Fail("%s is not an ancestor of HEAD" % full[:8])
+    parents = _vc(root, "rev-list", "--parents", "-n1", full)[1].split()[1:]
+    if not parents:
+        raise Fail("%s is the root commit and cannot be reverted" % full[:8])
+    if len(parents) > 1:
+        raise Fail("%s is a merge commit and cannot be reverted" % full[:8])
+    subject = _vc(root, "log", "-n1", "--format=%s", full)[1].strip()
+    files = [f for f in _vc(root, "diff-tree", "--no-commit-id", "--name-only", "-r", full)[1].splitlines() if f]
+    return full, subject, files
+
+
+def rollback(root, sha, confirm_sha=None):
+    with locked(root):
+        full, subject, files = rollback_plan(root, sha)
+        if confirm_sha is not None and confirm_sha != full:
+            raise Fail("confirm_sha does not match the resolved commit %s" % full)
+        code, _, err = _vc(root, "revert", "--no-edit", full)
+        if code != 0:
+            _vc(root, "revert", "--abort")
+            if "conflict" in err.lower():
+                raise Fail("revert conflicts; resolve by hand")
+            raise Fail("revert failed: %s" % (err.strip().splitlines() or ["unknown error"])[-1][:200])
+        new = head_sha(root)
+        emit_event(root, "rollback", "reverted", "reverted %s as %s" % (full[:8], (new or "")[:8]),
+                   extra={"reverted": full, "new_head": new}, force=True)
+    return {"ok": True, "reverted": full, "new_head": new}
+
+
 # ---------------------------------------------------------------- runtime state for status, serve
 def read_events(root, limit=1000):
     return read_jsonl(lpath(root, "events.jsonl"), tail=True)[-limit:]
@@ -1091,6 +1282,12 @@ def status_data(root):
     }
 
 
+def commit_parents(root):
+    """{sha: number of parents} for the recent log; the dashboard hides Rollback on merges and the root commit."""
+    raw = git(root, "log", "-n200", "--format=%H %P") or b""
+    return {ln.split()[0]: len(ln.split()) - 1 for ln in raw.decode("utf-8", "replace").splitlines() if ln.strip()}
+
+
 def runtime_state(root):
     out = {"now": iso(now())}
     try:
@@ -1111,6 +1308,7 @@ def runtime_state(root):
                          "verdict": i["verdict"]} for i in intervals(phase_rows(root), None)]
     out["events"] = read_events(root)
     out["cost"] = cost_summary(root)
+    out["commit_parents"] = commit_parents(root)
     return out
 
 
@@ -1199,35 +1397,150 @@ def cmd_phase(a, root):
     if cps.get(a.name, mode_default):
         name = a.name + "-review"
         hitl_open(root, name, a.ask or "Approve %s?" % a.name, a.artifact or [],
-                  "checkpoint after %s (%s)" % (a.name, verdict))
+                  "checkpoint after %s (%s)" % (a.name, verdict), bind=False)
         out("human checkpoint opened: %s  (release: lsf hitl release %s, or click Approve in the dashboard)" % (name, name))
     return 0
+
+
+MAX_LOG = 64 * 1024
+
+
+def read_log_input(src):
+    """(last 64 KiB of the log as bytes, total byte count). '-' reads stdin. Unreadable input is a Usage error."""
+    try:
+        if src == "-":
+            tail, total = b"", 0
+            while True:
+                chunk = sys.stdin.buffer.read(1 << 16)
+                if not chunk:
+                    break
+                total += len(chunk)
+                tail = (tail + chunk)[-MAX_LOG:]
+            return tail, total
+        if not os.path.isfile(src):
+            raise Usage("log file %s is missing or not a regular file" % src)
+        total = os.path.getsize(src)
+        with open(src, "rb") as f:
+            if total > MAX_LOG:
+                f.seek(total - MAX_LOG)
+            return f.read(MAX_LOG), total
+    except OSError as e:
+        raise Usage("cannot read the log: %s" % e)
+
+
+def clean_log(raw, total):
+    """Decode, redact like events (keeping line breaks), and say so when the front was cut."""
+    text = raw.decode("utf-8", "replace").replace("\r", "")
+    text = "".join(" " if (ord(c) < 32 and c not in "\n\t") or 127 <= ord(c) < 160 else c for c in text)
+    text = redact(text)
+    if total > len(raw):
+        text = "[earlier output cut: %d bytes]\n" % (total - len(raw)) + text
+    return text
+
+
+def private_dir(root, *parts):
+    """Create or verify root/.lsf/<parts> as real directories (no symlink at any level, inside the repo), mode 0700."""
+    base = os.path.realpath(root)
+    cur = base
+    for part in (".lsf",) + parts:
+        cur = os.path.join(cur, part)
+        if os.path.lexists(cur) and (os.path.islink(cur) or not os.path.isdir(cur)):
+            raise Fail("%s is not a real directory; refusing to write there" % os.path.relpath(cur, base))
+        try:
+            os.makedirs(cur, mode=0o700, exist_ok=True)
+        except OSError as e:
+            raise Fail("cannot create %s: %s" % (os.path.relpath(cur, base), e))
+        if os.path.islink(cur) or os.path.realpath(cur) != cur:
+            raise Fail("%s resolves outside the repository; refusing to write there" % os.path.relpath(cur, base))
+    try:
+        os.chmod(cur, 0o700)
+    except OSError as e:
+        raise Fail("cannot set %s to 0700: %s" % (os.path.relpath(cur, base), e))
+    return cur
+
+
+def store_log(root, text):
+    """Write text to .lsf/logs/<id>.txt (dir 0700, file 0600, created exclusively and never through a symlink).
+    Returns the repo-relative path; any problem is a Fail and nothing is written."""
+    d = private_dir(root, "logs")
+    name = "%s-%s.txt" % (now().strftime("%Y%m%dT%H%M%S"), secrets.token_hex(4))
+    try:
+        dfd = os.open(d, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=dfd)
+        finally:
+            os.close(dfd)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+    except OSError as e:
+        raise Fail("cannot store the log: %s" % e)
+    return ".lsf/logs/" + name
 
 
 def cmd_event(a, root):
     if not a.stage.strip() or not a.verdict.strip():
         raise Usage("stage and verdict are required")
+    if a.log_file and a.log:
+        raise Usage("use either --log-file PATH or --log -, not both")
+    if a.log not in (None, "-"):
+        raise Usage("--log only accepts - (read the log from stdin); use --log-file PATH for a file")
+    logp = None
+    if a.log_file or a.log:
+        raw, total = read_log_input(a.log_file or "-")
+        logp = store_log(root, clean_log(raw, total))
     op = open_phase(phase_rows(root))
-    emit_event(root, a.stage, a.verdict, a.note or "", source=a.source, phase=a.phase or (op["phase"] if op else None),
-               slice_=a.slice, role=a.role)
+    if not emit_event(root, a.stage, a.verdict, a.note or "", source=a.source, phase=a.phase or (op["phase"] if op else None),
+                      slice_=a.slice, role=a.role, extra={"log": logp} if logp else None) and logp:
+        with contextlib.suppress(OSError):
+            os.remove(os.path.join(root, logp))  # no event, so nothing may point at the log
+    return 0
+
+
+def cmd_rollback(a, root):
+    full, subject, files = rollback_plan(root, a.sha)
+    if not a.yes:
+        out("would revert %s: %s" % (full[:8], subject))
+        out("files changed (%d): %s" % (len(files), ", ".join(files[:20]) + (" ..." if len(files) > 20 else "")))
+        out("this adds a new commit that undoes it; history is kept. Re-run with --yes to do it.")
+        return 2
+    require_tty_if_strict(root, "rollback")
+    r = rollback(root, full, full)
+    out("reverted %s; new commit %s (history is kept)" % (full[:8], (r["new_head"] or "")[:8]))
     return 0
 
 
 def fmt_stop(s):
-    state = "released %s by %s" % (s["released_at"], s.get("released_by")) if "released_at" in s else "OPEN since %s" % s["opened_at"]
-    return "%s: %s [%s]%s" % (s["name"], s["question"], state,
-                              (" artifacts: " + ", ".join(s["artifact"])) if s["artifact"] else "")
+    st = s.get("state") or ("answered" if "released_at" in s else "asked")
+    when = "released %s by %s" % (s["released_at"], s.get("released_by")) if "released_at" in s else "OPEN since %s" % s["opened_at"]
+    line = "%s: %s [%s, %s]%s" % (s["name"], s["question"], st, when, (" artifacts: " + ", ".join(s["artifact"])) if s["artifact"] else "")
+    if s.get("options"):
+        line += " options: " + " | ".join(s["options"])
+    if s.get("answer"):
+        line += " answer: " + s["answer"]
+    if s.get("recorded_where"):
+        line += " recorded in: " + s["recorded_where"]
+    if s.get("applied_at"):
+        line += " applied: " + (s.get("applied_evidence") or "")
+    return line
 
 
 def cmd_hitl(a, root):
     if a.action == "request":
-        hitl_open(root, a.name, a.question, a.artifact or [], a.reason or "requested by the agent")
+        hitl_open(root, a.name, a.question, a.artifact or [], a.reason or "requested by the agent", a.option)
         out("human stop opened: %s" % a.name)
+        return 0
+    if a.action == "recorded":
+        t = hitl_recorded(root, a.name, a.where, a.note or "")
+        out("recorded %s at %s (answer written to %s; not applied yet)" % (a.name, t, a.where))
+        return 0
+    if a.action == "applied":
+        t = hitl_applied(root, a.name, a.evidence)
+        out("applied %s at %s" % (a.name, t))
         return 0
     if a.action == "release":
         require_tty_if_strict(root, "hitl release")
         via = "cli-tty" if sys.stdin.isatty() else "cli-nontty"
-        t = hitl_release(root, a.name, a.note or "", a.by, via)
+        t = hitl_release(root, a.name, a.note or "", a.by, via, answer=a.answer)
         out("released %s at %s via %s (a recorded procedure, not proof of identity)" % (a.name, t, via))
         return 0
     if a.action == "repair":
@@ -1434,6 +1747,7 @@ def summarize(text, limit=200):
 
 _COMMIT = re.compile(r"(?:^|&&|\|\||;|\n|\()\s*(?:\w+=\S+\s+)*git\s+(?:-\S+\s+(?:[^-\s]\S*\s+)?)*commit\b")
 _DENY_RELEASE = re.compile(r"hitl\s+(?:release|repair)\b")
+_DENY_ROLLBACK = re.compile(r"\blsf\b[^\n;|&]*\brollback\b")
 _STOPS_TOUCH = re.compile(r"\.lsf/(?:stops|\.lock)|stops\.(?:jsonl|head)")
 _WRITES = re.compile(r"(?:>|\brm\b|\bmv\b|\btruncate\b|\btee\b|\bsed\b[^|;&]*\s-i|\bcp\b|\bdd\b|\bperl\b|\bpython|\bnode\b|\bln\b|\bchmod\b|\bsh\s+-c)")
 
@@ -1444,6 +1758,10 @@ def guard_reason(command):
         return "lsf hitl release and repair are human acts; ask the owner to run them in their own terminal"
     if _STOPS_TOUCH.search(command) and _WRITES.search(command):
         return "the human stop ledger (.lsf/stops*) must not be written by an agent"
+    if _DENY_ROLLBACK.search(command):
+        return "lsf rollback is a human act; ask the owner to run it in their own terminal"
+    if re.search(r"/api/rollback", command):
+        return "the rollback route is for the human's browser; an agent must not call it"
     if re.search(r"/api/hitl/release", command):
         return "the release route is for the human's browser; an agent must not call it"
     return None
@@ -1665,6 +1983,27 @@ def read_repo_file(root, rel):
         return 404, str(e), None
 
 
+def log_view(root, text):
+    """The log (last 64 KiB, redacted again) plus {reference: repo path} for each path:line naming a real file in the repo."""
+    text = redact(text[-MAX_LOG:])
+    base = os.path.realpath(root)
+    files = {}
+    for m in re.finditer(r"((?:/|\./)?[\w.@+\-]+(?:/[\w.@+\-]+)*\.[A-Za-z0-9]{1,8}):(\d+)", text):
+        raw = m.group(1)
+        if raw in files or len(files) >= 200:
+            continue
+        real = os.path.realpath(raw if os.path.isabs(raw) else os.path.join(base, raw))
+        try:
+            inside = os.path.commonpath([real, base]) == base
+        except ValueError:
+            inside = False
+        if inside and os.path.isfile(real):
+            rel = os.path.relpath(real, base).replace(os.sep, "/")
+            if safe_rel(rel)[0] and not forbidden_rel(rel):
+                files[raw] = rel
+    return {"text": text, "files": files}
+
+
 def make_handler(root, token, assets_html):
     class H(BaseHTTPRequestHandler):
         server_version = "lsf"
@@ -1721,6 +2060,24 @@ def make_handler(root, token, assets_html):
                         return self._send(200, text, "text/html; charset=utf-8",
                                           {"Content-Security-Policy": "sandbox allow-scripts"})
                     return self._send(200, text, "text/plain; charset=utf-8")
+                if path == "/api/log":
+                    status, msg, text = read_repo_file(root, qs.get("path", ""))
+                    if status != 200:
+                        return self._err(status, msg)
+                    return self._send(200, json.dumps(log_view(root, text), default=_jd))
+                if path == "/api/commit":
+                    try:
+                        full, subject, files = rollback_plan(root, qs.get("sha", ""))
+                        why = None
+                    except Fail as e:  # still describe the commit when it cannot be rolled back
+                        why = str(e)
+                        try:
+                            full = resolve_sha(root, qs.get("sha", ""))
+                        except (Usage, Fail) as e2:
+                            return self._err(400, str(e2))
+                        subject = (_vc(root, "log", "-n1", "--format=%s", full)[1]).strip()
+                        files = [f for f in _vc(root, "diff-tree", "--no-commit-id", "--name-only", "-r", full)[1].splitlines() if f]
+                    return self._send(200, json.dumps({"sha": full, "subject": subject, "files": files, "refusal": why}, default=_jd))
                 if path == "/api/at":
                     try:
                         full = resolve_sha(root, qs.get("sha", ""))
@@ -1736,7 +2093,7 @@ def make_handler(root, token, assets_html):
                 if not self._host_ok():
                     return self._err(403, "forbidden host")
                 path = self.path.partition("?")[0]
-                if path != "/api/hitl/release":
+                if path not in ("/api/hitl/release", "/api/rollback"):
                     return self._err(404, "not found")
                 if not hmac.compare_digest(self.headers.get("X-LSF-Token", "").encode("utf-8", "replace"), token.encode()):
                     return self._err(403, "missing or wrong token")
@@ -1746,15 +2103,22 @@ def make_handler(root, token, assets_html):
                     return self._err(411, "Content-Length required")
                 if n < 0 or n > 65536:
                     return self._err(413, "body too large")
+                if path == "/api/rollback":
+                    return self._rollback(n)
                 try:
                     body = json.loads(self.rfile.read(n).decode("utf-8"))
                     name, note = body["name"], body.get("note", "")
-                    if not isinstance(name, str) or not isinstance(note, str):
+                    answer, ph = body.get("answer"), body.get("proposal_hash")
+                    if not isinstance(name, str) or not isinstance(note, str) \
+                            or not all(v is None or isinstance(v, str) for v in (answer, ph)):
                         raise ValueError
-                except (ValueError, KeyError, TypeError):
-                    return self._err(400, "body must be JSON {name, note}")
+                except (ValueError, KeyError, TypeError, AttributeError):
+                    return self._err(400, "body must be JSON {name, note, answer, proposal_hash}")
                 try:
-                    t = hitl_release(root, name, note, "dashboard")
+                    mine = [x for x in stops_state(root) if x["name"] == name]
+                    if ph is None and mine and mine[-1]["state"] == "asked" and mine[-1].get("proposal_hash") and mine[-1].get("options"):
+                        return self._err(400, "proposal_hash is required for this stop")
+                    t = hitl_release(root, name, note, "dashboard", answer=answer or None, proposal_hash=ph)
                 except Usage as e:
                     return self._err(400, str(e))
                 except Fail as e:
@@ -1762,6 +2126,22 @@ def make_handler(root, token, assets_html):
                 return self._send(200, json.dumps({"ok": True, "name": name, "released_at": t}, default=_jd))
             except Exception as e:
                 return self._err(500, "internal error: %s" % e.__class__.__name__)
+
+        def _rollback(self, n):
+            try:
+                body = json.loads(self.rfile.read(n).decode("utf-8"))
+                sha, confirm = body["sha"], body["confirm_sha"]
+                if not isinstance(sha, str) or not isinstance(confirm, str):
+                    raise ValueError
+            except (ValueError, KeyError, TypeError, AttributeError):
+                return self._err(400, "body must be JSON {sha, confirm_sha}")
+            try:
+                r = rollback(root, sha, confirm)
+            except Usage as e:
+                return self._err(400, str(e))
+            except Fail as e:
+                return self._err(409, str(e))
+            return self._send(200, json.dumps(r, default=_jd))
 
         def _no(self):
             self._err(405, "method not allowed")
@@ -1812,6 +2192,15 @@ def cmd_serve(a, root):
 
 
 # ---------------------------------------------------------------- parser and main
+def _no_abbrev(parser):
+    """--ye must not mean --yes: abbreviations would slip past the guard's text match."""
+    parser.allow_abbrev = False
+    for act in parser._actions:
+        if isinstance(act, argparse._SubParsersAction):
+            for sp in act.choices.values():
+                _no_abbrev(sp)
+
+
 def build_parser():
     ap = argparse.ArgumentParser(prog="lsf", description="lite software factory: phase clock, telemetry, human checkpoints, dashboard",
                                  epilog="Every command accepts --root DIR (default: nearest git root, else the current directory). "
@@ -1855,15 +2244,31 @@ def build_parser():
     p.add_argument("--slice")
     p.add_argument("--phase")
     p.add_argument("--source", choices=["lsf", "hook", "agent"], default="agent")
+    p.add_argument("--log-file", metavar="PATH", help="store this file's last 64 KiB (redacted) as the event's error log")
+    p.add_argument("--log", metavar="-", help="read the error log from stdin: --log -")
 
-    p = mk("hitl", cmd_hitl, "human checkpoints: request, status, release")
-    hs = p.add_subparsers(dest="action", metavar="request|status|release|repair")
+    p = mk("rollback", cmd_rollback, "revert a commit with a new commit (never rewrites history)")
+    p.add_argument("sha")
+    p.add_argument("--yes", action="store_true", help="do it; without this only show what would be reverted")
+
+    p = mk("hitl", cmd_hitl, "human decisions: request, status, release, recorded, applied")
+    hs = p.add_subparsers(dest="action", metavar="request|status|release|recorded|applied|repair")
     hs.required = True
     q = hs.add_parser("request")
     q.add_argument("name")
     q.add_argument("--question", required=True)
     q.add_argument("--artifact", action="append")
+    q.add_argument("--option", action="append", help="an answer the human may pick; repeat up to 6 times")
     q.add_argument("--reason")
+    q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
+    q = hs.add_parser("recorded", description="After the answer is written down (answered -> recorded).")
+    q.add_argument("name")
+    q.add_argument("--where", required=True, help="existing file or directory inside the repo")
+    q.add_argument("--note")
+    q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
+    q = hs.add_parser("applied", description="After the recorded answer was acted on (recorded -> applied).")
+    q.add_argument("name")
+    q.add_argument("--evidence", required=True)
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
     q = hs.add_parser("status")
     q.add_argument("--json", action="store_true")
@@ -1874,6 +2279,7 @@ def build_parser():
     q = hs.add_parser("release", description="Release is a human act; agents must never run it. It records who and when; it is a procedure, not proof of identity.")
     q.add_argument("name")
     q.add_argument("--note")
+    q.add_argument("--answer", help="required when the stop has options; must equal one of them")
     q.add_argument("--by")
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
 
@@ -1914,6 +2320,7 @@ def build_parser():
     q = cs.add_parser("summary")
     q.add_argument("--json", action="store_true")
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
+    _no_abbrev(ap)
     return ap
 
 
