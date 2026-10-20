@@ -62,6 +62,7 @@ def fill(tmp_path, rel):
     t = p.read_text()
     t = t.replace("**What it does:** TODO", "**What it does:** It does a small job.")
     t = re.sub(r"(\(\w+\)|\(any\)|\([^)]*\)): TODO", r"\1: a value", t)
+    t = re.sub(r"\(TODO\)", "(int)", t)
     t = t.replace(": TODO", ": a value").replace("**Gives back:** TODO", "**Gives back:** str: text")
     t = t.replace("\nTODO\n", "\nThis file holds small helpers.\n", 1)
     p.write_text(t)
@@ -81,10 +82,10 @@ def test_scaffold_computes_lists_and_leaves_todo(tmp_path):
     assert "- a (int): TODO" in lib
     assert "<!-- sig:" in lib
     helper = lib.split("## helper")[1].split("## ")[0]
-    assert "app.run (app.py:4)" in helper
+    assert "app.run (app.py:7)" in helper
     app = (tmp_path / "docs/eli12/app.md").read_text()
-    assert "lib.helper (lib.py:4)" in app and "lib.Box (lib.py:8)" in app
-    assert "lib.Box.grow (lib.py:12) (maybe)" in app  # b.grow: receiver type unknown
+    assert "lib.helper (app.py:7)" in app and "lib.Box (app.py:5)" in app
+    assert "lib.Box.grow (app.py:6) (maybe)" in app  # b.grow: receiver type unknown
     assert json.loads((tmp_path / "docs/eli12/index.json").read_text()) == {
         "app.py": "docs/eli12/app.md", "lib.py": "docs/eli12/lib.md"}
 
@@ -264,3 +265,84 @@ def test_two_thousand_modules_fast(tmp_path):
     t = time.time()
     eli12.main(["check", "--root", str(tmp_path)])
     assert time.time() - t < 30
+
+
+MESSY = '''import functools
+
+
+def deco(f):
+    return f
+
+
+@deco
+def plain(x, *args, y=1, **kw):
+    return x
+
+
+async def waiter(n):
+    await plain(n)
+
+
+def outer(v):
+    z = 1
+    return mystery_call(v), len([z])
+
+
+class K:
+    @functools.lru_cache()
+    def m(self, q):
+        return q
+
+    @staticmethod
+    def s(a):
+        return a
+'''
+
+
+def test_unannotated_placeholders_pass_after_filling(tmp_path, capsys):
+    make(tmp_path, {"messy.py": MESSY})
+    run(tmp_path, "scaffold", "messy.py")
+    doc = (tmp_path / "docs/eli12/messy.md").read_text()
+    assert "- x (TODO): TODO" in doc and "**Gives back:** TODO: TODO" in doc
+    assert "(maybe)" in doc.split("## outer")[1].split("## ")[0]
+    assert "mystery_call (messy.py:19) (maybe)" in doc and "len" not in doc
+    assert "messy.plain (messy.py:14)" in doc.split("## waiter")[1].split("## ")[0]
+    p = tmp_path / "docs/eli12/messy.md"
+    p.write_text(re.sub(r"TODO", "words here", doc.replace("A tiny", "")).replace("\nwords here\n", "\nA file.\n", 1))
+    capsys.readouterr()
+    run(tmp_path, "check")
+    assert codes(capsys) == []
+
+
+def test_writes_refuse_symlinks(tmp_path, capsys):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    root = tmp_path / "root"
+    make(root, {"lib.py": LIB})
+    (root / "docs/eli12").mkdir(parents=True)
+    victim = outside / "victim.txt"
+    victim.write_text("keep")
+    os.symlink(victim, root / "docs/eli12/lib.md")
+    assert run(root, "scaffold", "lib.py") == 2
+    assert victim.read_text() == "keep"
+    (root / "docs/eli12/lib.md").unlink()
+    os.symlink(victim, root / "docs/eli12/index.json")
+    assert run(root, "scaffold", "lib.py") == 2
+    assert victim.read_text() == "keep"
+    (root / "docs/eli12/index.json").unlink()
+    os.symlink(victim, root / "docs/eli12/INDEX.md")
+    assert run(root, "index") == 2 and victim.read_text() == "keep"
+    (root / "docs/eli12/INDEX.md").unlink()
+    assert run(root, "scaffold", "lib.py") == 0 and run(root, "index") == 0
+    assert not list((root / "docs/eli12").glob("*.tmp*"))
+
+
+def test_symlinked_docs_dir_refused(tmp_path):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    root = tmp_path / "root"
+    make(root, {"lib.py": LIB})
+    (root / "docs").mkdir()
+    os.symlink(outside, root / "docs/eli12")
+    assert run(root, "scaffold", "lib.py") == 2
+    assert not list(outside.iterdir())
