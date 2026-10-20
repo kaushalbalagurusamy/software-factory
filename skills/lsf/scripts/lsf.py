@@ -1166,7 +1166,21 @@ def c_docs(src):
     return ok(items)
 
 
-COLLECTORS = [("research", c_research), ("experiments", c_experiments), ("adrs", c_adrs), ("bug_log", c_bug_log),
+def c_load_model(src):
+    """Collect declared simulation assumptions; never probe live services."""
+    text = src.text("docs/load-model.json")
+    if text is None:
+        return unavailable("missing docs/load-model.json; simulator can show an illustrative example")
+    try:
+        model = json.loads(text)
+    except ValueError as e:
+        return unavailable("docs/load-model.json is invalid JSON: %s" % e)
+    if not isinstance(model, dict) or not isinstance(model.get("nodes"), list) or not isinstance(model.get("edges"), list):
+        return unavailable("docs/load-model.json needs a model object with nodes and edges lists")
+    return ok([model])
+
+
+COLLECTORS = [("load_model", c_load_model), ("research", c_research), ("experiments", c_experiments), ("adrs", c_adrs), ("bug_log", c_bug_log),
               ("prd_journeys", c_prd_journeys), ("architecture", c_architecture), ("git", c_git), ("docs", c_docs)]
 
 

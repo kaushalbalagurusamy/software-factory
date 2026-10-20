@@ -80,3 +80,14 @@ Stage ids are an alias map to `/sf` (last column) so events from both tools read
 ## The end of the hour
 
 `lsf budget` for the planned-versus-actual story, `lsf cost summary`, and the dashboard's Telemetry tab for the journey: every decision the owner approved and how long each took.
+
+## System-design load simulation
+
+The dashboard's **Load simulator** tab is pure browser arithmetic, never a stress
+runner. During brownfield exploration, declare the actual services and paths in
+`docs/load-model.json` when capacity reasoning is relevant; see `LOAD-SIMULATOR.md`.
+Keep it consistent with the nesting-dolls map and ADRs. Record capacity sources
+and unknowns; never invent measurements. Missing topology shows a clearly labelled
+illustrative example, not the repo architecture. At plan/final HITL, discuss how
+users, request rates, fan-out/cache misses and outages change estimated bottlenecks.
+Do not provision services or call providers to populate this simulator.
