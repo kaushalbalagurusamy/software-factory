@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "ad33b62",
+  "commit": "f500f1a",
   "generated": "2026-10-19"
  },
  "root": "factory",
@@ -573,7 +573,7 @@
     },
     {
      "path": ".claude/state.md",
-     "lines": "16-19",
+     "lines": "22-22",
      "contains": "no build-loop profile",
      "note": "Local, untracked state file recording the 2026-10-09 decision"
     }
@@ -593,7 +593,7 @@
    "files": [
     {
      "path": "~/.claude/skills/sf/SKILL.md",
-     "lines": "315-356",
+     "lines": "317-358",
      "contains": "Hygiene: disk and memory",
      "external": true
     },

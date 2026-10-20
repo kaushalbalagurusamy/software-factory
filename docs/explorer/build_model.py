@@ -185,7 +185,7 @@ N("build-loop", "Build loop (/sf)",
   ],
   children=[s[0] for s in stages] + ["build-profile", "build-hygiene"])
 N("build-profile", "Project profile", "A per-project file that names where verbatim requirements, ADRs, specs, tests live, the test command and the reviewer. The skill is project-independent; everything specific lives here.", kind="config",
-  files=[X(SF, "85-94", "Load the project profile first"), F(".claude/state.md", "3-6", "no build-loop profile", "Local, untracked state file recording the 2026-10-09 decision")],
+  files=[X(SF, "85-94", "Load the project profile first"), F(".claude/state.md", "22-22", "no build-loop profile", "Local, untracked state file recording the 2026-10-09 decision")],
   cov=C("gap", "This repository deliberately has none: the owner decision on 2026-10-09 was to stand by until asked for factory changes, so the factory is not built with its own loop.",
         ["No .claude/build-loop.md exists in this checkout"]))
 N("build-hygiene", "Hygiene", "A deterministic script scans disk and memory before fan-out and after merges so a long run does not die of ENOSPC mid-write.", kind="harness",
