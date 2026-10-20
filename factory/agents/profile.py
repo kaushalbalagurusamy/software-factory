@@ -15,7 +15,7 @@ from typing import Any
 import yaml
 
 ROLE_IDS: tuple[str, ...] = (
-    "orchestrator", "research", "design", "audit", "implement", "test", "review",
+    "orchestrator", "research", "design", "audit", "implement", "qa", "test", "review",
 )
 GIT_HOSTS: tuple[str, ...] = ("github", "gitlab", "none")
 TRACKERS: tuple[str, ...] = ("none", "linear", "notion")
@@ -29,7 +29,7 @@ DEFAULT_LEDGER_DIR = ".factory/ledger"
 _TOP_LEVEL_ORDER = (
     "schema_version", "project", "main_session_role", "paths", "agents", "mcp_servers",
     "graph", "deploy", "git_host", "tracker", "checks", "one_way_door_patterns",
-    "secret_allow_patterns",
+    "secret_allow_patterns", "allow_models",
 )
 
 
@@ -157,6 +157,7 @@ class Profile(_Dictable):
     checks: Checks | None = None
     one_way_door_patterns: tuple[str, ...] = ()
     secret_allow_patterns: tuple[str, ...] = ()
+    allow_models: tuple[str, ...] = ()
 
 
 # ---------------------------------------------------------------- validation helpers
@@ -413,6 +414,8 @@ def parse_profile(data: Any) -> Profile:
     otw = _regex_list(data["one_way_door_patterns"], "one_way_door_patterns") if "one_way_door_patterns" in data else ()
     allow = _regex_list(data["secret_allow_patterns"], "secret_allow_patterns") if "secret_allow_patterns" in data else ()
 
+    allow_models = _str_list(data["allow_models"], "allow_models") if "allow_models" in data else ()
+
     for key in data:
         if key not in _TOP_LEVEL_ORDER:
             raise _fail(str(key), "unknown top-level key")
@@ -421,6 +424,7 @@ def parse_profile(data: Any) -> Profile:
         schema_version=1, project=project, paths=paths, main_session_role=main_role,
         agents=agents, mcp_servers=servers, graph=graph, deploy=deploy, git_host=git_host,
         tracker=tracker, checks=checks, one_way_door_patterns=otw, secret_allow_patterns=allow,
+        allow_models=allow_models,
     )
 
 

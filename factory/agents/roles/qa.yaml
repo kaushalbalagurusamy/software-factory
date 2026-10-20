@@ -1,0 +1,13 @@
+id: qa
+description: QA supervisor; runs the protected suites, writes behavioural feedback in criterion terms, records attempts and proposes regression cases, and never edits application code or writes test source.
+model: sonnet
+core_tools: [Read, Glob, Grep, Write, Edit, Bash]
+disallowed_tools: []
+skills: [qa-supervisor, "superpowers:verification-before-completion"]
+mcp: []
+spawns: []
+writes: qa_paths
+bash: full
+blind: false
+hooks: [path_guard, secrets_guard, bash_guard, subagent_stop]
+max_tools: 20

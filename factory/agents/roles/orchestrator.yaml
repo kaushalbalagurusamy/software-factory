@@ -1,13 +1,13 @@
 id: orchestrator
-description: Coordinates the other six roles, owns routing, the ticket ledger and gate packets; never writes application code.
-model: opus
-core_tools: [Read, Bash, PushNotification, "Agent(research, design, audit, implement, test, review)"]
+description: Coordinates the other seven roles, owns routing, the ticket ledger and gate packets; never writes application code.
+model: sonnet
+core_tools: [Read, Bash, PushNotification, "Agent(research, design, audit, implement, qa, test, review)"]
 disallowed_tools: [Write, Edit]
 skills: [orchestration, plan-adherence, session-handoff, away-mode, deploy-verify, one-way-door, "superpowers:dispatching-parallel-agents"]
 mcp:
   - {server: "$deploy", access: read}
   - {server: "$git_host", access: read}
-spawns: [research, design, audit, implement, test, review]
+spawns: [research, design, audit, implement, qa, test, review]
 writes: none
 bash: full
 blind: false
