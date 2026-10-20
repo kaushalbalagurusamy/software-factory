@@ -60,7 +60,7 @@ def _target(root: Path) -> Path:
     return ops / "events.jsonl"
 
 
-def emit(root, stage: str, slice_id: str, verdict: str, note: str = "", source: str = "sf",
+def emit(root, stage: str, slice_id: str, verdict: str, note: str = "", source: str | None = "sf",
          role: str | None = None) -> bool:
     """Append one event; True when written. Never raises, never changes a caller's outcome."""
     if os.environ.get("SF_EVENTS", "").strip().lower() == "off":
@@ -70,8 +70,10 @@ def emit(root, stage: str, slice_id: str, verdict: str, note: str = "", source: 
         event = {
             "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "stage": _clean(stage, FIELD_LIMIT), "slice": _clean(slice_id, FIELD_LIMIT), "sha": _head(root),
-            "verdict": _clean(verdict, FIELD_LIMIT), "note": _clean(note, NOTE_LIMIT), "source": _clean(source, FIELD_LIMIT),
+            "verdict": _clean(verdict, FIELD_LIMIT), "note": _clean(note, NOTE_LIMIT)
         }
+        if source is not None:  # None only for the legacy script, whose events never had a source key
+            event["source"] = _clean(source, FIELD_LIMIT)
         if role is not None:
             event["role"] = _clean(role, FIELD_LIMIT)
         line = (json.dumps(event, ensure_ascii=False) + "\n").encode("utf-8")

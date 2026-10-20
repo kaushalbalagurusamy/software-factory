@@ -15,5 +15,5 @@ import sys
 sys.path.insert(0, sys.argv[1])
 from factory.ops.events import emit
 here, root, stage, slice_, verdict, note = sys.argv[1:7]
-emit(root, stage, slice_, verdict, note, source="script")
+emit(root, stage, slice_, verdict, note, source=None)
 ' "$here" "$root" "$1" "$2" "$3" "${4:-}"
