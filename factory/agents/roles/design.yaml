@@ -1,9 +1,9 @@
 id: design
 description: Turns approved research into PRDs, specs and decision records, writing only to the design folders.
-model: opus
+model: sonnet
 core_tools: [Read, Glob, Grep, Write, Bash]
 disallowed_tools: []
-skills: [prd-designer, axiomatic-spec, one-way-door, "superpowers:brainstorming", "superpowers:writing-plans"]
+skills: [prd-writer, axiomatic-spec, one-way-door, "superpowers:brainstorming", "superpowers:writing-plans"]
 mcp: []
 spawns: []
 writes: design_dirs

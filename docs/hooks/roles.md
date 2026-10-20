@@ -1,14 +1,17 @@
 # Role specs and loader (`factory.agents.roles`)
 
-Data for the seven agent roles (`orchestrator research design audit implement test review`) lives in `factory/agents/roles/<role>.yaml`, one file per role, keys equal to the `RoleSpec` field names. `load_roles()` reads and validates them. Contract: `docs/contracts/roles-and-generation.md`; binding clarifications A-12 to A-18 in `docs/contracts/clarifications.md`. This component is data and a loader only: it runs no hook and renders no agent file (TB-03).
+Data for the eight agent roles (`orchestrator research design audit implement qa test review`) lives in `factory/agents/roles/<role>.yaml`, one file per role, keys equal to the `RoleSpec` field names. `load_roles()` reads and validates them. Contract: `docs/contracts/roles-and-generation.md`; binding clarifications A-12 to A-18 in `docs/contracts/clarifications.md`. This component is data and a loader only: it runs no hook and renders no agent file (TB-03).
 
 ## API
-- `load_roles(dir=None) -> dict[str, RoleSpec]`: keys in the order above. `dir` defaults to the shipped data; a str or `Path` is accepted.
+- `load_roles(dir=None, allow_models=None) -> dict[str, RoleSpec]`: keys in the order above. `dir` defaults to the shipped data; a str or `Path` is accepted. Every role must declare `model: sonnet` unless the model is in `allow_models` (the profile's top-level `allow_models` list; the installer's `--allow-model` feeds the same list), else `RoleError` with field `model`.
 - `RoleSpec` and `McpEntry` are frozen dataclasses with `.to_dict()`; list fields are tuples.
 - `RoleError(ValueError)` has `.role` and `.field`; the message names both. Per C-37, `.field` is always the bare top-level field name (`hooks`, `core_tools`, `skills`, `spawns`, `disallowed_tools`, `mcp`), never indexed or nested; the offending entry and its position are in the message (for example `entry 3: unknown hook id 'x'`).
 
 ## Validation
-Raised as `RoleError`: a missing or unknown field; wrong types; `writes` not in `none app research_dir design_dirs audit_dir eval_paths`; `bash` not in `none readonly full`; MCP `access` not `read` or `write`; a hook id outside the eight in `hook-io.md`; `max_tools` above 20; `len(core_tools) > max_tools`; `id` not matching the file name; a missing or extra role file.
+Raised as `RoleError`: a missing or unknown field; wrong types; `model` not `sonnet` and not in `allow_models`; `writes` not in `none app research_dir design_dirs audit_dir eval_paths qa_paths`; `bash` not in `none readonly full`; MCP `access` not `read` or `write`; a hook id outside the eight in `hook-io.md`; `max_tools` above 20; `len(core_tools) > max_tools`; `id` not matching the file name; a missing or extra role file.
+
+## Writes class `qa_paths`
+The `qa` role writes only QA notes and QA attempt records: `**/qa-notes.md`, `**/qa-feedback/**` and `.sf/qa/**`. The generator lists these in the agent's "You may write" section. The path guard has no `qa_paths` rule yet, so it denies every write by role `qa` (fail closed) until the hook learns the class.
 
 ## MCP placeholders
 Per A-15, role data never names a deploy platform or git host. `$deploy` and `$git_host` are placeholders for the generator to resolve from the profile; named general servers (`deepwiki`, `alphaXiv`, `firecrawl`, `playwright`) are omitted by the generator when the profile lacks them.

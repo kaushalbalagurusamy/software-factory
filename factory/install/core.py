@@ -28,6 +28,12 @@ from factory.agents.settings import emit_settings
 MODEL = "sonnet"
 ENV_PIN = {"CLAUDE_CODE_SUBAGENT_MODEL": MODEL, "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"}
 MANIFEST = ".factory/install-manifest.json"
+EXTERNAL_PINS = "docs/external-skills.json"
+# Skills the flow needs that live outside the repo; pinned by the hash of their SKILL.md.
+EXTERNAL_SKILLS = (
+    "minesweeper", "spec-recomposition", "biz-decomposer", "grounded-research", "deep-research",
+    "experiment-designer", "one-way-door", "progress-briefing", "away-mode", "good-night",
+)
 PROFILE = ".factory/profile.yaml"
 SETTINGS = ".claude/settings.json"
 DEFAULT_PROFILE = """\
@@ -180,7 +186,6 @@ def install(project, *, factory_root=None, python=None, profile_src=None, hooks=
         raise InstallError(f"{root} is not a factory checkout (no factory/hooks/__main__.py)")
     py = os.path.abspath(python) if python else str(root / ".venv" / "bin" / "python")
     check_python(py, root)
-    allowed = {MODEL, *allow_models}
     prefix = hook_command_prefix(root, py)
 
     # profile
@@ -205,11 +210,12 @@ def install(project, *, factory_root=None, python=None, profile_src=None, hooks=
         new_files[PROFILE] = text.encode()
         profile_state = "created"
 
+    allowed = {MODEL, *allow_models, *profile.allow_models}
     roles = None
     agent_models: dict = {}
     if agents or hooks:
         try:
-            roles = load_roles()
+            roles = load_roles(allow_models=allowed - {MODEL})
             generated = generate_agents(profile, roles)
         except (GenerationError, RoleError) as e:
             raise InstallError(f"cannot generate agents: {e}") from None
@@ -354,3 +360,26 @@ def uninstall(project, out=print, err=None) -> bool:
         except OSError:
             pass
     return True
+
+
+def pin_external(skills_dir, factory_root, yes, out=print) -> int:
+    """Rewrite docs/external-skills.json from the installed copies; 0 written, 2 without `yes`."""
+    sdir = Path(skills_dir) if skills_dir else Path.home() / ".claude" / "skills"
+    root = Path(factory_root).resolve() if factory_root else Path(__file__).resolve().parents[2]
+    pins = {}
+    for name in EXTERNAL_SKILLS:
+        f = sdir / name / "SKILL.md"
+        if f.is_file():
+            pins[name] = {"sha256": sha(f.read_bytes())}
+        else:
+            out(f"not pinned: {name} (no SKILL.md under {sdir / name})")
+    new = (json.dumps({"schema": 1, "skills": pins}, indent=2, sort_keys=True) + "\n").encode()
+    target = root / EXTERNAL_PINS
+    old = target.read_bytes() if target.is_file() else None
+    out(_diff(EXTERNAL_PINS, old, new).rstrip("\n") if old != new else "unchanged")
+    if not yes:
+        out("not written: re-run with --yes to write the pins")
+        return 2
+    if old != new:
+        _atomic(target, new)
+    return 0
