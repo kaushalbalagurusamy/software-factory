@@ -55,8 +55,8 @@ def record(rig, name, where, *extra):
     return rig.run("hitl", "recorded", name, "--where", where, *extra)
 
 
-def apply_(rig, name, evidence, *extra):
-    return rig.run("hitl", "applied", name, "--evidence", evidence, *extra)
+def apply_(rig, name, evidence, *extra, now=None):
+    return rig.run("hitl", "applied", name, "--evidence", evidence, *extra, now=now)
 
 
 def state_of(rig, name):

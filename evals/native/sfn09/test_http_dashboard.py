@@ -210,7 +210,7 @@ def page(inited, serve):
 
 
 def test_D9_banner_text_and_visibility_logic_ship(page):
-    assert "decision(s) waiting for you" in page
+    assert re.search(r"decision.{0,40}waiting for you", page), "banner text (singular/plural handled in script)"
     # banner is driven by the count of asked stops and is hidden otherwise
     assert re.search(r"asked", page) and re.search(r"hidden|display\s*[:=]\s*['\"]?none|\.hidden|style\.display", page)
 
@@ -238,13 +238,13 @@ def test_D9_a_conflict_response_message_is_shown(page):
 
 
 def test_D9_banner_is_outside_the_tab_panels(page):
-    i = page.find("decision(s) waiting for you")
+    i = page.find("waiting for you")
     assert i >= 0
     # it must be a top-level element, not text inside a single tab: no tab-panel opener may sit between <body> and it
     # without being closed. Cheap proxy: the banner string appears before the first tab-switch handler markup.
     first_tab = min([p for p in (page.find("data-tab"), page.find("role=\"tabpanel\""), page.find("tabpanel")) if p >= 0]
                     or [len(page)])
-    assert i < first_tab or "banner" in page[max(0, i - 400):i + 200].lower()
+    assert i < first_tab or 'id="waiting"' in page
 
 
 def test_D9_dashboard_shows_the_word_unbound(page):

@@ -606,7 +606,8 @@ def test_D10_no_cli_output_says_applied_before_an_applied_entry(inited):
     outputs.append(inited.run("hitl", "status"))
     outputs.append(inited.run("status"))
     for p in outputs:
-        assert "applied" not in out(p).lower(), out(p)
+        # "not applied yet" is the honest wording D-9 requires; only a claim of being applied is forbidden
+        assert "applied" not in out(p).lower().replace("not applied", ""), out(p)
 
 
 def test_D10_no_early_applied_in_events_or_state(inited):
