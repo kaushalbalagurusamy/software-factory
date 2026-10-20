@@ -472,7 +472,7 @@ def derive_stops(entries):
         if e.get("kind") == "open":
             stops.append({"id": e.get("name"), "name": e.get("name"), "question": e.get("question"), "artifact": e.get("artifact") or [],
                           "reason": e.get("reason"), "opened_at": e.get("opened_at"), "state": "asked",
-                          "options": e.get("options") or [], "proposal_hash": e.get("proposal_hash"), "answer": None,
+                          "options": e.get("options") or [], "proposal_hash": e.get("proposal_hash"), "unbound": e.get("unbound") or [], "answer": None,
                           "answered_at": None, "recorded_where": None, "recorded_at": None,
                           "applied_evidence": None, "applied_at": None})
         elif e.get("kind") in ("release", "recorded", "applied"):
@@ -533,6 +533,7 @@ MAX_PROPOSAL_FILE = 1024 * 1024
 
 def _artifact_sha(root, path):
     """sha256 of the file bytes, or None when missing, not a regular file, outside the repo root, or over 1 MiB."""
+    path = re.sub(r":\d+$", "", path)  # a trailing :LINE names a position in the file
     try:
         real = os.path.realpath(os.path.join(root, path))
         base = os.path.realpath(root)
@@ -548,7 +549,7 @@ def _artifact_sha(root, path):
 
 def proposal_hash(root, question, options, artifacts):
     doc = {"question": question, "options": list(options),
-           "artifacts": [{"path": a, "sha256": _artifact_sha(root, a)} for a in artifacts]}
+           "artifacts": [{"path": a, "sha256": _artifact_sha(root, a) or "unbound"} for a in artifacts]}
     return hashlib.sha256(json.dumps(doc, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
@@ -559,7 +560,7 @@ def latest_stop(root, name):
     return mine[-1]
 
 
-def hitl_open(root, name, question, artifacts, reason, options=None):
+def hitl_open(root, name, question, artifacts, reason, options=None, bind=True):
     check_name(name)
     opts = [clean_note(o, MAX_OPTION + 1).strip() for o in (options or [])]
     if len(opts) > MAX_OPTIONS or any(not o or len(o) > MAX_OPTION for o in opts):
@@ -568,8 +569,12 @@ def hitl_open(root, name, question, artifacts, reason, options=None):
         if any(s["name"] == name for s in open_stops(root)):
             raise Fail("stop %s is already open" % name)
         q, arts = clean_note(question, 500), [clean_note(a, 300) for a in artifacts]
+        unbound = [a for a in arts if _artifact_sha(root, a) is None]
+        if unbound and bind:
+            raise Usage("cannot hash artifact(s) (missing, not a regular file, outside the repo, or over 1 MiB): " + ", ".join(unbound))
         stops_append(root, {"kind": "open", "name": name, "question": q, "artifact": arts, "reason": clean_note(reason, 500),
-                            "opened_at": iso(now()), "options": opts, "proposal_hash": proposal_hash(root, q, opts, arts)})
+                            "opened_at": iso(now()), "options": opts, "proposal_hash": proposal_hash(root, q, opts, arts),
+                            "unbound": unbound})
         emit_event(root, "hitl", "opened", "%s: %s" % (name, question), phase=name, extra={"stop": name}, force=True)
 
 
@@ -1304,7 +1309,7 @@ def cmd_phase(a, root):
     if cps.get(a.name, mode_default):
         name = a.name + "-review"
         hitl_open(root, name, a.ask or "Approve %s?" % a.name, a.artifact or [],
-                  "checkpoint after %s (%s)" % (a.name, verdict))
+                  "checkpoint after %s (%s)" % (a.name, verdict), bind=False)
         out("human checkpoint opened: %s  (release: lsf hitl release %s, or click Approve in the dashboard)" % (name, name))
     return 0
 

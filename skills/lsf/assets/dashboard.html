@@ -69,6 +69,7 @@ main{padding:8px 16px 64px;max-width:1180px;margin:0 auto;min-width:0}
 .opt{display:flex;align-items:center;gap:.7rem;min-height:48px;padding:.4rem .8rem;border:1px solid var(--line);border-radius:12px;background:var(--panel2);cursor:pointer;overflow-wrap:anywhere}
 .opt:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--panel2))}
 .opt input{flex:none;width:22px;height:22px;min-height:0;accent-color:var(--acc)}
+.refu{display:inline-flex;align-items:center;gap:.4rem;flex-wrap:wrap}
 .dl{display:grid;grid-template-columns:max-content 1fr;gap:.25rem .8rem;margin:.6rem 0 0;font-size:.9rem}
 .dl dt{color:var(--mute)}.dl dd{margin:0;overflow-wrap:anywhere;min-width:0}
 .dec .note{flex:1 1 220px;min-width:0}
@@ -294,7 +295,7 @@ function stopCard(s){
  kids.push(h("div",{class:"q"},s.question||"Approve?"));
  if(s.reason){kids.push(h("div",{class:"small mute"},s.reason));}
  kids.push(stepRow(st));
- if((s.artifact||[]).length){kids.push(h("div",{class:"refs"},s.artifact.map(function(a){var m=/^(.*?)(?::(\d+))?$/.exec(a);return ref(m[1],m[2]?parseInt(m[2],10):null,a);})));}
+ if((s.artifact||[]).length){kids.push(h("div",{class:"refs"},s.artifact.map(function(a){var m=/^(.*?)(?::(\d+))?$/.exec(a);var r=ref(m[1],m[2]?parseInt(m[2],10):null,a);return (s.unbound||[]).indexOf(a)>=0?h("span",{class:"refu"},[r,chip("unbound","v-wait")]):r;})));}
  if(!open){
   if(s.via&&s.via!=="dashboard"){kids.push(h("div",{class:"small v-wait"},[chip("released from the command line","v-wait")," ("+s.via+")"]));}
   var dl=h("dl",{class:"dl"});
