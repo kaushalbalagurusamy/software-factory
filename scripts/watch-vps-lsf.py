@@ -93,7 +93,8 @@ def install(sha):
     subprocess.run([str(PYTHON), str(ROOT / 'scripts/add-antigravity-editor.py'), str(staging)],
                    check=True, timeout=15)
     checks = ['tests/lsf']
-    for suite in ('evals/native/sfn09',):
+    for suite in ('evals/native/sfn09', 'tests/test_editor_links.py',
+                  'skills/mermaid-nesting-dolls/tests/test_workspace.py'):
         if (staging / suite).exists():
             checks.append(suite)
     env = dict(os.environ, SF_TEST_MEM_MB='0')
