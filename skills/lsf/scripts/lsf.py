@@ -453,29 +453,44 @@ def cross_check(root, entries):
             led[k] = led.get(k, 0) + 1
     evc = {}
     for e in ev:
-        if e.get("verdict") in ("opened", "released"):
-            k = ("open" if e["verdict"] == "opened" else "release", e.get("stop"))
+        kind = {"opened": "open", "released": "release", "recorded": "recorded", "applied": "applied"}.get(e.get("verdict"))
+        if kind:
+            k = (kind, e.get("stop"))
             evc[k] = evc.get(k, 0) + 1
     for k, n in evc.items():
         if k[0] == "open" and led.get(k, 0) < n:
             raise Fail("stop ledger inconsistent: stop %s was opened (events.jsonl) but is missing from the ledger" % k[1])
     for k, n in led.items():
-        if k[0] == "release" and evc.get(k, 0) < n:
-            raise Fail("stop ledger inconsistent: stop %s is released in the ledger with no release event" % k[1])
+        if k[0] in ("release", "recorded", "applied") and evc.get(k, 0) < n:
+            raise Fail("stop ledger inconsistent: stop %s is %s in the ledger with no %s event"
+                       % (k[1], {"release": "released"}.get(k[0], k[0]), k[0]))
 
 
 def derive_stops(entries):
     stops = []
     for e in entries:
         if e.get("kind") == "open":
-            stops.append({"name": e.get("name"), "question": e.get("question"), "artifact": e.get("artifact") or [],
-                          "reason": e.get("reason"), "opened_at": e.get("opened_at")})
-        elif e.get("kind") == "release":
+            stops.append({"id": e.get("name"), "name": e.get("name"), "question": e.get("question"), "artifact": e.get("artifact") or [],
+                          "reason": e.get("reason"), "opened_at": e.get("opened_at"), "state": "asked",
+                          "options": e.get("options") or [], "proposal_hash": e.get("proposal_hash"), "answer": None,
+                          "answered_at": None, "recorded_where": None, "recorded_at": None,
+                          "applied_evidence": None, "applied_at": None})
+        elif e.get("kind") in ("release", "recorded", "applied"):
+            # a release closes the latest asked stop of that name; recorded/applied advance the latest stop of that name
+            want = {"release": "asked", "recorded": "answered", "applied": "recorded"}[e["kind"]]
             for s in reversed(stops):
-                if s["name"] == e.get("name") and "released_at" not in s:
-                    s["released_at"], s["released_by"], s["note"] = e.get("released_at"), e.get("released_by"), e.get("note")
-                    s["via"] = e.get("via") or "unknown"
-                    break
+                if s["name"] != e.get("name"):
+                    continue
+                if s["state"] == want:
+                    if e["kind"] == "release":
+                        s["released_at"], s["released_by"], s["note"] = e.get("released_at"), e.get("released_by"), e.get("note")
+                        s["via"] = e.get("via") or "unknown"
+                        s["answer"], s["answered_at"], s["state"] = e.get("answer"), e.get("released_at"), "answered"
+                    elif e["kind"] == "recorded":
+                        s["recorded_where"], s["recorded_at"], s["state"] = e.get("where"), e.get("recorded_at"), "recorded"
+                    else:
+                        s["applied_evidence"], s["applied_at"], s["state"] = e.get("evidence"), e.get("applied_at"), "applied"
+                break
     return stops
 
 
@@ -511,18 +526,54 @@ def require_tty_if_strict(root, what):
         raise StopError()
 
 
-def hitl_open(root, name, question, artifacts, reason):
+MAX_OPTIONS = 6
+MAX_OPTION = 120
+MAX_PROPOSAL_FILE = 1024 * 1024
+
+
+def _artifact_sha(root, path):
+    """sha256 of the file bytes, or None when missing, not a regular file, outside the repo root, or over 1 MiB."""
+    try:
+        real = os.path.realpath(os.path.join(root, path))
+        base = os.path.realpath(root)
+        if real != base and not real.startswith(base + os.sep):
+            return None
+        if not os.path.isfile(real) or os.path.getsize(real) > MAX_PROPOSAL_FILE:
+            return None
+        with open(real, "rb") as f:
+            return hashlib.sha256(f.read()).hexdigest()
+    except (OSError, ValueError):
+        return None
+
+
+def proposal_hash(root, question, options, artifacts):
+    doc = {"question": question, "options": list(options),
+           "artifacts": [{"path": a, "sha256": _artifact_sha(root, a)} for a in artifacts]}
+    return hashlib.sha256(json.dumps(doc, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def latest_stop(root, name):
+    mine = [s for s in stops_state(root) if s["name"] == name]
+    if not mine:
+        raise Fail("unknown stop %s" % name)
+    return mine[-1]
+
+
+def hitl_open(root, name, question, artifacts, reason, options=None):
     check_name(name)
+    opts = [clean_note(o, MAX_OPTION + 1).strip() for o in (options or [])]
+    if len(opts) > MAX_OPTIONS or any(not o or len(o) > MAX_OPTION for o in opts):
+        raise Usage("--option may repeat at most %d times, each 1-%d characters" % (MAX_OPTIONS, MAX_OPTION))
     with locked(root):
         if any(s["name"] == name for s in open_stops(root)):
             raise Fail("stop %s is already open" % name)
-        stops_append(root, {"kind": "open", "name": name, "question": clean_note(question, 500),
-                            "artifact": [clean_note(a, 300) for a in artifacts], "reason": clean_note(reason, 500),
-                            "opened_at": iso(now())})
+        q, arts = clean_note(question, 500), [clean_note(a, 300) for a in artifacts]
+        stops_append(root, {"kind": "open", "name": name, "question": q, "artifact": arts, "reason": clean_note(reason, 500),
+                            "opened_at": iso(now()), "options": opts, "proposal_hash": proposal_hash(root, q, opts, arts)})
         emit_event(root, "hitl", "opened", "%s: %s" % (name, question), phase=name, extra={"stop": name}, force=True)
 
 
-def hitl_release(root, name, note="", by=None, via="cli-nontty"):
+def hitl_release(root, name, note="", by=None, via="cli-nontty", answer=None, proposal_hash=None):
     check_name(name)
     by = by or os.environ.get("LSF_BY") or os.environ.get("USER") or "human"
     with locked(root):
@@ -530,17 +581,71 @@ def hitl_release(root, name, note="", by=None, via="cli-nontty"):
         mine = [s for s in stops if s["name"] == name]
         if not mine:
             raise Fail("unknown stop %s" % name)
-        if "released_at" in mine[-1]:
+        st = mine[-1]
+        if "released_at" in st:
             raise Fail("stop %s is already released" % name)
+        if st.get("options"):
+            if answer not in st["options"]:
+                raise Usage("stop %s needs an answer, exactly one of: %s" % (name, " | ".join(st["options"])))
+        elif answer:
+            raise Usage("stop %s has no options; release it without an answer" % name)
+        stored = st.get("proposal_hash")
+        if proposal_hash is not None and proposal_hash != stored:
+            raise Fail("stale proposal hash for stop %s; reload and answer the current proposal" % name)
+        if stored and _stop_hash(root, st) != stored:
+            raise Fail("proposal changed since it was asked; ask again")
         t = iso(now())
-        opened = parse_ts(mine[-1]["opened_at"])
+        opened = parse_ts(st["opened_at"])
         wait = int(minutes_between(opened, parse_ts(t)) * 60) if opened else None
         # the release event goes first so a ledger release can never exist without it
-        if not emit_event(root, "hitl", "released", "%s released by %s via %s%s" % (name, by, via, (": " + note) if note else ""),
+        if not emit_event(root, "hitl", "released", "%s released by %s via %s%s%s" % (name, by, via, (" with answer: " + answer) if answer else "", (": " + note) if note else ""),
                           phase=name, duration_s=wait, extra={"stop": name, "via": via}, force=True):
             raise Fail("release event could not be recorded; nothing released")
-        stops_append(root, {"kind": "release", "name": name, "released_at": t, "released_by": clean_note(by, 120),
-                            "note": clean_note(note, 500), "via": via})
+        entry = {"kind": "release", "name": name, "released_at": t, "released_by": clean_note(by, 120),
+                 "note": clean_note(note, 500), "via": via}
+        if stored:
+            entry["answer"], entry["proposal_hash"] = answer, stored
+        stops_append(root, entry)
+    return t
+
+
+def _stop_hash(root, st):
+    return proposal_hash(root, st.get("question"), st.get("options") or [], st.get("artifact") or [])
+
+
+def _advance(root, name, verdict, kind, want, extra_entry, note):
+    """Shared by recorded/applied: the stop's latest state must be `want`; the event goes first, then the chained entry."""
+    with locked(root):
+        st = latest_stop(root, name)
+        if st["state"] != want:
+            raise Fail("stop %s is %s; %s is only valid after %s" % (name, st["state"], kind, want))
+        if not emit_event(root, "hitl", verdict, "%s %s: %s" % (name, verdict, note), phase=name, extra={"stop": name}, force=True):
+            raise Fail("%s event could not be recorded; nothing changed" % verdict)
+        e = dict(extra_entry, kind=kind, name=name)
+        stops_append(root, e)
+
+
+def hitl_recorded(root, name, where, note=""):
+    check_name(name)
+    real = os.path.realpath(os.path.join(root, where or ""))
+    base = os.path.realpath(root)
+    if not where or (real != base and not real.startswith(base + os.sep)) or not os.path.exists(real) \
+            or not (os.path.isfile(real) or os.path.isdir(real)):
+        raise Fail("--where must be an existing file or directory inside the repository")
+    rel = os.path.relpath(real, base)
+    t = iso(now())
+    _advance(root, name, "recorded", "recorded", "answered",
+             {"where": clean_note(rel, 300), "recorded_at": t, "record_note": clean_note(note, 500)}, rel)
+    return t
+
+
+def hitl_applied(root, name, evidence):
+    check_name(name)
+    ev = clean_note(evidence, 500).strip()
+    if not ev:
+        raise Fail("--evidence is required and must not be blank")
+    t = iso(now())
+    _advance(root, name, "applied", "applied", "recorded", {"evidence": ev, "applied_at": t}, ev)
     return t
 
 
@@ -1214,20 +1319,37 @@ def cmd_event(a, root):
 
 
 def fmt_stop(s):
-    state = "released %s by %s" % (s["released_at"], s.get("released_by")) if "released_at" in s else "OPEN since %s" % s["opened_at"]
-    return "%s: %s [%s]%s" % (s["name"], s["question"], state,
-                              (" artifacts: " + ", ".join(s["artifact"])) if s["artifact"] else "")
+    st = s.get("state") or ("answered" if "released_at" in s else "asked")
+    when = "released %s by %s" % (s["released_at"], s.get("released_by")) if "released_at" in s else "OPEN since %s" % s["opened_at"]
+    line = "%s: %s [%s, %s]%s" % (s["name"], s["question"], st, when, (" artifacts: " + ", ".join(s["artifact"])) if s["artifact"] else "")
+    if s.get("options"):
+        line += " options: " + " | ".join(s["options"])
+    if s.get("answer"):
+        line += " answer: " + s["answer"]
+    if s.get("recorded_where"):
+        line += " recorded in: " + s["recorded_where"]
+    if s.get("applied_at"):
+        line += " applied: " + (s.get("applied_evidence") or "")
+    return line
 
 
 def cmd_hitl(a, root):
     if a.action == "request":
-        hitl_open(root, a.name, a.question, a.artifact or [], a.reason or "requested by the agent")
+        hitl_open(root, a.name, a.question, a.artifact or [], a.reason or "requested by the agent", a.option)
         out("human stop opened: %s" % a.name)
+        return 0
+    if a.action == "recorded":
+        t = hitl_recorded(root, a.name, a.where, a.note or "")
+        out("recorded %s at %s (answer written to %s; not applied yet)" % (a.name, t, a.where))
+        return 0
+    if a.action == "applied":
+        t = hitl_applied(root, a.name, a.evidence)
+        out("applied %s at %s" % (a.name, t))
         return 0
     if a.action == "release":
         require_tty_if_strict(root, "hitl release")
         via = "cli-tty" if sys.stdin.isatty() else "cli-nontty"
-        t = hitl_release(root, a.name, a.note or "", a.by, via)
+        t = hitl_release(root, a.name, a.note or "", a.by, via, answer=a.answer)
         out("released %s at %s via %s (a recorded procedure, not proof of identity)" % (a.name, t, via))
         return 0
     if a.action == "repair":
@@ -1856,14 +1978,24 @@ def build_parser():
     p.add_argument("--phase")
     p.add_argument("--source", choices=["lsf", "hook", "agent"], default="agent")
 
-    p = mk("hitl", cmd_hitl, "human checkpoints: request, status, release")
-    hs = p.add_subparsers(dest="action", metavar="request|status|release|repair")
+    p = mk("hitl", cmd_hitl, "human decisions: request, status, release, recorded, applied")
+    hs = p.add_subparsers(dest="action", metavar="request|status|release|recorded|applied|repair")
     hs.required = True
     q = hs.add_parser("request")
     q.add_argument("name")
     q.add_argument("--question", required=True)
     q.add_argument("--artifact", action="append")
+    q.add_argument("--option", action="append", help="an answer the human may pick; repeat up to 6 times")
     q.add_argument("--reason")
+    q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
+    q = hs.add_parser("recorded", description="After the answer is written down (answered -> recorded).")
+    q.add_argument("name")
+    q.add_argument("--where", required=True, help="existing file or directory inside the repo")
+    q.add_argument("--note")
+    q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
+    q = hs.add_parser("applied", description="After the recorded answer was acted on (recorded -> applied).")
+    q.add_argument("name")
+    q.add_argument("--evidence", required=True)
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
     q = hs.add_parser("status")
     q.add_argument("--json", action="store_true")
@@ -1874,6 +2006,7 @@ def build_parser():
     q = hs.add_parser("release", description="Release is a human act; agents must never run it. It records who and when; it is a procedure, not proof of identity.")
     q.add_argument("name")
     q.add_argument("--note")
+    q.add_argument("--answer", help="required when the stop has options; must equal one of them")
     q.add_argument("--by")
     q.add_argument("--root", metavar="DIR", default=argparse.SUPPRESS)
 
