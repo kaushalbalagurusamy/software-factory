@@ -153,3 +153,16 @@ def test_k03_never_dangerous_scheme_fuzz():
         low = out.lower().lstrip()
         assert not low.startswith(("javascript:", "data:", "file:")), (c, out)
         assert re.match(r"^(vscode|cursor|windsurf|zed|idea|subl|txmt)://", out), (c, out)
+
+
+# --- added by the maintainer for clarification C-44 (automated security review of editor-links.js)
+import pytest as _pytest_c44
+
+
+@_pytest_c44.mark.parametrize("root,rel", [
+    ("//evil/share", "a.py"), ("///evil", "a.py"), ("/home/me//proj", "a.py"),
+    ("/home/me/proj", "a//b.py"), ("/home/me/proj", "./a.py"), ("/home/me/proj", "a/./b.py"),
+])
+def test_k03_c44_unc_and_empty_segment_inputs_return_null(root, rel):
+    from evals.native.sfn08.conftest import call
+    assert call("vscode", root, rel, 3) is None

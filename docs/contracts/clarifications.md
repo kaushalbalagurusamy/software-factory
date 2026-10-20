@@ -203,3 +203,7 @@ Binding for `docs/prds/SFN-08-editor-links.md`.
 ## C-43 (2026-10-20, SFN-08): URL shape found wrong in review
 
 Amends C-42 and PRD K-02/K-03. The editors' documented URL form puts the absolute path directly after `file`: with a POSIX root `/home/me/proj` and relPath `a.py` and line 120, `vscode://file/home/me/proj/a.py:120` (one slash after `file`, never two). Windows drive roots keep the drive colon: `vscode://file/C:/Users/me/proj/a.py:3`. A root given with backslashes is accepted only when it starts with a drive letter and colon; its backslashes are converted to `/`. A backslash in `relPath` is still rejected. The `..` rule rejects only a whole path segment equal to `..`; a name such as `a..b` is fine. The same one-slash rule applies to `cursor`, `windsurf` and `zed`.
+
+## C-44 (2026-10-20, SFN-08): UNC and empty-segment roots (automated security review)
+
+Amends K-03. A POSIX root that begins with two or more slashes (`//host/share`) is invalid, because the editors' URL handler would read the result as a network (UNC) path. A root or `relPath` containing an empty path segment (`a//b`) or a segment equal to `.` is invalid. A single trailing slash on the root is still stripped. The same rules hold for roots taken from `?root=`, which keeps overriding a configured root as K-04 says; the UNC rule is what makes a crafted link harmless on Windows.
