@@ -9,8 +9,9 @@ import pytest
 from .conftest import (EXPLORER_DIR, JS, OPS_SHELL, SKILL, TEMPLATE, embedded_model, region, run_cli,
                        write_model)
 
+# Amended when SFN-03 added the human-stops tab (clarification C-51.1): SFN-08 must still not change the tab list itself.
 TABS_BLOCK = '''var TABS=[
- ["overview","Overview","mix"],["ops","Ops","rt"],["architecture","Architecture","hist"],["research","Research","hist"],
+ ["overview","Overview","mix"],["hitl","Human stops","mix"],["ops","Ops","rt"],["architecture","Architecture","hist"],["research","Research","hist"],
  ["experiments","Experiments","hist"],["adrs","ADRs","hist"],["prd","PRD journeys","hist"],["langfuse","Langfuse","rt"],
  ["evals","Evals & bugs","hist"],["journey","Dev journey","hist"],["git","Git history","hist"]];'''
 

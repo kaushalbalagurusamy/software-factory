@@ -3,7 +3,7 @@
   "title": "Claude Software Factory: workflow, design choices, coverage",
   "subtitle": "Nesting-dolls explorer of the software-factory repository",
   "repo": "software-factory",
-  "commit": "005edab",
+  "commit": "f0f710e",
   "generated": "2026-10-20"
  },
  "root": "factory",
@@ -3271,7 +3271,7 @@
      "path": "factory/install/core.py",
      "contains": "def pin_external",
      "note": "Rewrites the pins from the installed copies; exit 2 without --yes",
-     "lines": "368-400"
+     "lines": "368-399"
     },
     {
      "path": "docs/external-skills.json",
@@ -4069,7 +4069,7 @@
   },
   "editor-copies": {
    "title": "Inlined copies",
-   "summary": "The function text between /* editor-links:begin */ and /* editor-links:end */ appears in the viewer template, ops/shell/index.html and skills/lsf/assets/dashboard.html, and skills/lsf/assets/editor-links.js is a copy of the source.",
+   "summary": "The function text between the editor-links begin and end marker comments appears in the viewer template, ops/shell/index.html and skills/lsf/assets/dashboard.html, and skills/lsf/assets/editor-links.js is a copy of the source.",
    "kind": "module",
    "files": [
     {
