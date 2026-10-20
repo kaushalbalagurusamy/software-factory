@@ -74,7 +74,9 @@ with a `(maybe)` suffix; keep them, they are honest.
 1. Scaffold: `python3 skills/eli12-docs/scripts/eli12.py scaffold --root . path/to/module.py ...`.
    It creates or updates the page. On an existing page it only refreshes `sig`, `Used by` and
    `Depends on` and adds missing sections; your sentences are never overwritten.
-2. Fill every `TODO` from the code and its tests, in the words above. Check each `(maybe)` line by
+2. Fill every `TODO` from the code and tests (read both; never guess), in plain words a 12-year-old
+   can follow, using the rules above. Each `TODO` stands for one word or phrase: `name (TODO): TODO`
+   becomes `name (int): the price in cents`. Check each `(maybe)` line by
    reading the code and keep or remove it only by changing the code, not the doc.
 3. Check: `python3 skills/eli12-docs/scripts/eli12.py check --root .` (exit 0 clean, 1 findings, 2
    usage error). Useful flags: `--paths P...`, `--changed GITREF` (only modules changed since the
