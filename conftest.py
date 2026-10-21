@@ -16,6 +16,8 @@ import pytest
 
 MEM_MB = int(os.environ.get("SF_TEST_MEM_MB", "4096"))
 TIMEOUT_S = int(os.environ.get("SF_TEST_TIMEOUT_S", "120"))
+sys.dont_write_bytecode = True  # this process and, via the variable, children
+os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")  # scripts run under test must not leave .pyc in skills/ (test_skills_sync rejects it)
 
 
 def pytest_sessionstart(session):
