@@ -1,55 +1,59 @@
 1
-00:00:00,000 --> 00:00:08,010
-Left: the booking page with Ada Alpha selected. Right: the booking page with Ben Bravo selected. Below: a terminal.
+00:00:00,001 --> 00:00:07,011
+Left: the booking page as Ada Alpha. Right: the booking page as Ben Bravo, in a separate browser frame. Below: a terminal.
 
 2
-00:00:08,010 --> 00:00:19,997
+00:00:07,011 --> 00:00:15,994
 Both users see 10 Available items (Ada) and 10 (Ben); price $100 on Ada's screen, $100 on Ben's.
 
 3
-00:00:19,997 --> 00:00:23,002
-Ada and Ben pressed Hold on Item 1 at the same moment. Ada sees "Held" and "In your cart"; Ben sees "Someone else holds that item." and the item as "Restocking".
+00:00:15,994 --> 00:00:20,499
+TEST 1, same-moment hold: Ada and Ben pressed Hold on Item 1 together. Ada sees "Held" and "In your cart"; Ben sees "Someone else holds that item." and the item as "Restocking" (Hold button disabled: true).
 
 4
-00:00:23,002 --> 00:00:24,507
-Countdown running: Ada's cart reads "Item 1, 5s left".
+00:00:20,499 --> 00:00:27,673
+Ada's cart reads "Item 1, 7s left"; Ben's cart is "empty". Price is still $100 for Ada and $100 for Ben: holding does not move it.
 
 5
-00:00:24,507 --> 00:00:27,652
-Countdown running: Ada's cart now reads "Item 1, 3s left"; Ben's item still shows Restocking.
+00:00:27,673 --> 00:00:31,177
+TEST 2, payment fails: the hold ran out and Ada pressed Pay: "No active hold: your hold ended or you have none."
 
 6
-00:00:27,652 --> 00:00:29,867
-The hold ran out with no payment. Ada pressed Pay: "No active hold: your hold ended or you have none."
+00:00:31,177 --> 00:00:39,926
+Item 1 is "Available" again for Ada and "Available" for Ben, restocked at the same price: $100 on both screens.
 
 7
-00:00:29,867 --> 00:00:38,077
-Item 1 is "Available" again for Ada and "Available" for Ben; cart empty; price still $100.
+00:00:39,926 --> 00:00:47,436
+TEST 3, payment succeeds: Ada holds Item 2 ("Held"). Ben sees it as "Restocking", greyed, Hold button disabled: true. Price $100.
 
 8
-00:00:38,077 --> 00:00:42,456
-Ada holds Item 2: "Held", cart "Item 2, 8s left". Ben sees it as "Available".
+00:00:47,436 --> 00:00:57,154
+Ada paid: "Paid $100". The price is now $110 on Ada's screen and $110 on Ben's (0.5 s after the click). Item 2 is "Available" again.
 
 9
-00:00:42,456 --> 00:00:56,104
-Ada paid: "Paid $100". Item 2 is "Available" again; price now $110. Ben's screen showed $110 0.9 s after Ada pressed Pay.
+00:00:57,154 --> 00:01:03,702
+Ben can hold Item 2 again, now at $110: "Held", cart "Item 2, 12s left".
 
 10
-00:00:56,104 --> 00:01:00,421
-Ben holds Item 3: "Held", cart "Item 3, 8s left". Price on his screen: $110.
+00:01:03,702 --> 00:01:12,753
+Ben paid: "Paid $110" - the price he saw when he paid. The price is now $120.
 
 11
-00:01:00,421 --> 00:01:13,429
-Ben paid: "Paid $110". Price is now $120 for Ben and $120 for Ada; Item 3 is "Available" again.
+00:01:12,753 --> 00:01:18,988
+TEST 4, two payments at once: Ada holds Item 3 and Ben holds Item 4. Both carts are counting down.
 
 12
-00:01:13,429 --> 00:01:18,441
-Running the real test command in the terminal: node --test on tests/booking.test.mjs and tests/booking-hardening.test.mjs. Output streams live.
+00:01:18,988 --> 00:01:29,995
+They pressed Pay at the same moment: Ada sees "Paid $120", Ben sees "Paid $130". Each was charged a different price; the price is now $140 on Ada's screen and $140 on Ben's.
 
 13
-00:01:18,441 --> 00:01:32,446
-Test run finished (exit 0): the terminal shows "tests 24", "pass 24", "fail 0" - 24 pass, 0 fail.
+00:01:29,995 --> 00:01:49,057
+Running the real test command in the terminal: node --test on all three test files, including the browser end-to-end test file. Output streams live.
 
 14
-00:01:32,446 --> 00:01:39,447
-Final state: Ada's and Ben's screens both show price $120; the terminal still shows "pass 24" and "fail 0".
+00:01:49,057 --> 00:02:05,061
+Test run finished (exit 0): the terminal shows "tests 35", "pass 35", "fail 0" - 35 pass, 0 fail.
+
+15
+00:02:05,061 --> 00:02:12,064
+Final state: Ada's and Ben's screens both show price $140; the terminal still shows "pass 35" and "fail 0".
