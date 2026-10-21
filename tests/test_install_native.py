@@ -273,8 +273,8 @@ def test_doctor_hooks_run_with_non_sonnet_role_only_role_line_fails(skills, tmp_
 def test_empty_skill_md_does_not_resolve(skills, tmp_path):
     (skills / "away-mode/SKILL.md").write_text("")
     (skills / "good-night/SKILL.md").write_text("  \n")
-    assert doctor._skill_resolves("away-mode", REPO, skills) is None
-    assert doctor._skill_resolves("good-night", REPO, skills) is None
+    assert doctor._skill_resolves("away-mode", tmp_path, skills) is None  # tmp_path: no repo copy to fall back on
+    assert doctor._skill_resolves("good-night", tmp_path, skills) is None
     assert doctor._skill_resolves("minesweeper", REPO, skills)
 
 

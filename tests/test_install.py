@@ -353,7 +353,7 @@ def test_doctor_all_pass(proj, env, capsys):
     out = lines(capsys)
     assert all(l.startswith(("PASS", "SKIP")) for l in out), out
     joined = "\n".join(out)
-    assert "hook bash_guard deny" in joined and joined.count("PASS skill ") == 15  # one per repo skill (ls skills/*/SKILL.md)
+    assert "hook bash_guard deny" in joined and joined.count("PASS skill ") == len(list((REPO / "skills").glob("[!_]*/SKILL.md")))  # one per repo skill
 
 
 def test_doctor_json(proj, env, capsys):
@@ -525,12 +525,16 @@ def test_doctor_fails_on_unresolved_role_skill(proj, env, capsys):
 
 def test_doctor_warns_on_changed_external_pin_and_fails_on_missing(proj, env, capsys):
     inst(proj)
-    (env / "minesweeper/SKILL.md").write_text("edited\n")
+    import factory.install.doctor as d
+    pins = Path(d.EXTERNAL_PINS)  # repo ships these skills, so change the pin, not the skill (that would be drift)
+    data = json.loads(pins.read_text())
+    data["skills"]["minesweeper"]["sha256"] = "0" * 64
+    pins.write_text(json.dumps(data))
     capsys.readouterr()
     assert doc(proj, env) == 0  # a changed pin is a WARN, never a failure
     out = "\n".join(lines(capsys))
     assert "WARN external minesweeper" in out and "changed since pinned" in out
-    shutil.rmtree(env / "good-night")
+    (env / "good-night").unlink()  # a symlink to the repo skill; rmtree would refuse
     capsys.readouterr()
     assert doc(proj, env) == 1
     assert "FAIL external good-night" in "\n".join(lines(capsys))
