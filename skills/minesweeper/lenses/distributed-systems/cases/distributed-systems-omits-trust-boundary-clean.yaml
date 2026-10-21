@@ -1,0 +1,14 @@
+schema_version: 1
+id: distributed-systems-omits-trust-boundary-clean
+kind: clean
+twin: distributed-systems-omits-trust-boundary
+brief: |
+  Project: shared parcel-locker network run by three courier firms in one city.
+  - 60 lockers each report door state and occupancy to a coordination service.
+  - Fault model: up to one of the four coordination replicas may be compromised (Byzantine, f=1); the replicas run a BFT protocol with n=4.
+  - Each courier firm operates some replicas and lockers; firms are mutually untrusted, every report and vote is signed with a per-device key from a jointly managed roster, and replicas reject unsigned or unknown senders.
+  - Lockers retry each report until acknowledged; replicas deduplicate by (locker id, sequence number).
+  - Reports are ordered per locker by sequence number; door commands carry an increasing command number.
+  - Couriers reserve compartments through a mobile app.
+expect:
+  none_from_lens: true

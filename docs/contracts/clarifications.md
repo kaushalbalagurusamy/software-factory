@@ -168,3 +168,109 @@ Status: published, **binding**. It resolves the 94 ambiguities the eval authors 
   1. **Placeholders are whole-value.** A matched secret is exempt only when the whole matched value (for a prefixed key, the whole body after the prefix; for an assignment, the whole assigned value) is itself a placeholder form: an angle-bracket form `<...>` spanning the value, a single repeated character, or a `$VAR` / `${VAR}` reference. A placeholder word elsewhere in the surrounding token or text no longer exempts a real key (`your_key=<real key>` is denied). `secret_allow_patterns` from the profile still apply and are matched against the matched value only.
   2. **Bounded scanning.** Text longer than 2,000,000 characters is denied (fail closed) with a reason saying the content is too large to scan; the assignment-name part of any pattern is bounded so scanning cannot take unbounded time on hostile input.
   3. **Quoting does not hide a key.** For `Bash`, the command is scanned both as written and in a de-quoted form (single and double quotes and backslash escapes removed, `$'...'` sequences unescaped, adjacent literals joined), so a key split by shell quoting such as `"sk-""ant-..."` is caught.
+
+## C-40 (2026-10-20, SFN-02): names and formats the owner flow needs
+
+Binding for slice SFN-02 (`docs/prds/SFN-02-roles-and-doctor.md`). Source: the owner's verbatim flow (`docs/requirements/sf-owner-flow.md`) and the plan the owner approved with "Do it" on 2026-10-20 (artifact QvGeDjn8CkfoHrbATXFH11).
+
+1. `load_roles(roles_dir, allow_models=None)` accepts an optional collection of model names allowed beyond `sonnet`; the profile file may carry a top-level list `allow_models`; the installer's existing `--allow-model` flag feeds the same list. A role declaring another model without it is rejected with `RoleError`, and `sf install install` then exits 1 and writes nothing (it no longer downgrades silently).
+2. The writes class of the `qa` role is the string `qa_paths`; `docs/hooks/roles.md` defines it as QA notes (`**/qa-notes.md`, `**/qa-feedback/**`) and the QA attempt records under `.sf/qa/`.
+3. `sf install pin-external` takes `--skills-dir DIR` (default the user skills directory), `--factory-root DIR` (default the repository root) and `--yes`. `docs/external-skills.json` is `{"schema": 1, "skills": {"<name>": {"sha256": "<hex of SKILL.md bytes>"}}}`; a skill without a `SKILL.md` is not pinned and is reported.
+4. Doctor lines are `PASS|WARN|FAIL role <id> skill <name>: <detail>` for role skills (not beginning with `skill `, which the existing per-skill count uses) and `PASS|WARN|FAIL external <name>: <detail>` for pins; the changed-pin detail contains the words `changed since pinned`. A WARN does not change the exit code; a FAIL does.
+5. Where the default graph lists stages, `qa` sits between `implement` and `review`; `test` stays as the runner stage reached from `qa`.
+6. Amendment of earlier acceptance material: the earlier seven-role, Opus-declaration and `prd-designer` expectations in `evals/agents/` and `tests/` are superseded by this slice. They are updated by the maintainer after the slice lands (never by the implementer), each edit listed with its reason in ADR-0005.
+
+Applied: ADR-0005
+
+## C-41 (2026-10-20, SFN-02b): amendments after the automated security review of SFN-02
+
+Supersedes C-40.1 where it differs; binding for the SFN-02 follow-up.
+1. `allow_models` in a project's profile never widens the allowed models on its own: a model outside `sonnet` is allowed only when the operator passes it on the command line (`--allow-model M`), and a profile list is honoured only for models that are also given there. `install` and `doctor` print any extra model they were asked to allow. Role-file loading takes the already-combined list from its caller.
+2. `path_guard` enforces the `qa_paths` writes class: a role whose writes class is `qa_paths` may write only paths matching `**/qa-notes.md`, `**/qa-feedback/**` and `.sf/qa/**` (never `evals/**`, held-out, frozen-test or control directories), and the `app` branch denies writes to those `qa_paths` globs by implement-style roles. The globs come from the hook configuration, with the three above as defaults.
+3. The `qa` role's Bash mode is `full` only so it can run the protected suites. It receives the implement-style git restrictions (no `git add -A`/`.`, no history rewrite, no checkout of protected paths), and the QA feedback files are subject to the existing feedback leak check before a blind role may read them.
+4. `python -m factory.install` gains the `pin-external` subcommand (flags in C-40.3), dispatching to the existing function.
+
+## C-42 (2026-10-20, SFN-08): editor link details
+
+Binding for `docs/prds/SFN-08-editor-links.md`.
+1. `idea`: `idea://open?file=` followed by `encodeURIComponent(root + "/" + relPath)` (one encoding, so `/` becomes `%2F`), then `&line=N` when a line is valid. `sublime` and `textmate` append `&line=N` only when valid; without a line the whole `&line=` part is omitted.
+2. Windows drive roots (`C:/Users/me`, a drive letter, colon, slash) are valid roots; the colon after the drive letter is kept as is. `C:` alone and `C:proj` are not valid roots.
+3. Any `relPath` that begins with a scheme-like prefix (letters, digits, `+`, `.`, `-` followed by `:`) is rejected, so a file name containing `:` after such a prefix is rejected.
+4. A line that is a boolean, a non-numeric string, a float or a negative is omitted, not an error. A numeric string of digits is accepted.
+5. The 4,096-character limit applies to each argument separately; exactly 4,096 is accepted, 4,097 is rejected.
+6. `nesting_dolls.py check --assets [--repo DIR]` finds the ops shell at `<repo>/ops/shell/index.html` (repo defaults to the current directory's git root) and the skill assets relative to the script; a mismatch is reported with the text `editor-links` and exits 1. Without `--assets`, drift is not checked.
+7. With no editor or no valid root a file entry shows `Copy path` and a hint containing the word `editor`.
+8. Browser tests in the hidden evals launch Chrome themselves; implementers do not run them.
+
+## C-43 (2026-10-20, SFN-08): URL shape found wrong in review
+
+Amends C-42 and PRD K-02/K-03. The editors' documented URL form puts the absolute path directly after `file`: with a POSIX root `/home/me/proj` and relPath `a.py` and line 120, `vscode://file/home/me/proj/a.py:120` (one slash after `file`, never two). Windows drive roots keep the drive colon: `vscode://file/C:/Users/me/proj/a.py:3`. A root given with backslashes is accepted only when it starts with a drive letter and colon; its backslashes are converted to `/`. A backslash in `relPath` is still rejected. The `..` rule rejects only a whole path segment equal to `..`; a name such as `a..b` is fine. The same one-slash rule applies to `cursor`, `windsurf` and `zed`.
+
+## C-44 (2026-10-20, SFN-08): UNC and empty-segment roots (automated security review)
+
+Amends K-03. A POSIX root that begins with two or more slashes (`//host/share`) is invalid, because the editors' URL handler would read the result as a network (UNC) path. A root or `relPath` containing an empty path segment (`a//b`) or a segment equal to `.` is invalid. A single trailing slash on the root is still stripped. The same rules hold for roots taken from `?root=`, which keeps overriding a configured root as K-04 says; the UNC rule is what makes a crafted link harmless on Windows.
+
+## C-45 (2026-10-20, SFN-06): lsf interfaces the PRD left open
+
+Binding for `docs/prds/SFN-06-lsf-lite.md`.
+1. **Clock.** `LSF_NOW=<ISO UTC, e.g. 2026-10-20T10:00:00Z>` overrides "now" for every command (event `at`, budget, status).
+2. **Data dump.** `lsf bundle --json` prints `{"tabs": {<tab>: {"available": bool, "items": [...] | "reason": str}}}` with tab names research, experiments, adrs, bug_log, prd_journeys, architecture, git (the names and item shapes of `factory.ops.collect`) plus `docs` (ELI12). `/api/state` and `/api/at` return the same tab layout.
+3. `--root DIR` is accepted before or after the subcommand and its arguments.
+4. `doctor --port N` names the port to check (default 8765).
+5. **Profile keys** in `.lsf/profile.json`: `session_minutes`, `phases` (list of `{id, group}`), `weights` (`{align, review, build}`), `checkpoints` (`{phase: bool}`), `editor`, `workspace_root`, optional `models`. The default checkpoint mode is `align` (the seven align phases). A second `lsf init` never deletes events, stops or the profile.
+6. **`budget --json`**: `{"groups": {name: {planned_minutes, actual_minutes, percent_of_plan, flag}}, "waiting_on_human_minutes": N}`; an unmeasured `actual_minutes` is null; flag text contains `over` or `under`; the human-readable output always has a line containing `waiting on human`. A weights sum outside tolerance is exit 2 on `budget` and `status`.
+7. **`hitl status --json`**: a list of stops with `name`, `question`, `artifact` (list), `reason`, `opened_at`, and when released `released_at`, `released_by`, `note`. Release of an unknown or already released stop is exit 1. `phase end` on a phase that is not open is exit 1.
+8. **Hooks.** `hooks print` decides the command names. The `PostToolUse` matcher is `Bash`; the `hook` command filters for `git commit` itself. A `hook` run prints nothing on stdout and exits 0 on any input; for malformed input stderr is empty too; for a failed write only stdout must be empty.
+9. **Events.** `note` keeps the first 2000 characters, no ellipsis. Required keys: `at, stage, slice (may be null), phase, verdict, note, source`; `sha` is HEAD (full) or `unknown`. `source` is one of `lsf`, `hook`, `agent`. The hook summary lives in `note`, at most 200 characters.
+10. **Stop ledger.** Each entry carries a 64-hex chain value over the previous chain value and the entry text; any edited, deleted or malformed line makes `status` print `stop ledger failed verification` and exit 1.
+11. **`/api/file`**: errors are 4xx (missing 404, over 1 MiB 4xx, non-UTF-8 4xx); anything under `.lsf/` whose name contains `secret` or `token`, and every `.env*` at any depth, is refused; a symlink that stays inside the repo is allowed; the success body is the file text. `/api/at?sha=` takes a full or short sha; a bad revision is 4xx.
+12. **Release route.** A wrong, missing or foreign-Host request is 403; an unknown stop, an already released stop or bad JSON is 4xx; other POST paths give 404, 405 or 501; no CORS headers are sent.
+13. **`install.sh`**: shebang `#!/bin/sh` or `#!/usr/bin/env sh`; avoids `sha256sum`, `realpath`, `cp -a`, `mktemp --`, `readlink -f`, `sed -i`, `date -d`, `stat -c`; the wrapper is at most 15 lines and runs `python3` on the installed `lsf.py`; backups are named `lsf.backup-<UTC digits>`.
+14. The dashboard's "never available with zero items" rule is checked statically in source and through the bundle data.
+
+## C-46 (2026-10-20, SFN-07): eli12 finding codes and output
+
+Binding for `docs/prds/SFN-07-eli12-docs.md`. Each finding line is `path:line: code: message` where `path` is relative to `--root`, `line` a positive integer (the entry's heading line, or 1), and `code` is one of: `missing-entry` (public symbol without an entry), `orphan-entry` (entry whose symbol no longer exists), `stale-signature`, `stale-dependencies`, `todo`, `format` (missing, misordered or malformed labelled line or heading), `too-long` (more than 25 words or more than one sentence in `What it does`, or a line over 160 characters), `bad-param` (a parameter not written `name (type): meaning`), `jargon` (a listed term without a glossary entry), `unparseable`. `--json` prints a list of objects with the keys `path`, `line`, `code`, `message`. Exit codes: 0 no findings, 1 findings, 2 usage error. Doc files are `docs/eli12/<dotted.module.path>.md` (dots, no slashes; package `__init__` modules use the package path).
+
+## C-47 (2026-10-20, SFN-07): where a reference points
+
+In `Used by` and `Depends on`, the `path:line` of an entry is the line where the call or reference happens (the call site), so that clicking it in an editor lands on the use. A symbol is listed once per caller with its first call-site line. Scaffolded placeholders have the shape a finished line must have: `TODO` stands in for each word to be written, so a parameter line is `name (TODO): TODO` and a return line is `TODO: TODO` when the type is not annotated; replacing every `TODO` with plain words must give a line that passes `check`.
+
+## C-48 (2026-10-20, SFN-07): which place each reference opens
+
+Refines C-47. In `Used by`, `path:line` is the call site in the caller (where the use happens). In `Depends on`, `path:line` is where the depended-on symbol is defined (so the entry opens the thing being relied on); a `(maybe)` dependency that resolves to no definition cites the call site in this symbol. Every finding that concerns one symbol (`stale-signature`, `stale-dependencies`, `too-long`, `bad-param`, `format`, `todo`, `missing-entry`, `orphan-entry`) names that symbol, with its short name or dotted name, in its message text.
+
+## C-49 (2026-10-20, SFN-01): readings of the live-dashboard PRD
+
+Binding for `docs/prds/SFN-01-live-dashboard.md`.
+1. `sf ops init --dir DIR`: DIR is the project (repository) directory, default the current directory; the output directory is DIR/ops.
+2. An exit code of 2 never emits an event (argument-parse errors and the delegated tool's own usage errors alike).
+3. `contracts report` and any subcommand not named in E-04 emit nothing.
+4. A refused `hitl release` (for example exit 5 under a stop) emits stage `hitl`, verdict `fail`, note `exit=5`; only successful `request` and `release` use the verdicts `open` and `released`.
+5. The slice id of an event is the basename of the `DIR` or `--slice` argument (a trailing slash is ignored), else `-`.
+6. `sf ops status --json` prints `{"head": <full sha>, "snapshot": <sha or null>, "behind": <int or null>, "events": <int>}`; `behind` is null when there is no snapshot. The text form prints the same values.
+7. `sf ops init` prints one line per historical tab named by its `factory.ops.collect.TABS` id, `available` or `not available: <reason>`. The `dev_journey` reason, when no events exist, contains `no stage events recorded`, even when slices exist.
+8. `ops/index.json` gets a top-level `head`; `runtime.json` gets top-level `repo_head` and `behind`. `head` is the commit of the newest bundle run with the default `--sha HEAD`.
+9. `ledger_audit` emits its `subagent-stop` event whether or not a ticket exists.
+10. A symlink that resolves inside the root is allowed; one resolving outside is refused (E-02).
+11. A commit counts as already snapshotted for backfill only if `ops/snapshots/<sha>/manifest.json` exists. A commit that fails to bundle is listed and counted as failed.
+12. A pre-existing `events.jsonl` without a trailing newline gets one before the next event is appended.
+
+## C-50 (2026-10-20, SFN-01): the event log is local history, not a tracked file
+
+Supersedes the `SF_EVENTS=off` instruction given for the post-commit block (it contradicts E-04, which makes `ops bundle` emit `11-commit`, and E-10). `ops/events.jsonl` is a local, append-only record read from the working tree and filtered to a snapshot's commit date (E-13); it is not committed. `sf ops init` adds `ops/events.jsonl` to the repository's local exclude file (`.git/info/exclude`, via `git rev-parse --git-path info/exclude`; idempotent, never edits a tracked `.gitignore`), and `sf ops autobundle install` does the same. The post-commit block therefore runs the normal `sf ops bundle --sha HEAD` (event on) and a commit still leaves `git status --porcelain` clean because the log is excluded. In this repository the log is untracked and listed in `.gitignore`.
+
+## C-51 (2026-10-20, SFN-03): readings of the dashboard-content PRD
+
+Binding for `docs/prds/SFN-03-dashboard-content.md`.
+1. A new collector `hitl` is registered in `COLLECTORS` and `TABS`, so a manifest has `tabs["hitl"]`. Its items are ADRs whose status is Proposed or Pending (case-insensitive, bold markup allowed) and events in `ops/events.jsonl` with stage `hitl`. The unavailable reason names `docs/adr` and the events path.
+2. `runtime.json["hitl"]` holds `open`, a list of objects with `name`, `reason`, `opened_at`, `scope` (the stop's stage or scope text) and `release_by` (always the word `human`). On ledger verification failure the dump contains the text `stop ledger failed verification` and `open` is not an empty list. An empty or absent ledger gives `open == []`. The runtime command exits 0 even then.
+3. Banner texts are exactly `N open human stop(s)` and `human stops unknown`, on every tab including `hitl`; no banner when the ledger is verified empty.
+4. `prd_journeys` journey items: `kind: "journey"`, `name`, `steps` (strings without the `- ` prefix), `slices` (list of `{id, exists}`), `flags` (list of strings). An unknown slice gives a flag containing `unknown slice` and the id; steps outside 1 to 5 or a missing `Slices` line give a flag too. Journeys are never dropped or truncated and keep page order. A journey heading is exactly `## Journey: <name>`. The page-level `warning: "longer than one page"` applies when `len(text.splitlines()) > 80`.
+5. A slice id exists when any path exists under `docs/slices/<id>/`; a plain file named like the slice does not count. Proposals keep their present item shape; `docs/prds/*.md` items are `kind: "prd"` with `path`, `title` and the Delivers text. A onepager with zero journeys and no other source is unavailable and the reason mentions `onepager.md`.
+6. Experiments: `kind` is `experiment` or `resolved`; unreadable JSON yields an `error` item, never a drop; the unavailable reason names both `experiments/*/results.json` and `experiments/*/resolved.json`. `resolved.json` requires `question`, `resolved_by`, at least one source (key `sources`), and `as_of` as `YYYY-MM-DD`; the checker's message names the experiment id and the missing field.
+7. Bugs: items have `id` (file stem), `path`, `title`, `status`, `slice`, `criterion`; status is lowercase and one of open, fixed, wontfix; anything else, including a missing status line or the word `invalid`, becomes `invalid`. qa-notes entries appear in `bug_log` with the failure signature in the item text.
+8. `sf qa promote-notes --slice DIR [--root R]` (also `python -m factory.qa promote-notes`): the slice id is `basename(DIR)` and the attempt log is read from `R/.sf/slices/<id>/`. Exit 1 on a leak (message does not echo the protected text), on a missing log (message names `.sf`) and on a symlink or outside-the-root target (message matches `symlink|outside|escape`); nothing is written in those cases. Every signature in the log gets a block with the signature id, the count of counted failures (`attempts N`), the criterion ids, the observed error text, the expected text from `qa feedback`, and the word `proposal`; the output has no timestamps; an unchanged re-run rewrites nothing, not even mtimes.
+9. Langfuse: configuration is `{"langfuse": {"host", "project"}}` in `ops/config.json`; the tab renders `not measured: <reason>` and, when a slice proposal has the line `llm_features: true` and no host is configured, `LLM features declared in <ids> but Langfuse is not configured` (ids joined with commas, read from the working tree at runtime). `runtime.json` keeps its existing `langfuse` block so `tests/test_ops.py` stays unedited. `--langfuse-host` accepts `https://` URLs only (any other value exits 2 with stderr mentioning https and no key written); init merges into an existing `config.json`; a password inside the URL is never written or printed.
+10. T-08 exception: the evals collector is available when `GOLDEN.json` exists and parses, even with zero items, because the golden membership summary is itself a measurement; every other historical collector needs at least one item to be available.
+11. A snapshot's `hitl` tab holds the historical part only; open stops never enter `ops/`.

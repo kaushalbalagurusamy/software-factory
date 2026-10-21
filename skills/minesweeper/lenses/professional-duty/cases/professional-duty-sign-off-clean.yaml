@@ -1,0 +1,16 @@
+schema_version: 1
+id: professional-duty-sign-off-clean
+kind: clean
+twin: professional-duty-sign-off-planted
+brief: |
+  Orchard Lab Systems: release process for a lab results portal
+  Users: lab technicians at a regional diagnostics group.
+  1. Technicians enter results; the portal formats and files them.
+  2. A release is approved only after the regression suite passes and the security review
+     is signed off; the approval record links to that evidence, and the launch date moves
+     if the evidence is not ready.
+  3. Audit log keeps who approved each release and the evidence it rested on.
+  4. Target page load under 500 ms.
+  5. Roll back within one click if a tech reports a bad result.
+expect:
+  none_from_lens: true

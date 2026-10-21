@@ -1,0 +1,16 @@
+schema_version: 1
+id: company-context-omit-organisation-payer-clean
+kind: clean
+twin: company-context-omit-organisation-payer-omission
+brief: |
+  A public school district wants a tool that drafts lesson plans from a curriculum standard and a
+  class profile. Teachers use it; the district pays from its instructional technology budget.
+  It is subject to the student-records privacy rules of the education regulator in each launch
+  state.
+  Requirements:
+  - Teachers pick a standard and get a draft plan with activities and an assessment.
+  - Plans can be edited and exported to a shared drive.
+  - No student names are stored.
+  Success: teachers rate drafts usable without major edits in 70% of cases.
+expect:
+  none_from_lens: true

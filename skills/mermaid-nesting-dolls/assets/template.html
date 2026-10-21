@@ -85,7 +85,8 @@ aside li{margin:2px 0}
 code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface2);padding:1px 5px;border-radius:4px;word-break:break-all}
 .files a{color:var(--accent)}
 .files .note{color:var(--muted);font-size:13px;flex-basis:100%}
-.files button{min-height:26px;padding:0 8px;font-size:12px}
+.files button,.files a.elink{min-height:40px;display:inline-flex;align-items:center;padding:0 10px;font-size:13px}
+.files .hint{color:var(--muted);font-size:12px;flex-basis:100%}
 .design li{margin-bottom:8px}
 .design em{color:var(--muted);font-style:normal}
 .gaps li::marker{color:var(--st-gap-ink)}
@@ -169,6 +170,74 @@ body.present{font-size:17px}
 
 <script type="application/json" id="nd-model">__MODEL_JSON__</script>
 <script>/*__MERMAID__*/</script>
+<script>
+/* editor-links:begin */
+var SFEditorLinks = (function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module && module.exports) { module.exports = api; }
+  else if (root) { root.SFEditorLinks = api; }
+  return api;
+})(typeof window !== "undefined" ? window : null, function () {
+  var MAX_PATH = 4096, MAX_LINE = 10000000;
+  var EDITORS = ["vscode", "cursor", "windsurf", "antigravity-ide", "zed", "idea", "sublime", "textmate"];
+  function encSeg(s) { return s.split("/").map(encodeURIComponent).join("/"); }
+  function encRoot(r) {
+    var m = /^([A-Za-z]:)(\/.*)?$/.exec(r);
+    return m ? m[1] + encSeg(m[2] || "") : encSeg(r);
+  }
+  function lineOf(line) {
+    var n;
+    if (typeof line === "number") { n = line; }
+    else if (typeof line === "string" && /^[0-9]+$/.test(line)) { n = parseInt(line, 10); }
+    else { return null; }
+    if (isFinite(n) && Math.floor(n) === n && n >= 1 && n <= MAX_LINE) { return n; }
+    return null;
+  }
+  function normRoot(r) {
+    var n, i, segs, drive;
+    if (typeof r !== "string" || r.length === 0 || r.length > MAX_PATH || r.indexOf("\0") >= 0) { return null; }
+    drive = /^[A-Za-z]:[\\\/]/.test(r);
+    if (!drive && (r.indexOf("\\") >= 0 || r.charAt(0) !== "/")) { return null; }
+    n = drive ? r.replace(/\\/g, "/") : r;
+    if (n.charAt(n.length - 1) === "/") { n = n.slice(0, -1); }
+    segs = n.slice(drive ? 3 : 1).split("/");
+    if (n.length === (drive ? 2 : 0)) { return n; }
+    for (i = 0; i < segs.length; i++) { if (segs[i] === "" || segs[i] === ".") { return null; } }
+    return n;
+  }
+  function validRoot(r) { return normRoot(r) !== null; }
+  function validRel(p) {
+    var i, segs;
+    if (typeof p !== "string" || p.length === 0 || p.length > MAX_PATH) { return false; }
+    if (p.indexOf("\0") >= 0 || p.indexOf("\\") >= 0 || p.charAt(0) === "/") { return false; }
+    if (/^[A-Za-z0-9+.\-]+:/.test(p)) { return false; }
+    segs = p.split("/");
+    for (i = 0; i < segs.length; i++) { if (segs[i] === ".." || segs[i] === "." || segs[i] === "") { return false; } }
+    return true;
+  }
+  function build(editor, rootDir, relPath, line) {
+    var base, abs, n, q, i, found = false;
+    if (typeof editor !== "string") { return null; }
+    for (i = 0; i < EDITORS.length; i++) { if (EDITORS[i] === editor) { found = true; } }
+    if (!found || !validRoot(rootDir) || !validRel(relPath)) { return null; }
+    base = normRoot(rootDir);
+    n = lineOf(line);
+    if (editor === "idea") {
+      return "idea://open?file=" + encodeURIComponent(base + "/" + relPath) + (n ? "&line=" + n : "");
+    }
+    abs = encRoot(base) + "/" + encSeg(relPath);
+    q = n ? "&line=" + n : "";
+    if (editor === "sublime") { return "subl://open?url=file://" + abs + q; }
+    if (editor === "textmate") { return "txmt://open?url=file://" + abs + q; }
+    return editor + "://file/" + abs.replace(/^\//, "") + (n ? ":" + n : "");
+  }
+  function editorUrl(editor, rootDir, relPath, line) {
+    try { return build(editor, rootDir, relPath, line); } catch (e) { return null; } // a lone surrogate makes encodeURIComponent throw
+  }
+  return { editorUrl: editorUrl, editors: EDITORS.slice(), validRoot: validRoot };
+});
+/* editor-links:end */
+</script>
 <script>
 /* Model source: the embedded JSON when present; otherwise ?model=<url> (same-origin or CORS), so one viewer
    can render any model without a rebuild. A load failure is shown on the page, never a blank screen. */
@@ -270,13 +339,25 @@ function kidsList(){
     return '<li><a class="chip" href="#/'+id+'"'+(id===cur?' aria-current="true"':'')+'>'+(s?'<i class="dot st-'+s+'"></i>':'')+esc(N[id].title)+(drillable(id)?' <span aria-hidden="true">▸</span>':'')+'</a></li>';
   }).join("")+'</ul>';
 }
+var WS=(function(){
+  var w=MODEL.workspace||{},q=new URLSearchParams(location.search),ed=w.editor||"none",root=SFEditorLinks.validRoot(w.root)?w.root:"";
+  var qe=q.get("editor"),qr=q.get("root");
+  if(qe!==null&&(qe==="none"||SFEditorLinks.editors.indexOf(qe)>=0))ed=qe;
+  if(qr!==null&&SFEditorLinks.validRoot(qr))root=qr;
+  return {editor:ed,root:root};
+})();
 function filesHtml(n){
   if(!(n.files&&n.files.length))return "";
   return '<h3>Source files</h3><ul class="files">'+n.files.map(function(f){
     var ext=f.external||/^~/.test(f.path),loc=f.path+(f.lines?":"+f.lines:"");
-    var link=(!ext&&META.repoUrl)?META.repoUrl.replace(/\/$/,"")+"/blob/"+(META.commit||"HEAD")+"/"+f.path+(f.lines?"#L"+String(f.lines).replace("-","-L"):""):"";
-    return '<li>'+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener"><code>'+esc(loc)+'</code></a>':'<code>'+esc(loc)+'</code>')+
-      (ext?' <span class="badge">outside repo</span>':'')+' <button data-copy="'+esc(loc)+'" aria-label="Copy path">copy</button>'+(f.note?'<span class="note">'+esc(f.note)+'</span>':'')+'</li>';
+    var first=f.lines?parseInt(String(f.lines),10):null;
+    var url=ext?null:SFEditorLinks.editorUrl(WS.editor,WS.root,f.path,first);
+    var repo=(!ext&&META.repoUrl)?META.repoUrl.replace(/\/$/,"")+"/blob/"+(META.commit||"HEAD")+"/"+f.path+(f.lines?"#L"+String(f.lines).replace("-","-L"):""):"";
+    var main=url?'<a class="elink" href="'+esc(url)+'"><code>'+esc(loc)+'</code></a>':
+      (repo?'<a href="'+esc(repo)+'" target="_blank" rel="noopener"><code>'+esc(loc)+'</code></a>':'<code>'+esc(loc)+'</code>');
+    return '<li>'+main+(ext?' <span class="badge">outside repo</span>':'')+' <button data-copy="'+esc(loc)+'">Copy path</button>'+
+      (!ext&&!url?'<span class="hint">To open files in your editor, set the editor and root: add ?editor=vscode&amp;root=/abs/path/to/repo to this page address.</span>':'')+
+      (f.note?'<span class="note">'+esc(f.note)+'</span>':'')+'</li>';
   }).join("")+'</ul>';
 }
 function panel(){
@@ -417,7 +498,7 @@ $("q").addEventListener("keydown",function(e){if(e.key==="Escape"){this.value=""
 document.addEventListener("click",function(e){
   if(!e.target.closest("#search"))$("results").style.display="none";
   var b=e.target.closest("[data-copy]");
-  if(b){try{navigator.clipboard.writeText(b.dataset.copy);b.textContent="copied";setTimeout(function(){b.textContent="copy"},1200)}catch(x){}}
+  if(b){try{navigator.clipboard.writeText(b.dataset.copy);b.textContent="Copied";setTimeout(function(){b.textContent="Copy path"},1200)}catch(x){}}
   if(e.target.closest("#results a"))setTimeout(function(){$("results").style.display="none";$("q").value=""},0);
 });
 document.addEventListener("keydown",function(e){

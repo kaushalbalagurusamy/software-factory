@@ -13,11 +13,14 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
 SKILL = Path(__file__).resolve().parent.parent
 STATUSES = {"built", "partial", "designed", "external", "gap"}
+EDITORS = ("vscode", "cursor", "windsurf", "antigravity-ide", "zed", "idea", "sublime", "textmate")  # keep in step with assets/editor-links.js
+MARK_BEGIN, MARK_END = "/* editor-links:begin */", "/* editor-links:end */"
 RESERVED = {"end", "graph", "subgraph", "flowchart", "class", "classdef", "style", "click", "default"}
 
 
@@ -36,8 +39,58 @@ def children_map(node: dict) -> dict[str, str]:
     return dict(ch) if isinstance(ch, dict) else {c: c for c in ch}
 
 
+def valid_root(root: object) -> bool:
+    """Same rule as editor-links.js: absolute POSIX or drive path, no UNC start, no empty or `.` segments."""
+    if not isinstance(root, str) or not 0 < len(root) <= 4096 or "\0" in root:
+        return False
+    drive = re.match(r"[A-Za-z]:[\\/]", root) is not None
+    if not drive and ("\\" in root or not root.startswith("/")):
+        return False
+    n = root.replace("\\", "/") if drive else root
+    n = n[:-1] if n.endswith("/") else n
+    body = n[3:] if drive else n[1:]
+    return not body or all(x not in ("", ".") for x in body.split("/"))
+
+
+def validate_workspace(ws: object) -> list[str]:
+    if ws is None:
+        return []
+    if not isinstance(ws, dict):
+        return ["workspace must be an object {root, editor}"]
+    errs = []
+    if "root" in ws and not valid_root(ws["root"]):
+        errs.append(f"workspace.root must be an absolute path (/abs or C:/abs), got {ws['root']!r}")
+    if "editor" in ws and ws["editor"] not in (*EDITORS, "none"):
+        errs.append(f"workspace.editor must be one of {', '.join(EDITORS)} or none, got {ws['editor']!r}")
+    return errs
+
+
+def inlined(text: str) -> str | None:
+    a, b = text.find(MARK_BEGIN), text.find(MARK_END)
+    return text[a:b + len(MARK_END)] if 0 <= a < b else None
+
+
+def check_assets(repo: Path) -> list[str]:
+    """Every inlined copy of editor-links.js must be byte-identical to the source between the markers."""
+    src = inlined((SKILL / "assets" / "editor-links.js").read_text(encoding="utf-8"))
+    if src is None:
+        return ["editor-links: assets/editor-links.js has no begin/end markers"]
+    errs = []
+    for label, path in (("template", SKILL / "assets" / "template.html"), ("ops shell", repo / "ops" / "shell" / "index.html")):
+        if not path.is_file():
+            errs.append(f"editor-links: {label} not found at {path}")
+        elif inlined(path.read_text(encoding="utf-8")) != src:
+            errs.append(f"editor-links: copy in {label} ({path}) differs from assets/editor-links.js")
+    return errs
+
+
+def git_root() -> Path:
+    r = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    return Path(r.stdout.strip()) if r.returncode == 0 and r.stdout.strip() else Path.cwd()
+
+
 def validate(model: dict, repo: Path) -> tuple[list[str], list[str]]:
-    errors: list[str] = []
+    errors: list[str] = validate_workspace(model.get("workspace"))
     warns: list[str] = []
     nodes = model.get("nodes", {})
     root = model.get("root")
@@ -194,8 +247,12 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("check", "build"):
         p = sub.add_parser(name)
-        p.add_argument("model")
-        p.add_argument("--repo", default=".", help="repository root that file paths are relative to")
+        p.add_argument("model", nargs="?" if name == "check" else None)
+        p.add_argument("--repo", default=None, help="repository root that file paths are relative to (default: .; with --assets the git root)")
+        p.add_argument("--workspace-root", help="absolute checkout directory the viewer joins file paths to for editor links")
+        p.add_argument("--editor", help=f"editor for deep links: {', '.join(EDITORS)} or none")
+        if name == "check":
+            p.add_argument("--assets", action="store_true", help="verify the inlined editor-links copies match assets/editor-links.js")
         if name == "build":
             p.add_argument("-o", "--out", required=True)
             p.add_argument("--allow-errors", action="store_true", help="write the HTML even if validation fails")
@@ -211,11 +268,27 @@ def main(argv: list[str] | None = None) -> int:
         print(f"imported {len(m['nodes'])} nodes -> {a.out}")
         return 0
 
+    rc = 0
+    if a.cmd == "check" and a.assets:
+        for e in check_assets(Path(a.repo).resolve() if a.repo else git_root()):
+            print("ERROR:", e)
+            rc = 1
+        if a.model is None:
+            return rc
+    if a.model is None:
+        ap.error("model is required")
     model = json.loads(Path(a.model).read_text(encoding="utf-8"))
+    if a.workspace_root is not None or a.editor is not None:
+        ws = dict(model.get("workspace") or {})
+        if a.workspace_root is not None:
+            ws["root"] = a.workspace_root
+        if a.editor is not None:
+            ws["editor"] = a.editor
+        model["workspace"] = ws
     for n in model.get("nodes", {}).values():  # a diagram may be a list of lines, which is easier to edit in JSON
         if isinstance(n.get("diagram"), list):
             n["diagram"] = "\n".join(n["diagram"])
-    errors, warns = validate(model, Path(a.repo).resolve())
+    errors, warns = validate(model, Path(a.repo or ".").resolve())
     for w in warns:
         print("warn: ", w)
     for e in errors:
@@ -224,7 +297,7 @@ def main(argv: list[str] | None = None) -> int:
     drill = sum(1 for x in model["nodes"].values() if x.get("diagram"))
     print(f"{n} nodes, {drill} diagrams, {len(errors)} errors, {len(warns)} warnings")
     if a.cmd == "check" or (errors and not a.allow_errors):
-        return 1 if errors else 0
+        return 1 if errors or rc else 0
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(build(model), encoding="utf-8")
     print(f"wrote {a.out} ({Path(a.out).stat().st_size // 1024} KiB)")

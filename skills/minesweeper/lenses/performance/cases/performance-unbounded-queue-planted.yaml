@@ -1,0 +1,17 @@
+schema_version: 1
+id: performance-unbounded-queue-planted
+kind: planted
+twin: performance-unbounded-queue-clean
+brief: |
+  A regional clinic network - document intake
+
+  - Clinics upload scanned referral letters for text extraction and filing.
+  - Extraction takes about 4 seconds per page on one worker; there are 20 workers.
+  - No upload may ever be rejected: everything goes into an in-memory queue and workers will catch up eventually, retrying any failed extraction until it succeeds.
+  - Filed documents must appear in the patient chart within 15 minutes at p95, measured from upload.
+  - Load model: peak 4 pages per second, pages under 2 MB, up to 300 clinics uploading at once.
+  - Infrastructure cost must stay under $0.01 per page.
+expect:
+  traps:
+  - performance.unbounded-queue
+  min_severity: high

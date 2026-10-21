@@ -1,0 +1,16 @@
+schema_version: 1
+id: provider-terms-distillation-clean
+kind: clean
+twin: provider-terms-distillation-planted
+brief: |
+  Acme Support Copilot: reply drafting for help-desk agents
+
+  1. Draft replies with a hosted frontier model through our paid API account.
+  2. Store prompts and model replies for 30 days for debugging only; provider outputs are tagged
+     and excluded from any training pipeline.
+  3. To cut inference spend later, fine-tune our own open-weight model on agent-written replies
+     from our historical tickets, which we own.
+  4. Ticket text contains customer names; only business-contact data is sent to the model.
+  5. Agents can edit drafts before sending; edits are tracked.
+expect:
+  none_from_lens: true

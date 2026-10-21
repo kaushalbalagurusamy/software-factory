@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>lsf dashboard</title>
+<style>
+:root{--bg:#f4f5f8;--panel:#ffffff;--panel2:#eef0f5;--fg:#171a21;--mute:#5a6275;--line:#d8dce6;--acc:#3b5bdb;--acc-fg:#ffffff;
+--align:#3b5bdb;--build:#0b8f6a;--review:#8e44c9;--ok:#0b7a4b;--warn:#a15c00;--bad:#c0262d;--wait:#a15c00;--shadow:0 1px 2px rgba(20,25,40,.06),0 6px 20px rgba(20,25,40,.05)}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1017;--panel:#151a24;--panel2:#1b2230;--fg:#e8ebf2;--mute:#9aa4b8;--line:#2a3345;--acc:#7c9bff;--acc-fg:#0d1017;
+--align:#7c9bff;--build:#4fd1a5;--review:#c49bff;--ok:#56d39a;--warn:#f0b64a;--bad:#ff7a82;--wait:#f0b64a;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.25)}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-width:0}
+h1,h2,h3{margin:0;line-height:1.25}
+h2{font-size:1.05rem;margin:1.4rem 0 .6rem;letter-spacing:.01em}
+h3{font-size:.98rem}
+code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em}
+pre{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;overflow-x:auto;max-width:100%}
+a{color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:var(--panel);padding:.5rem;z-index:20}
+header.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between;padding:.7rem 16px;max-width:1180px;margin:0 auto}
+.brand{display:flex;align-items:baseline;gap:.6rem;min-width:0}
+.brand b{font-size:1.25rem;letter-spacing:.02em}
+.brand span{color:var(--mute);font-size:.88rem}
+.clock{display:flex;align-items:center;gap:.7rem;min-width:0}
+.clock .t{font:600 1.35rem/1 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.clock .l{color:var(--mute);font-size:.8rem;line-height:1.2}
+.settings{display:flex;flex-wrap:wrap;gap:.4rem .6rem;align-items:center;font-size:.82rem;color:var(--mute)}
+.settings input,.settings select{min-width:0;max-width:100%}.settings input{flex:1 1 160px}
+input,select,button{font:inherit;color:var(--fg)}
+input,select{min-height:44px;padding:.25rem .6rem;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+button{min-height:44px;padding:.35rem .9rem;background:var(--panel);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+button.primary{background:var(--acc);color:var(--acc-fg);border-color:var(--acc);font-weight:650}
+button:disabled{opacity:.55;cursor:default}
+#banner{margin:0;padding:.55rem 16px;font-weight:600;font-size:.92rem;text-align:center}
+#banner:empty,#waiting:empty{display:none}
+#waiting{margin:0;padding:.55rem 16px;font-weight:650;font-size:.95rem;text-align:center;background:color-mix(in srgb,var(--wait) 22%,var(--bg));border-bottom:1px solid var(--wait)}
+#waiting a{margin-left:.6rem;white-space:nowrap}
+#banner.stop{background:color-mix(in srgb,var(--wait) 18%,var(--bg));border-bottom:1px solid var(--wait)}
+#banner.snap{background:color-mix(in srgb,var(--acc) 15%,var(--bg));border-bottom:1px solid var(--acc)}
+#banner.err{background:color-mix(in srgb,var(--bad) 18%,var(--bg));border-bottom:1px solid var(--bad)}
+nav{display:flex;gap:.3rem;overflow-x:auto;padding:.4rem 16px;max-width:1180px;margin:0 auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+nav button{white-space:nowrap;border-color:transparent;background:transparent;color:var(--mute);border-radius:999px;padding:.35rem .95rem}
+nav button[aria-selected=true]{background:var(--panel);border-color:var(--line);color:var(--fg);font-weight:650;box-shadow:var(--shadow)}
+nav .dot{display:inline-block;min-width:1.2em;padding:0 .35em;margin-left:.4em;border-radius:99px;background:var(--wait);color:#000;font-size:.75rem;font-weight:700;text-align:center}
+main{padding:8px 16px 64px;max-width:1180px;margin:0 auto;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem;margin:.7rem 0;box-shadow:var(--shadow);overflow-wrap:anywhere;min-width:0}
+.card.stop{border-color:var(--wait);border-left-width:5px}
+.card.done{opacity:.8}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:.7rem}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:.6rem}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.7rem .9rem}
+.tile b{display:block;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{color:var(--mute);font-size:.8rem}
+.mute{color:var(--mute)}.small{font-size:.85rem}
+.chip{display:inline-block;padding:.05rem .55rem;border-radius:99px;font-size:.76rem;font-weight:650;border:1px solid currentColor;white-space:nowrap}
+.g-align{color:var(--align)}.g-build{color:var(--build)}.g-review{color:var(--review)}
+.v-pass{color:var(--ok)}.v-fail{color:var(--bad)}.v-wait{color:var(--wait)}.v-mute{color:var(--mute)}
+.steps{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0 0;padding:0;list-style:none}
+.steps li{padding:.2rem .65rem;border-radius:99px;border:1px solid var(--line);font-size:.8rem;color:var(--mute);background:var(--panel2)}
+.steps li.done{color:var(--fg)}.steps li.done::before{content:"\2713 "}
+.steps li.open{background:var(--acc);color:var(--acc-fg);border-color:var(--acc);font-weight:700}
+.opts{border:0;margin:.7rem 0 0;padding:0;display:grid;gap:.45rem}
+.opts legend{padding:0;font-size:.85rem;color:var(--mute);margin-bottom:.3rem}
+.opt{display:flex;align-items:center;gap:.7rem;min-height:48px;padding:.4rem .8rem;border:1px solid var(--line);border-radius:12px;background:var(--panel2);cursor:pointer;overflow-wrap:anywhere}
+.opt:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--panel2))}
+.opt input{flex:none;width:22px;height:22px;min-height:0;accent-color:var(--acc)}
+.refu{display:inline-flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.clk{cursor:pointer}.clk:focus-visible{outline:3px solid var(--acc);outline-offset:-2px;border-radius:8px}
+.logp{margin-top:.6rem;cursor:auto}
+pre.logpre{max-height:50vh;overflow:auto;white-space:pre;margin:.4rem 0 0;-webkit-overflow-scrolling:touch}
+.logpre a{color:var(--acc);text-decoration:underline;min-height:0}
+.dl{display:grid;grid-template-columns:max-content 1fr;gap:.25rem .8rem;margin:.6rem 0 0;font-size:.9rem}
+.dl dt{color:var(--mute)}.dl dd{margin:0;overflow-wrap:anywhere;min-width:0}
+.dec .note{flex:1 1 220px;min-width:0}
+.dec button.primary{flex:1 1 160px}
+.gb{margin:.9rem 0}
+.wrows{display:flex;flex-direction:column;gap:.35rem;margin-top:.6rem}
+.gb .row{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;font-size:.9rem}
+.track{position:relative;height:16px;border-radius:99px;background:var(--panel2);margin:.35rem 0}
+.plan{position:absolute;left:0;top:0;bottom:0;border:2px dashed var(--mute);border-radius:99px;opacity:.55}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:99px;transition:width .6s ease}
+.fill.g-align{background:var(--align)}.fill.g-build{background:var(--build)}.fill.g-review{background:var(--review)}
+.fill.over{box-shadow:0 0 0 2px var(--warn)}
+.legend{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.78rem;color:var(--mute)}
+.q{font-size:1.15rem;font-weight:650;margin:.2rem 0 .5rem}
+.refs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
+.ref{display:inline-flex;align-items:center;flex-wrap:wrap;gap:.4rem;max-width:100%;min-width:0}
+a.elink,.ref.plain{display:inline-flex;align-items:center;min-height:44px;padding:0 .7rem;border:1px solid var(--line);border-radius:10px;background:var(--panel2);text-decoration:none;max-width:100%;overflow-wrap:anywhere}
+.ref button{min-height:44px;padding:0 .6rem;font-size:.8rem}
+.row2{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.7rem}
+.err{color:var(--bad)}
+.list{list-style:none;margin:0;padding:0}
+.list li{padding:.6rem 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.list li:last-child{border-bottom:0}
+.ev{display:grid;grid-template-columns:5.2rem 1fr;gap:.2rem .7rem}
+.ev time{color:var(--mute);font:.8rem ui-monospace,Menlo,monospace}
+details{border:1px solid var(--line);border-radius:12px;padding:.2rem .9rem;margin:.5rem 0;background:var(--panel)}
+summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600;gap:.5rem}
+iframe{width:100%;height:68vh;min-height:360px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.md h1,.md h2,.md h3{margin:1rem 0 .4rem}.md p{margin:.4rem 0}.md ul{padding-left:1.2rem}
+.empty{padding:1.2rem;border:1px dashed var(--line);border-radius:14px;color:var(--mute);background:var(--panel)}
+.tbl{display:grid;gap:.4rem}
+.hbar{height:10px;border-radius:99px;background:var(--acc);min-width:2px}
+@media (max-width:620px){header.top{position:static}}
+@media (max-width:520px){.dl{grid-template-columns:1fr}.dl dt{margin-top:.3rem}.clock .t{font-size:1.15rem}.bar{padding:.55rem 16px}.q{font-size:1.05rem}.ev{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+ <div class="bar">
+  <div class="brand"><b>lsf</b><span>lite software factory</span></div>
+  <div class="clock" role="timer" aria-live="off"><div class="t" id="clk">--:--</div><div class="l" id="clkl">loading</div></div>
+  <div class="settings">
+   <label for="ed">Editor</label><select id="ed"></select>
+   <label for="ws">Workspace root</label><input id="ws" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="/absolute/path/to/project" size="22">
+  </div>
+ </div>
+ <p id="waiting" role="status"></p>
+ <p id="banner" role="status"></p>
+ <nav id="nav" role="tablist" aria-label="Dashboard tabs"></nav>
+</header>
+<main id="main" tabindex="-1"></main>
+<script>
+/* editor-links:begin */
+var SFEditorLinks = (function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module && module.exports) { module.exports = api; }
+  else if (root) { root.SFEditorLinks = api; }
+  return api;
+})(typeof window !== "undefined" ? window : null, function () {
+  var MAX_PATH = 4096, MAX_LINE = 10000000;
+  var EDITORS = ["vscode", "cursor", "windsurf", "antigravity-ide", "zed", "idea", "sublime", "textmate"];
+  function encSeg(s) { return s.split("/").map(encodeURIComponent).join("/"); }
+  function encRoot(r) {
+    var m = /^([A-Za-z]:)(\/.*)?$/.exec(r);
+    return m ? m[1] + encSeg(m[2] || "") : encSeg(r);
+  }
+  function lineOf(line) {
+    var n;
+    if (typeof line === "number") { n = line; }
+    else if (typeof line === "string" && /^[0-9]+$/.test(line)) { n = parseInt(line, 10); }
+    else { return null; }
+    if (isFinite(n) && Math.floor(n) === n && n >= 1 && n <= MAX_LINE) { return n; }
+    return null;
+  }
+  function normRoot(r) {
+    var n, i, segs, drive;
+    if (typeof r !== "string" || r.length === 0 || r.length > MAX_PATH || r.indexOf("\0") >= 0) { return null; }
+    drive = /^[A-Za-z]:[\\\/]/.test(r);
+    if (!drive && (r.indexOf("\\") >= 0 || r.charAt(0) !== "/")) { return null; }
+    n = drive ? r.replace(/\\/g, "/") : r;
+    if (n.charAt(n.length - 1) === "/") { n = n.slice(0, -1); }
+    segs = n.slice(drive ? 3 : 1).split("/");
+    if (n.length === (drive ? 2 : 0)) { return n; }
+    for (i = 0; i < segs.length; i++) { if (segs[i] === "" || segs[i] === ".") { return null; } }
+    return n;
+  }
+  function validRoot(r) { return normRoot(r) !== null; }
+  function validRel(p) {
+    var i, segs;
+    if (typeof p !== "string" || p.length === 0 || p.length > MAX_PATH) { return false; }
+    if (p.indexOf("\0") >= 0 || p.indexOf("\\") >= 0 || p.charAt(0) === "/") { return false; }
+    if (/^[A-Za-z0-9+.\-]+:/.test(p)) { return false; }
+    segs = p.split("/");
+    for (i = 0; i < segs.length; i++) { if (segs[i] === ".." || segs[i] === "." || segs[i] === "") { return false; } }
+    return true;
+  }
+  function build(editor, rootDir, relPath, line) {
+    var base, abs, n, q, i, found = false;
+    if (typeof editor !== "string") { return null; }
+    for (i = 0; i < EDITORS.length; i++) { if (EDITORS[i] === editor) { found = true; } }
+    if (!found || !validRoot(rootDir) || !validRel(relPath)) { return null; }
+    base = normRoot(rootDir);
+    n = lineOf(line);
+    if (editor === "idea") {
+      return "idea://open?file=" + encodeURIComponent(base + "/" + relPath) + (n ? "&line=" + n : "");
+    }
+    abs = encRoot(base) + "/" + encSeg(relPath);
+    q = n ? "&line=" + n : "";
+    if (editor === "sublime") { return "subl://open?url=file://" + abs + q; }
+    if (editor === "textmate") { return "txmt://open?url=file://" + abs + q; }
+    return editor + "://file/" + abs.replace(/^\//, "") + (n ? ":" + n : "");
+  }
+  function editorUrl(editor, rootDir, relPath, line) {
+    try { return build(editor, rootDir, relPath, line); } catch (e) { return null; } // a lone surrogate makes encodeURIComponent throw
+  }
+  return { editorUrl: editorUrl, editors: EDITORS.slice(), validRoot: validRoot };
+});
+/* editor-links:end */
+
+</script>
+<script>
+/* load-simulator:begin */
+(function(root){
+"use strict";
+function validate(m){
+ if(!m||!Array.isArray(m.nodes)||!Array.isArray(m.edges)||!m.nodes.length||m.nodes.length>40||m.edges.length>120){throw Error("Use 1–40 services and at most 120 paths.");}
+ var ids=new Set();
+ m.nodes.forEach(function(n){if(!n||typeof n.id!=="string"||!n.id||ids.has(n.id)||!Number.isFinite(n.capacity_rps)||n.capacity_rps<0){throw Error("Services need unique string ids and nonnegative finite capacity_rps.");}ids.add(n.id);});
+ if(!ids.has(m.entry)){throw Error("entry must identify a service.");}
+ var degree=Object.create(null),next=Object.create(null);ids.forEach(function(id){degree[id]=0;next[id]=[];});
+ m.edges.forEach(function(e){if(!e||!ids.has(e.from)||!ids.has(e.to)||!Number.isFinite(e.factor)||e.factor<0||e.factor>100){throw Error("Each path needs known endpoints and a factor from 0 to 100 (calls per upstream request).");}degree[e.to]++;next[e.from].push(e.to);});
+ var queue=Array.from(ids).filter(function(id){return degree[id]===0;}),order=[];
+ while(queue.length){var id=queue.shift();order.push(id);next[id].forEach(function(to){if(--degree[to]===0){queue.push(to);}});}
+ if(order.length!==m.nodes.length){throw Error("Cycles need a bounded retry/visit factor or an unrolled topology; cyclic graphs are not supported.");}
+ return order;
+}
+function simulate(m,users,rate,burst,failed){
+ var order=validate(m);
+ [users,rate,burst].forEach(function(v){if(!Number.isFinite(v)||v<0||v>1e9){throw Error("Users, requests/user/s and burst must be finite, nonnegative, and at most 1 billion.");}});
+ failed=new Set(failed||[]);
+ var visits=Object.create(null),affected=Object.create(null),incoming=Object.create(null),rows=Object.create(null),limit=Infinity,critical=null;
+ m.nodes.forEach(function(n){visits[n.id]=0;affected[n.id]=false;incoming[n.id]=[];});visits[m.entry]=1;
+ m.edges.forEach(function(e){incoming[e.to].push(e);});
+ order.forEach(function(id){
+  incoming[id].forEach(function(e){visits[id]+=visits[e.from]*e.factor;if(e.factor>0&&affected[e.from]){affected[id]=true;}});
+  var n=m.nodes.find(function(x){return x.id===id;}),demand=visits[id]*users*rate*burst,cap=failed.has(id)?0:n.capacity_rps;
+  if(!Number.isFinite(demand)||!Number.isFinite(visits[id])){throw Error("Demand overflow; reduce fan-out or traffic assumptions.");}
+  var saturated=demand>0&&demand>=cap;
+  if(visits[id]>0&&rate*burst>0){var supported=cap/(visits[id]*rate*burst);if(supported<limit){limit=supported;critical=id;}}
+  rows[id]={id:id,label:n.label||id,demand:demand,capacity:cap,utilization:cap>0?demand/cap:null,failed:failed.has(id),saturated:saturated,affected:affected[id],visits:visits[id],source:n.source||"Assumed capacity; not measured"};
+  affected[id]=affected[id]||saturated||failed.has(id);
+ });
+ return {nodes:m.nodes.map(function(n){return rows[n.id];}),edges:m.edges.map(function(e){return {from:e.from,to:e.to,factor:e.factor,demand:rows[e.from].demand*e.factor,affected:e.factor>0&&affected[e.from]};}),order:order,maxUsers:Number.isFinite(limit)?limit:null,bottleneck:critical};
+}
+var EXAMPLE={title:"Illustrative web service — replace with this repo's topology",entry:"gateway",nodes:[{id:"gateway",label:"API gateway",capacity_rps:12000},{id:"api",label:"Application API",capacity_rps:4000},{id:"cache",label:"Cache",capacity_rps:20000},{id:"db",label:"Database",capacity_rps:800},{id:"queue",label:"Work queue",capacity_rps:2000},{id:"worker",label:"Workers",capacity_rps:300},{id:"provider",label:"External provider",capacity_rps:100}],edges:[{from:"gateway",to:"api",factor:1},{from:"api",to:"cache",factor:0.8},{from:"cache",to:"db",factor:0.1},{from:"api",to:"db",factor:0.2},{from:"api",to:"queue",factor:0.1},{from:"queue",to:"worker",factor:1},{from:"worker",to:"provider",factor:0.5}]};
+var scenarios=new Map();
+function render(model,key){
+ var example=!model,initial=model||EXAMPLE,signature=key+JSON.stringify(initial),state=scenarios.get(signature);
+ if(!state){state={model:initial,users:1000,rate:0.2,burst:1,failed:[]};scenarios.set(signature,state);}
+ function el(tag,text,attrs){var n=document.createElement(tag);if(text!==null&&text!==undefined){n.textContent=text;}Object.keys(attrs||{}).forEach(function(k){n.setAttribute(k,attrs[k]);});return n;}
+ var wrap=el("section"),title=el("h2","System design · Load simulator");wrap.appendChild(title);
+ wrap.appendChild(el("p","SIMULATED ESTIMATES ONLY · Pure browser arithmetic. No traffic is sent to services. No external calls or infrastructure is created.",{class:"chip v-wait"}));
+ wrap.appendChild(el("p",example?"Illustrative example, not a discovered architecture for this repo. Add docs/load-model.json to use your system graph.":"Repository topology: docs/load-model.json. Capacities and routing factors are assumptions unless their sources provide measurements.",{class:"mute"}));
+ var controls=el("div",null,{class:"row",style:"gap:1.2rem;align-items:center"}),output=el("div"),error=el("p",null,{role:"alert",class:"err"});wrap.appendChild(controls);wrap.appendChild(error);
+ function input(label,key,min,max,step,type){var l=el("label",label+" ",{style:"display:flex;gap:.6rem;align-items:center"}),i=el("input",null,{type:type||"number",min:min,max:max,step:step,value:state[key],"aria-label":label}),v=el("span",String(state[key]));i.addEventListener("input",function(){state[key]=Number(i.value);v.textContent=i.value;draw();});l.appendChild(i);if(type==="range"){l.appendChild(v);}controls.appendChild(l);}
+ input("Active users","users",0,100000,100,"range");input("Requests / user / second","rate",0,10000,0.01);input("Burst multiplier","burst",0,1000,0.1);
+ var failures=el("details"),summary=el("summary","Simulate service outages"),checks=el("div",null,{class:"row"});failures.appendChild(summary);failures.appendChild(checks);wrap.appendChild(failures);
+ function failureControls(){checks.textContent="";state.model.nodes.forEach(function(n){var l=el("label",n.label||n.id),c=el("input",null,{type:"checkbox","aria-label":"Fail "+n.id});c.checked=state.failed.indexOf(n.id)>=0;c.addEventListener("change",function(){state.failed=state.failed.filter(function(id){return id!==n.id;});if(c.checked){state.failed.push(n.id);}draw();});l.prepend(c);checks.appendChild(l);});}
+ wrap.appendChild(output);
+ var edit=el("details"),json=el("textarea",JSON.stringify(state.model,null,2),{rows:14,style:"width:100%;font-family:monospace","aria-label":"Topology JSON"}),apply=el("button","Apply topology",{type:"button"});
+ edit.appendChild(el("summary","Topology and capacity assumptions"));edit.appendChild(el("p","Each edge factor is downstream calls per upstream request: cache miss 10% = 0.1; fan-out to three shards = 3. Parallel edges and converging paths add demand. Model retries with a bounded factor; cycles are rejected. Set capacity_rps per component and source to the evidence or assumption. No latency or correctness guarantee is inferred."));edit.appendChild(json);edit.appendChild(apply);wrap.appendChild(edit);
+ apply.addEventListener("click",function(){try{var m=JSON.parse(json.value);validate(m);state.model=m;state.failed=[];failureControls();draw();}catch(e){error.textContent=e.message;}});
+ wrap.appendChild(el("p","Model limits: steady-state offered demand, linear fan-out, fixed capacities. Edge rates show demand assuming upstream work can proceed, not achieved throughput. Red means at/over assumed capacity or unavailable; amber means ≥80% capacity or dependent on an overloaded path. Downstream impact is a warning, not a prediction of exact failures. Queues, backpressure, autoscaling, latency distributions and recovery are not simulated.",{class:"small mute"}));
+ function fmt(v){return Number.isFinite(v)?v.toLocaleString(undefined,{maximumFractionDigits:1}):"—";}
+ function draw(){
+  output.textContent="";error.textContent="";var result;
+  try{result=simulate(state.model,state.users,state.rate,state.burst,state.failed);}catch(e){error.textContent=e.message;return;}
+  output.appendChild(el("h3",String(state.model.title||"System topology")));
+  output.appendChild(el("p","Offered entry load: "+fmt(state.users*state.rate*state.burst)+" req/s · First capacity constraint: "+(result.bottleneck||"none at this request rate")+" · Estimated user ceiling: "+(result.maxUsers===null?"not applicable":fmt(result.maxUsers))));
+  var ns=["http:","","www.w3.org","2000","svg"].join("/"),svg=document.createElementNS(ns,"svg"),layers=Object.create(null),positions=Object.create(null),counts={};
+  result.order.forEach(function(id){var parents=state.model.edges.filter(function(e){return e.to===id;});layers[id]=parents.length?Math.max.apply(null,parents.map(function(e){return layers[e.from]+1;})):0;counts[layers[id]]=(counts[layers[id]]||0)+1;});
+  var depth=Math.max.apply(null,Object.values(layers))+1,height=Math.max.apply(null,Object.values(counts))*125+120,width=depth*250+40,used={};
+  svg.setAttribute("viewBox","0 0 "+width+" "+height);svg.setAttribute("role","img");svg.setAttribute("aria-label","System topology with simulated request rates and capacity warnings");svg.style.cssText="width:100%;min-width:850px;max-height:650px";
+  function shape(tag,attrs,text){var e=document.createElementNS(ns,tag);Object.keys(attrs).forEach(function(k){e.setAttribute(k,attrs[k]);});if(text!==undefined){e.textContent=text;}svg.appendChild(e);return e;}
+  result.order.forEach(function(id){var layer=layers[id],index=used[layer]||0;used[layer]=index+1;positions[id]={x:20+layer*250,y:60+index*125};});
+  result.edges.forEach(function(e,index){var a=positions[e.from],b=positions[e.to],color=e.affected?"#f59e0b":"#64748b";var far=b.x-a.x>260,route=Math.min(a.y,b.y)-22-(index%2)*12;
+   var path=far?"M "+(a.x+190)+" "+a.y+" L "+(a.x+215)+" "+route+" L "+(b.x-15)+" "+route+" L "+(b.x+10)+" "+b.y:"M "+(a.x+200)+" "+(a.y+36)+" C "+(a.x+225)+" "+(a.y+36)+", "+(b.x-25)+" "+(b.y+36)+", "+b.x+" "+(b.y+36);
+   shape("path",{d:path,fill:"none",stroke:color,"stroke-width":2});shape("text",{x:(a.x+200+b.x)/2,y:far?route-5:(a.y+b.y)/2+25,fill:color,"font-size":10,"text-anchor":"middle"},fmt(e.demand)+"/s →");});
+  result.nodes.forEach(function(n){var p=positions[n.id],color=n.failed||n.saturated?"#f87171":n.affected||n.utilization>=0.8?"#fbbf24":"#34d399";shape("rect",{x:p.x,y:p.y,width:200,height:78,rx:10,fill:"#151d2b",stroke:color,"stroke-width":2});shape("text",{x:p.x+10,y:p.y+21,fill:"#e2e8f0","font-size":13},String(n.label).slice(0,25));shape("text",{x:p.x+10,y:p.y+42,fill:color,"font-size":12},fmt(n.demand)+" / "+fmt(n.capacity)+" req/s");shape("text",{x:p.x+10,y:p.y+62,fill:color,"font-size":11},n.failed?"UNAVAILABLE":n.saturated?"CAPACITY EXCEEDED":n.affected?"UPSTREAM AT RISK":fmt((n.utilization||0)*100)+"% utilization");});
+  var graph=el("div",null,{style:"overflow-x:auto"});graph.appendChild(svg);output.appendChild(graph);
+  var table=el("table",null,{style:"width:100%;border-spacing:10px;text-align:left"}),head=el("tr");["Service","Demand req/s","Capacity req/s","Utilization","Capacity basis"].forEach(function(s){head.appendChild(el("th",s));});table.appendChild(head);
+  result.nodes.forEach(function(n){var row=el("tr");[n.label,fmt(n.demand),fmt(n.capacity),n.utilization===null?"unavailable":fmt(n.utilization*100)+"%",n.source].forEach(function(v){row.appendChild(el("td",String(v)));});table.appendChild(row);});output.appendChild(table);
+ }
+ failureControls();draw();return wrap;
+}
+var api={validate:validate,simulate:simulate,example:EXAMPLE,render:render};
+if(typeof module!=="undefined"&&module.exports){module.exports=api;}else{root.LSFLoad=api;}
+})(typeof window!=="undefined"?window:globalThis);
+/* load-simulator:end */
+
+</script>
+<script>
+(function(){
+"use strict";
+var TABS=[["now","Now"],["stops","Human stops"],["telemetry","Telemetry"],["research","Research"],["experiments","Experiments"],["adrs","ADRs"],["prd","PRD"],["architecture","Architecture"],["load","Load simulator"],["docs","Docs"],["evals","Evals & bugs"],["git","Git"]];
+var GROUPS=["align","review","build"];
+var S={state:null,snap:null,tab:"now",token:"",editor:null,wsroot:null,openDoc:null,docText:{},err:"",busy:{},sig:"",gotAt:0,iframe:{},draft:{},openLog:{}};
+var main=document.getElementById("main"),nav=document.getElementById("nav");
+try{var m=/token=([0-9a-f]+)/.exec(location.hash||"");if(m){S.token=m[1];history.replaceState(null,"",location.pathname+location.search);}}catch(e){}
+function tabFromHash(){var id=(location.hash||"").replace(/^#/,"");for(var i=0;i<TABS.length;i++){if(TABS[i][0]===id){return id;}}return "now";}
+S.tab=tabFromHash();
+function store(k,v){try{if(v===undefined){return localStorage.getItem("lsf."+k);}localStorage.setItem("lsf."+k,v);}catch(e){return null;}return null;}
+function h(tag,attrs,kids){var el=document.createElement(tag),k,i;attrs=attrs||{};
+ for(k in attrs){if(attrs[k]===null||attrs[k]===undefined||attrs[k]===false){continue;}
+  if(k==="class"){el.className=attrs[k];}else if(k==="text"){el.textContent=attrs[k];}else if(k.slice(0,2)==="on"){el.addEventListener(k.slice(2),attrs[k]);}else{el.setAttribute(k,attrs[k]===true?"":attrs[k]);}}
+ kids=kids||[];if(!Array.isArray(kids)){kids=[kids];}
+ for(i=0;i<kids.length;i++){var c=kids[i];if(c===null||c===undefined||c===false){continue;}el.appendChild(typeof c==="string"||typeof c==="number"?document.createTextNode(String(c)):c);}
+ return el;}
+function fmtMin(m){if(m===null||m===undefined){return "not measured";}return (Math.round(m*10)/10)+" min";}
+function clock(sec){sec=Math.max(0,Math.floor(sec));var m=Math.floor(sec/60),s=sec%60;return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;}
+function hhmmss(iso){return iso?String(iso).slice(11,19):"";}
+function conf(){var p=(S.state&&S.state.profile)||{};return {editor:S.editor||p.editor||"vscode",root:S.wsroot||p.workspace_root||""};}
+function ref(path,line,label){
+ var c=conf(),url=null,txt=label||(path+(line?":"+line:"")),text=String(path)+(line?":"+line:"");
+ try{url=SFEditorLinks.editorUrl(c.editor,c.root,String(path),line);}catch(e){url=null;}
+ var cp=h("button",{type:"button",onclick:function(ev){var b=ev.currentTarget;try{navigator.clipboard.writeText(text);b.textContent="Copied";}catch(e){b.textContent="Copy failed";}}},"Copy path");
+ if(url){return h("span",{class:"ref"},[h("a",{class:"elink mono",href:url,title:"Open in "+c.editor},txt),cp]);}
+ return h("span",{class:"ref plain mono",title:"Set a valid editor and absolute workspace root in the header to get a link"},[txt,cp]);}
+function tabData(name){var t=S.snap?S.snap.tabs:(S.state&&S.state.tabs);return t?t[name]:null;}
+function items(t){return t&&t.available&&Array.isArray(t.items)&&t.items.length?t.items:null;}
+function emptyTab(t,what){var why=t&&t.reason?t.reason:(t&&t.available?"the source holds no items":"no data was collected");
+ why=String(why).replace(/^not available:\s*/,"");return h("div",{class:"empty",role:"status"},"not available: "+why);}
+function chip(text,cls){return h("span",{class:"chip "+(cls||"")},text);}
+function grpChip(g){return chip(g||"?","g-"+(g||"x"));}
+function verdictClass(v){v=String(v||"").toLowerCase();
+ if(v==="pass"){return "v-pass";}
+ if(v==="fail"||v==="error"||v==="red"){return "v-fail";}
+ if(/^(opened|waiting|switched|stopped|denied)$/.test(v)){return "v-wait";}return "v-mute";}
+function api(path,opts){return fetch(path,opts).then(function(r){return r.text().then(function(t){var j=null;try{j=JSON.parse(t);}catch(e){}
+ if(!r.ok){throw new Error((j&&j.error)||("HTTP "+r.status));}return j===null?t:j;});});}
+
+/* ---------- header, banner, nav ---------- */
+function stateOf(s){return s.state||(s.released_at?"answered":"asked");}
+function asked(rt){return ((rt&&rt.stops)||[]).filter(function(x){return stateOf(x)==="asked";});}
+function renderHeader(){
+ var st=S.state,rt=st&&st.runtime,s=rt&&rt.status,op=s&&s.open_phase,sess=s&&s.session_elapsed_minutes,tot=s&&s.session_minutes;
+ document.getElementById("clk").textContent=sess!==null&&sess!==undefined?clock(sess*60+(Date.now()-S.gotAt)/1000*(S.live?1:0)):"--:--";
+ document.getElementById("clkl").textContent=(sess!==null&&sess!==undefined?"of "+clock((tot||60)*60)+" session":"session not started")+(op?" - "+op.phase:"");
+ var p=(st&&st.profile)||{},c=conf(),sel=document.getElementById("ed");
+ if(!sel.options.length){(SFEditorLinks.editors||[]).concat(["none"]).forEach(function(e){sel.appendChild(h("option",{value:e,text:e}));});}
+ if(document.activeElement!==sel){sel.value=c.editor;}
+ var ws=document.getElementById("ws");if(document.activeElement!==ws){ws.value=c.root;}
+ var b=document.getElementById("banner"),stops=asked(rt),wt=document.getElementById("waiting");
+ wt.textContent="";
+ if(stops.length){wt.appendChild(document.createTextNode(stops.length+" decision"+(stops.length>1?"s":"")+" waiting for you"));
+  if(S.tab!=="stops"){wt.appendChild(h("a",{href:"#stops"},"Review"));}}
+ b.className="";
+ if(rt&&rt.stop_ledger&&rt.stop_ledger!=="ok"){b.className="err";b.textContent=rt.stop_ledger;}
+ else if(S.err){b.className="err";b.textContent=S.err;}
+ else if(s&&s.clock_overridden){b.className="stop";b.textContent="Clock overridden by LSF_NOW: every time on this page is a rehearsal value";}
+ else if(S.snap){b.className="snap";b.textContent="Viewing commit "+S.snap.sha.slice(0,8)+": the historical tabs show that commit; Now and Telemetry stay live.";}
+ else{b.textContent="";}
+}
+function renderNav(){
+ var stops=S.state?asked(S.state.runtime).length:0;
+ nav.textContent="";
+ TABS.forEach(function(t){var b=h("button",{type:"button",role:"tab","aria-selected":S.tab===t[0]?"true":"false","data-tab":t[0],onclick:function(){S.tab=t[0];S.sig="";try{if(location.hash!=="#"+t[0]){history.pushState(null,"","#"+t[0]);}}catch(e){}renderNav();renderTab();}},[t[1]]);
+  if((t[0]==="stops"||t[0]==="now")&&stops){b.appendChild(h("span",{class:"dot","aria-label":stops+" waiting"},String(stops)));}nav.appendChild(b);});
+}
+
+/* ---------- Now ---------- */
+function groupBars(budget){
+ var wrap=h("div",{class:"card"},[h("h3",{},"Planned vs actual"),h("div",{class:"legend"},[h("span",{},"dashed outline: plan"),h("span",{},"solid bar: actual"),h("span",{},"time waiting on a human is counted separately")])]);
+ if(!budget||budget.error){wrap.appendChild(h("p",{class:"err"},budget&&budget.error||"budget not available"));return wrap;}
+ var scale=1;GROUPS.forEach(function(g){var x=budget.groups[g];scale=Math.max(scale,x.planned_minutes,x.actual_minutes||0);});
+ GROUPS.forEach(function(g){var x=budget.groups[g],over=x.flag.indexOf("over")===0;
+  wrap.appendChild(h("div",{class:"gb"},[
+   h("div",{class:"row"},[h("span",{},[grpChip(g)," ",h("b",{},g)]),h("span",{class:"mono"},fmtMin(x.actual_minutes)+" / "+fmtMin(x.planned_minutes)+(x.percent_of_plan!==null?" ("+x.percent_of_plan+"%)":""))]),
+   h("div",{class:"track",role:"img","aria-label":g+": "+fmtMin(x.actual_minutes)+" of "+fmtMin(x.planned_minutes)+", "+x.flag},[
+    h("div",{class:"plan",style:"width:"+(100*x.planned_minutes/scale)+"%"}),
+    h("div",{class:"fill g-"+g+(over?" over":""),style:"width:"+(100*(x.actual_minutes||0)/scale)+"%"})]),
+   h("div",{class:"small "+(over?"v-wait":"mute")},x.flag+" - human wait in this group: "+fmtMin(x.waiting_minutes))]));});
+ wrap.appendChild(h("div",{class:"wrows small"},[h("span",{class:"v-wait"},budget.ledger_error?"waiting on human: not measured (stop ledger failed verification)":"waiting on human: "+fmtMin(budget.waiting_on_human_minutes)),
+  h("b",{},"session total "+fmtMin(budget.session_total_minutes)+" of "+fmtMin(budget.session_minutes))]));
+ return wrap;}
+function phaseCard(){
+ var rt=S.state.runtime,s=rt.status||{},op=s.open_phase,prof=S.state.profile,done={};
+ (rt.intervals||[]).forEach(function(i){if(i.end){done[i.phase]=true;}});
+ var steps=h("ol",{class:"steps","aria-label":"Phases"});
+ (prof.phases||[]).forEach(function(p){var open=op&&op.phase===p.id;steps.appendChild(h("li",{class:open?"open":(done[p.id]?"done":"")},p.id));});
+ var secs=op?(op.elapsed_minutes*60+(S.live?(Date.now()-S.gotAt)/1000:0)):0;
+ return h("div",{class:"card"},[
+  h("div",{class:"row2",style:"margin-top:0"},[h("h3",{},op?"Now in "+op.phase:"No phase open"),op?grpChip(op.group):null,op?h("span",{id:"pclk",class:"mono",style:"font-size:1.6rem;font-weight:650"},clock(secs)):null]),
+  h("p",{class:"mute small"},op?"Started "+hhmmss(op.started_at)+" UTC":("Next: "+(s.next_phase||"all phases done")+". Start it with lsf phase start "+(s.next_phase||""))),steps]);}
+var STEPS=[["asked","Asked"],["answered","Answered"],["recorded","Recorded"],["applied","Applied"]];
+function stepRow(st){var at=0;STEPS.forEach(function(x,i){if(x[0]===st){at=i;}});
+ return h("ol",{class:"steps","aria-label":"Decision progress"},STEPS.map(function(x,i){
+  return h("li",{class:st==="applied"||i<at?"done":(i===at?"open":""),"aria-current":i===at?"step":null},x[1]);}));}
+function stopCard(s){
+ var st=stateOf(s),open=st==="asked",opts=s.options||[],kids=[];
+ kids.push(h("div",{class:"row2",style:"margin-top:0"},[chip(open?"waiting for you":(s.status||st),open?"v-wait":"v-pass"),h("span",{class:"mono small mute"},s.name),h("span",{class:"small mute"},"opened "+hhmmss(s.opened_at))]));
+ kids.push(h("div",{class:"q"},s.question||"Approve?"));
+ if(s.reason){kids.push(h("div",{class:"small mute"},s.reason));}
+ kids.push(stepRow(st));
+ if((s.artifact||[]).length){kids.push(h("div",{class:"refs"},s.artifact.map(function(a){var m=/^(.*?)(?::(\d+))?$/.exec(a);var r=ref(m[1],m[2]?parseInt(m[2],10):null,a);return (s.unbound||[]).indexOf(a)>=0?h("span",{class:"refu"},[r,chip("unbound","v-wait")]):r;})));}
+ if(!open){
+  if(s.via&&s.via!=="dashboard"){kids.push(h("div",{class:"small v-wait"},[chip("released from the command line","v-wait")," ("+s.via+")"]));}
+  var dl=h("dl",{class:"dl"});
+  function row(k,v){dl.appendChild(h("dt",{},k));dl.appendChild(h("dd",{},v));}
+  if(s.answer){row("Answer",h("b",{},s.answer));}
+  row(s.superseded_by?"Superseded":"Answered",(s.released_by||"?")+" at "+hhmmss(s.released_at)+(s.note?": "+s.note:""));
+  if(s.recorded_where){row("Recorded in",ref(s.recorded_where));}
+  if(st==="applied"){row("Evidence",s.applied_evidence||"");row("Applied",hhmmss(s.applied_at));}
+  else if(!s.superseded_by){row("Status","not applied yet");}
+  kids.push(dl);
+ }else{
+  var msg=h("div",{class:"small err",role:"alert"});
+  if(S.token){
+   var dr=S.draft[s.name]=S.draft[s.name]||{},chosen=dr.answer||null,note=h("input",{type:"text",class:"note",placeholder:"Optional note","aria-label":"Note for "+s.name,value:dr.note||"",oninput:function(){dr.note=note.value;}});
+   var btn=h("button",{type:"button",class:"primary",disabled:opts.length>0&&!chosen,onclick:function(){btn.disabled=true;msg.textContent="";
+    api("/api/hitl/release",{method:"POST",headers:{"Content-Type":"application/json","X-LSF-Token":S.token},body:JSON.stringify({name:s.name,note:note.value,answer:chosen,proposal_hash:s.proposal_hash||null})})
+     .then(function(){return poll();}).catch(function(e){msg.textContent="Could not "+(opts.length?"submit":"approve")+": "+e.message;btn.disabled=false;});}},opts.length?"Submit answer":"Approve");
+   if(opts.length){kids.push(h("fieldset",{class:"opts"},[h("legend",{},"Choose one answer")].concat(opts.map(function(o,i){
+    var id="o-"+s.name+"-"+i;
+    return h("label",{class:"opt",for:id},[h("input",{type:"radio",name:"ans-"+s.name,id:id,checked:chosen===o,onchange:function(){chosen=dr.answer=o;btn.disabled=false;}}),h("span",{},o)]);}))));}
+   kids.push(h("div",{class:"row2"},[note,btn]));kids.push(msg);
+  }else{
+   kids.push(h("div",{class:"small"},["No token in this URL, so run in a terminal: ",h("code",{},"lsf hitl release "+s.name+(opts.length?" --answer \"<one of the options>\"":""))]));}
+ }
+ return h("div",{class:"card dec "+(open?"stop":"done")},kids);}
+function renderStops(){
+ var rt=S.state.runtime,all=(rt.stops||[]),open=all.filter(function(x){return stateOf(x)==="asked";}),rest=all.filter(function(x){return stateOf(x)!=="asked";});
+ var n=h("div",{});
+ n.appendChild(h("p",{class:"mute small"},"Decisions the agent asked you to make. Pick an answer and submit it; the agent then records it and applies it, and each step shows here."));
+ if(rt.stop_ledger!=="ok"){n.appendChild(h("div",{class:"empty err",role:"alert"},rt.stop_ledger));return n;}
+ if(!all.length){n.appendChild(h("div",{class:"empty"},"No decision has been asked yet (.lsf/stops.jsonl has no entries)."));return n;}
+ n.appendChild(h("h2",{},"Waiting for you ("+open.length+")"));
+ if(!open.length){n.appendChild(h("div",{class:"empty"},"Nothing is waiting."));}
+ open.forEach(function(s){n.appendChild(stopCard(s));});
+ if(rest.length){n.appendChild(h("h2",{},"Answered, recorded and applied"));rest.slice().reverse().forEach(function(s){n.appendChild(stopCard(s));});}
+ return n;}
+function renderNow(){
+ var rt=S.state.runtime,stops=rt.stops||[],open=stops.filter(function(x){return stateOf(x)==="asked";}),rel=stops.filter(function(x){return stateOf(x)!=="asked";});
+ var n=h("div",{});
+ n.appendChild(phaseCard());
+ n.appendChild(h("h2",{},"Human checkpoints"+(open.length?" ("+open.length+" waiting)":"")));
+ if(rt.stop_ledger!=="ok"){n.appendChild(h("div",{class:"empty err",role:"alert"},rt.stop_ledger));}
+ else if(!open.length){n.appendChild(h("div",{class:"empty"},"No checkpoint is waiting. The agent opens one at the end of each alignment phase."));}
+ open.forEach(function(s){n.appendChild(stopCard(s));});
+ n.appendChild(groupBars(rt.budget));
+ if(rel.length){n.appendChild(h("h2",{},"Approved"));rel.slice().reverse().forEach(function(s){n.appendChild(stopCard(s));});}
+ return n;}
+
+/* ---------- Telemetry ---------- */
+function renderTelemetry(){
+ var rt=S.state.runtime,ev=rt.events||[],pass=0,fail=0,agents=0,commits=0,phases=0,rel=0;
+ ev.forEach(function(e){var c=verdictClass(e.verdict);if(c==="v-pass"){pass++;}if(c==="v-fail"){fail++;}if(e.source==="hook"&&e.stage==="SubagentStop"){agents++;}if(e.source==="hook"&&e.verdict==="commit"){commits++;}
+  if(e.type==="phase_end"&&e.verdict!=="switched"){phases++;}if(e.stage==="hitl"&&e.verdict==="released"){rel++;}});
+ var n=h("div",{});
+ n.appendChild(h("div",{class:"tiles",style:"margin-top:.7rem"},[["events (last "+ev.length+")",ev.length],["pass",pass],["fail",fail],["phases ended",phases],["checkpoints released",rel],["agent stops",agents],["commits seen",commits],["cost (manual)","$"+((rt.cost&&rt.cost.total_usd)||0)]].map(function(t){return h("div",{class:"tile"},[h("b",{},String(t[1])),h("span",{},t[0])]);})));
+ n.appendChild(h("p",{class:"small mute"},"Legend: pass and fail count only the verdicts pass, fail and error that an agent or test run recorded with lsf event. Phase ends, releases, commits and agent stops are counted separately and are not test results."));
+ n.appendChild(h("h2",{},"Phase durations"));
+ var iv=rt.intervals||[],max=1,prof=S.state.profile,gm={};(prof.phases||[]).forEach(function(p){gm[p.id]=p.group;});
+ var at=Date.parse(rt.now);
+ var durs=iv.map(function(i){var a=Date.parse(i.start),b=i.end?Date.parse(i.end):at;var m=Math.max(0,(b-a)/60000);max=Math.max(max,m);return {i:i,m:m};});
+ if(!durs.length){n.appendChild(h("div",{class:"empty"},"not available: no phase has started (.lsf/phases.jsonl has no entries)"));}
+ else{var c=h("div",{class:"card tbl"});durs.forEach(function(d){c.appendChild(h("div",{},[h("div",{class:"row2",style:"margin:0"},[grpChip(gm[d.i.phase]),h("b",{},d.i.phase),h("span",{class:"mono small"},fmtMin(d.m)),h("span",{class:"small "+verdictClass(d.i.verdict)},d.i.end?(d.i.verdict||"done"):"open")]),h("div",{class:"hbar g-"+gm[d.i.phase],style:"width:"+(100*d.m/max)+"%;background:var(--"+(gm[d.i.phase]||"acc")+")"})]));});n.appendChild(c);}
+ n.appendChild(h("h2",{},"Human wait per checkpoint"));
+ var stops=rt.stops||[];
+ if(!stops.length){n.appendChild(h("div",{class:"empty"},"not available: no checkpoint has been opened (.lsf/stops.jsonl has no entries)"));}
+ else{var l=h("ul",{class:"list card"});stops.forEach(function(s){var a=Date.parse(s.opened_at),b=s.released_at?Date.parse(s.released_at):at;l.appendChild(h("li",{},[h("b",{class:"mono"},s.name)," ",h("span",{class:"mono"},fmtMin(Math.max(0,(b-a)/60000))),s.released_at?h("span",{class:"mute small"}," released by "+(s.released_by||"?")):h("span",{class:"v-wait small"}," still waiting")]));});n.appendChild(l);}
+ var cost=rt.cost;n.appendChild(h("h2",{},"Cost (as entered by the operator)"));
+ if(!cost||!Object.keys(cost.by_model||{}).length){n.appendChild(h("div",{class:"empty"},"not available: no cost logged. Use lsf cost add --usd X --model M"));}
+ else{var cl=h("ul",{class:"list card"});Object.keys(cost.by_model).forEach(function(k){var d=cost.by_model[k];cl.appendChild(h("li",{},[h("b",{},k)," $"+d.usd+" - "+d.tokens+" tokens - "+d.entries+" entries"]));});n.appendChild(cl);}
+ n.appendChild(h("h2",{},"Event timeline"));
+ if(!ev.length){n.appendChild(h("div",{class:"empty"},"not available: .lsf/events.jsonl has no events"));}
+ else{var tl=h("ul",{class:"list card"});ev.slice(-200).reverse().forEach(function(e){tl.appendChild(h("li",{class:"ev"},[h("time",{},hhmmss(e.at)),h("div",{},[h("b",{class:"mono"},e.stage)," ",h("span",{class:"chip "+verdictClass(e.verdict)},e.verdict),e.role?h("span",{class:"mute small"}," "+e.role):null,e.source&&e.source!=="lsf"?h("span",{class:"mute small"}," ["+e.source+"]"):null,e.note?h("div",{class:"small mute"},e.note):null])]));});n.appendChild(tl);}
+ return n;}
+
+/* ---------- historical tabs ---------- */
+function list(t,fn,wrap){var it=items(t);if(!it){return emptyTab(t);}var l=h("ul",{class:"list card"});it.forEach(function(x){var li=h("li",{},fn(x));l.appendChild(wrap?wrap(li,x):li);});return l;}
+function renderResearch(){return list(tabData("research"),function(x){return [h("b",{},x.title)," ",x.as_of?chip("as of "+x.as_of,"v-mute"):null,h("div",{class:"refs"},[ref(x.path)])];});}
+function renderExperiments(){return list(tabData("experiments"),function(x){var r=x.kind==="resolved"?x:x.results;var k=[h("b",{},x.name)," ",chip(x.kind==="resolved"?"resolved by research":"experiment","v-mute"),x.error?h("div",{class:"err small"},x.error):null];
+ if(r&&typeof r==="object"){var s=r.winner||r.decision||r.verdict||r.resolved_by||r.question;if(s){k.push(h("div",{class:"small"},typeof s==="string"?s:JSON.stringify(s)));}}
+ k.push(h("div",{class:"refs"},[ref(x.path)]));return k;});}
+function renderAdrs(){return list(tabData("adrs"),function(x){return [h("b",{},x.id+": "+x.title)," ",x.status?chip(x.status,"v-mute"):null,x.date?h("span",{class:"small mute"}," "+x.date):null,h("div",{class:"refs"},[ref(x.path)])];});}
+function renderPrd(){var pt=tabData("prd_journeys"),w=pt&&pt.warning;var lst=list(pt,function(x){
+ if(x.kind==="journey"){return [h("b",{},"Journey: "+x.name),(x.flags||[]).length?h("div",{class:"v-wait small"},x.flags.join("; ")):null,h("ol",{},(x.steps||[]).map(function(s){return h("li",{},s);})),
+  h("div",{class:"small"},(x.slices||[]).map(function(s){return chip(s.id+(s.exists?"":" (unknown slice)"),s.exists?"v-mute":"v-fail");})),h("div",{class:"refs"},[ref("docs/prd/onepager.md")])];}
+ if(x.kind==="prd"){return [h("b",{},x.title)," ",chip("PRD","v-mute"),x.delivers?h("div",{class:"small mute"},x.delivers):null,h("div",{class:"refs"},[ref(x.path)])];}
+ return [h("b",{},x.title)," ",x.priority?chip("priority "+x.priority,"v-mute"):null,h("ul",{},(x.stories||[]).map(function(s){return h("li",{},s);})),h("div",{class:"refs"},[ref(x.path)])];});
+ if(!w){return lst;}var box=h("div",{});box.appendChild(h("p",{class:"v-wait small"},"Warning: the one-page PRD is "+w));box.appendChild(lst);return box;}
+var LOGRX=/((?:\/|\.\/)?[\w.@+\-]+(?:\/[\w.@+\-]+)*\.[A-Za-z0-9]{1,8}):(\d+)/g;
+function logBody(j){
+ var c=conf(),pre=h("pre",{class:"logpre",tabindex:"0","aria-label":"Error log"}),text=String(j.text||""),files=j.files||{},last=0,m;
+ LOGRX.lastIndex=0;
+ while((m=LOGRX.exec(text))){var rel=files[m[1]],url=null;
+  if(rel){try{url=SFEditorLinks.editorUrl(c.editor,c.root,rel,parseInt(m[2],10));}catch(e){url=null;}}
+  if(!url){continue;}
+  if(m.index>last){pre.appendChild(document.createTextNode(text.slice(last,m.index)));}
+  pre.appendChild(h("a",{href:url,title:"Open "+rel+":"+m[2]+" in "+c.editor},m[0]));last=m.index+m[0].length;}
+ pre.appendChild(document.createTextNode(text.slice(last)));
+ var cp=h("button",{type:"button",onclick:function(ev){var b=ev.currentTarget;try{navigator.clipboard.writeText(text);b.textContent="Copied";}catch(e){b.textContent="Copy failed";}}},"Copy");
+ return h("div",{},[h("div",{class:"row2",style:"margin-top:0"},[h("b",{class:"small"},"Error log"),cp]),pre]);}
+function logRow(li,key,logPath){
+ var panel=h("div",{class:"logp"});li.appendChild(panel);li.className+=" clk";li.tabIndex=0;li.setAttribute("role","button");
+ function show(on){li.setAttribute("aria-expanded",on?"true":"false");panel.textContent="";S.openLog[key]=on;if(!on){return;}
+  if(!logPath){panel.appendChild(h("div",{class:"empty small"},"No log recorded. Record one with: lsf event STAGE fail --log-file FILE"));return;}
+  panel.appendChild(h("div",{class:"small mute",role:"status"},"Loading..."));
+  api("/api/log?path="+encodeURIComponent(logPath)).then(function(j){if(S.openLog[key]){panel.textContent="";panel.appendChild(logBody(j));}})
+   .catch(function(e){panel.textContent="";panel.appendChild(h("div",{class:"small err",role:"alert"},"Could not load the log: "+e.message));});}
+ function flip(){show(li.getAttribute("aria-expanded")!=="true");}
+ li.addEventListener("click",function(ev){if(ev.target.closest&&(ev.target.closest(".logp")||ev.target.closest("a,button"))){return;}flip();});
+ li.addEventListener("keydown",function(ev){if(ev.target===li&&(ev.key==="Enter"||ev.key===" ")){ev.preventDefault();flip();}});
+ show(!!S.openLog[key]);return li;}
+function renderEvals(){
+ var n=h("div",{});n.appendChild(h("h2",{},"Bug log and QA notes"));
+ n.appendChild(list(tabData("bug_log"),function(x){
+  if(x.kind==="qa-note"){return [h("b",{},"QA note, slice "+x.slice)," ",chip("repeated failure"+(x.attempts?" x"+x.attempts:""),"v-wait"),h("div",{class:"small"},x.text),h("div",{class:"refs"},[ref(x.path)])];}
+  if(x.kind==="qa-report"){return [h("b",{},x.title)," ",chip("QA report, slice "+x.slice,"v-pass"),h("div",{class:"small"},x.text),h("div",{class:"refs"},[ref(x.path)])];}
+  if(x.error){return [h("span",{class:"err"},x.error)];}
+  if(x.path){return [h("b",{},x.title)," ",x.status?chip(x.status,x.status==="open"||x.status==="invalid"?"v-fail":"v-pass"):null,x.log?null:h("span",{class:"small mute"}," log: none recorded"),h("div",{class:"refs"},[ref(x.path)])];}
+  return [h("code",{},JSON.stringify(x))];},function(li,x){return x.kind!=="qa-note"&&x.kind!=="qa-report"&&!x.error&&x.path?logRow(li,"bug:"+x.path,x.log||null):li;}));
+ n.appendChild(h("h2",{},"Verdicts logged by agents"));
+ var ev=(S.state.runtime.events||[]).filter(function(e){var c=verdictClass(e.verdict);return (c==="v-pass"||c==="v-fail")&&e.source!=="hook";});
+ var bugsT=tabData("bug_log");
+ if(!ev.length){n.appendChild(h("div",{class:"empty"},"not available: no pass or fail verdict in .lsf/events.jsonl. Agents record them with lsf event 8-qa pass|fail."));}
+ else{var l=h("ul",{class:"list card"});ev.slice(-60).reverse().forEach(function(e){var li=h("li",{},[h("time",{class:"mono small mute"},hhmmss(e.at)+" "),h("b",{class:"mono"},e.stage)," ",h("span",{class:"chip "+verdictClass(e.verdict)},e.verdict),e.note?h("div",{class:"small mute"},e.note):null]);
+   l.appendChild(verdictClass(e.verdict)==="v-fail"?logRow(li,"ev:"+e.at+":"+e.stage+":"+(e.slice||""),e.log||null):li);});n.appendChild(l);}
+ return n;}
+function renderArch(){
+ var t=tabData("architecture"),it=items(t);if(!it){return emptyTab(t);}
+ var n=h("div",{});
+ it.forEach(function(x){
+  var card=h("div",{class:"card"},[h("h3",{},x.title||x.path),h("div",{class:"small mute"},x.error?x.error:(x.nodes+" nodes, "+x.diagrams+" diagrams")),h("div",{class:"refs"},[ref(x.path)])]);
+  var htmlPath=x.path.replace(/\.model\.json$/,".html");
+  var box=h("div",{});
+  var btn=h("button",{type:"button",onclick:function(){var open=!S.iframe[htmlPath];S.iframe[htmlPath]=open;box.textContent="";
+   if(open){var src=S.snap?null:"/api/file?path="+encodeURIComponent(htmlPath)+"&view=html";
+    box.appendChild(src?h("iframe",{src:src,sandbox:"allow-scripts",title:"Nested diagrams: "+x.title}):h("div",{class:"empty"},"not available: the explorer page is served from the working tree, not from a past commit"));btn.textContent="Hide the nested diagrams";}else{btn.textContent="Show the nested diagrams";}}},S.iframe[htmlPath]?"Hide the nested diagrams":"Show the nested diagrams");
+  card.appendChild(h("div",{class:"row2"},[btn,ref(htmlPath)]));card.appendChild(box);
+  if(S.iframe[htmlPath]&&!S.snap){box.appendChild(h("iframe",{src:"/api/file?path="+encodeURIComponent(htmlPath)+"&view=html",sandbox:"allow-scripts",title:"Nested diagrams: "+x.title}));}
+  var nodes=(x.model&&x.model.nodes)||{};
+  Object.keys(nodes).forEach(function(id){var nd=nodes[id],files=[];
+   (nd.design||[]).forEach(function(d){(d.files||[]).forEach(function(f){files.push(f);});});
+   var d=h("details",{},[h("summary",{},[h("span",{},nd.title||id),nd.kind?chip(nd.kind,"v-mute"):null])]);
+   if(nd.summary){d.appendChild(h("p",{class:"small"},nd.summary));}
+   var seen={};var refs=h("div",{class:"refs"});
+   files.forEach(function(f){if(!f||typeof f.path!=="string"||f.path.charAt(0)==="~"){return;}var ln=parseInt(String(f.lines||"").split("-")[0],10)||null,key=f.path+":"+ln;if(seen[key]){return;}seen[key]=1;refs.appendChild(ref(f.path,ln));});
+   d.appendChild(refs.childNodes.length?refs:h("div",{class:"small mute"},"No source files listed for this node."));card.appendChild(d);});
+  n.appendChild(card);});
+ return n;}
+function mdInline(text){var out=[],re=/(\*\*[^*]+\*\*|`[^`]+`)/g,last=0,m;
+ while((m=re.exec(text))){if(m.index>last){out.push(text.slice(last,m.index));}var s=m[0];out.push(s.charAt(0)==="*"?h("b",{},s.slice(2,-2)):h("code",{},s.slice(1,-1)));last=m.index+s.length;}
+ if(last<text.length){out.push(text.slice(last));}return out;}
+function mdRender(src){var box=h("div",{class:"md"}),lines=src.replace(/<!--[\s\S]*?-->/g,"").split("\n"),i=0,ul=null,code=null;
+ for(;i<lines.length;i++){var ln=lines[i];
+  if(/^```/.test(ln)){if(code){box.appendChild(h("pre",{},code.join("\n")));code=null;}else{code=[];}continue;}
+  if(code){code.push(ln);continue;}
+  var hm=/^(#{1,4})\s+(.*)$/.exec(ln),bm=/^\s*[-*]\s+(.*)$/.exec(ln);
+  if(bm){if(!ul){ul=h("ul");box.appendChild(ul);}ul.appendChild(h("li",{},mdInline(bm[1])));continue;}
+  ul=null;
+  if(hm){box.appendChild(h("h"+Math.min(4,hm[1].length+1),{},mdInline(hm[2])));}else if(ln.trim()){box.appendChild(h("p",{},mdInline(ln)));}}
+ return box;}
+function renderDocs(){
+ var t=tabData("docs"),it=items(t);if(!it){return emptyTab(t);}
+ var n=h("div",{});
+ it.forEach(function(x){
+  var d=h("details",{open:S.openDoc===x.doc},[h("summary",{},[h("span",{class:"mono"},x.module),chip((x.symbols||[]).length+" documented","v-mute")])]);
+  var body=h("div",{});
+  d.appendChild(body);
+  d.addEventListener("toggle",function(){if(!d.open){if(S.openDoc===x.doc){S.openDoc=null;}return;}S.openDoc=x.doc;body.textContent="";
+   var show=function(txt){body.textContent="";body.appendChild(mdRender(txt));
+    var refs=h("div",{class:"refs"},[ref(x.module,null,"source: "+x.module)]);(x.symbols||[]).forEach(function(s){if(s.line){refs.appendChild(ref(x.module,s.line,s.name+" at line "+s.line));}});body.appendChild(h("h3",{},"Open in the editor"));body.appendChild(refs);};
+   if(S.docText[x.doc]!==undefined){show(S.docText[x.doc]);return;}
+   body.appendChild(h("p",{class:"mute"},"Loading..."));
+   api("/api/file?path="+encodeURIComponent(x.doc)).then(function(txt){S.docText[x.doc]=txt;show(txt);}).catch(function(e){body.textContent="";body.appendChild(h("div",{class:"empty"},"not available: "+x.doc+" could not be read ("+e.message+")"));});});
+  n.appendChild(d);});
+ return n;}
+function rollbackControl(c){
+ var par=((S.state.runtime||{}).commit_parents||{})[c.sha];
+ if(par!==1){return null;}
+ var box=h("div",{class:"rb",style:"flex:1 1 100%"}),btn;
+ function close(){box.textContent="";btn.hidden=false;S.rb=null;}
+ function openIt(){btn.hidden=true;S.rb=c.sha;box.textContent="";box.appendChild(h("div",{class:"small mute"},"Loading..."));
+  api("/api/commit?sha="+c.sha).then(function(j){box.textContent="";var msg=h("div",{class:"small err",role:"alert"});
+   var yes=h("button",{type:"button",class:"primary",disabled:!!j.refusal,onclick:function(){yes.disabled=true;msg.textContent="";
+    api("/api/rollback",{method:"POST",headers:{"Content-Type":"application/json","X-LSF-Token":S.token},body:JSON.stringify({sha:c.sha,confirm_sha:j.sha})})
+     .then(function(){S.rb=null;S.sig="";return poll();}).catch(function(e){msg.textContent="Could not roll back: "+e.message;yes.disabled=false;});}},"Confirm rollback");
+   box.appendChild(h("div",{class:"card dec"},[h("b",{},j.subject),h("div",{class:"small mute"},j.files.length+" file"+(j.files.length===1?"":"s")+" changed: "+j.files.slice(0,12).join(", ")+(j.files.length>12?" ...":"")),
+    h("p",{class:"small"},"This adds a new commit that undoes it; history is kept."),j.refusal?h("p",{class:"small err",role:"alert"},"Cannot roll back now: "+j.refusal):null,
+    h("div",{class:"row2"},[yes,h("button",{type:"button",onclick:close},"Cancel")]),msg]));
+  }).catch(function(e){box.textContent="";box.appendChild(h("div",{class:"small err",role:"alert"},"Could not load the commit: "+e.message));box.appendChild(h("button",{type:"button",onclick:close},"Close"));});}
+ if(!S.token){return h("span",{class:"small"},["No token in this URL, so run in a terminal: ",h("code",{},"lsf rollback "+c.sha.slice(0,8)+" --yes")]);}
+ btn=h("button",{type:"button","aria-label":"Rollback "+c.sha.slice(0,8),onclick:openIt},"Rollback");
+ return h("span",{style:"display:contents"},[btn,box]);}
+function renderGit(){
+ var gt=S.state.tabs.git,it=items(gt);
+ if(!it){return emptyTab(gt);}
+ var n=h("div",{});
+ if(S.snap){n.appendChild(h("div",{class:"row2"},[h("span",{},"Viewing "+S.snap.sha.slice(0,8)),h("button",{type:"button",onclick:function(){S.snap=null;S.sig="";render();}},"Back to live")]));}
+ var l=h("ul",{class:"list card"});
+ it.forEach(function(c){var cur=S.snap&&S.snap.sha===c.sha;
+  l.appendChild(h("li",{},[h("div",{},[h("b",{class:"mono"},c.sha.slice(0,8))," ",h("span",{class:"small mute"},c.date)]),h("div",{},c.subject),
+   h("div",{class:"row2",style:"margin-top:.3rem"},[h("button",{type:"button",disabled:cur,"aria-label":"View tabs at "+c.sha.slice(0,8),onclick:function(){S.err="";api("/api/at?sha="+c.sha).then(function(j){S.snap=j;S.sig="";render();}).catch(function(e){S.err="Could not load "+c.sha.slice(0,8)+": "+e.message;render();});}},cur?"Showing":"View tabs at this commit"),rollbackControl(c)])]));});
+ n.appendChild(l);return n;}
+
+function withHelp(text,node){var w=h("div",{});w.appendChild(h("p",{class:"mute small"},text));w.appendChild(node);return w;}
+function renderLoad(){var t=tabData("load_model");if(t&&!t.available&&t.reason.indexOf("missing")<0){return emptyTab(t);}var data=items(t);return window.LSFLoad.render(data?data[0]:null,conf().root+(S.snap?S.snap.sha:"live"));}
+var RENDER={load:renderLoad,now:renderNow,stops:renderStops,telemetry:renderTelemetry,research:renderResearch,experiments:renderExperiments,adrs:renderAdrs,prd:renderPrd,architecture:function(){return withHelp("Looks in docs/explorer/*.model.json and docs/explorer/*.html (the nested diagrams); each node lists its source files as editor links.",renderArch());},docs:function(){return withHelp("Looks in docs/eli12/index.json and the module pages it names under docs/eli12/.",renderDocs());},evals:renderEvals,git:renderGit};
+function renderTab(){
+ main.textContent="";
+ if(!S.state){main.appendChild(h("div",{class:"empty",role:"status"},S.err||"Loading..."));return;}
+ try{main.appendChild(RENDER[S.tab]());}catch(e){main.appendChild(h("div",{class:"empty err",role:"alert"},"This tab failed to render: "+e.message));}
+}
+function render(){renderHeader();renderNav();renderTab();}
+function strip(o){return JSON.stringify(o,function(k,v){return k==="now"?undefined:v;});}
+function poll(){
+ return api("/api/state").then(function(st){
+  var first=!S.state,tabsChanged=first||strip(S.state.tabs)!==strip(st.tabs),rtChanged=first||strip(S.state.runtime)!==strip(st.runtime);
+  S.live=true;S.gotAt=Date.now();S.state=st;S.err="";renderHeader();
+  if(first||tabsChanged||rtChanged){renderNav();
+   var liveTab=S.tab==="now"||S.tab==="stops"||S.tab==="telemetry"||S.tab==="evals",typing=document.activeElement&&document.activeElement.tagName==="INPUT"&&main.contains(document.activeElement);
+   if((first||tabsChanged||(rtChanged&&liveTab))&&!typing){renderTab();}}
+ }).catch(function(e){S.err="Cannot reach the lsf server: "+e.message;renderHeader();if(!S.state){renderTab();}});}
+window.addEventListener("hashchange",function(){var t=tabFromHash();if(t!==S.tab){S.tab=t;S.sig="";render();}});
+document.getElementById("ed").addEventListener("change",function(e){S.editor=e.target.value;store("editor",S.editor);renderTab();});
+document.getElementById("ws").addEventListener("change",function(e){S.wsroot=e.target.value.trim();store("root",S.wsroot);renderTab();});
+S.editor=store("editor");S.wsroot=store("root");
+render();poll();setInterval(poll,2500);
+setInterval(function(){if(!S.state){return;}renderHeader();var p=document.getElementById("pclk"),op=S.state.runtime.status&&S.state.runtime.status.open_phase;
+ if(p&&op){p.textContent=clock(op.elapsed_minutes*60+(Date.now()-S.gotAt)/1000);}},1000);
+})();
+</script>
+</body>
+</html>

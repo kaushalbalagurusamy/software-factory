@@ -1,0 +1,16 @@
+schema_version: 1
+id: company-context-ignores-sector-regulator-clean
+kind: clean
+twin: company-context-ignores-sector-regulator-planted
+brief: |
+  A regional savings bank wants a chat assistant inside its mobile banking app. Account holders use
+  it; the bank pays for it from its digital channels budget.
+  Requirements:
+  - Answer questions about balances, recent transactions and fees.
+  - Let customers dispute a card transaction from the chat.
+  - The bank is supervised by its banking and consumer financial regulators; the dispute flow must
+    meet their error-resolution and disclosure duties, reviewed by the bank's compliance team
+    before launch.
+  - Success: 30% of routine support calls move to chat within a quarter.
+expect:
+  none_from_lens: true

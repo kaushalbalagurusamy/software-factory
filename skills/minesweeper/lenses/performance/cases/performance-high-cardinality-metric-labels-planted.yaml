@@ -1,0 +1,17 @@
+schema_version: 1
+id: performance-high-cardinality-metric-labels-planted
+kind: planted
+twin: performance-high-cardinality-metric-labels-clean
+brief: |
+  Northwind Payments - checkout API observability
+
+  - The checkout API exposes request counts, error counts and latency histograms.
+  - On-call engineers need to debug individual failed checkouts.
+  - Every metric is labelled with the customer id, the cart id and the request id so engineers can filter the dashboards down to a single checkout.
+  - Alerts fire when the 5xx rate exceeds 1% for 5 minutes.
+  - Load model: peak 2,000 requests per second, payloads under 20 KB, up to 5,000 concurrent sessions.
+  - Latency is measured at the API edge; infrastructure and data-transfer cost must stay under $0.02 per active user per month.
+expect:
+  traps:
+  - performance.high-cardinality-metric-labels
+  min_severity: medium

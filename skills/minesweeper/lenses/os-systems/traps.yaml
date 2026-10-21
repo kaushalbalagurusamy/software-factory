@@ -1,0 +1,126 @@
+schema_version: 1
+traps:
+  - id: os-systems.ephemeral-port-exhaustion
+    aliases: [PERF-05]
+    title: New outbound connection per request exhausts the ephemeral port range
+    kind: requirement
+    cues:
+      - "open a fresh connection to the downstream service for each incoming request"
+      - "create a new HTTP client per webhook call"
+      - "connect to the database inside every handler, no pooling needed"
+      - "close the socket after each call to keep things stateless"
+      - "thousands of requests per second, each calling the partner API"
+    principle: >-
+      An outbound TCP or UDP socket without an explicit bind takes a local port from the ephemeral range
+      (Linux default 32768-60999). When every port in the range is in use for a given destination, connect()
+      fails with EADDRNOTAVAIL. Actively closed TCP connections stay in TIME-WAIT (2 MSL in RFC 9293), which
+      limits the rate of connection reuse, so a sustained rate of new connections times the TIME-WAIT duration
+      can exceed the range.
+    sources: [kernel-ip-sysctl, man-connect2, rfc9293]
+    severity:
+      default: high
+      blast_radius: Every outbound call from the host fails once the range is consumed; the service stops serving at peak load.
+    remediation:
+      safe_route: Reuse long-lived connections through a shared client or connection pool with keep-alive (and a server-side pooler for databases); bound concurrency per destination.
+      invariant: New outbound connections per second times the TIME-WAIT duration stays well below the configured ephemeral range per destination; pool size and keep-alive are stated.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      The report's "65,535 ports per IP tuple" is the whole 16-bit port space, not the Linux default ephemeral
+      range (32768-60999, about 28k ports). Its "60-120 s" TIME_WAIT and "locks up within 3 seconds" are not
+      confirmed by these sources; the actual TIME-WAIT length on a host must be read from the kernel, and the
+      exhaustion time computed from the brief's rate, not quoted.
+  - id: os-systems.fd-limit-exhaustion
+    aliases: []
+    title: Per-request sockets or files exceed the process file-descriptor limit
+    kind: requirement
+    cues:
+      - "keep a socket open per connected client"
+      - "open a file handle for every upload and process it later"
+      - "hold one connection per tenant for the life of the process"
+      - "support 100k concurrent websocket clients on one node"
+    principle: >-
+      RLIMIT_NOFILE caps the descriptors a process can open; attempts to exceed it fail with EMFILE. Every
+      socket, pipe and open file counts against the same limit.
+    sources: [man-getrlimit2]
+    severity:
+      default: high
+      blast_radius: New connections and file opens fail with "too many open files"; accept loops spin and the service refuses traffic.
+    remediation:
+      safe_route: Size the descriptor budget from the brief's concurrency, raise the soft and hard limits deliberately in the deployment, pool and close handles, and shed load before the limit.
+      invariant: Peak concurrent descriptors per process (clients + upstream connections + files) is computed and is below RLIMIT_NOFILE with headroom; exceeding it triggers load shedding, not crashes.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Second half of report seed PERF-05 (alias held by os-systems.ephemeral-port-exhaustion).
+  - id: os-systems.memory-limit-oom-kill
+    title: Worker memory budget below peak resident set; the OOM killer ends the process
+    kind: requirement
+    cues:
+      - "run each job in a small container, memory is not a concern"
+      - "load the whole dataset into memory for speed"
+      - "the function has 512 MB, which should be plenty"
+      - "scale out by running more workers on the same host"
+      - "process uploads of any size"
+    principle: >-
+      A cgroup's memory.max is a hard limit: when usage reaches it and cannot be reclaimed, the kernel invokes
+      the OOM killer in that cgroup, and the victim is chosen against that configured limit. Peak resident
+      memory per worker times workers per host must fit the limit.
+    sources: [kernel-cgroup-v2, man-proc-oom]
+    severity:
+      default: high
+      blast_radius: Workers are SIGKILLed mid-request under load, causing crash loops, lost work and retries that add more load.
+    remediation:
+      safe_route: Bound input size and per-worker concurrency, stream instead of loading whole inputs, and set the memory limit from a measured peak RSS with headroom.
+      invariant: Max input size and per-worker concurrency are stated; measured peak RSS per worker times workers per host is below the memory limit with headroom; oversize input is rejected before allocation.
+      spec_section: capacity-physics
+    checks: [calc.memory]
+    status: verified
+    verified_on: "2026-10-14"
+  - id: os-systems.thread-or-process-per-request
+    title: Unbounded thread or process per request hits task limits and stack memory
+    kind: requirement
+    cues:
+      - "spawn a new thread for every incoming connection"
+      - "fork a worker process per job"
+      - "start a background thread for each request so nothing blocks"
+      - "no limit on parallel tasks"
+    principle: >-
+      Thread creation fails with EAGAIN once RLIMIT_NPROC or the system thread limit is reached, and each
+      thread reserves a stack whose default size comes from RLIMIT_STACK. Per-request threads or processes
+      grow with load, not with capacity.
+    sources: [man-pthread-create3]
+    severity:
+      default: high
+      blast_radius: Under a burst the service cannot create threads, requests fail, and memory is consumed by stacks rather than work.
+    remediation:
+      safe_route: Use a bounded worker pool or an event loop with an explicit admission queue and backpressure.
+      invariant: The number of threads or processes is bounded by configuration independent of request rate; excess requests queue (bounded) or are rejected.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+  - id: os-systems.page-cache-as-free-memory
+    title: Brief assumes file cache is free memory outside the container limit
+    kind: requirement
+    cues:
+      - "rely on the OS file cache to keep the hot files in memory"
+      - "memory-map the whole index file, it does not count toward the limit"
+      - "the cache is free, the kernel manages it"
+    principle: >-
+      Under cgroup v2 the memory controller tracks userland memory as page cache and anonymous memory, so file
+      cache and mapped files are charged to the container and compete with the heap under memory.max.
+    sources: [kernel-cgroup-v2]
+    severity:
+      default: medium
+      blast_radius: Cache hit rates collapse or the container hits its limit when file working sets grow; latency and OOM behaviour differ from the developer's machine.
+    remediation:
+      safe_route: Budget file working set inside the container memory limit, or size the cache explicitly in the application with a bound.
+      invariant: The memory budget lists heap, page cache working set and mapped files separately and their sum fits the limit.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"

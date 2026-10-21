@@ -1,6 +1,6 @@
 id: test
 description: Authors evals before implementation and runs the suites; never edits application code.
-model: opus
+model: sonnet
 core_tools: [Read, Glob, Grep, Write, Edit, Bash]
 disallowed_tools: []
 skills: [eval-designer, deploy-verify, "superpowers:verification-before-completion", langfuse]

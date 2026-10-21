@@ -354,6 +354,27 @@ lists items flagged `needs_judgment`.
   directories, or anything with unique commits. Deleting a branch still needs the user's say-so.
 - `apply` without `--execute` is a dry-run. Never pass `-f -f` to `git worktree remove`.
 
+## Lite and auto variants, and lsf features sf shares
+
+`/lsf` is this loop made faster, shallower and with fewer gates (one-hour live sessions, offline dashboard, Python 3.9 and git
+only). `/asf` and `/alsf` are the same two loops run fully automatically from a business PRD plus a repo or greenfield, with
+no human stops (see their skills). All four use the same stage names, artifacts and `docs/` conventions, so events and
+documents read the same across them. Everything below is additive to the stages above; nothing replaces an sf gate.
+
+| lsf feature | In sf |
+|---|---|
+| Hash-chained stop ledger: `request`, `release`, `supersede` | `sf hitl request|status|release|supersede`. `supersede --name OLD --by-stop NEW --by human:<ref>` retires an open stop when a later stop over the same ground was released; a person at a terminal only, and denied to every agent role by the `one_way_door_patterns` guard |
+| Intake first: greenfield or brownfield, owned remote, brief saved verbatim | Do it before stage 1: ask for the PRD and for greenfield or brownfield; brownfield needs the source repo and baseline; record provenance and remotes and the brief verbatim |
+| Phase clock, budget, telemetry, cost | Use `lsf` beside sf for a timed run: `lsf init`, `lsf phase start|end`, `lsf budget`, `lsf cost add`. Its phases map to sf stages (`0-intake`=0, `2-research`=1, `3-experiments`=2, `6-decide`=3, `4-prd`=4, `5-evals`=5, `7-implement`=6, `8-qa`=7, `9-review`=8, `10-docs`=10) |
+| Offline dashboard (`lsf serve`) | The human starts it in their own terminal; the agent never runs it or reads its token. Tabs: human stops, telemetry, evals and bugs with stored error logs, git with rollback, architecture (nesting dolls), load simulator, ELI12 docs |
+| Error logs and rollback | `lsf event STAGE fail --log-file F` stores a redacted log the dashboard links; `lsf rollback SHA` adds a revert commit, never rewrites history |
+| Load simulator | Declare services in `docs/load-model.json` during brownfield exploration; capacity figures are sourced or marked unknown, never invented |
+| Nesting-dolls architecture page at review | Build `docs/explorer/*.model.json` and `.html` at stage 8 and pass `--editor` so diagram nodes open files |
+| ELI12 docs check | Run the `eli12-docs` check at stage 10; findings are stale docs |
+
+When to choose which: `/sf` for long, rigorous builds; `/lsf` for a timed, watched session; `/asf` or `/alsf` when nobody is
+available to answer stops.
+
 ## Checks that catch the common failures
 
 - Did anything get labelled "a fixable limit" without being measured? Measure it.

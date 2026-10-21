@@ -14,6 +14,8 @@ import yaml
 
 from factory.agents.roles import MAX_TOOLS_LIMIT, ROLE_IDS, RoleSpec
 
+# Mirrors docs/hooks/roles.md `qa_paths`.
+QA_PATHS = ("docs/slices/*/qa-notes.md", "docs/slices/*/qa-feedback/*.md", ".sf/slices/**")
 AGENT_PATH = ".claude/agents/{role}.md"
 HOOK_COMMAND = "python -m factory.hooks {hook_id}"
 
@@ -145,6 +147,7 @@ def _folders(profile: Any, role: RoleSpec) -> list[str]:
         "design_dirs": list(p.design_dirs),
         "audit_dir": [p.audit_dir],
         "eval_paths": list(p.eval),
+        "qa_paths": list(QA_PATHS),
     }[role.writes]
 
 
@@ -243,9 +246,9 @@ def _generate_one(profile: Any, role: RoleSpec) -> str:
 
 
 def generate_agents(profile: Any, roles: Mapping[str, RoleSpec]) -> dict[str, str]:
-    """Return ``{'.claude/agents/<role>.md': text}`` for all seven roles, byte-identical per input."""
+    """Return ``{'.claude/agents/<role>.md': text}`` for every role, byte-identical per input."""
     if set(roles) != set(ROLE_IDS):
-        raise GenerationError("roles must contain exactly the seven role ids")
+        raise GenerationError("roles must contain exactly the eight role ids")
     out: dict[str, str] = {}
     for rid in ROLE_IDS:
         spec = roles[rid]

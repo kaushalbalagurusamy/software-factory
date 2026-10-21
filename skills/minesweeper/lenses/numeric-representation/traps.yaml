@@ -1,0 +1,118 @@
+schema_version: 1
+traps:
+  - id: numeric-representation.money-in-binary-float
+    aliases: [TCS-03]
+    title: Money, premiums or ledger balances stored and summed in binary floating point
+    kind: requirement
+    cues:
+      - "store balances as double"
+      - "amount: float"
+      - "use the default number type for prices"
+      - "keep premiums in float64 columns and sum them across workers"
+      - "JSON number for currency amounts"
+      - "round at display time"
+    principle: >-
+      Most decimal fractions cannot be represented exactly in binary floating point, so stored amounts
+      are approximations (Python tutorial; Goldberg 1991). Exact decimal arithmetic is preferred in
+      accounting because binary differences prevent reliable equality and accumulate (Python decimal docs).
+    sources: [python-floatingpoint, python-decimal, goldberg-1991]
+    severity:
+      default: high
+      blast_radius: Ledgers that do not reconcile to the cent, audit failures, and totals that differ between reports.
+    remediation:
+      safe_route: Store integer minor units (with currency and scale) or a fixed-scale decimal type; perform arithmetic in decimal with an explicit rounding mode at defined points.
+      invariant: No monetary value is ever held in a binary float; every division or allocation states its rounding rule and where the remainder goes, and the ledger sums exactly.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Report claim, corrected: the seed pairs integer minor units with Kahan summation; Kahan summation
+      reduces float error but does not make float money exact, and is unnecessary for integer sums.
+  - id: numeric-representation.float-equality
+    title: Exact equality or fixed-epsilon comparison on computed floating-point values
+    kind: requirement
+    cues:
+      - "if the computed total equals the expected total"
+      - "assert result == 0.3"
+      - "treat values within 0.0001 as equal"
+      - "deduplicate readings with identical float values"
+      - "rubric: output must match the reference value exactly"
+    principle: >-
+      Summing values that are not exactly representable may not give the exact expected value (Python
+      tutorial), and replacing equality with a fixed error bound raises as many questions as it answers
+      (Goldberg 1991).
+    sources: [python-floatingpoint, goldberg-1991]
+    severity:
+      default: medium
+      blast_radius: Flaky tests, false mismatches in reconciliation, and branch logic that flips on the last bit.
+    remediation:
+      safe_route: Compare in an exact domain (integers, decimals, rationals) where exactness matters; otherwise state a tolerance that is relative and justified by the computation's error, and test both sides of it.
+      invariant: Every float comparison in the spec names its tolerance and why; exact-match acceptance criteria apply only to exact types.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+  - id: numeric-representation.order-dependent-float-aggregation
+    title: Reproducible totals demanded from parallel or reordered floating-point sums
+    kind: requirement
+    cues:
+      - "aggregate in parallel and the total must match the batch report"
+      - "map-reduce sum of float values across shards"
+      - "results must be bit-identical across runs"
+      - "sum the scores in whatever order the workers finish"
+    principle: >-
+      Floating-point addition is not associative: due to roundoff the associative laws of algebra do not
+      necessarily hold (Goldberg 1991), so a sum depends on reduction order.
+    sources: [goldberg-1991]
+    severity:
+      default: medium
+      blast_radius: Totals differ between runs and between the streaming and batch paths; reconciliation and regression tests fail intermittently.
+    remediation:
+      safe_route: Use exact types for totals that must reconcile; otherwise fix the reduction order (sorted or tree order) or use compensated or exact summation, and state the reproducibility requirement.
+      invariant: Any total that must reproduce is computed in an exact type or a fixed, documented reduction order.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+  - id: numeric-representation.naive-local-timestamps
+    title: Timestamps stored or compared as local time without an offset or zone
+    kind: requirement
+    cues:
+      - "store the time as the user sees it"
+      - "save dates in server local time"
+      - "schedule the job for 02:30 every day"
+      - "timestamp column without time zone"
+      - "compare event times from offices in different countries"
+    principle: >-
+      A naive timestamp cannot be unambiguously placed relative to other times (Python datetime docs),
+      and the UTC instant of a local time can depend on administrative daylight-saving decisions (RFC 3339).
+    sources: [python-datetime, rfc3339]
+    severity:
+      default: high
+      blast_radius: Events misordered or duplicated across zones and DST changes; jobs skipped or run twice; billing periods off by an hour or a day.
+    remediation:
+      safe_route: Store instants in UTC (or with an explicit offset per RFC 3339); keep the user's IANA time zone separately for display and for future local-time schedules; recompute future local events from the zone rule.
+      invariant: Every stored instant is unambiguous (UTC or offset); local wall-clock times are stored only with their zone and only where the business rule is local.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+  - id: numeric-representation.fixed-width-counter-overflow
+    title: Counters, ids or sums held in a fixed-width integer with no stated range
+    kind: requirement
+    cues:
+      - "int id column"
+      - "32-bit counter for total requests"
+      - "store amounts in cents as an int"
+      - "sequence number wraps are not expected"
+      - "milliseconds since start held in an int"
+    principle: >-
+      Fixed-width integer arithmetic in mainstream languages wraps silently: the integer operators do
+      not indicate overflow or underflow in any way (Java Language Specification 4.2.2).
+    sources: [jls-integer-ops]
+    severity:
+      default: high
+      blast_radius: Ids collide, counters go negative, sums wrap to wrong values without an error, often years after launch.
+    remediation:
+      safe_route: Size every counter, id and sum from its maximum lifetime value (usually 64-bit), use checked arithmetic where overflow must fail loudly, and test at the boundary.
+      invariant: Each integer field states its maximum value over the system lifetime and its width covers it with margin; overflow raises rather than wraps.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"

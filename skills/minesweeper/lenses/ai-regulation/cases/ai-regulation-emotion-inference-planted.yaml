@@ -1,0 +1,16 @@
+schema_version: 1
+id: ai-regulation-emotion-inference-planted
+kind: planted
+twin: ai-regulation-emotion-inference-clean
+brief: |
+  Acme Remote Workforce Suite (customers in Germany and the Netherlands)
+
+  1. Time tracking and project dashboards for remote teams.
+  2. Use the laptop camera during working hours to estimate each employee's stress and frustration
+     level, and show managers a weekly wellbeing score per person.
+  3. Managers can export reports as PDF.
+  4. Classified as a minimal-risk system under the EU AI Act apart from the wellbeing feature.
+  5. Single sign-on with the customer's identity provider.
+expect:
+  traps: [ai-regulation.emotion-inference-work-education]
+  min_severity: critical

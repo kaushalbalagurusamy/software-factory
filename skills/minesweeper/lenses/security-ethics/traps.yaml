@@ -1,0 +1,144 @@
+schema_version: 1
+traps:
+  - id: security-ethics.exploit-and-dump-to-prove
+    aliases: [LEG-05]
+    title: Exploiting a found vulnerability and exposing real records to prove it
+    kind: requirement
+    cues:
+      - "show a sample of the leaked rows on the dashboard as proof"
+      - "pull real user records to demonstrate exploitability"
+      - "the report must include actual credentials or PII found"
+      - "extract a table from the vulnerable host so the client believes us"
+      - "rubric: bonus points for demonstrating real data access"
+    principle: >-
+      Obtaining information from a computer without authorisation, or beyond authorised access, is the conduct
+      18 U.S.C. 1030(a)(2) prohibits. Good-faith testing rules use an exploit only to confirm a vulnerability's
+      presence, never to compromise or exfiltrate data, and require the tester to stop and not disclose any
+      sensitive data met. Exposing personal data is itself a personal data breach under GDPR Article 4(12), which
+      Article 32 obliges controllers to guard against and Article 33 obliges them to notify.
+    sources: [usc-18-1030, cisa-vdp-template, gdpr]
+    severity:
+      default: critical
+      blast_radius: >-
+        Real people's data is exposed (often publicly), the operator commits unauthorised access, and the data owner
+        faces breach notification duties; the "proof" becomes the incident.
+    remediation:
+      safe_route: >-
+        Prove exploitability with a benign, non-destructive check (version fingerprint, canary value, a read of a
+        synthetic record planted by the authorised owner) and report it privately; never read, store or display
+        third-party records.
+      invariant: >-
+        The tool never retrieves, retains or displays data belonging to the tested system's users; when sensitive data
+        is encountered it stops, discards it, and notifies the authorised owner through a private channel.
+      spec_section: legal-terms
+    checks: []
+    status: verified
+    verified_on: "2026-10-15"
+    notes: >-
+      Seed LEG-05 (recorded in aliases, as sibling lenses do). The seed also bundles scanning third-party hosts
+      (security-ethics.unauthorised-third-party-scanning) and public exposure before a fix
+      (security-ethics.public-disclosure-before-fix). Report claims not carried: GDPR Article 9 (only relevant if the
+      records are special-category) and a "typically 90 days" embargo (no primary source quoted; CISA states 45 days
+      for unresponsive vendors). CFAA reach and GDPR applicability depend on jurisdiction: disposition ask-owner,
+      but no jurisdiction makes publishing others' records a valid proof.
+  - id: security-ethics.unauthorised-third-party-scanning
+    title: Scanning or probing systems the operator is not authorised to test
+    kind: requirement
+    cues:
+      - "scan any domain a user types in"
+      - "crawl the internet for exposed instances and test them"
+      - "probe our partners' and customers' hosts too"
+      - "auto-expand scope to every subdomain and connected service found"
+      - "attack-surface discovery across third-party infrastructure"
+    principle: >-
+      Testing is lawful and ethical only on systems the tester is authorised to test. 18 U.S.C. 1030 prohibits
+      unauthorised access that obtains information and knowingly transmitting code that intentionally causes damage
+      without authorisation; the federal disclosure-policy template treats anything not expressly listed as out of
+      scope and not authorised, and CERT/CC says research should be done on equipment the finder is authorised to use.
+    sources: [usc-18-1030, cisa-vdp-template, cert-cvd-discovery]
+    severity:
+      default: critical
+      blast_radius: >-
+        Every scan of an unconsenting host is potential unauthorised access or damage; scanners are blocklisted,
+        abuse reports reach the hosting provider, and the operator carries criminal and civil exposure.
+    remediation:
+      safe_route: >-
+        Restrict active testing to targets whose owner has proven control and consented (DNS TXT or HTTP challenge
+        token plus written scope), with an explicit allowlist; offer passive, public-information checks for anything else.
+      invariant: >-
+        No active probe is sent to a host that is not on a verified, owner-authorised scope list, and scope never
+        expands automatically to connected or discovered systems.
+      spec_section: legal-terms
+    checks: []
+    status: verified
+    verified_on: "2026-10-15"
+    notes: >-
+      Part of seed LEG-05 (alias held by security-ethics.exploit-and-dump-to-prove). Ownership-verification tokens are
+      an engineering safeguard, not a legal requirement. Where "authorisation" is contested (terms of service, shared
+      hosting, a client's third-party providers) the disposition is ask-owner.
+  - id: security-ethics.weaponised-exploit-beyond-proof
+    title: Shipping working exploit payloads that persist, pivot or damage instead of confirming presence
+    kind: requirement
+    cues:
+      - "auto-generate a working exploit for each CVE found and run it"
+      - "drop a persistent agent on hosts we get into"
+      - "pivot to adjacent systems to show full impact"
+      - "one-click attack mode for the red-team dashboard"
+      - "rubric: higher score for deeper compromise"
+    principle: >-
+      Good-faith testing uses exploits only to the extent necessary to confirm a vulnerability's presence; it does not
+      compromise or exfiltrate data, establish persistent access, or pivot to other systems. Knowingly transmitting
+      code that intentionally causes damage without authorisation is prohibited by 18 U.S.C. 1030(a)(5)(A).
+    sources: [cisa-vdp-template, usc-18-1030]
+    severity:
+      default: critical
+      blast_radius: >-
+        A tool that weaponises findings becomes an attack tool: damage, persistence and lateral movement on real systems,
+        and a ready-made capability for anyone who gets the tool.
+    remediation:
+      safe_route: >-
+        Confirm with the least intrusive check that proves presence; keep any exploit development inside an owned lab
+        against owned replicas; gate deeper testing on a signed rules-of-engagement for named, owned targets.
+      invariant: >-
+        Against any system, the tool's actions stop at confirming presence: no persistence, no lateral movement, no
+        destructive or data-reading payload, unless a written engagement for that exact owned target allows it.
+      spec_section: legal-terms
+    checks: []
+    status: verified
+    verified_on: "2026-10-15"
+    notes: Authorised penetration tests may go further under a signed engagement; whether one covers a given action is ask-owner.
+  - id: security-ethics.public-disclosure-before-fix
+    title: Publishing vulnerability details before the vendor or owner has had a chance to fix them
+    kind: requirement
+    cues:
+      - "post every finding to the public feed as soon as it is found"
+      - "publish exploit details for unpatched issues to drive signups"
+      - "the leaderboard lists live vulnerable sites"
+      - "open a public issue with the proof of concept on the upstream repo"
+      - "zero-day feed for subscribers"
+    principle: >-
+      Coordinated vulnerability disclosure gives the vendor or owner a reasonable time to resolve an issue before it
+      is disclosed publicly, synchronises release of the information with mitigations, and agrees timelines with
+      stakeholders so disclosure minimises harm. CISA publishes early (as soon as 45 days) only when a vendor is
+      unresponsive or will not set a reasonable remediation timeframe.
+    sources: [cisa-vdp-template, cisa-cvd, cert-cvd-ethics]
+    severity:
+      default: critical
+      blast_radius: >-
+        Every user of the unpatched system is exposed to attackers who read the public post before defenders can act;
+        the publisher shares responsibility for resulting compromises.
+    remediation:
+      safe_route: >-
+        Report privately to the vendor's security contact or a coordinator; publish only after a fix or an agreed
+        deadline, with mitigations; public dashboards show aggregate or remediated items only.
+      invariant: >-
+        No unremediated vulnerability detail that identifies an affected system or enables exploitation is published
+        before the agreed coordinated-disclosure date.
+      spec_section: legal-terms
+    checks: []
+    status: verified
+    verified_on: "2026-10-15"
+    notes: >-
+      Part of seed LEG-05. The seed's "typically 90 days" embargo is a common vendor practice, not a primary-source
+      rule; ISO/IEC 29147 (cited by the seed) is paywalled and its abstract page returned 403, so it is not quoted.
+      The right deadline for a given case is ask-owner.

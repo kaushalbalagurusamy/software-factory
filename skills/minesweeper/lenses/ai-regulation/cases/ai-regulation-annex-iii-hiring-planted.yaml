@@ -1,0 +1,16 @@
+schema_version: 1
+id: ai-regulation-annex-iii-hiring-planted
+kind: planted
+twin: ai-regulation-annex-iii-hiring-clean
+brief: |
+  Brightline Talent: automated hiring pipeline for EU retail chains
+
+  1. A team of agents reads CVs, runs a chat interview, and scores each applicant.
+  2. Applicants below the cut-off are rejected automatically and emailed; recruiters only see the
+     shortlist.
+  3. To save storage, scoring traces are discarded once the decision is sent.
+  4. Applicants are told the chat interviewer is an AI.
+  5. Shortlist delivered within 24 hours of the posting closing.
+expect:
+  traps: [ai-regulation.annex-iii-without-oversight-or-logs]
+  min_severity: critical

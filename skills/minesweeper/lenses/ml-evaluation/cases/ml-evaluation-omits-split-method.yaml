@@ -1,0 +1,15 @@
+schema_version: 1
+id: ml-evaluation-omits-split-method
+kind: omission
+twin: ml-evaluation-states-split-method
+brief: |
+  Product brief: demand forecasting for a bakery chain.
+  Data: daily sales per product per store for three years.
+  Stock-outs affect about 3% of product-days; the forecast must beat "same day last week".
+  Forecasts are point estimates; no probabilities are shown.
+  Requirement 1: forecast next-day demand per product per store.
+  Requirement 2: report forecast error on held-out data before launch.
+  Success: less waste and fewer stock-outs.
+expect:
+  omissions:
+  - ml-evaluation.split-method

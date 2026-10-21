@@ -1,0 +1,15 @@
+schema_version: 1
+id: realtime-transport-live-media-over-reliable-stream-clean
+kind: clean
+twin: realtime-transport-live-media-over-reliable-stream-planted
+brief: |
+  A telehealth startup - remote consultation app
+
+  - Patients and clinicians hold live video consultations from phones and laptops.
+  - Calls are one-to-one and last up to 30 minutes.
+  - Call media is sent over WebRTC (SRTP over UDP) with Opus loss concealment and an adaptive jitter buffer; chat and call control use a websocket.
+  - Clinicians can share a document during the call.
+  - Network assumptions: mobile and home Wi-Fi with up to 3% packet loss, 150 ms round trip, 40 ms jitter; path MTU discovered, 1,200-byte datagrams.
+  - End-to-end latency budget: 400 ms mouth-to-ear, split as capture 20, encode 20, network 150, jitter buffer 80, processing 100, playout 30.
+expect:
+  none_from_lens: true

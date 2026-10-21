@@ -1,0 +1,136 @@
+schema_version: 1
+traps:
+  - id: licensing.gpl-in-distributed-proprietary
+    aliases: [LEG-04, LEG-04a]
+    title: GPL-licensed code shipped inside a closed-source distributed product
+    kind: dependency
+    cues:
+      - "embed the GPL library in our desktop app / SDK / appliance"
+      - "statically link this open-source component into the closed binary"
+      - "ship the on-prem installer with the bundled GPL engine"
+      - "customers receive the agent binary; source stays private"
+      - "pick whichever library scores best on the benchmark (licence not stated, product is distributed)"
+    principle: >-
+      GPLv3 obligations attach when a covered work is conveyed (any propagation that lets others make or
+      receive copies). Conveying a work based on the program requires licensing the whole work under the
+      GPL and providing Corresponding Source with object code. Pure network use without transferring a copy
+      is not conveying under GPLv3, so the trigger is distribution (installers, SDKs, mobile apps, devices,
+      on-prem images), not hosted SaaS use.
+    sources: [gpl-3-0]
+    severity:
+      default: critical
+      blast_radius: >-
+        The distributed product must either be released under the GPL with source, or the component removed;
+        otherwise every shipped copy infringes. Hits on-prem customers, app-store builds and device images.
+    remediation:
+      safe_route: >-
+        Inventory every dependency's SPDX licence before choosing it; for distributed artefacts, use
+        permissive or weak-copyleft components, obtain a commercial licence, or keep the GPL component as a
+        separate program the product does not combine with (owner/counsel decides where the boundary is).
+      invariant: >-
+        No component under a strong-copyleft licence is included in any artefact conveyed to third parties
+        unless the whole artefact's licensing has been approved for that; a CI licence gate fails the build otherwise.
+      spec_section: legal-terms
+    checks: [licence.package, licence.spdx, licence.github, licence.family]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Report claim corrected: the report says GPLv3 is triggered by closed-source SaaS backends. GPLv3 has no
+      network-use clause (Section 0 says mere network interaction is not conveying); the network trigger is
+      AGPLv3 Section 13 (see licensing.agpl-modified-network-service). Whether a given combination is a single
+      "work based on the Program" is a legal question: disposition ask-owner.
+  - id: licensing.agpl-modified-network-service
+    aliases: [LEG-04b]
+    title: Modified AGPL component run as a network service without offering its source
+    kind: dependency
+    cues:
+      - "fork the AGPL server and patch it for our multi-tenant SaaS"
+      - "keep our modifications private; users only hit the API"
+      - "customise the open-source engine and host it for customers"
+      - "it's server-side so the licence does not matter"
+    principle: >-
+      AGPLv3 Section 13: if you modify the program, your modified version must prominently offer every user
+      interacting with it remotely over a network the Corresponding Source of that version, at no charge.
+      Running a modified AGPL program as a service therefore obliges publishing the modified source to its users.
+    sources: [agpl-3-0, gpl-3-0]
+    severity:
+      default: critical
+      blast_radius: >-
+        Proprietary modifications to the component become publishable to every network user; non-compliance is
+        infringement and terminates the licence.
+    remediation:
+      safe_route: >-
+        Run the AGPL component unmodified behind a clear interface, upstream or publish the modifications with
+        a source offer, buy a commercial licence, or pick a permissively licensed alternative.
+      invariant: >-
+        Any modified AGPL component reachable by remote users ships with a working Corresponding Source offer,
+        or the component is unmodified, or it is replaced.
+      spec_section: legal-terms
+    checks: [licence.package, licence.spdx, licence.github, licence.family]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Whether unmodified use or a separate-program boundary avoids Section 13 in a given design is a legal call; disposition ask-owner.
+  - id: licensing.source-available-managed-service
+    aliases: [LEG-04c]
+    title: Offering a source-available (SSPL / BUSL-family) component as a hosted service
+    kind: dependency
+    cues:
+      - "offer a managed, multi-tenant hosted version of the open database"
+      - "resell the source-available engine as our cloud service"
+      - "wrap the server in our control plane and charge per cluster"
+      - "it's on the public repo, so we can host it commercially"
+      - "use the latest release in production (licence is BUSL-family)"
+    principle: >-
+      SSPL Section 13 requires anyone who makes the program's functionality available to third parties as a
+      service to release the Service Source Code, defined to include the management, UI, API, automation,
+      monitoring, backup, storage and hosting software used to run it. BUSL 1.1 grants only non-production use
+      unless the licensor's Additional Use Grant permits more; other use requires a commercial licence until
+      the Change Date. These are not OSI open-source licences.
+    sources: [sspl-1-0, busl-1-1]
+    severity:
+      default: critical
+      blast_radius: >-
+        A managed offering either has to publish its whole operating stack (SSPL) or is unlicensed production use
+        (BUSL outside the Additional Use Grant); the service may have to be withdrawn.
+    remediation:
+      safe_route: >-
+        Read the exact licence of the exact version in use (projects change licences between releases), check
+        the Additional Use Grant and Change Date for BUSL-family, and choose an OSI-licensed version or fork, a
+        commercial licence, or a different component.
+      invariant: >-
+        Every hosted component's licence and version are pinned in the inventory, and no source-available
+        component is offered as a service outside what its licence text grants.
+      spec_section: legal-terms
+    checks: [licence.package, licence.spdx, licence.github, licence.family]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Name licence families, not vendors: several infrastructure projects have moved between source-available
+      and open-source licences across versions, so the licence must be read per version at sweep time.
+      BUSL Additional Use Grants differ per project and are not in the SPDX template text.
+  - id: licensing.non-commercial-asset-in-paid-product
+    title: Non-commercial (CC BY-NC or research-only) weights or datasets used in a revenue product
+    kind: dependency
+    cues:
+      - "fine-tune on the public research dataset and sell the model"
+      - "use the best open model weights from the leaderboard in the paid tier"
+      - "the dataset is free to download, so we can ship it"
+      - "pretrained checkpoint released for research use"
+    principle: >-
+      CC BY-NC 4.0 grants reproduction and sharing (and adapted material) for NonCommercial purposes only,
+      defined as not primarily intended for or directed towards commercial advantage or monetary compensation.
+      Research-only model licences restrict use in the same direction; free download is not a commercial licence.
+    sources: [cc-by-nc-4-0]
+    severity:
+      default: critical
+      blast_radius: The paid product relies on an asset it has no licence to use commercially; retraining or withdrawal follows.
+    remediation:
+      safe_route: >-
+        Record the licence of every model checkpoint and dataset; use commercially licensed or permissive assets
+        for anything that ships or earns revenue, or negotiate a licence.
+      invariant: No asset whose licence restricts commercial use is used in training, fine-tuning, or serving for a paid product.
+      spec_section: legal-terms
+    checks: [licence.spdx, licence.github, licence.family]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Bespoke model licences (responsible-use or research-only) are not SPDX-listed; read the model card's licence text.

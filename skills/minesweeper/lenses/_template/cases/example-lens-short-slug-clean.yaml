@@ -1,0 +1,8 @@
+schema_version: 1
+id: example-lens-short-slug-clean
+kind: clean
+twin: example-lens-short-slug-planted
+brief: |
+  The same brief with only the trap removed or made safe, so any finding here is a false alarm.
+expect:
+  none_from_lens: true

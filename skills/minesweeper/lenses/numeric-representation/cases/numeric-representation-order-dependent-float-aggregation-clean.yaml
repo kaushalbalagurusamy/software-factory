@@ -1,0 +1,16 @@
+schema_version: 1
+id: numeric-representation-order-dependent-float-aggregation-clean
+kind: clean
+twin: numeric-representation-order-dependent-float-aggregation-planted
+brief: |
+  Product brief: energy usage analytics for a building operator.
+  Meters report kilowatt-hour readings every 15 minutes as floating-point values.
+  All timestamps are stored in UTC; each customer's IANA time zone is stored for display.
+  Ids and counters are 64-bit integers; arithmetic on them fails loudly on overflow.
+  Requirement 1: a streaming job keeps a running monthly total per building.
+  Requirement 2: a batch job recomputes the monthly totals overnight from raw readings.
+  Requirement 3: readings are stored as integer watt-hours; both jobs sum integers so batch and streaming totals match exactly and the report is blocked only on a real difference.
+  Requirement 4: building managers see a monthly usage chart.
+  Success: monthly reports go out on the first working day.
+expect:
+  none_from_lens: true

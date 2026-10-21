@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "minesweeper/sources.v1.json",
+  "title": "Source list (lenses/<id>/sources.yaml)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "sources"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "url", "adapter", "tier", "kind"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+          "title": {"type": "string"},
+          "url": {"type": "string", "pattern": "^https?://"},
+          "adapter": {"type": "string"},
+          "tier": {"enum": ["primary", "secondary", "community"]},
+          "kind": {"enum": ["statute", "regulation", "licence", "terms", "standard", "spec", "paper", "advisory", "docs", "guidance", "case-law", "dataset", "report"]},
+          "freshness_days": {"type": "integer", "minimum": 1},
+          "quotes": {
+            "description": "Verbatim excerpts that decide a trap. Required on every source of a verified trap.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["text", "locator", "fetched"],
+              "properties": {
+                "text": {"type": "string", "minLength": 10},
+                "locator": {"type": "string", "description": "Article, section, clause or heading."},
+                "fetched": {"type": "string", "format": "date"},
+                "supports": {"type": "array", "items": {"type": "string"}, "description": "Trap ids this quote decides."}
+              }
+            }
+          },
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

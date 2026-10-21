@@ -1,0 +1,14 @@
+schema_version: 1
+id: performance-percentile-slo-without-load-model-clean
+kind: clean
+twin: performance-percentile-slo-without-load-model-planted
+brief: |
+  A logistics marketplace - shipment quote API
+
+  - Shippers request a price quote for a shipment between two postcodes.
+  - Quotes combine carrier rate cards stored in our database.
+  - Quotes must return within 200 ms at p99 measured at the API edge, under a peak of 1,500 quotes per second with requests under 5 KB and up to 2,000 concurrent clients.
+  - Shippers can save quotes for 7 days.
+  - Infrastructure cost must stay under $0.001 per quote.
+expect:
+  none_from_lens: true

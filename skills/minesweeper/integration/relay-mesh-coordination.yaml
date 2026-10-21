@@ -1,0 +1,26 @@
+schema_version: 1
+id: relay-mesh-coordination
+kind: integration
+brief: |
+  Harbor Relay: coordination layer for a fleet of field devices owned by different operators
+
+  1. Devices exchange commands through community-run relay nodes; any operator may run a relay.
+  2. Use Raft for agreement on the command log so every device applies the same commands in the
+     same order, regardless of which relays forward them.
+  3. Relays forward messages as-is; signing adds latency, so skip it in the first release.
+  4. Order commands by the relay's wall-clock receive timestamp.
+  5. Each command must be delivered exactly once to every device.
+  6. Billing per command is computed in JavaScript numbers (dollars, two decimals).
+  7. Ship in six weeks; Byzantine behaviour is out of scope for v1.
+expect:
+  traps:
+    - distributed-systems.cft-in-byzantine-setting
+    - distributed-systems.unauthenticated-relay
+    - distributed-systems.wall-clock-ordering
+    - distributed-systems.exactly-once-delivery
+    - numeric-representation.money-in-binary-float
+  min_severity: critical
+notes: >-
+  Multi-lens: untrusted relays make the fault model Byzantine, so the out-of-scope line in item 7
+  must be refused (consensus-trust and byzantine-faults are never out of scope). Item 6 crosses into
+  numeric-representation.

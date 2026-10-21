@@ -1,0 +1,15 @@
+schema_version: 1
+id: cryptography-pq-signature-size-mtu-planted
+kind: planted
+twin: cryptography-pq-signature-size-mtu-clean
+brief: |
+  A utility deploys smart meters that broadcast signed readings over a low-power radio link.
+  - Each reading frame carries at most 255 bytes of payload.
+  - Readings are sent every 15 minutes.
+  - For quantum safety, replace the ECDSA signature on each frame with an ML-DSA signature while keeping
+    the single-frame message format unchanged.
+  - The head-end stores readings for billing for seven years.
+expect:
+  traps:
+  - cryptography.pq-signature-size-mtu
+  min_severity: high

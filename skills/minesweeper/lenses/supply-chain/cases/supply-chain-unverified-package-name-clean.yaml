@@ -1,0 +1,15 @@
+schema_version: 1
+id: supply-chain-unverified-package-name-clean
+kind: clean
+twin: supply-chain-unverified-package-name-planted
+brief: |
+  Acme Logistics wants an internal web tool that turns shipment CSV exports into weekly charts.
+  - Frontend in TypeScript with React; backend in Python with FastAPI.
+  - Charts must render 50k rows in under two seconds on a standard laptop.
+  - For CSV parsing use the Python standard csv module; for charts use the charting library already
+    on the approved-dependency list (checked against the registry by the platform team).
+  - Dependencies are locked with package-lock.json and a hashed requirements file; CI installs from the locks.
+  - Store uploads in the existing object bucket; delete them after 30 days.
+  - Ship behind the company single sign-on.
+expect:
+  none_from_lens: true

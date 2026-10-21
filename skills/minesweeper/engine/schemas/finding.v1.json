@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "minesweeper/finding.v1.json",
+  "title": "A finding (one entry of register.findings)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "claim_ids", "lens", "status", "route", "evidence"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^F-\\d{3,}$"},
+    "claim_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "lens": {"type": "string"},
+    "trap_id": {"type": ["string", "null"], "description": "Catalogue trap matched, or null for a novel finding."},
+    "trap_status": {"enum": ["verified", "unverified", "novel"]},
+    "cues_matched": {"type": "array", "items": {"type": "string"}},
+    "status": {"enum": ["suspect", "confirmed", "plausible", "dismissed"]},
+    "route": {"enum": ["retrieval", "grounded-research", "deep-research", "experiment", "check", "none"]},
+    "route_reason": {"type": "string"},
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "ref", "date"],
+        "properties": {
+          "kind": {"enum": ["quote", "note", "report", "experiment", "check"]},
+          "ref": {"type": "string", "description": "URL, source id, or artifact path."},
+          "quote": {"type": "string"},
+          "locator": {"type": "string"},
+          "tier": {"enum": ["primary", "secondary", "community"]},
+          "date": {"type": "string", "format": "date"}
+        }
+      }
+    },
+    "would_settle": {"type": "string", "description": "Required when status is plausible."},
+    "dismissal_reason": {"type": "string", "description": "Required when status is dismissed."},
+    "skeptic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verdict", "reason"],
+      "properties": {"verdict": {"enum": ["upheld", "dismissed", "downgraded"]}, "reason": {"type": "string"}}
+    },
+    "severity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tier", "answers"],
+      "properties": {
+        "tier": {"enum": ["critical", "high", "medium", "low"]},
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["q", "a"],
+            "properties": {"q": {"type": "string"}, "a": {"type": "boolean"}, "why": {"type": "string"}}
+          }
+        }
+      }
+    },
+    "underlying_problem": {"type": "string"},
+    "disposition": {"enum": ["comply-safely", "reframe", "decline", "ask-owner"]},
+    "owner_question": {"type": "string", "description": "Required when disposition is ask-owner."},
+    "spec_section": {"enum": ["trust-consensus", "crypto-agent-security", "capacity-physics", "verification-calibration", "legal-terms", "product-scope"]},
+    "out_of_scope_consequence": {"type": "string", "description": "Required if anyone proposes closing this as out of scope."},
+    "pass": {"type": "integer", "minimum": 1}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "confirmed"}}}, "then": {"properties": {"evidence": {"minItems": 1}}, "required": ["severity", "disposition", "underlying_problem", "spec_section"]}},
+    {"if": {"properties": {"status": {"const": "plausible"}}}, "then": {"required": ["would_settle"]}},
+    {"if": {"properties": {"status": {"const": "dismissed"}}}, "then": {"required": ["dismissal_reason"]}},
+    {"if": {"properties": {"disposition": {"const": "ask-owner"}}, "required": ["disposition"]}, "then": {"required": ["owner_question"]}}
+  ]
+}

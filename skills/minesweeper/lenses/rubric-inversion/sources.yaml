@@ -1,0 +1,69 @@
+schema_version: 1
+sources:
+  - id: manheim-2018
+    title: Manheim, Garrabrant, Categorizing Variants of Goodhart's Law (2018)
+    url: https://arxiv.org/abs/1803.04585
+    adapter: paper
+    tier: primary
+    kind: paper
+    notes: The common phrasing "when a measure becomes a target, it ceases to be a good measure" is Strathern's (1997) paraphrase, not Goodhart's own wording; do not quote it as Goodhart.
+    quotes:
+      - text: This occurs when a metric which can be used to improve a system is used to an extent that further optimization is ineffective or harmful, and is sometimes termed Goodhart's Law.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [rubric-inversion.proxy-metric-as-target]
+  - id: skalse-2022
+    title: Skalse, Howe, Krasheninnikov, Krueger, Defining and Characterizing Reward Hacking (NeurIPS 2022)
+    url: https://arxiv.org/abs/2209.13085
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: We provide the first formal definition of reward hacking, a phenomenon where optimizing an imperfect proxy reward function leads to poor performance according to the true reward function.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [rubric-inversion.proxy-metric-as-target]
+  - id: inozemtseva-2014
+    title: Inozemtseva, Holmes, Coverage Is Not Strongly Correlated with Test Suite Effectiveness (ICSE 2014)
+    url: https://doi.org/10.1145/2568225.2568271
+    adapter: paper
+    tier: primary
+    kind: paper
+    notes: ACM Digital Library returns HTTP 403 to the adapter (2026-10-14); no HTML abstract page reachable. No quote recorded, so the coverage trap stays unverified.
+  - id: sklearn-pr-example
+    title: "scikit-learn example: Precision-Recall"
+    url: https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: The precision-recall curve shows the tradeoff between precision and recall for different thresholds.
+        locator: Precision-Recall, introduction
+        fetched: "2026-10-14"
+        supports: [rubric-inversion.zero-misses-without-false-alarm-budget]
+      - text: A system with high recall but low precision returns most of the relevant items, but the proportion of returned results that are incorrectly labeled is high.
+        locator: Precision-Recall, introduction
+        fetched: "2026-10-14"
+        supports: [rubric-inversion.zero-misses-without-false-alarm-budget]
+  - id: zheng-2023
+    title: Zheng et al., Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena (NeurIPS 2023 Datasets and Benchmarks)
+    url: https://arxiv.org/abs/2306.05685
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: We examine the usage and limitations of LLM-as-a-judge, including position, verbosity, and self-enhancement biases, as well as limited reasoning ability
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [rubric-inversion.llm-judge-self-grading]
+  - id: panickssery-2024
+    title: Panickssery, Bowman, Feng, LLM Evaluators Recognize and Favor Their Own Generations (NeurIPS 2024)
+    url: https://arxiv.org/abs/2404.13076
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: One such bias is self-preference, where an LLM evaluator scores its own outputs higher than others' while human annotators consider them of equal quality.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [rubric-inversion.llm-judge-self-grading]

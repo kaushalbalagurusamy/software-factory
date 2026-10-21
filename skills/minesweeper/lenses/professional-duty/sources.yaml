@@ -1,0 +1,101 @@
+schema_version: 1
+sources:
+  - id: se-code
+    title: Software Engineering Code of Ethics and Professional Practice (IEEE-CS/ACM Joint Task Force), version 5.2
+    url: https://www.computer.org/education/code-of-ethics
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: The joint ACM and IEEE Computer Society code, hosted by IEEE-CS. Clause numbers are from the full version.
+    quotes:
+      - text: Approve software only if they have a well-founded belief that it is safe, meets specifications, passes appropriate tests, and does not diminish quality of life, diminish privacy or harm the environment.
+        locator: Clause 1.03
+        fetched: "2026-10-15"
+        supports: [professional-duty.sign-off-without-basis]
+      - text: Only endorse documents either prepared under their supervision or within their areas of competence and with which they are in agreement.
+        locator: Clause 4.02
+        fetched: "2026-10-15"
+        supports: [professional-duty.sign-off-without-basis]
+      - text: Ensure adequate testing, debugging, and review of software and related documents on which they work.
+        locator: Clause 3.10
+        fetched: "2026-10-15"
+        supports: [professional-duty.sign-off-without-basis]
+      - text: Disclose to appropriate persons or authorities any actual or potential danger to the user, the public, or the environment, that they reasonably believe to be associated with software or related documents.
+        locator: Clause 1.04
+        fetched: "2026-10-15"
+        supports: [professional-duty.suppress-danger-disclosure]
+      - text: Identify, document, collect evidence and report to the client or the employer promptly if, in their opinion, a project is likely to fail, to prove too expensive, to violate intellectual property law, or otherwise to be problematic.
+        locator: Clause 2.06
+        fetched: "2026-10-15"
+        supports: [professional-duty.suppress-danger-disclosure]
+      - text: Keep private any confidential information gained in their professional work, where such confidentiality is consistent with the public interest and consistent with the law.
+        locator: Clause 2.05
+        fetched: "2026-10-15"
+        supports: [professional-duty.suppress-danger-disclosure]
+      - text: Be fair and avoid deception in all statements, particularly public ones, concerning software or related documents, methods and tools.
+        locator: Clause 1.06
+        fetched: "2026-10-15"
+        supports: [professional-duty.deceptive-capability-claims]
+      - text: Ensure realistic quantitative estimates of cost, scheduling, personnel, quality and outcomes on any project on which they work or propose to work and provide an uncertainty assessment of these estimates.
+        locator: Clause 3.09
+        fetched: "2026-10-15"
+        supports: [professional-duty.deceptive-capability-claims]
+  - id: acm-code
+    title: ACM Code of Ethics and Professional Conduct (2018)
+    url: https://www.acm.org/code-of-ethics
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: >-
+      acm.org and ethics.acm.org returned HTTP 403 to automated fetches on 2026-10-15 (four URL variants). Not
+      quoted; traps rely on the joint ACM/IEEE-CS Software Engineering Code (se-code) instead.
+  - id: ieee-code
+    title: IEEE Code of Ethics (IEEE Policies, Section 7.8)
+    url: https://www.ieee.org/about/corporate/governance/p7-8.html
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: >-
+      ieee.org returned HTTP 202 with an empty bot-challenge body on 2026-10-15 (three URL variants). Not quoted;
+      traps rely on se-code instead.
+  - id: nspe-code
+    title: NSPE Code of Ethics for Engineers
+    url: https://www.nspe.org/resources/ethics/code-ethics
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: >-
+      The page fetches but is a landing page without the code's text; the text is a PDF that the web_page adapter
+      cannot parse (checked 2026-10-15). Not quoted.
+  - id: usc-21-360j
+    title: 21 U.S.C. 360j (FD&C Act section 520)
+    url: https://www.law.cornell.edu/uscode/text/21/360j
+    adapter: web_page
+    tier: primary
+    kind: statute
+    notes: Cornell LII reproduction of the US Code.
+    quotes:
+      - text: shall not include a software function that is intended—
+        locator: 360j(o)(1), lead-in
+        fetched: "2026-10-15"
+        supports: [professional-duty.clinical-advice-without-reviewable-basis]
+      - text: enabling such health care professional to independently review the basis for such recommendations that such software presents so that it is not the intent that such health care professional rely primarily on any of such recommendations to make a clinical diagnosis or treatment decision regarding an individual patient.
+        locator: 360j(o)(1)(E)(iii)
+        fetched: "2026-10-15"
+        supports: [professional-duty.clinical-advice-without-reviewable-basis]
+      - text: supporting or providing recommendations to a health care professional about prevention, diagnosis, or treatment of a disease or condition; and
+        locator: 360j(o)(1)(E)(ii)
+        fetched: "2026-10-15"
+        supports: [professional-duty.clinical-advice-without-reviewable-basis]
+  - id: fda-cds-guidance
+    title: FDA guidance - Clinical Decision Support Software (landing page)
+    url: https://www.fda.gov/regulatory-information/search-fda-guidance-documents/clinical-decision-support-software
+    adapter: web_page
+    tier: primary
+    kind: guidance
+    notes: Landing page summary only; the full guidance is a PDF the adapter cannot parse.
+    quotes:
+      - text: This guidance further clarifies that FDA’s existing digital health policies continue to apply to software functions that meet the definition of a device, including those that are intended for use by patients or caregivers.
+        locator: Summary
+        fetched: "2026-10-15"
+        supports: [professional-duty.clinical-advice-without-reviewable-basis]

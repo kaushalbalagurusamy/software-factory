@@ -1,0 +1,17 @@
+schema_version: 1
+id: cyber-physical-flat-it-ot-network-planted
+kind: planted
+twin: cyber-physical-flat-it-ot-network-clean
+brief: |
+  Contoso Chemicals wants an optimisation assistant for its solvent blending unit.
+  The unit stores flammable solvents above the process-safety threshold quantity.
+  Engineers want shorter batch times and fewer off-spec batches.
+  The high-pressure interlocks and the safety instrumented system are owned by the site process-safety engineer, sit outside this software, and any change goes through the site's management-of-change procedure.
+  The assistant only recommends setpoints; the board operator reviews them and enters any change at the local HMI, and the local controllers keep running if the assistant is offline.
+  The unit is a covered process under the US process safety management rule; the site's PSM coordinator signs off on the design.
+  Office laptops, the analytics servers and the plant controllers will share one flat network so engineers can reach any device from their desks.
+  Results are shown in a weekly report and on a dashboard in the control room.
+expect:
+  traps:
+  - cyber-physical.flat-it-ot-network
+  min_severity: high

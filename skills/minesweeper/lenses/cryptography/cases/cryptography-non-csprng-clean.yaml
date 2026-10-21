@@ -1,0 +1,13 @@
+schema_version: 1
+id: cryptography-non-csprng-clean
+kind: clean
+twin: cryptography-non-csprng-planted
+brief: |
+  A ticketing site issues password-reset links and API keys for event organisers.
+  - Backend in Python; links expire after 30 minutes and are single use.
+  - The reset token and the API keys are 256-bit values from the secrets module; tests stub the generator
+    explicitly.
+  - Reset requests are rate-limited per account and per IP.
+  - Keys can be revoked from the organiser dashboard.
+expect:
+  none_from_lens: true

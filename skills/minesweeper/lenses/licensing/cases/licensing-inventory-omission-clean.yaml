@@ -1,0 +1,15 @@
+schema_version: 1
+id: licensing-inventory-omission-clean
+kind: clean
+twin: licensing-inventory-omission
+brief: |
+  Acme Field Tools: Android inspection app (sold to utilities)
+
+  1. Inspectors photograph assets and fill structured forms offline; sync when back online.
+  2. The APK is distributed through a managed app store to customer devices; the product is commercial.
+  3. Use well-maintained open-source libraries for image compression, PDF export and the local database;
+     each one's SPDX licence and version is recorded in a licence inventory, and only permissive licences are allowed.
+  4. Forms must render in under 300 ms on mid-range devices.
+  5. All data at rest is encrypted with the platform keystore.
+expect:
+  none_from_lens: true

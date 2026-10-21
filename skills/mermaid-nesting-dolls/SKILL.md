@@ -58,9 +58,19 @@ without finding a stale reference. Keep the content in `model.json` and regenera
 `Present` hides the side panel; `n`/`p` walk the tree depth-first, `h` home, `u` up, `/` search, `f` present,
 Alt+← back. The Coverage tab lists every status with the reasons: the honest closing slide.
 
+## Opening files in your editor
+
+Each file in a node's detail panel is a link that opens your editor at the first line of its range, next to a `Copy path` button.
+Set it at build time with `build model.json -o out.html --workspace-root /abs/checkout --editor vscode`, or at view time with
+`?editor=vscode&root=/abs/checkout` (the query overrides the model; an invalid root is ignored). Editors: vscode, cursor, windsurf, antigravity-ide, zed, idea,
+sublime, textmate, or `none`. With no editor or root only `Copy path` and a hint are shown. Leave both unset for a portable file.
+`assets/editor-links.js` is the single source of the link builder; its text between `/* editor-links:begin */` and `/* editor-links:end */` is inlined into
+`assets/template.html` and `ops/shell/index.html`, and `check --assets [--repo DIR]` fails if a copy drifts.
+
 ## Files
 
 - `scripts/nesting_dolls.py`: `check`, `build`, `import-omm` (Python 3 standard library only).
+- `assets/editor-links.js`: the pure `editorUrl(editor, root, relPath, line)` function (ES5, no dependencies).
 - `assets/template.html`: the viewer. `assets/vendor/`: Mermaid (version in `VERSION`, MIT licence file alongside).
 - `references/model-schema.md`: the model format and the rules the checker enforces.
 - A worked example lives in the repository that first used it: `docs/explorer/` in software-factory.

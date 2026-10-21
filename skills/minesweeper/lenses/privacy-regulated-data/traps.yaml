@@ -1,0 +1,112 @@
+schema_version: 1
+traps:
+  - id: privacy-regulated-data.phi-to-general-model-endpoint
+    aliases: [LEG-06]
+    title: Health or other special-category data sent to a general model endpoint with no BAA or processor contract
+    kind: requirement
+    cues:
+      - "send raw patient intake transcripts to the hosted model API"
+      - "paste clinical notes into the general chat endpoint for summarisation"
+      - "use the standard multi-tenant LLM endpoint for medical records"
+      - "the model vendor's default terms are fine for patient data"
+      - "upload therapy session audio to the transcription API"
+    principle: >-
+      HIPAA: a covered entity may let a business associate create, receive, maintain or transmit protected
+      health information only after obtaining satisfactory assurance (a business associate contract) that it
+      will safeguard the information (45 CFR 164.502(e)(1)(i), 164.308(b)(1)); the contract must, among other
+      things, bar uses and disclosures beyond those it permits (164.504(e)(2)). GDPR: processing data concerning
+      health is prohibited unless an Article 9(2) condition applies, and a controller may use only processors
+      giving sufficient guarantees, bound by a contract under Article 28(3).
+    sources: [hipaa-164-502, hipaa-164-504, hipaa-164-308, gdpr]
+    severity:
+      default: critical
+      blast_radius: >-
+        Every patient record sent is an impermissible disclosure; breach notification, regulator action, and loss
+        of customer trust; downstream model logs may retain the data.
+    remediation:
+      safe_route: >-
+        Use only a model endpoint covered by a signed business associate agreement (US) or Article 28 processor
+        contract (EU), with retention and training excluded by contract; minimise or de-identify before egress;
+        pin processing regions. Confirm the Article 9(2) condition with the owner.
+      invariant: >-
+        Regulated health or special-category data reaches a third-party service only under a signed BAA or
+        Article 28 contract that covers that service, region and data class.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Report claims about "statutory per-record penalties" and "loss of operating licenses" are not sourced here
+      and left out. Whether the brief's operator is a covered entity or business associate, and which GDPR
+      Article 9(2) condition applies, are ask-owner.
+  - id: privacy-regulated-data.special-category-global-edge-cache
+    aliases: [LEG-06b]
+    title: Personal or special-category data cached or replicated to global edge or regions with no transfer basis
+    kind: requirement
+    cues:
+      - "cache prompts and responses at CDN edge nodes worldwide"
+      - "replicate the patient database to every region for latency"
+      - "store EU user records in whichever region is cheapest"
+      - "edge-cache personalised API responses globally"
+    principle: >-
+      GDPR Chapter V (Article 44): a transfer of personal data to a third country may take place only if the
+      Chapter's conditions are met by controller and processor, including onward transfers. Health and other
+      Article 9 data carry the stricter special-category regime on top. Caching personal data on edge nodes
+      outside the EEA is processing in those locations.
+    sources: [gdpr]
+    severity:
+      default: critical
+      blast_radius: Unlawful international transfers for every cached record; a regulator can order the processing to stop.
+    remediation:
+      safe_route: >-
+        Do not cache personal data at the edge (mark responses private / no-store), or restrict caching and
+        replication to regions with a documented Chapter V basis; keep a data-residency map.
+      invariant: Personal data is stored or cached only in locations listed in the data-residency map, each with a documented transfer basis.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Which Chapter V mechanism applies (adequacy, safeguards, derogation) is ask-owner.
+  - id: privacy-regulated-data.collect-all-keep-forever
+    title: Collect every personal field and keep it indefinitely "in case it is useful"
+    kind: requirement
+    cues:
+      - "log everything about the user, we may need it later"
+      - "retain all personal data indefinitely"
+      - "capture full device and location history for future features"
+      - "never delete accounts, just deactivate them"
+    principle: >-
+      GDPR Article 5(1)(c) and (e): personal data must be adequate, relevant and limited to what is necessary for
+      the purposes (data minimisation), and kept identifiable no longer than necessary for those purposes
+      (storage limitation).
+    sources: [gdpr]
+    severity:
+      default: high
+      blast_radius: Larger breach impact, unlawful processing for every surplus field, and costly erasure later.
+    remediation:
+      safe_route: Define purposes first, collect only fields each purpose needs, and set a retention period and deletion job per data class.
+      invariant: Every stored personal-data field maps to a stated purpose and a retention period enforced by an automated deletion job.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+  - id: privacy-regulated-data.children-data-without-parental-consent
+    title: Collecting children's personal information without verifiable parental consent
+    kind: requirement
+    cues:
+      - "kids sign up with their email and a photo"
+      - "collect children's voice recordings to improve the tutor"
+      - "track young players' location for the leaderboard"
+      - "age gate is optional"
+    principle: >-
+      The US COPPA Rule requires an operator to obtain verifiable parental consent before any collection, use or
+      disclosure of personal information from children (16 CFR 312.5(a)(1)); "child" and "operator" are defined
+      in 16 CFR 312.2.
+    sources: [coppa-312-5]
+    severity:
+      default: critical
+      blast_radius: Unlawful collection from every child user; regulator enforcement and forced data deletion.
+    remediation:
+      safe_route: Determine whether the service is directed to children or has actual knowledge of child users; if so, gate collection behind verifiable parental consent and collect the minimum.
+      invariant: No personal information is collected from a child user before verifiable parental consent is recorded.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Other jurisdictions (e.g. GDPR Article 8) set their own age thresholds; ask-owner for non-US markets.

@@ -1,0 +1,206 @@
+schema_version: 1
+traps:
+  - id: cryptography.gcm-deterministic-nonce
+    aliases: [SEC-04]
+    title: AES-GCM nonces derived from stable identifiers or from a counter that can repeat
+    kind: requirement
+    cues:
+      - "derive the IV from the record id so encryption stays stateless"
+      - "use the node id as the nonce"
+      - "each worker keeps its own message counter in memory"
+      - "the counter resets when the service restarts"
+      - "a fixed IV is fine because the key is secret"
+      - "same key shared by all replicas"
+    principle: >-
+      An AEAD nonce must be distinct for every encryption under a key. Reusing a GCM nonce with
+      different plaintexts undermines confidentiality of both messages and all authenticity under that
+      key (the authentication key can be recovered and tags forged); GCM should only be used where nonce
+      uniqueness is assured, and a nonce-misuse-resistant AEAD (AES-GCM-SIV) is suggested where it is not.
+    sources: [rfc5116, rfc8452, bock-2016-nonce-disrespecting, osv-cve-2026-50577]
+    severity:
+      default: high
+      blast_radius: >-
+        Plaintext recovery for the colliding messages and forgery of arbitrary messages under the key
+        for every party that trusts it.
+    remediation:
+      safe_route: >-
+        Guarantee uniqueness by construction (a per-key counter persisted atomically before use, a
+        distinct fixed field per encryptor) or rotate keys per stream; where uniqueness cannot be
+        guaranteed (stateless workers, restarts, many encryptors on one key) use AES-GCM-SIV (RFC 8452).
+      invariant: No (key, nonce) pair is ever used for two encryptions; nonce state survives restarts or the key changes.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Joux's 2006 comments on draft SP 800-38D (the forbidden attack) are referenced by the advisory
+      quote; the original PDF was not fetchable as text. The report's "48 percent slower" cost of
+      AES-GCM-SIV is not used: measure throughput on the target platform in an experiment. The report's
+      cache-timing and PCLMULQDQ remediation is plausible but was not verified from a primary source.
+
+  - id: cryptography.gcm-random-nonce-volume
+    title: Random 96-bit GCM nonces used for a high or unbounded number of messages under one key
+    kind: metric
+    cues:
+      - "a random IV for every message, so we never need to rotate the key"
+      - "one long-lived key for all devices"
+      - "billions of messages per day under the tenant key"
+      - "long-lived sessions that never rekey"
+    principle: >-
+      Random nonces collide by the birthday bound, and a single collision is a GCM nonce reuse. A
+      deployment must bound messages per key so the collision probability stays negligible, or rotate
+      keys, or use a nonce-misuse-resistant AEAD.
+    sources: [rfc5116, rfc8452, bock-2016-nonce-disrespecting, osv-cve-2026-26014]
+    severity:
+      default: high
+      blast_radius: Same as nonce reuse once volume crosses the bound; the failure is silent and probabilistic.
+    remediation:
+      safe_route: >-
+        Compute the collision probability for the brief's message volume per key (calc.birthday_collision
+        with 96 bits); set a per-key message limit and rotate keys before it, or use AES-GCM-SIV.
+      invariant: Messages encrypted per key with random nonces stay below a stated limit at which collision probability is negligible.
+      spec_section: crypto-agent-security
+    checks: [calc.birthday_collision]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      SP 800-38D states the per-key invocation limit for random IVs in its PDF (Section 8), which the
+      adapters cannot read; the trap is verified from RFC 5116, RFC 8452 and the advisories instead.
+
+  - id: cryptography.non-csprng
+    aliases: [SEC-05]
+    title: Keys, nonces, tokens or handles generated with a general-purpose PRNG or a sequence
+    kind: requirement
+    cues:
+      - "generate the session key with Math.random"
+      - "random.randint for the reset token"
+      - "use java.util.Random for the API key"
+      - "seed the generator with the current time"
+      - "sequential ids for invite codes"
+      - "uuid from a timestamp is unique enough"
+    principle: >-
+      General-purpose generators (Python random, java.util.Random, linear congruential generators) are
+      not suitable for cryptographic use; their outputs can be predicted from observed values. Secrets
+      must come from the platform CSPRNG (Python secrets, SecureRandom, the OS generator).
+    sources: [rfc4086, python-random-docs, java-util-random-docs]
+    severity:
+      default: high
+      blast_radius: Attackers predict past and future keys, tokens and handles and take over sessions or decrypt data.
+    remediation:
+      safe_route: Use the OS-backed CSPRNG API of the platform for every secret value and state handle.
+      invariant: Every key, nonce, token and handle is drawn from a CSPRNG with at least 128 bits of entropy.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: JavaScript Math.random is covered by its own platform documentation (not fetched here); the principle is the same.
+
+  - id: cryptography.quantum-vulnerable-long-term-secrecy
+    aliases: [SEC-06]
+    title: Data that must stay secret for years is protected only by RSA or elliptic-curve key exchange
+    kind: requirement
+    cues:
+      - "RSA-2048 key exchange for archives kept for decades"
+      - "ECDH is fine for the long-term records"
+      - "post-quantum can wait until a later release"
+      - "classical TLS is enough for the twenty-year retention data"
+    principle: >-
+      A passive attacker can record encrypted traffic now and decrypt it once a quantum computer exists,
+      so confidentiality that must outlast that horizon needs a quantum-resistant key establishment
+      (ML-KEM, FIPS 203), usually alongside a classical one; NIST is transitioning away from
+      quantum-vulnerable algorithms.
+    sources: [rfc9370, nist-fips203, nist-fips204, nist-ir8547]
+    severity:
+      default: high
+      blast_radius: Recorded ciphertext of long-lived secrets becomes readable in the future; the exposure cannot be undone.
+    remediation:
+      safe_route: >-
+        State the confidentiality lifetime; for lifetimes that reach the quantum horizon, use hybrid key
+        establishment (classical plus ML-KEM) and plan signature migration to ML-DSA or SLH-DSA with
+        crypto agility.
+      invariant: Data whose confidentiality lifetime exceeds the accepted quantum horizon is never protected only by quantum-vulnerable key establishment.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: The report's dates and Federal Register citation for the FIPS approvals were not re-checked and are not used.
+
+  - id: cryptography.pq-signature-size-mtu
+    aliases: [SEC-06-mtu]
+    title: Post-quantum signatures or keys are dropped into packets or fields sized for RSA or ECC
+    kind: requirement
+    cues:
+      - "swap RSA signatures for post-quantum ones in the same UDP message"
+      - "the signed beacon must fit in one small packet"
+      - "certificate fits in a single datagram"
+      - "keep the 512-byte message format and just change the algorithm"
+    principle: >-
+      ML-DSA signatures are thousands of bytes (2420 bytes at the smallest parameter set, plus a 1312-byte
+      public key), far above RSA or ECDSA sizes, so formats and transports sized for classical
+      signatures overflow and fragment.
+    sources: [rfc9881]
+    severity:
+      default: high
+      blast_radius: Messages are dropped, fragmented or truncated on constrained links; handshakes stall.
+    remediation:
+      safe_route: >-
+        Size every field and datagram for the chosen parameter set (calc.payload_mtu with the real
+        payload); design multi-packet transfer, certificate compression or a protocol that carries large
+        signatures; benchmark on the target link.
+      invariant: Every signed message and certificate chain fits its transport budget with the post-quantum sizes, verified by calculation.
+      spec_section: crypto-agent-security
+    checks: [calc.payload_mtu]
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: cryptography.stateful-hbs-state-reuse
+    title: Stateful hash-based signing keys (LMS, XMSS) copied, restored or shared without state control
+    kind: requirement
+    cues:
+      - "back up the signing key and restore it if the host fails"
+      - "run the firmware signer on several VMs from the same image"
+      - "snapshot the signing server nightly"
+      - "use XMSS like any other signature library"
+    principle: >-
+      LMS and XMSS are stateful: the signer must keep state so no one-time key is used twice, and if a
+      key state is used twice no security guarantees remain. Restoring a backup or cloning a VM rewinds
+      the state and reuses one-time keys.
+    sources: [nist-sp800-208, rfc8554, rfc8391, rfc9802]
+    severity:
+      default: high
+      blast_radius: Signature forgery under the root or firmware signing key, which is usually the most trusted key in the system.
+    remediation:
+      safe_route: >-
+        Use stateless SLH-DSA (FIPS 205) where possible; otherwise keep the key in one HSM that persists
+        state before releasing each signature, partition the key space across signers, and forbid
+        snapshot or restore of live state.
+      invariant: Each one-time key index is used at most once, and state is durably advanced before a signature leaves the signer.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: cryptography.custom-crypto-construction
+    title: The brief asks for a home-made cipher, mode or authenticated-encryption construction
+    kind: requirement
+    cues:
+      - "design our own lightweight encryption scheme"
+      - "XOR the data with a hash of the key"
+      - "encrypt with AES and append a SHA-256 of the plaintext for integrity"
+      - "a proprietary algorithm is more secure because nobody knows it"
+      - "combine the cipher and MAC ourselves"
+    principle: >-
+      Standard AEAD algorithms exist so application designers do not have to design crypto mechanisms;
+      ad hoc combinations of block cipher and hash primitives were the previously common, risky
+      practice that AEAD replaced.
+    sources: [rfc5116, rfc8452]
+    severity:
+      default: high
+      blast_radius: Confidentiality or integrity fails in ways no test suite reveals; every stored or transmitted record is exposed.
+    remediation:
+      safe_route: Use a standard AEAD (AES-GCM, ChaCha20-Poly1305, AES-GCM-SIV) from a maintained library through its high-level API.
+      invariant: No cryptographic primitive or mode is designed or composed in project code; only reviewed library APIs are called.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"

@@ -1,0 +1,15 @@
+schema_version: 1
+id: cryptography-quantum-vulnerable-long-term-secrecy-planted
+kind: planted
+twin: cryptography-quantum-vulnerable-long-term-secrecy-clean
+brief: |
+  A records-management company stores scanned legal and medical archives for clients.
+  - Archives must remain confidential for 25 years.
+  - Clients upload over TLS; archives are encrypted at rest with AES-256.
+  - Archive keys are wrapped for each client and replicated between our two regions using RSA-2048 key
+    transport only; post-quantum support is out of scope for this contract.
+  - Retrieval within one business day.
+expect:
+  traps:
+  - cryptography.quantum-vulnerable-long-term-secrecy
+  min_severity: high

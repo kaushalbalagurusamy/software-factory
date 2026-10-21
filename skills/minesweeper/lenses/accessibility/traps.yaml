@@ -1,0 +1,129 @@
+schema_version: 1
+traps:
+  - id: accessibility.information-by-single-sense
+    title: Information or state conveyed only by colour (or another single sense)
+    kind: requirement
+    cues:
+      - "show status by colour: red means overdue, green means paid"
+      - "errors are highlighted in red on the field"
+      - "required fields are marked with colour only"
+      - "the chart distinguishes series purely by colour"
+      - "rubric: UI scored on a clean colour-coded look"
+    principle: >-
+      WCAG 2.2 Success Criterion 1.4.1 (Level A) requires that colour is not the only visual means of conveying
+      information, indicating an action, prompting a response, or distinguishing an element. A UI that encodes
+      meaning in colour alone fails this, and so fails Level AA conformance, which requires all Level A and AA
+      criteria to be met.
+    sources: [wcag-22]
+    severity:
+      default: medium
+      blast_radius: >-
+        Users who cannot distinguish the colours (colour-blind, low-vision, monochrome or high-contrast displays)
+        cannot perceive the state or action; where the UI is under a legal accessibility floor this also breaches it.
+    remediation:
+      safe_route: >-
+        Pair every colour cue with a second channel: text, an icon with a text label, a pattern, or position, and
+        keep colour as reinforcement only.
+      invariant: Every piece of information or state the UI conveys is available without relying on colour perception alone.
+      spec_section: product-scope
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Generic trap (no report seed). Severity rises to high or critical when the product is a legally covered service or public-sector site (see the EAA and ADA traps).
+  - id: accessibility.not-keyboard-or-pointer-operable
+    title: Core functionality that only works with a mouse or a dragging gesture
+    kind: requirement
+    cues:
+      - "reorder items by dragging the handle (no other way)"
+      - "the control is mouse-only; hover to reveal the menu"
+      - "set the value by dragging the slider"
+      - "desktop drag-and-drop is the only way to upload"
+      - "no keyboard shortcuts needed; it is a pointer-first UI"
+    principle: >-
+      WCAG 2.2 requires all functionality to be operable through a keyboard interface (Success Criterion 2.1.1,
+      Level A), and any dragging-movement operation to be achievable with a single pointer without dragging unless
+      dragging is essential (Success Criterion 2.5.7, Level AA). A function reachable only by mouse or only by a
+      drag fails these and breaks Level AA conformance.
+    sources: [wcag-22]
+    severity:
+      default: medium
+      blast_radius: >-
+        Keyboard-only users, switch and screen-reader users, and people who cannot perform a precise drag are locked
+        out of the function; under a legal floor it is also non-compliant.
+    remediation:
+      safe_route: >-
+        Make every function keyboard operable and provide a single-pointer (click/tap) alternative to any drag, such
+        as move-up/move-down buttons or a file picker beside drag-and-drop.
+      invariant: Every function can be operated by keyboard alone and without a dragging gesture, unless dragging is genuinely essential.
+      spec_section: product-scope
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Generic trap. Essential-drag exceptions (e.g. freehand drawing) exist; whether one applies is a design judgement.
+  - id: accessibility.public-entity-below-wcag-aa
+    title: A public-entity (government) website or app not meeting WCAG Level AA
+    kind: requirement
+    cues:
+      - "state agency portal; accessibility is a later phase"
+      - "county benefits website, WCAG compliance deferred post-launch"
+      - "public university course app, ship without an accessibility pass"
+      - "city services mobile app; a11y is out of scope for v1"
+      - "rubric: public-sector site scored on features, accessibility optional"
+    principle: >-
+      Under ADA Title II, 28 CFR 35.200 requires a public entity to ensure its web content and mobile apps are
+      readily accessible to and usable by individuals with disabilities, and (on the phased dates) to comply with
+      WCAG 2.1 Level A and Level AA, unless it can demonstrate a fundamental alteration or undue burden. A
+      public-sector deliverable that omits or defers accessibility does not meet this duty.
+    sources: [ada-28-cfr-35-200]
+    severity:
+      default: high
+      blast_radius: >-
+        A government service is inaccessible to residents with disabilities and the entity is out of compliance with a
+        binding federal rule on its compliance date.
+    remediation:
+      safe_route: >-
+        Treat WCAG 2.1 AA (or later as adopted) as an acceptance gate for any public-entity web or mobile deliverable,
+        test with assistive technology, and document any fundamental-alteration or undue-burden claim as the rule requires.
+      invariant: Any public-entity web content or mobile app meets the WCAG level the rule incorporates before it is relied on by the public.
+      spec_section: legal-terms
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Generic trap. The rule incorporates WCAG 2.1 (not 2.2) by reference and phases in by entity size (April 2027 /
+      April 2028); the exact deadline and whether an exception applies is ask-owner. Whether a given body is a "public
+      entity" under Title II is also ask-owner.
+  - id: accessibility.covered-service-not-accessible
+    title: An EAA-covered service launched after 28 June 2025 without meeting its accessibility requirements
+    kind: requirement
+    cues:
+      - "launch the e-commerce checkout in the EU; accessibility is a stretch goal"
+      - "consumer banking app for EU customers, a11y backlog for next year"
+      - "sell e-books to EU readers; skip screen-reader support for now"
+      - "ticketing website for EU travellers, defer accessibility"
+      - "drop accessibility to make the EU launch date"
+    principle: >-
+      The European Accessibility Act (Directive (EU) 2019/882) applies to listed services provided to consumers after
+      28 June 2025 (Article 2(2)), including e-commerce, consumer banking, e-books and transport services. Economic
+      operators may only provide services that comply with the accessibility requirements in Annex I (Article 4(1)),
+      and service providers must design and provide services accordingly (Article 13(1)); Annex I Section III requires
+      websites and mobile services to be perceivable, operable, understandable and robust.
+    sources: [eaa-2019-882]
+    severity:
+      default: high
+      blast_radius: >-
+        A covered consumer service in the EU market is non-compliant from launch, exposing the provider to enforcement
+        and shutting out consumers with disabilities.
+    remediation:
+      safe_route: >-
+        Confirm whether the service is EAA-covered and in the EU market; if so, build the Annex I requirements in from
+        the start (perceivable, operable, understandable, robust), not as a later phase.
+      invariant: Any EAA-covered service offered to EU consumers after 28 June 2025 meets the Annex I accessibility requirements at launch.
+      spec_section: legal-terms
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Generic trap. Microenterprises providing services are exempt (Article 4(5)), national transposition and the
+      transitional provisions (Article 32) vary, and whether a given service is covered is ask-owner. The 28 June 2025
+      application date is quoted from the Directive text, not from the seed report.

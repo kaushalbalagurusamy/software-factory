@@ -1,0 +1,15 @@
+schema_version: 1
+id: ml-evaluation-omits-base-rates
+kind: omission
+twin: ml-evaluation-states-base-rates
+brief: |
+  Product brief: early warning of equipment failure on delivery trucks.
+  Data: engine sensor logs and maintenance records for 900 trucks over four years.
+  Evaluation: train on the first three years, test on the last year, grouped by truck.
+  Scores are used only to rank trucks for inspection and are not shown as probabilities.
+  Requirement 1: flag trucks likely to fail in the next 14 days.
+  Requirement 2: fleet managers see a weekly inspection list.
+  Success: fewer roadside breakdowns.
+expect:
+  omissions:
+  - ml-evaluation.base-rates

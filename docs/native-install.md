@@ -1,6 +1,6 @@
 # Native Claude Code installation
 
-`python -m factory.install` wires the factory into a project so the hooks, the seven role agents and
+`python -m factory.install` wires the factory into a project so the hooks, the eight role agents and
 the Sonnet-only model routing apply in a real Claude Code session. The orchestrator exposes it as
 `sf install`, `sf doctor`, `sf hitl`; until then call the modules directly.
 
@@ -9,6 +9,7 @@ python -m factory.install install   --project DIR [--factory-root DIR] [--python
                                     [--no-hooks] [--no-agents] [--allow-model NAME ...] [--dry-run]
 python -m factory.install uninstall --project DIR
 python -m factory.install doctor    [--project DIR] [--skills-dir DIR] [--json] [--allow-model NAME ...]
+python -m factory.install pin-external [--skills-dir DIR] [--factory-root DIR] [--yes] [--accept-changed NAME ...]
 python -m factory.hitl request|status|release --root R ...
 ```
 
@@ -19,7 +20,7 @@ Exit codes (install, uninstall, doctor): 0 ok, 1 failure, 2 usage.
 | File | Content |
 |---|---|
 | `.factory/profile.yaml` | Only if absent: copied from `--profile` or a minimal default (generic `evals/**`, `tests/held_out/**`, `tests/frozen/**`, `evals/baselines/**`; main session role `orchestrator`; the `graph` key omitted so the standard default graph applies; project name `project-<hash of path>`). An existing profile is validated and **never modified**. |
-| `.claude/agents/<role>.md` x7 | From `generate_agents`, then post-processed deterministically (below). |
+| `.claude/agents/<role>.md` x8 (orchestrator, research, design, audit, implement, qa, test, review) | From `generate_agents`, then post-processed deterministically (below). |
 | `.claude/settings.json` | Existing file merged, never replaced: every unrelated key, user hook and the whole `permissions` object are preserved. Adds the hooks, `"model": "sonnet"` and `env` pins. |
 | `.factory/install-manifest.json` | Factory version/commit/root, python, model pin, per-file sha256, `created` vs `existing` origin, backups. No timestamps (so a re-run is byte-identical). |
 | `.claude/backups/<UTC stamp>/...` | The previous version of any file that differed, taken before it is overwritten. |
@@ -47,12 +48,12 @@ and `agent_id`) are the enforcement.
 
 The user-level settings may inherit an Opus default; that must not apply to factory work. Project
 settings pin `"model": "sonnet"` and `env` `CLAUDE_CODE_SUBAGENT_MODEL=sonnet`,
-`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (project `env` is honoured even in untrusted folders). The
-role specs propose `opus` for orchestrator, design, review and test; the installer rewrites the
-generated frontmatter to `model: sonnet` (the role YAMLs and any existing profile are untouched)
-and records proposed vs pinned per role in the manifest. `--allow-model opus` explicitly lets a
-role keep a proposed model that is in the allowed set; the settings pin stays `sonnet`, and
-`doctor` then also needs `--allow-model`.
+`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (project `env` is honoured even in untrusted folders). Every
+shipped role spec declares `model: sonnet`; the loader rejects a role file naming any other model
+unless the caller allows it, and `install` then exits 1 and writes nothing. `--allow-model NAME`
+is the only way to allow one (a profile `allow_models` list never widens the allowlist on its own,
+C-41.1); `install` and `doctor` print any extra model they were asked to allow. Proposed vs pinned
+model per role is recorded in the manifest, and `doctor` needs the same `--allow-model`.
 
 ## Idempotence, dry run, rollback
 
@@ -79,6 +80,22 @@ the hooks can produce, so a non-run fails) and the deny payload (`git add -A` as
 against `bash_guard`, must exit 2); agent files exist with an allowed model; profile validates;
 manifest hashes match (the profile is exempt, being user-editable); no `permissions.allow` entry
 that mentions `factory.` or the installed python.
+
+Role and pin checks (always run; `--factory-root` selects the role files and `docs/external-skills.json`):
+`PASS|FAIL role <id> model: ...` (FAIL when a role file names a model that is not `sonnet` and not
+allowed); `PASS|FAIL role <id> skill <name>: ...` for every skill a role names (PASS when it
+resolves to a non-empty `SKILL.md` in the repo `skills/` or the user skills dir, or in an installed
+and not disabled plugin (`plugin:skill`; `enabledPlugins` in `~/.claude/settings.json` is honoured),
+or is the built-in `claude-api`; names containing `..` or a slash never resolve). The agent files are
+checked too: model, the role's skills present, extra skills resolving; a profile `agents.<role>.model`
+override is checked like a role file's model; `PASS|WARN|FAIL external <name>: ...` for the skills pinned in
+`docs/external-skills.json` (missing or unpinned is FAIL; a changed `SKILL.md` is a WARN
+`changed since pinned`, which does not change the exit code).
+
+`pin-external` rewrites `docs/external-skills.json` (`{"schema": 1, "skills": {name: {"sha256": ...}}}`)
+from the installed copies in `--skills-dir` (default `~/.claude/skills`), prints the diff, and
+writes only with `--yes`; without it nothing is written and the exit code is 2. A skill with no
+`SKILL.md` is reported as not pinned. A skill whose hash differs from its existing pin (or that vanished) is never re-pinned silently: the diff is printed and the command exits 2, writing nothing, until each such skill is named with `--accept-changed NAME`.
 
 ## Human stop (`python -m factory.hitl`)
 

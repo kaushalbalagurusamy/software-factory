@@ -1,0 +1,15 @@
+schema_version: 1
+id: os-systems-omits-memory-budget-per-worker
+kind: omission
+twin: os-systems-omits-memory-budget-per-worker-clean
+brief: |
+  Acme Logistics - label rendering service
+
+  - Shipping labels are rendered as PDFs from order data and returned to the warehouse app.
+  - Peak load is 800 labels per second during the evening wave.
+  - Workers run a fixed pool of 16 threads with pooled database connections; peak per host is about 1,000 open sockets and files.
+  - Labels must be returned within 500 ms at p95.
+  - Rendered labels are cached for 24 hours.
+expect:
+  omissions:
+  - os-systems.memory-budget-per-worker

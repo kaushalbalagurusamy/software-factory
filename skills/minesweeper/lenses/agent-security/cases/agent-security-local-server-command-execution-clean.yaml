@@ -1,0 +1,13 @@
+schema_version: 1
+id: agent-security-local-server-command-execution-clean
+kind: clean
+twin: agent-security-local-server-command-execution-planted
+brief: |
+  A design studio wants a desktop assistant that automates file chores.
+  - Renames exports, builds contact sheets and posts status updates to the team chat.
+  - Runs on the designers' own laptops.
+  - Helpers are local MCP servers installed after showing the full command for approval; each runs in a
+    sandbox limited to the exports folder, and notifications use the OS notification API, never a shell.
+  - Settings sync through the studio's existing device management.
+expect:
+  none_from_lens: true

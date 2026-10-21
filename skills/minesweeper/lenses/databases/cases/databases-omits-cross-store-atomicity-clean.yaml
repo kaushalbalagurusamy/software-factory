@@ -1,0 +1,13 @@
+schema_version: 1
+id: databases-omits-cross-store-atomicity-clean
+kind: clean
+twin: databases-omits-cross-store-atomicity
+brief: |
+  Project: appointment booking for a network of physiotherapy practices.
+  - Bookings are stored in a single-region relational database; all reads and writes go to the primary.
+  - If the database is unreachable, booking shows an error and nothing is written.
+  - Booking a slot runs as a SERIALIZABLE transaction retried on conflict.
+  - Each booking writes an outbox row in the same transaction; a relay pushes it to the practice's calendar service and the reminder queue, which deduplicate by booking id.
+  - Patients receive a reminder the day before.
+expect:
+  none_from_lens: true

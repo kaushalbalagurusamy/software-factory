@@ -36,6 +36,12 @@ def _release(a) -> int:
     return OK
 
 
+def _supersede(a) -> int:
+    store.supersede(a.root, a.name, a.by_stop, a.by, a.note)
+    print(f"stop {a.name} superseded by {a.by_stop} ({a.by})")
+    return OK
+
+
 def build() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="python -m factory.hitl", description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -45,6 +51,9 @@ def build() -> argparse.ArgumentParser:
     c = sub.add_parser("status"); c.set_defaults(f=_status); c.add_argument("--scope")
     c = sub.add_parser("release"); c.set_defaults(f=_release)
     c.add_argument("--name", required=True); c.add_argument("--by", required=True)
+    c = sub.add_parser("supersede"); c.set_defaults(f=_supersede)
+    c.add_argument("--name", required=True); c.add_argument("--by-stop", required=True)
+    c.add_argument("--by", required=True); c.add_argument("--note", default="")
     for c in sub.choices.values():
         c.add_argument("--root", required=True)
     return ap

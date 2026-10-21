@@ -337,19 +337,129 @@ TOOL_GROUPS = {
 }
 
 
+_SLICE_STAGES = {"check": "4-slice", "triage": "4-slice", "lock": "5-evals", "tick": "6-implement",
+                 "verify": "7-qa", "amend": "8-review", "done": "9-drift"}
+
+
+def _event_stage(group: str, argv: List[str]) -> Optional[str]:
+    """The stage an `sf <group> <argv>` run is recorded under, or None when the command leaves no event."""
+    if "-h" in argv or "--help" in argv:
+        return None
+    if group == "qa":  # global options (--root, --slice) may precede the subcommand
+        return "7-qa"
+    sub = argv[0] if argv and not argv[0].startswith("-") else None
+    if sub is None:
+        return None
+    if group == "intake":
+        return "0-intake" if sub in ("check", "record-sweep", "signoff", "gate") or (
+            sub in ("seeds", "experiments") and argv[1:2] == ["check"]) else None
+    if group == "slice":
+        return _SLICE_STAGES.get(sub)
+    if group == "contracts":
+        return {"check-contracts": "4c-contracts", "verify": "8-gate"}.get(sub)
+    if group == "structure":
+        return "8-gate" if sub == "diff" else "4b-structure"
+    if group == "hitl":
+        return "hitl" if sub in ("request", "release") else None
+    if group == "ops":
+        return "11-commit" if sub == "bundle" else None
+    return None
+
+
+def _event_slice(group: str, argv: List[str]) -> str:
+    """Basename of a --slice value, else (slice group) of the first positional DIR after the subcommand, else '-'."""
+    def base(v: str) -> str:
+        return Path(v.rstrip("/\\")).name or "-"
+
+    for i, a in enumerate(argv):
+        if a == "--slice" and i + 1 < len(argv):
+            return base(argv[i + 1])
+        if a.startswith("--slice="):
+            return base(a[8:])
+    skip = False
+    for a in argv[1:] if group == "slice" else []:
+        if skip:
+            skip = False
+        elif a.startswith("--") and "=" not in a:
+            skip = True
+        elif not a.startswith("-"):
+            return base(a)
+    return "-"
+
+
+def _arg_value(argv: List[str], name: str) -> Optional[str]:
+    for i, a in enumerate(argv):
+        if a == name and i + 1 < len(argv):
+            return argv[i + 1]
+        if a.startswith(name + "="):
+            return a[len(name) + 1:]
+    return None
+
+
+def _toplevel(path: Path) -> Optional[Path]:
+    import subprocess
+
+    d = path if path.is_absolute() else Path.cwd() / path
+    while not d.is_dir() and d != d.parent:  # the nearest existing ancestor
+        d = d.parent
+    try:
+        p = subprocess.run(["git", "-C", str(d), "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=10)
+        if p.returncode == 0 and p.stdout.strip():
+            return Path(p.stdout.strip())
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
+
+
+def _event_root(group: str, argv: List[str]) -> Path:
+    """The repository an event belongs to: that of the --root/--repo/--repo-root/--slice (or slice DIR) path argument, else the cwd's."""
+    for name in ("--root", "--repo", "--repo-root", "--slice"):
+        v = _arg_value(argv, name)
+        if v:
+            top = _toplevel(Path(v))
+            if top is not None:
+                return top
+    if group == "slice":
+        d = _event_slice(group, argv)
+        for a in argv[1:]:
+            if not a.startswith("-") and Path(a.rstrip("/")).name == d and d != "-":
+                top = _toplevel(Path(a))
+                if top is not None:
+                    return top
+    return _toplevel(Path.cwd()) or Path.cwd()
+
+
+def _record_event(group: str, argv: List[str], code: int) -> None:
+    """Leave one stage event for a finished tool run. Telemetry only: it never raises and never alters `code`."""
+    try:
+        stage = _event_stage(group, argv)
+        if stage is None or code == 2:
+            return
+        from .ops.events import emit
+
+        verdict = "pass" if code == 0 else "fail"
+        if group == "hitl" and code == 0:
+            verdict = "open" if argv[0] == "request" else "released"
+        emit(_event_root(group, argv), stage, _event_slice(group, argv), verdict, f"exit={code}", source="sf")
+    except Exception as e:  # noqa: BLE001
+        print(f"event not recorded: {type(e).__name__}", file=sys.stderr)
+
+
 def run_tool(group: str, argv: List[str]) -> int:
     """Run a tool module's __main__ with its own argument parsing and return its exit code."""
     import runpy
 
     saved = sys.argv
     sys.argv = [f"sf {group}", *argv]
+    code = 0
     try:
         runpy.run_module(TOOL_GROUPS[group], run_name="__main__", alter_sys=True)
     except SystemExit as e:
-        return e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
+        code = e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
     finally:
         sys.argv = saved
-    return 0
+    _record_event(group, argv, code)
+    return code
 
 
 def main(argv: Optional[List[str]] = None) -> int:

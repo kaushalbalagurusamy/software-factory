@@ -1,0 +1,233 @@
+schema_version: 1
+traps:
+  - id: agent-security.token-passthrough
+    aliases: [SEC-02]
+    title: A tool server forwards the caller's access token to downstream APIs
+    kind: requirement
+    cues:
+      - "forward the user's OAuth token to the backend services"
+      - "the tool server just relays the bearer token it receives"
+      - "reuse the client's access token for the downstream API calls"
+      - "no need to validate the token, the downstream service will"
+      - "accept any token our identity provider issued"
+    principle: >-
+      The MCP authorization specification requires servers to accept only tokens issued for their own
+      resources and forbids accepting or transiting any other token. Passthrough bypasses audience-bound
+      controls, breaks audit attribution and lets a stolen token be proxied for exfiltration.
+    sources: [mcp-security-best-practices, mcp-authorization]
+    severity:
+      default: high
+      blast_radius: >-
+        Downstream authorization, rate limits and audit logs are bypassed; one stolen token reaches every
+        service that accepts it.
+    remediation:
+      safe_route: >-
+        Validate inbound tokens for the server's own audience; call downstream APIs with a separate token
+        the server obtains for that resource (for example an on-behalf-of or token-exchange grant scoped
+        to the user and the resource).
+      invariant: Every inbound token is audience-checked for this server, and no inbound token is ever sent to another service.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: agent-security.confused-deputy
+    aliases: [SEC-02-confused-deputy]
+    title: A tool server acts with its own broad credentials or a shared client identity instead of the user's
+    kind: requirement
+    cues:
+      - "the server runs every query with its admin service account"
+      - "one static OAuth client for all users of the proxy"
+      - "skip the consent screen if the user approved before"
+      - "request every scope up front so we never prompt again"
+      - "the agent has full database access to keep things simple"
+    principle: >-
+      A proxy that holds one static client identity and relies on consent cookies can be steered into
+      issuing authorization codes the user never approved (the confused deputy); MCP requires per-client
+      consent for such proxies and recommends a progressive, least-privilege scope model rather than
+      broad up-front grants.
+    sources: [mcp-security-best-practices]
+    severity:
+      default: high
+      blast_radius: Any caller can reach data and actions of other users through the server's authority; per-user access control is void.
+    remediation:
+      safe_route: >-
+        Make every downstream call carry the invoking user's identity and minimal scopes; keep a per-user
+        registry of approved clients and show consent before the third-party flow; elevate scopes only
+        when a privileged operation is first attempted.
+      invariant: Each tool call is authorized as the invoking user with the narrowest scope that operation needs.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: agent-security.guessable-state-handle
+    aliases: [SEC-02-state-handle]
+    title: Possession of a session or state handle is treated as authentication, or handles are predictable
+    kind: requirement
+    cues:
+      - "the session id is enough to resume the conversation"
+      - "use incrementing ids for agent sessions"
+      - "anyone with the handle can continue the task"
+      - "store session state keyed only by session id"
+      - "handles never expire"
+    principle: >-
+      MCP servers must verify every inbound request and must not treat possession of a state handle as
+      authentication; handles should come from a secure random generator and be bound to the
+      authenticated user so a guessed handle cannot be used by another principal.
+    sources: [mcp-security-best-practices]
+    severity:
+      default: high
+      blast_radius: An attacker who guesses or observes a handle can inject events into, or act as, another user's session.
+    remediation:
+      safe_route: >-
+        Authenticate every request; generate handles with a CSPRNG; key stored state by the verified user
+        id plus the handle; expire handles.
+      invariant: A handle presented by any principal other than the one it was issued to is rejected.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: agent-security.untrusted-tool-servers
+    aliases: [SEC-03]
+    title: The agent loads tool servers from untrusted sources and trusts their tool descriptions
+    kind: requirement
+    cues:
+      - "auto-discover and load community tool servers"
+      - "let users add any MCP server from the marketplace"
+      - "the model picks tools based on their descriptions"
+      - "install popular servers from the public registry"
+      - "trust the tool annotations to decide what is safe"
+    principle: >-
+      Tool names, descriptions and annotations are instructions the model reads; MCP says they are
+      untrusted unless they come from a trusted server. Instructions hidden in tool metadata (tool
+      poisoning) steer agents without the tool ever being called.
+    sources: [mcp-spec-overview, mcp-local-server-security, wang-2025-mcptox, song-2025-mcp-attack-vectors]
+    severity:
+      default: high
+      blast_radius: A malicious server can direct the agent to read and exfiltrate files, keys or data reachable through any connected tool.
+    remediation:
+      safe_route: >-
+        Allowlist tool servers by publisher and pinned version; review tool descriptions before
+        enabling; treat all descriptions as untrusted input and keep data-reading tools separated from
+        tools that can send data out.
+      invariant: Only reviewed, allowlisted tool servers are connected, and their descriptions grant no authority by themselves.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: agent-security.silent-tool-redefinition
+    aliases: [SEC-03-rug-pull]
+    title: Tool definitions approved once are assumed to stay the same (rug pull)
+    kind: omission
+    cues:
+      - "users approve a server once at install"
+      - "refresh the tool list automatically when the server updates"
+      - "no re-approval needed after updates"
+      - "consent is a one-time step"
+      - "servers can add new tools at runtime"
+    principle: >-
+      A server can change its tool definitions after approval, so a one-time consent dialog and package
+      pinning do not cover this surface; the protocol does not require clients to pin definitions, so a
+      design that relies on initial review must add pinning and re-approval itself.
+    sources: [mcp-local-server-security, song-2025-mcp-attack-vectors]
+    severity:
+      default: high
+      blast_radius: A previously benign tool becomes a data-exfiltration or command-execution path without any user-visible event.
+    remediation:
+      safe_route: >-
+        Record a hash of each approved tool definition; on any change, disable the tool and require
+        re-approval showing the diff.
+      invariant: A tool whose definition differs from the approved hash cannot be invoked.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: agent-security.cross-server-tool-shadowing
+    aliases: [SEC-03-shadowing]
+    title: Many tool servers share one agent context with no isolation between them
+    kind: requirement
+    cues:
+      - "connect all our servers to one assistant"
+      - "mix internal and third-party tools in the same agent"
+      - "the more integrations the better"
+      - "one agent with access to email, files and payments"
+    principle: >-
+      All configured servers share the model's context, so a server's descriptions can steer how the
+      agent uses another server's tools (tool shadowing); every added server extends the surface the
+      others are exposed to.
+    sources: [mcp-local-server-security]
+    severity:
+      default: high
+      blast_radius: A low-trust server redirects or alters calls to a high-trust server's tools (payments, file writes, messaging).
+    remediation:
+      safe_route: >-
+        Keep the roster per agent small; isolate high-privilege tools in a separate agent or context
+        from third-party servers; namespace tools and confirm sensitive calls with their full arguments.
+      invariant: No third-party server shares a model context with tools that can move money, send messages or write data without confirmation.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: agent-security.untrusted-content-drives-tools
+    aliases: [SEC-03-prompt-injection]
+    title: The agent reads untrusted content and can call powerful tools in the same session without confirmation
+    kind: requirement
+    cues:
+      - "summarize incoming emails and take the follow-up actions"
+      - "browse the web and update our records"
+      - "process uploaded documents and run the steps they describe"
+      - "fully autonomous, no confirmation prompts"
+      - "the assistant replies to customers on its own"
+    principle: >-
+      Indirect prompt injection lets anyone who can place text in retrieved data control which APIs the
+      model calls; MCP says there should be a human in the loop able to deny tool invocations and that
+      clients should show tool inputs before calling to prevent exfiltration.
+    sources: [greshake-2023-indirect-prompt-injection, mcp-tools]
+    severity:
+      default: high
+      blast_radius: An external sender can make the agent leak data or take actions with the user's authority.
+    remediation:
+      safe_route: >-
+        Mark content sources as untrusted; while untrusted content is in context, restrict the agent to
+        read-only tools and require confirmation (showing full arguments) for any action or outbound
+        transfer.
+      invariant: No side-effecting or outbound tool call is made on the strength of untrusted content without a human confirmation.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+
+  - id: agent-security.local-server-command-execution
+    aliases: [SEC-03-local-rce]
+    title: Local tool servers run unsandboxed with the user's privileges, installed or executed without showing the command
+    kind: requirement
+    cues:
+      - "one-click install of local servers"
+      - "the helper runs shell commands for the assistant"
+      - "pass the notification text to the system shell"
+      - "local server listens on localhost without auth"
+      - "run helper scripts on the user's machine"
+    principle: >-
+      Local MCP servers are binaries that execute with the client's privileges; without sandboxing and
+      consent, malicious startup commands, payloads and DNS-rebinding access become possible. MCP
+      requires showing the exact command without truncation before one-click setup and recommends
+      sandboxed execution with minimal privileges.
+    sources: [mcp-security-best-practices, mcp-local-server-security]
+    severity:
+      default: high
+      blast_radius: Arbitrary code execution on the user's host, exfiltration of keys and files, data loss.
+    remediation:
+      safe_route: >-
+        Show the full command for approval; run local servers in a sandbox (container or OS sandbox) with
+        no default file or network access; never build shell commands from strings; require an auth
+        token or IPC for local HTTP servers.
+      invariant: No local server runs with access beyond its declared directories and hosts, and no tool input reaches a shell.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"

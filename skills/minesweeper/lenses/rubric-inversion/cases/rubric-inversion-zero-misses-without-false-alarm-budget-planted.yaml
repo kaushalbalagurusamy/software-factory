@@ -1,0 +1,15 @@
+schema_version: 1
+id: rubric-inversion-zero-misses-without-false-alarm-budget-planted
+kind: planted
+twin: rubric-inversion-zero-misses-without-false-alarm-budget-clean
+brief: |
+  Engineering brief: suspicious-login detection for a consumer banking app.
+  Flagged logins require a one-time code by text message.
+  Requirement 1: score each login using device, location and timing signals.
+  Requirement 2: acceptance requires that the detector never misses an account takeover in the evaluation set; flag anything that could possibly be suspicious.
+  Requirement 3: security analysts review weekly samples of flagged and unflagged logins.
+  Deliverable: scoring service and an evaluation report.
+expect:
+  traps:
+  - rubric-inversion.zero-misses-without-false-alarm-budget
+  min_severity: medium

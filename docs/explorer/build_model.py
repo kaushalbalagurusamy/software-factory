@@ -65,7 +65,7 @@ N("factory", "Claude Software Factory",
       "  intake[\"Requirements intake<br/>sweep the brief\"] -->|\"verified requirements<br/>become a ledger\"| build-loop[\"Build loop<br/>/sf, 12 stages\"]",
       "  skills-library[\"Skills library<br/>procedures per stage\"] -->|\"each stage invokes<br/>a skill\"| build-loop",
       "  governance-docs[\"Decisions and rules<br/>ADRs, contracts, plans\"] -->|\"binding rules\"| build-loop",
-      "  governance-docs -->|\"contracts the<br/>roles implement\"| agent-layer[\"Agent layer<br/>7 roles + hooks\"]",
+      "  governance-docs -->|\"contracts the<br/>roles implement\"| agent-layer[\"Agent layer<br/>8 roles + hooks\"]",
       "  build-loop -->|\"split work across<br/>roles (designed)\"| agent-layer",
       "  build-loop -->|\"run the deterministic<br/>gates\"| verification-engine[\"Verification engine<br/>factory/ and sf CLI\"]",
       "  agent-layer -->|\"graded blind by\"| evals-gate[\"Evals and golden gate\"]",
@@ -185,7 +185,7 @@ N("build-loop", "Build loop (/sf)",
   ],
   children=[s[0] for s in stages] + ["build-profile", "build-hygiene"])
 N("build-profile", "Project profile", "A per-project file that names where verbatim requirements, ADRs, specs, tests live, the test command and the reviewer. The skill is project-independent; everything specific lives here.", kind="config",
-  files=[X(SF, "85-94", "Load the project profile first"), F(".claude/state.md", "3-6", "no build-loop profile", "Local, untracked state file recording the 2026-10-09 decision")],
+  files=[X(SF, "85-94", "Load the project profile first")],
   cov=C("gap", "This repository deliberately has none: the owner decision on 2026-10-09 was to stand by until asked for factory changes, so the factory is not built with its own loop.",
         ["No .claude/build-loop.md exists in this checkout"]))
 N("build-hygiene", "Hygiene", "A deterministic script scans disk and memory before fan-out and after merges so a long run does not die of ENOSPC mid-write.", kind="harness",
@@ -500,13 +500,13 @@ N("evals-gate", "Evals and golden gate",
 N("contracts-in", "Published contracts", "Evals and implementers both depend on the contracts in docs/contracts and nothing else; expectations are quoted or paraphrased from them with the clause checked.", kind="input",
   files=[F("evals/agents/README.md", "13", "Expectations come only from the published contracts")], cov=C("built", "Published and used as the single source for expectations."))
 N("eval-cases", "Eval cases", "pytest tests tagged with an id (TB05-G-001 golden or TB05-D-114 diagnostic), a tier, the tracer bullet and the requirement ids; fixture profiles base.yaml and alt.yaml vary project settings.", kind="artifact",
-  files=[F("evals/agents/README.md", "5-9", "Case model"), F("evals/agents/GOLDEN.json", None, "TB"), F("evals/agents/lib.py", "19-22", "def need")],
+  files=[F("evals/agents/README.md", "5-9", "Case model"), F("evals/agents/GOLDEN.json", None, "TB01-G-001"), F("evals/agents/lib.py", "19-22", "def need")],
   cov=C("built", "1,302 cases exist across TB-01 to TB-14, with per-TB coverage notes.", ["All blocked: nothing under test is implemented"]))
 N("eval-runner", "Runner and verdict", "run.py runs pytest, writes results/latest.json and prints counts per tier, per tracer bullet and per requirement; the golden verdict is green only if every golden case passes and the membership matches.", kind="tool",
   files=[F("evals/agents/run.py", "30-50", "GOLDEN VERDICT"), F("evals/agents/README.md", "19", "python evals/agents/run.py")],
   cov=C("built", "Runs; plain pytest does not collect evals/ (testpaths = tests)."))
 N("trigger-smoke", "Trigger smoke checks", "A small checker that tests whether five skills' descriptions trigger on realistic prompts.", kind="tool",
-  files=[F("docs/evals/triggers/trigger_check.py", None, "def "), F("docs/evals/triggers/README.md", None, "trigger")],
+  files=[F("docs/evals/triggers/trigger_check.py", None, "def run_one"), F("docs/evals/triggers/README.md", None, "trigger")],
   cov=C("partial", "Smoke-level only for five of the skills; not part of CI."))
 N("golden-fix", "Golden gate fixes", "The remedial set from the audit: swap in cases that vary project settings, add an allowed-Bash case, add the full-suite-evidence case, protect .factory/ and .claude/, and make implementer blindness mechanical.", kind="todo",
   files=[F("docs/plans/2026-09-24-agent-layer-status.md", "9-15", "P0")],
@@ -568,7 +568,7 @@ N("ops-runtime", "Session ops and dashboards",
   "The harness around a long unattended run: keep-awake, overnight mode, disk and memory hygiene, owner briefings and per-project ops dashboards. It lives in the global skills directory and local state files, not in this repository.",
   kind="harness",
   design=[D("Never stop on a blocker", "Record what it waits on and move to the next independent requirement; stop only for an operator ceiling such as budget or an irreversible action.", "Halting the run and waiting for a human")],
-  files=[X(SF, "64-84", "Start away mode with the run"), F(".claude/state.md", "1-8", "Working state", "Local, untracked working state for this session")],
+  files=[X(SF, "64-84", "Start away mode with the run")],
   cov=C("external", "Operational, in daily use, and outside this repository.", ["Not reproducible from the repo alone: the scripts and state files are unversioned here"]),
   diagram=[
       "flowchart LR",
@@ -584,7 +584,7 @@ N("away-mode", "Away mode", "Scripts that keep a session running and reachable f
 N("overnight", "Overnight mode", "good-night opens a run that never stalls (blockers are broken with research and experiments, one-way doors queued only if owner-gated); good-morning closes it and walks the owner through queued decisions.", kind="harness",
   files=[X("~/.claude/skills/good-night/scripts/overnight.sh"), X(SF, "78-84", "Overnight mode")], cov=C("external", "Global skill scripts."))
 N("session-state", "Session state", "Working notes, a snapshot, a sub-agent ledger and a run registry kept under .claude/ (the run registry is a local process list and is not cited here) so a resumed or compacted session can recover.", kind="state",
-  files=[F(".claude/state.md", "1-4", "Working state"), F(".claude/subagent-ledger.jsonl", None, "agent_id", "One line per sub-agent run")],
+  files=[F(".gitignore", None, "runtime state of the bounded test runner", "Only .sf/ is ignored here; .claude/ is not tracked at all, so it is described but not cited")],
   cov=C("gap", "Valuable and untracked: if the checkout is lost the history of owner decisions is lost with it.", [".claude/ is not in git in this repo"]))
 N("ops-hygiene", "Hygiene scan", "hygiene.sh scans disk and memory before parallel fan-out and after merges; it never deletes branches, dirty worktrees, keys or evidence.", kind="harness",
   files=[X("~/.claude/skills/sf/hygiene/hygiene.sh"), X(SF, "253-263", "Hygiene")], cov=C("external", "Installed with the sf skill."))
@@ -673,7 +673,7 @@ N("sf-toolchain", "sf toolchain",
   "The commands that make the owner's flow checkable: intake gate, slice format, structural scan, contract verification, the QA loop, the dashboard, resource limits and the blind-worktree script. Each is a module under factory/ exposed as `sf <group>`.",
   kind="subsystem",
   design=[D("Deterministic gates over model judgement where a check can be mechanical", "Hash chains, ledger coverage, solver verdicts and role-checked ticks cannot be argued with; the judgement stays in review.", "More prose in the skills")],
-  files=[F("factory/cli.py", None, "TOOL_GROUPS", "Tool groups wired into sf"), F("docs/sf-flow.md", None, "flowchart", "The flow with current versus planned behaviour")],
+  files=[F("factory/cli.py", None, "TOOL_GROUPS = {", "Tool groups wired into sf"), F("docs/sf-flow.md", None, "flowchart", "The flow with current versus planned behaviour")],
   cov=C("built", "Implemented and tested; used by this very build (QA loop concepts, slices, bounded tests, dashboard bundle).", ["Adversarial acceptance of verify and structure is in progress", "Not yet run on a product project"]),
   diagram=[
     "flowchart LR",
@@ -687,26 +687,26 @@ N("sf-toolchain", "sf toolchain",
   ],
   children=["intake-gate", "slice-format", "structure-scan", "contract-verify", "blind-worktree", "qa-loop", "ops-dashboard", "resource-limits"])
 N("intake-gate", "Intake gate", "Ledger with one row per source line and a trust column, a recorded minesweeper sweep per source hash, a gate that fails when the sweep did not run, an open Critical has no sign-off or a High has no disposition, plus checks for research seeds and experiment records.", kind="module",
-  files=[F("factory/intake/ledger.py", None, "def check"), F("factory/intake/sweep.py", None, "def"), F("docs/intake-format.md", None, "ledger")],
+  files=[F("factory/intake/ledger.py", None, "def check"), F("factory/intake/sweep.py", None, "def build_record"), F("docs/intake-format.md", None, "ledger")],
   cov=C("partial", "Implemented and tested (61 tests). The sweep and the value-extraction pass are model procedure; only recording and gating are deterministic.", ["Minesweeper's locator format could not be confirmed; every integer in a locator is read as a source line", "The register schema is copied from the live skill and can drift"]))
 N("slice-format", "Slice format", "docs/slices/<id>/ with UX stories first, public acceptance criteria with IDs, a two-state task list (implemented by the implementer, verified only by QA), a criteria lock and an additive-only amendment log; checker, triage and a completion gate.", kind="module",
   files=[F("factory/slices/cli.py", None, "def cmd_done"), F("docs/slice-format.md", None, "OpenSpec")],
   cov=C("built", "Implemented and tested (28 tests). OpenSpec's own validator accepted the fixture layout (its tool was run in a throwaway directory with telemetry off); compatibility beyond that is not claimed.", ["The chain cannot catch deleting the newest entries together with the head; git is the backstop", "A hand-edited [x] in tasks.md is not blocked, though `done` still needs a QA chain entry"]))
 N("structure-scan", "Structure scan", "stdlib ast extraction of symbols, imports and calls with stable ids and spans; edges labelled resolved, syntactic or unresolved with a reason; bounded scope; symbol diff by normalised AST hash; output becomes a dolls model that the checker verifies.", kind="module",
-  files=[F("factory/structure/extract.py", None, "def"), F("factory/structure/diff.py", None, "def")],
+  files=[F("factory/structure/extract.py", None, "def make_source"), F("factory/structure/diff.py", None, "def diff_extractions")],
   cov=C("built", "Implemented and tested (34 tests); run on this repo's own factory/ package.", ["Python only; never a complete call graph", "Independent adversarial acceptance is in progress"]))
 N("contract-verify", "Contracts and solver", "Independent contracts for pure int/bool functions with IDs, frame conditions and assumptions; contract review before code; z3 verification of the real implementation with PROVED, COUNTEREXAMPLE (replayed on the real function), UNSUPPORTED (routed), UNKNOWN and TIMEOUT; fails closed; counterexamples become regression tests.", kind="module",
   design=[D("Replay every counterexample on the real function", "If z3 and Python disagree the translator is wrong; that is MODEL_MISMATCH and fails the gate.", "Trusting the solver model")],
-  files=[F("factory/verify/solve.py", None, "def"), F("factory/verify/gate.py", None, "def"), F("docs/verification-ir.md", None, "floor")],
+  files=[F("factory/verify/solve.py", None, "class Verdict"), F("factory/verify/gate.py", None, "def run_gate"), F("docs/verification-ir.md", None, "floor")],
   cov=C("built", "Implemented and tested (152 tests plus a differential test of the z3 model against real Python); demonstrated end to end on a labelled minimal fixture (examples/dogfood-limits).", ["Supported subset only: no loops, calls, floats or containers; everything else must route to tests", "int64 is modelled as checked overflow, not wraparound", "Generated regression tests replay an absolute source path", "Independent adversarial acceptance is in progress"]))
 N("blind-worktree", "Blind worktree", "scripts/implementer-worktree.sh creates a worktree with protected paths absent (sparse checkout), a local Read deny rule, and cleans up if any step fails.", kind="script",
   files=[F("scripts/implementer-worktree.sh", None, "sparse-checkout")],
   cov=C("built", "Tested (7 tests); used for every blind implementer in this build.", ["The object database still holds the protected files: a shell command could read them from git; the hooks and sandbox are the backstop"]))
 N("qa-loop", "QA loop", "State per slice, a failure signature, a bounded retry policy with measured escalation, behavioural feedback guarded by a leak check against protected material, regression proposals, and a reviewer hand-off; QA alone marks tasks verified.", kind="module",
-  files=[F("factory/qa/decide.py", None, "def"), F("factory/qa/leak.py", None, "def"), F("docs/qa-loop.md", None, "signature")],
+  files=[F("factory/qa/decide.py", None, "def decide("), F("factory/qa/leak.py", None, "def leak_check"), F("docs/qa-loop.md", None, "signature")],
   cov=C("built", "Implemented and tested (79 tests including a scripted fake-implementer simulation); policy defaults are configurable and tuned from recorded attempts.", ["Not yet run against real agent sessions", "Tamper detection misses someone who rewrites the logs and the state together"]))
 N("ops-dashboard", "Dashboard", "factory.ops bundles historical development artifacts per commit from the git object database into content-addressed blobs, collects runtime telemetry separately with measured / not-measured labels, and a static shell offers a commit selector and tabs.", kind="module",
-  files=[F("factory/ops/bundle.py", None, "def"), F("factory/ops/runtime.py", None, "def"), F("ops/shell/index.html", None, "snapshot")],
+  files=[F("factory/ops/bundle.py", None, "def put_blob"), F("factory/ops/runtime.py", None, "def collect_runtime"), F("ops/shell/index.html", None, "snapshot")],
   cov=C("partial", "Built and tested (27 + 8 tests); verified in a real browser against this repository's history.", ["Not deployed", "Runtime telemetry covers only what its config declares; most figures are 'not measured' without configuration", "Langfuse and CI figures are reported only when configured"]))
 N("resource-limits", "Resource limits", "Repo-root conftest.py caps address space and per-test time; scripts/bounded-pytest.sh adds a wall-clock kill, a lock and a limits log. Added after a 19 GB runaway test killed a session.", kind="harness",
   files=[F("conftest.py", None, "RLIMIT_AS"), F("scripts/bounded-pytest.sh", None, "prlimit")],
@@ -716,11 +716,405 @@ N("resource-limits", "Resource limits", "Repo-root conftest.py caps address spac
 nodes["sf-toolchain"]["children"] += ["native-install", "human-stop"]
 nodes["sf-toolchain"]["diagram"] += ['  resource-limits -.-> native-install["Native install<br/>agents, hooks, Sonnet pin"]', '  native-install -->|"doctor executes the hooks"| human-stop["Human stop<br/>sf hitl"]']
 N("native-install", "Native install", "sf install writes the generated agents, settings-level hooks with absolute verified commands, the Sonnet-only pin and a manifest into a project; doctor executes every hook command (a hook that cannot run fails open); uninstall restores from backups.", kind="module",
-  files=[F("factory/install/core.py", None, "ENV_PIN"), F("factory/install/doctor.py", None, "def"), F("docs/native-install.md", None, "fail")],
+  files=[F("factory/install/core.py", None, "ENV_PIN"), F("factory/install/doctor.py", None, "def check_roles"), F("docs/native-install.md", None, "fail")],
   cov=C("built", "Implemented and unit-tested (35 tests); verified in real headless Claude Code sessions: skills, agents and hooks resolve, hooks block in subagents, the pin overrides an inherited default (docs/native-verification/2026-10-19/REPORT.md).", ["Interactive (non -p) use not exercised", "The user-level default model (Opus) is deliberately unchanged; sessions elsewhere without --model sonnet or a project pin still inherit it", "A hook parser guard is not OS isolation"]))
 N("human-stop", "Human stop", "sf hitl request/status/release: a hash-chained stop ledger under .factory/stops that sf slice done and sf qa next obey; release needs a person at a terminal and the release command is a one-way door.", kind="module",
   files=[F("factory/hitl/store.py", None, "def release")],
   cov=C("built", "Implemented and unit-tested (23+ tests); obeyed in a real session: slice done refused (exit 5), release refused, stop still open.", ["Friction, not proof: a role with full Bash could allocate a terminal; no out-of-band secret"]))
+import os, re as _re
+
+
+# =================================================================================================== REFRESH 2026-10-20 (lsf, eli12-docs, editor links, ops events, eight roles, flow)
+def setsum(i, text):
+    nodes[i]["summary"] = text
+
+def addchildren(i, *ids, diagram=()):
+    nodes[i]["children"] = list(nodes[i]["children"]) + list(ids)
+    nodes[i]["diagram"] = list(nodes[i]["diagram"]) + list(diagram)
+
+EV_DOC = "Test and eval counts are recorded in docs/sf-flow.md ('Evidence base') and docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md section 3; this explorer cites them instead of restating them."
+ADR5 = "docs/adr/ADR-0005-sonnet-only-roles-and-qa-role.md"
+NV19 = "docs/native-verification/2026-10-19/REPORT.md"
+NV20 = "docs/native-verification/2026-10-20/REPORT.md"
+
+# ---- stale prose in existing nodes (item 7)
+setcov("factory", "partial", "The method, the sf CLI and tool groups, the eight-role agent layer (generator, settings emitter, eight hook ids, ledger, stage graph, walking skeleton), slices, intake, structure, contracts/solver, the QA loop, the ops dashboard and the lite factory (lsf) are implemented and tested. " + EV_DOC + " Real headless sessions verified the hooks, the qa role and the self-updating dashboard (" + NV19 + ", " + NV20 + "); the intake gate, a full QA loop with real agents, reviewer amendments and interactive use have not run in a real session.",
+       ["Hooks are mechanical only in projects where sf has generated the project settings; verified through headless sessions and simulated event streams, not an interactive session (clarification C-34 is still open)",
+        "The Bash and blindness guards are command-text guards and cannot be complete; the OS sandbox is the backstop (see the residual-risk sections of docs/hooks/bash_guard.md and blindness_guard.md)",
+        "One acceptance case is open by design pending a decision: TB06-D-035 (docs/adr/ADR-0004)",
+        "Not yet run in a real session: intake gate, the full QA loop, reviewer amendments, the lsf skill driven by Claude Code (" + NV20 + " 'Not covered')"])
+nodes["factory"]["detail"] = ["The factory is layered. The method (the /sf build loop, its skills and the sf toolchain) runs today. A deterministic engine (the sf CLI) enforces test integrity, one-way-door detection and, through factory/verify, honest solver verdicts on a small pure subset. An agent layer (eight roles, eight hook ids, generator, settings emitter, ledger, walking skeleton) is implemented and acceptance-tested. A lite factory (lsf) runs the same flow in one hour on a laptop with a phase clock, human checkpoints and an offline dashboard.",
+                              "Click any stacked box to open the diagram inside it. The Coverage tab lists what is built, partial, only designed, outside the repo, or a gap, with reasons."]
+setsum("factory", "A set of skills, rules, deterministic gates and eight Sonnet-pinned agent roles that turn an AI coding assistant from a 'vibe-coder' into a disciplined engineer: requirements are verified before use, tests come before code, the implementer is blind to the tests, QA supervises and verification is deterministic and independent.")
+nodes["factory"]["files"] += [F("docs/sf-flow.md", None, "The /sf flow as implemented", "The flow, its evidence base and what is unverified"),
+                              F(ADR5, None, "## 2. Decision", "The latest accepted decision")]
+addchildren("factory", "lsf", diagram=['  build-loop -->|"same flow, one hour, laptop"| lsf["Lite factory (lsf)<br/>phase clock, checkpoints, dashboard"]'])
+
+setcov("build-profile", "built", "This repository now has a profile at docs/development-workflow.md (source requirements, ADRs, tests, the blind eval path, test commands). The skill's own default location, .claude/build-loop.md, is untracked and is not cited here.",
+       ["The installed sf skill is the only copy of the loop text; this repo's history does not version it"])
+nodes["build-profile"]["files"] = [X(SF, "85-94", "Load the project profile first"), F("docs/development-workflow.md", None, "Build-loop profile: software-factory", "The profile for this repository")]
+setcov("stage-6-implement-blind", "partial", "Blindness is mechanical where sf install generated the settings: blindness_guard plus scripts/implementer-worktree.sh (sparse checkout without evals/). Verified in headless real sessions; the interactive case and ADR-0004's open symlink case are not.",
+       ["TB06-D-035 open (ADR-0004); command-text guards have documented residual risk", "Interactive (non -p) sessions not exercised"])
+setcov("stage-7-separate-runner", "partial", "Defined in the installed /sf skill and now carried by the qa role and sf qa; the qa role's path limits were verified in a real headless session, a full QA loop with a real implementer and QA agent has not run.",
+       ["Full QA loop with real agents not yet run (" + NV20 + " 'Not covered')"])
+setcov("stage-8-review", "partial", "Defined in the installed /sf skill; the review role now carries implementation-review, code-review, mermaid-nesting-dolls, minesweeper and doc-sync, and sf slice amend --role reviewer exists. Reviewer amendments have not run in a real session.",
+       ["Reviewer amendments not yet exercised by a real reviewer agent"])
+setcov("intake", "partial", "The skills exist outside this repo and the deterministic half (ledger, sweep record, gate) is implemented as sf intake; the sweep itself is a model procedure and the gate has not run in a real session.",
+       ["The only in-repo document about the sweep (docs/plans/2026-10-14-minesweeper-skill-proposal.md) still says 'Nothing is built yet'", "Intake gate not yet run in a real session"])
+
+setcov("skills-library", "partial", "15 skills are versioned under skills/ (axiomatic-spec, contract-verify, doc-sync, eli12-docs, eval-designer, implementation-review, intake-gate, lsf, mermaid-nesting-dolls, ops-dashboard-design, orchestration, prd-writer, qa-supervisor, sf, structure-scan) with scripts/skills_sync.py; the external ones are pinned in docs/external-skills.json and checked by sf install doctor.",
+       ["minesweeper (14 MB) and a few others are still live-only in ~/.claude/skills", "Install into ~/.claude/skills is opt-in and is not done by this explorer"])
+setcov("governance-docs", "partial", "Five ADRs (0001 to 0005), the methodology, the requirements register, contracts with binding clarifications, plans and reviews. Some summary documents lag the code.",
+       ["ROADMAP.md still has no mention of the agent layer or the sf toolchain", "ADR-0003 still reads 'Seven agent definitions' and 'not built yet'; ADR-0005 supersedes it in count and records the edits"])
+setsum("governance-docs", "The written authority the rest of the factory obeys: five ADRs, the methodology every agent must follow, the requirements register, binding contracts and clarifications, the plans and the review reports.")
+nodes["governance-docs"]["diagram"] = [l.replace("ADRs 0001 to 0003", "ADRs 0001 to 0005") for l in nodes["governance-docs"]["diagram"]]
+setsum("plans", "The Austin-ready plan, the original seven-agents design (now eight roles, see ADR-0005), the capability map, the skills consolidation, the minesweeper proposal and a token-saving research note.")
+setsum("adrs", "ADR-0001 chooses the Unity-IR dual-plane substrate, ADR-0002 the zero-trust verification substrate, ADR-0003 agent roles above skills, ADR-0004 (proposed) the blindness guard and symlinks, ADR-0005 Sonnet for every role plus a qa role and the test and eval edits that followed.")
+nodes["adrs"]["design"] += [D("Sonnet for every role, plus a qa role (ADR-0005)", "The owner's flow asks for one model across roles and QA agents that supervise and re-initiate; the loader, installer and doctor reject any other model unless explicitly allowed.", "Per-role model tiers (Opus to author, Haiku to run) proposed in the 2026-09-24 design")]
+nodes["adrs"]["files"] += [F(ADR5, None, "## 2. Decision", "Accepted 2026-10-20; section 4 lists every test and eval edit"),
+                           F("docs/adr/ADR-0004-blindness-guard-glob-through-symlinks.md", None, "Status", "Proposed")]
+setcov("adrs", "partial", "ADR-0001 to 0003 and ADR-0005 are accepted; ADR-0004 (blindness guard and symlinks) is proposed and needs a decision. ADR-0005 supersedes ADR-0003's role count (seven to eight) and model proposals.",
+       ["deal and CrossHair from ADR-0002 are still unused by production code; the z3 solver gate in factory/verify covers a small pure subset", "ADR-0003's own text still says roles and hooks are not built"])
+
+# verification engine and evals: drop the stale size and count claims
+setsum("verification-engine", "A small deterministic Python package behind the sf command: it classifies architectural doors, locks test baselines against reward hacking, runs a gated synthesis loop around the Claude CLI, transpiles with a proved equivalence and, through the tool groups, carries the intake, slice, structure, contract, QA, hitl, install and ops commands.")
+setcov("verification-engine", "built", "Implemented and tested; governance fails closed and the CLI exposes the tool groups. " + EV_DOC,
+       ["The semantic verifier is Unity, which an earlier audit found ledger-specific; this was not re-run. The honest solver gate for a pure subset is factory/verify (sf contracts)", "tests marked requires_unity need the sibling Unity repo", "One intermittent failure of the transpiler parity test was seen once and not explained"])
+setcov("evals-gate", "built", "The agent-layer eval suite (golden and diagnostic tiers) runs and its golden gate is the pass criterion; one diagnostic case, TB06-D-035, is open on purpose pending ADR-0004. " + EV_DOC,
+       ["TB06-D-035 is open pending ADR-0004", "Results are gitignored (evals/agents/results/)", "Cases were edited for the eight-role shape under " + ADR5 + " section 4 (no deletions or loosening, per that ADR)"])
+setsum("evals-gate", "Evals are authored from published contracts before any implementer exists, then locked. Golden cases must pass, diagnostic cases are reported; an independent audit found the first golden gate not collectively exhaustive and its blocking findings were closed. Counts live in docs/sf-flow.md and ADR-0005.")
+nodes["evals-gate"]["diagram"] = [l.replace("Eval cases<br/>129 golden, 1,173 diagnostic", "Eval cases<br/>golden and diagnostic tiers") for l in nodes["evals-gate"]["diagram"]]
+setcov("eval-cases", "built", "Cases exist across TB-01 to TB-14 and the SFN slices (evals/native), with per-TB coverage notes; counts are in docs/sf-flow.md.", ["TB06-D-035 is open on purpose (ADR-0004)"])
+setsum("audit-verdict", "MECE: FAIL at audit time (2026-09-24): 1,302 cases, 129 golden blocked, 1,173 diagnostic blocked, 0 failed, golden verdict NOT GREEN. Historical: the findings were closed afterwards.")
+
+# sf toolchain children: cite test files, not counts
+setcov("intake-gate", "partial", "Implemented and tested (tests/test_intake.py, test_intake_seeds.py, test_intake_experiments.py). The sweep and the value-extraction pass are model procedure; only recording and gating are deterministic. The gate has not run in a real session.",
+       ["Minesweeper's locator format could not be confirmed; every integer in a locator is read as a source line", "The register schema is copied from the live skill and can drift", "Not run in a real session (" + NV20 + ")"])
+setcov("slice-format", "built", "Implemented and tested (tests/test_slices.py). OpenSpec's own validator accepted the fixture layout (run in a throwaway directory with telemetry off); compatibility beyond that is not claimed.", nodes["slice-format"]["coverage"]["gaps"])
+setcov("structure-scan", "built", "Implemented and tested (tests/test_structure.py, test_structure_hardening.py); run on this repo's own factory/ package. Adversarial acceptance report: docs/acceptance/verify-structure-report.md.", ["Python only; never a complete call graph"])
+setcov("contract-verify", "built", "Implemented and tested (tests/test_verify_*.py and tests/acceptance/verify, including a differential test of the z3 model against real Python); demonstrated end to end on a labelled minimal fixture (examples/dogfood-limits). Adversarial acceptance report: docs/acceptance/verify-structure-report.md.",
+       ["Supported subset only: no loops, calls, floats or containers; everything else must route to tests", "int64 is modelled as checked overflow, not wraparound", "Generated regression tests replay an absolute source path"])
+setcov("blind-worktree", "built", "Tested (tests/test_implementer_worktree.py); used for the blind implementers of this build.", nodes["blind-worktree"]["coverage"]["gaps"])
+setcov("qa-loop", "partial", "Implemented and tested (tests/test_qa_*.py, including a scripted fake-implementer simulation, tests/test_qa_sim.py). Policy defaults are configurable. The qa role's write limits were verified in a real headless session; the loop has not run with a real implementer and a real QA agent.",
+       ["Full QA loop with real agents not yet run (" + NV20 + " 'Not covered')", "Tamper detection misses someone who rewrites the logs and the state together"])
+setcov("resource-limits", "built", "Tested (tests/test_resource_limits.py); the test runs for this explorer refresh used scripts/bounded-pytest.sh.", nodes["resource-limits"]["coverage"]["gaps"])
+setcov("human-stop", "built", "Implemented and unit-tested (tests/test_hitl.py); obeyed in a real session: slice done refused (exit 5), release refused, stop still open (" + NV19 + ").", nodes["human-stop"]["coverage"]["gaps"])
+setcov("sf-toolchain", "partial", "Implemented and tested; used by this very build. The deterministic parts are built; the intake gate and the full QA loop have not run in a real session.",
+       ["Intake gate, full QA loop and reviewer amendments not yet run in a real session", "Not yet applied to a product project"])
+
+# ---- eight roles, Sonnet (item 6)
+nodes["role-specs"]["title"] = "Eight role specs"
+setsum("role-specs", "Orchestrator, Research, Design, Audit, Implement, QA, Test and Review, each with a model (always sonnet), tools, skills, MCP servers and hooks, loaded and validated from factory/agents/roles/*.yaml.")
+nodes["role-specs"]["design"] = [D("Narrow tools, one model for every role", "Every subagent inherits the plugin and skill listing, so each role lists at most 20 tools. ADR-0005 fixes Sonnet for all roles; load_roles, the installer and sf install doctor reject any other model unless it is explicitly allowed.", "Per-role tiers (Opus to author, Haiku to run) from the 2026-09-24 design")]
+nodes["role-specs"]["files"] = [F("factory/agents/roles.py", None, "def load_roles", "Loader; rejects a non-sonnet model unless allowed"), F("factory/agents/roles/qa.yaml", None, "writes: qa_paths", "The role added by ADR-0005"), F("docs/hooks/roles.md", None, "## Writes class `qa_paths`", "Role data, qa_paths and the Sonnet rule"), F("docs/contracts/roles-and-generation.md", "5-7", "RoleSpec")]
+setcov("role-specs", "built", "Eight role files load and validate; generated agents follow them. Real headless sessions resolved all eight generated agents (" + NV20 + ").")
+addchildren("role-specs", "role-qa", diagram=[
+    '  role-implement -->|"supervised by"| role-qa["QA<br/>runs suites, feedback, no code"]',
+    '  role-qa -->|"runs the protected suites via"| role-test',
+    '  role-qa -.->|"loops back to"| role-implement'])
+for rid, (yml, wr) in {"role-orchestrator": ("orchestrator", "none"), "role-research": ("research", "research_dir"), "role-design": ("design", "design_dirs"), "role-audit": ("audit", "audit_dir"), "role-implement": ("implement", "app"), "role-test": ("test", "eval_paths"), "role-review": ("review", "none")}.items():
+    n = nodes[rid]
+    n["detail"] = ["Model: sonnet (ADR-0005; every role file declares it). Writes class: %s." % wr, n["detail"][1]]
+    n["files"] = [F("factory/agents/roles/%s.yaml" % yml, None, "model: sonnet", "Role data")] + n["files"]
+    setcov(rid, "built", "Implemented as role data and loaded by factory/agents/roles.py; a generated agent file is emitted from it and resolved in real headless sessions.")
+nodes["role-review"]["summary"] = "Independent read of the diff, traces and passes; drift against requirements. Read-only; verdict only. Carries implementation-review, code-review, mermaid-nesting-dolls, minesweeper and doc-sync."
+nodes["role-review"]["files"] = [F("factory/agents/roles/review.yaml", None, "mermaid-nesting-dolls", "The reviewer's skills")] + [f for f in nodes["role-review"]["files"] if f["path"].startswith("docs")]
+setcov("role-review", "partial", "Role data and skills are implemented; the reviewer has not amended a slice in a real session.", ["Cross-vendor review is not configured: every role is Sonnet by owner decision (ADR-0005)", "Reviewer amendments (sf slice amend --role reviewer) not yet exercised by a real reviewer agent"])
+nodes["role-design"]["summary"] = "Brief to PRD (prd-writer), axioms and contracts, one-way-door check, ADR. Runs behind gates G0, G1 and G2."
+N("role-qa", "QA", "Supervises the implementer: runs the protected suites, writes behavioural feedback in criterion terms, records attempts, proposes regression cases and marks tasks verified. Never edits application code or writes test source.", kind="role",
+  detail=["Model: sonnet (ADR-0005). Writes class qa_paths: only **/qa-notes.md, **/qa-feedback/** and .sf/qa/**. Bash is full so it can run suites, but path_guard denies it every command bash_guard flags.", "Skills: qa-supervisor and superpowers:verification-before-completion."],
+  design=[D("A QA role between implement and test, enforced by path_guard", "QA must run suites and write feedback without being able to edit code or test source; a writes class plus the hook, not a prompt, enforces it.", "Folding QA into the Test role, which freezes evals")],
+  files=[F("factory/agents/roles/qa.yaml", None, "writes: qa_paths", "Role data"), F("factory/hooks/path_guard.py", None, "if writes == \"qa_paths\"", "Enforcement (C-41.2)"), F("docs/hooks/roles.md", None, "## Writes class `qa_paths`", "Contract")],
+  cov=C("built", "Implemented; in a real headless session the generated qa agent could write its QA notes and was blocked from writing src/hack.py and from git add -A by the real hooks (" + NV20 + ", S7).",
+        ["A full QA loop with a real implementer and a real QA agent has not run"]))
+
+setsum("agent-layer", "Eight agent definitions (orchestrator, research, design, audit, implement, qa, test, review), all pinned to Sonnet, with tool allowlists and hooks, generated from a project profile so nothing names a specific project. Implemented in factory/agents and factory/hooks and acceptance-tested.")
+setcov("agent-layer", "partial", "All 14 tracer bullets are implemented and pass their acceptance cases; ADR-0005 added the qa role, the Sonnet-only rule and the doctor role-skill and external-pin checks. One diagnostic case is open pending ADR-0004. Counts: docs/sf-flow.md.",
+       ["TB06-D-035 open (ADR-0004)", "Not exercised in an interactive session (C-34); command-text guards have documented residual risk", "Each sub-agent stop is recorded twice (subagent_stop and ledger_audit both emit), noted in " + NV20])
+nodes["agent-layer"]["detail"] = ["Eight roles, eight hook ids, a profile loader, a stage graph (default order orchestrate, research, design, audit, implement, qa, test, review; loops qa to implement and review to implement), an agent file generator, a settings emitter, a tamper-evident ticket ledger and an end-to-end simulation with a shadow routing log exist as code. Implementers were mechanically blind to the evals (sparse worktrees without evals/), and an independent runner graded each slice; clarifications C-36 to C-41 record what the iterations found. docs/adr/ADR-0005 lists the test and eval edits for the eight-role shape."]
+nodes["agent-layer"]["files"] += [F("factory/agents/default_graph.yaml", None, "loops:", "Stage order and the two loop-backs"), F(ADR5, None, "## 2. Decision", "Eight roles, Sonnet only")]
+nodes["agent-layer"]["diagram"] = [l.replace("Seven role specs", "Eight role specs") for l in nodes["agent-layer"]["diagram"]]
+
+setsum("hooks", "Eight hook ids share one core: a payload parser and decision type, then guards for paths (including the qa_paths class), blindness, secrets, Bash and stop, the sub-agent stop validator, the ledger audit and the session-start summary. Guards fail closed on malformed input.")
+setcov("hooks", "built", "Eight hook ids are implemented behind one registry (factory/agents/generate.py HOOK_REGISTRATION); every guard has acceptance cases; security-review hardening recorded as clarifications C-36 to C-39 and the qa_paths class as C-41.")
+nodes["hooks"]["files"] += [F("factory/agents/generate.py", None, "HOOK_REGISTRATION", "Hook ids, events and matchers")]
+addchildren("hooks", "ledger-audit", "session-start", diagram=[
+    '  hook-core -->|"SubagentStop: audit trail"| ledger-audit["Ledger audit<br/>ticket Audit Trail + event"]',
+    '  hook-core -->|"SessionStart"| session-start["Session start<br/>ticket summary"]'])
+N("ledger-audit", "Ledger audit", "At SubagentStop appends an entry (agent type, id, the first 200 characters of the last message, secret shapes removed) to the current ticket's ledger; it always allows. Its recording step also leaves a subagent-stop stage event for the dashboard.", kind="TB-11",
+  files=[F("factory/hooks/ledger_audit.py", None, "def decide", "Always allows"), F("factory/hooks/ledger_audit.py", None, "emit(cfg.project_root, \"subagent-stop\"", "The ops event")],
+  cov=C("built", "Implemented; the event emission was seen in a real session.", ["Double counting with subagent_stop: both emit one subagent-stop event per stop"]))
+N("session-start", "Session start", "At SessionStart gives a new session the current ticket's ledger summary, or 'No ticket is active.'; it always allows.", kind="TB-11",
+  files=[F("factory/hooks/session_start.py", None, "NO_TICKET", "Summary or the no-ticket line")], cov=C("built", "Implemented with acceptance cases."))
+nodes["subagent-validators"]["files"] += [F("factory/hooks/subagent_stop.py", None, "def record", "Leaves a subagent-stop stage event")]
+setsum("path-guard", "Each role may write only its own folders (Research under research/, Design under docs/prd, spec and adr, Audit under docs/audit, Review nowhere, QA only qa-notes and qa-feedback and .sf/qa through the qa_paths class). Only Implement writes application code.")
+nodes["path-guard"]["files"] += [F("factory/hooks/path_guard.py", None, "the only paths a `qa_paths` role may write", "The qa_paths globs; configuration may override them"), F("factory/hooks/path_guard.py", None, "C-41.3: qa gets the implement-style git restrictions", "Bash limits for qa")]
+nodes["path-guard"]["coverage"]["note"] += " The qa_paths class (C-41.2) was added by ADR-0005."
+
+# ---- native install: doctor checks and pin-external
+nodes["native-install"]["summary"] = "sf install writes the generated agents, settings-level hooks with absolute verified commands, the Sonnet-only pin and a manifest into a project, and rejects any non-Sonnet role model unless --allow-model; doctor executes every hook command and also checks that each role's skills resolve and that external skills match their pins; pin-external rewrites the pins."
+nodes["native-install"]["design"] = [D("Doctor fails when a hook cannot run, a role skill does not resolve or an external pin is missing", "A hook that cannot run fails open, so the check executes the command; unresolved skills and unpinned externals would silently change behaviour.", "Trusting that files exist")]
+nodes["native-install"]["files"] += [F("factory/install/doctor.py", None, "def check_external", "External skills versus docs/external-skills.json"), F("factory/install/core.py", None, "def pin_external", "Rewrites the pins from the installed copies; exit 2 without --yes"), F("docs/external-skills.json", None, "\"skills\"", "The pins")]
+setcov("native-install", "built", "Implemented and unit-tested (tests/test_install.py, test_install_native.py); verified in real headless Claude Code sessions: skills (including eli12-docs and lsf) and all eight generated agents resolve, hooks block in subagents, the pin overrides an inherited default (" + NV19 + ", " + NV20 + ").",
+       ["Interactive (non -p) use not exercised", "The user-level default model is deliberately unchanged; sessions elsewhere without --model sonnet or a project pin still inherit it", "A hook parser guard is not OS isolation", "doctor WARNs (not FAILs) when an external skill changed since it was pinned"])
+
+# ---- lsf (item 1)
+LSF = "skills/lsf/scripts/lsf.py"
+DASH = "skills/lsf/assets/dashboard.html"
+N("lsf", "Lite factory (lsf)",
+  "/sf made fast: the owner's flow (brief, minesweep, research, experiments, tracer PRDs, evals, blind build, QA, mechanistic review, docs and drift) run in about an hour on a laptop with Python 3.9+ and git. A phase clock, telemetry, human checkpoints and an offline dashboard make every step visible.",
+  kind="subsystem",
+  detail=["One CLI (skills/lsf/scripts/lsf.py, standard library only) writes a .lsf folder in the project: a profile, an events log, a phase log and a hash-chained stop ledger. The dashboard (skills/lsf/assets/dashboard.html) is served from 127.0.0.1 by the same script and reads the project's own files, so nothing is fabricated for it.",
+          "Phase ids are an alias map onto the /sf stages, so events from both tools read the same (see the flow node under the build loop)."],
+  design=[D("A separate lite tool, not a mode of sf", "It must install on a Mac with only python3 and git (no virtualenv, no solver) and be demonstrable live in an hour.", "Running the full sf toolchain with its z3 and Unity dependencies"),
+          D("Human checkpoints are a procedure with an audit trail, not proof of identity", "The release route needs a token the agent is told never to read; the ledger is cross-checked against the event log. The skill says plainly that no software check can prove who clicked.", "Claiming the stop cannot be bypassed")],
+  files=[F("skills/lsf/SKILL.md", None, "# lsf: the lite software factory", "The skill: flow, per-phase procedure, rules"), F(LSF, None, "def main", "Entry point"), F("docs/prds/SFN-06-lsf-lite.md", None, "# SFN-06", "The PRD")],
+  cov=C("partial", "Implemented and tested here: tests/lsf ran with one failure (test_parity_with_factory_collectors). It has not been driven by Claude Code in a real session (" + NV20 + " 'Not covered').",
+        ["tests/lsf/test_hooks_collect.py::test_parity_with_factory_collectors fails on this checkout: lsf's experiments collector omits kind: experiment and returns the whole resolved.json instead of the four fields factory/ops/collect.py returns",
+         "The lsf skill has not been driven by Claude Code in a real session",
+         "Human stop release is friction with an audit trail, not proof (docs/reviews/2026-10-20-lsf-review.md)"]),
+  diagram=[
+      "flowchart LR",
+      "  lsf-install[\"Installer<br/>install.sh, bundle\"] -->|\"skill + lsf wrapper\"| lsf-cli[\"lsf CLI<br/>init, phase, event, budget, cost, doctor\"]",
+      "  lsf-cli -->|\"phase start/end, events\"| lsf-clock[\"Phase clock and budget<br/>11 phases, 3 groups\"]",
+      "  lsf-cli -->|\"hitl request/status\"| lsf-stops[\"Stop ledger and human checkpoints\"]",
+      "  lsf-stops -->|\"open stop: phase start exits 3\"| lsf-clock",
+      "  lsf-hooks[\"Hooks and telemetry<br/>SubagentStop, Stop, commit, guard\"] -->|\"events.jsonl\"| lsf-clock",
+      "  lsf-cli -->|\"serve\"| lsf-server[\"Dashboard server<br/>127.0.0.1, routes\"]",
+      "  lsf-server -->|\"/api/state, /api/file, /api/at\"| lsf-ui[\"Dashboard UI<br/>ten tabs\"]",
+      "  lsf-ui -->|\"Approve: POST /api/hitl/release\"| lsf-stops",
+  ],
+  children=["lsf-cli", "lsf-clock", "lsf-stops", "lsf-hooks", "lsf-server", "lsf-ui", "lsf-install"])
+N("lsf-cli", "lsf CLI", "One argparse program with the commands init, phase, event, hitl, status, budget, serve, bundle, hooks, doctor and cost. Every command takes --root; exit codes are 0 ok, 1 a check failed, 2 usage, 3 refused by a human stop.", kind="module",
+  files=[F(LSF, None, "def build_parser", "All commands"), F(LSF, None, "def cmd_init", "Writes .lsf/profile.json"), F(LSF, None, "def cmd_phase", "start and end; start refuses under an open stop"), F(LSF, None, "def cmd_doctor", "python, git, repository, port and the self-check"), F(LSF, None, "def cmd_bundle", "Prints which dashboard tabs have data")],
+  cov=C("built", "Implemented; tests/lsf/test_core.py passes here."))
+N("lsf-clock", "Phase clock and budget", "Eleven phases in three groups (align 0-intake to 6-decide, build 7-implement and 8-qa, review 9-review and 10-docs) with default weights 60 / 20 / 20 of the session minutes. budget compares planned with actual minutes per group and subtracts time spent waiting on a human stop.", kind="module",
+  design=[D("Waiting on a human is not charged to the work", "A checkpoint can sit open for minutes; counting it would make every group look over budget.", "Wall-clock phase time only")],
+  files=[F(LSF, None, "PHASES = [", "Phase ids and groups"), F(LSF, None, "SF_ALIAS = {", "lsf phase to /sf stage"), F(LSF, None, "DEFAULT_WEIGHTS", "60 / 20 / 20"), F(LSF, None, "def budget_data", "Planned versus actual, minus waiting"), F(LSF, None, "def wait_intervals", "Time under an open stop")],
+  cov=C("built", "Implemented; the clock can be overridden with LSF_NOW for rehearsals and tests (documented in SKILL.md).", ["Actual minutes are 'under (not measured)' until phases have been started and ended"]))
+N("lsf-stops", "Stop ledger and human checkpoints", "A hash-chained ledger under .lsf/stops with a head file: hitl request opens a named stop, ending an alignment phase opens <phase>-review automatically (the default; the profile can change it), hitl release records who and how (dashboard, cli-tty or cli-nontty). The ledger is cross-checked against the event log, and repair quarantines a failed ledger and rebuilds its valid prefix.", kind="module",
+  design=[D("Release is a human act with a recorded channel", "Agents must never run release or repair; --strict-hitl refuses them without a real terminal; the guard hook denies them in Bash.", "A boolean approved flag an agent could set")],
+  files=[F(LSF, None, "def hitl_open", "Opens a stop"), F(LSF, None, "def hitl_release", "Records the release and its channel"), F(LSF, None, "def hitl_repair", "Quarantine and rebuild"), F(LSF, None, "def cross_check", "Ledger versus events.jsonl"), F(LSF, None, "def require_tty_if_strict", "--strict-hitl")],
+  cov=C("built", "Implemented; tests/lsf/test_core.py and test_review_fixes.py pass here.", ["Friction, not proof: the unkeyed chain and head file can be forged by anything that can write .lsf; the adversarial review lists the residual cases (docs/reviews/2026-10-20-lsf-review.md)"]))
+N("lsf-server", "Dashboard server and routes", "A ThreadingHTTPServer bound to 127.0.0.1 only. GET / serves the dashboard with a restrictive Content-Security-Policy, GET /api/state the whole state, GET /api/file a repository file (path-checked, size-capped), GET /api/at?sha= the historical tabs at a commit, and POST /api/hitl/release (the only write) needs the per-run token in X-LSF-Token. Host and Origin must be loopback.", kind="module",
+  files=[F(LSF, None, "def make_handler", "Handler with every route"), F(LSF, None, "def cmd_serve", "Prints the URL with #token= once"), F(LSF, None, "def read_repo_file", "Path and size checks for /api/file"), F(LSF, None, "def resolve_sha", "Used by /api/at")],
+  cov=C("built", "Implemented; tests/lsf/test_serve.py passes here.", ["The agent must never run serve or read the token: that is procedure, not enforcement"]))
+N("lsf-ui", "Dashboard UI tabs", "One offline page with ten tabs: Now, Telemetry, Research, Experiments, ADRs, PRD, Architecture, Docs, Evals & bugs and Git. The tabs read the collectors (research, experiments, adrs, bug_log, prd_journeys, architecture, git, docs) and a commit selector shows the historical tabs at a past commit while Now and Telemetry stay live. File references open the editor through the inlined editor-links function.", kind="module",
+  files=[F(DASH, None, "var TABS=", "The ten tabs"), F(DASH, None, "function renderNow", "Now tab: clock, stops, Approve button"), F(DASH, None, "function renderTelemetry", "Telemetry tab"), F(DASH, None, "function renderArch", "Architecture tab (the explorer in an iframe)"), F(DASH, None, "function renderDocs", "Docs tab (reads docs/eli12/index.json)"), F(LSF, None, "COLLECTORS = [", "Collectors behind the tabs"), F(LSF, None, "def c_experiments", "Experiments and resolved.json")],
+  cov=C("partial", "Implemented; tests/lsf/test_dashboard.py passes here. The experiments collector disagrees with factory/ops (parity test fails).", ["lsf's experiments rows lack kind: experiment and carry the whole resolved.json", "Architecture and Docs tabs show 'not available' unless docs/explorer/*.model.json and docs/eli12/index.json exist; they are not faked"]))
+N("lsf-hooks", "Hooks and telemetry", "hooks install prints a diff of settings and --apply writes four hooks: SubagentStop and Stop (events), PostToolUse on Bash (git commit events) and a PreToolUse guard that denies hitl release, hitl repair, the release route and writes to .lsf/stops. Events are redacted and truncated; hooks write only into a project that already has .lsf.", kind="module",
+  files=[F(LSF, None, "def hooks_config", "The four hooks"), F(LSF, None, "def cmd_hook", "Always exits 0 except the guard's denial"), F(LSF, None, "def guard_reason", "What the guard denies"), F(LSF, None, "def emit_event", "Telemetry write; LSF_EVENTS=off disables"), F(LSF, None, "def redact", "Secret shapes removed"), F(LSF, None, "def cmd_hooks", "print, install, uninstall")],
+  cov=C("partial", "Implemented; tests/lsf/test_hooks_collect.py passes except the collector parity test. Hooks are opt-in (--apply) and have not been exercised in a real Claude Code session.", ["The guard is friction, not proof (SKILL.md)", "Not run in a real session"]))
+N("lsf-install", "Installer and bundle", "install.sh copies the skill to ~/.claude/skills/lsf and writes an lsf wrapper in ~/.local/bin; running it twice changes nothing and a different older copy is moved to skills-backups, never inside the skills folder. scripts/make-lsf-bundle.sh zips lsf, eli12-docs and mermaid-nesting-dolls with an install-bundle.sh for a machine with only python3 and git.", kind="script",
+  files=[F("skills/lsf/install.sh", None, "WRAP=$BIN/lsf", "Wrapper and idempotence"), F("skills/lsf/install.sh", None, "BKDIR=$SKILLS/../skills-backups", "Backup outside the skills folder"), F("scripts/make-lsf-bundle.sh", None, "for s in lsf eli12-docs mermaid-nesting-dolls", "What the bundle holds")],
+  cov=C("partial", "install.sh is tested (tests/lsf/test_install_skill.py passes here). make-lsf-bundle.sh has no test of its own.", ["The bundle script was not run in this refresh", "Mac behaviour is described in SKILL.md but was verified on Linux only"]))
+
+# ---- docs tools: eli12-docs and the explorer with editor links (items 2, 3)
+N("skills-docs", "Docs tools", "eli12-docs writes and checks plain-English module docs; mermaid-nesting-dolls builds this explorer and opens its files in the editor.", kind="skills",
+  cov=C("built", "Both tools are implemented and tested; see the children."),
+  diagram=["flowchart LR",
+           "  eli12-docs[\"ELI12 docs<br/>eli12.py scaffold, check, index\"] -->|\"index.json maps each file to its page\"| dolls-explorer[\"Explorer and editor links<br/>nesting_dolls.py\"]"],
+  children=["eli12-docs", "dolls-explorer"])
+addchildren("skills-library", "skills-docs", diagram=['  skills-ship -->|"documented by"| skills-docs["Docs tools<br/>eli12-docs, explorer"]'])
+E12 = "skills/eli12-docs/scripts/eli12.py"
+N("eli12-docs", "ELI12 docs", "A script that creates, refreshes and checks one Markdown page per Python module under docs/eli12/ in a fixed format: what it does, what it expects, what it gives back, who uses it, what it depends on. It computes the who-uses-who lines from the code and leaves TODO for the words only a person can write.", kind="skill",
+  design=[D("The tool computes facts, a person writes meaning", "Signatures, callers and callees must not be guessed; the sig fingerprint and the Used by / Depends on lists are computed, and the check fails when they drift.", "A model rewriting the docs on every change")],
+  files=[F("skills/eli12-docs/SKILL.md", None, "## The format", "The page format and rules"), F(E12, None, "def main", "scaffold, check, index"), F("docs/prds/SFN-07-eli12-docs.md", None, "# SFN-07", "The PRD")],
+  cov=C("built", "Implemented; tests/test_eli12.py passes here. lsf ships an identical copy of the script (tests compare them).", ["Only Python modules are covered", "Whether the sentences are plain enough for a 12-year-old is a human judgement the check cannot make (it checks length, labels, jargon list)"]),
+  diagram=["flowchart LR",
+           "  eli12-format[\"Page format<br/>docs/eli12/MODULE.md\"] -->|\"template for\"| eli12-scaffold[\"scaffold<br/>creates or refreshes\"]",
+           "  eli12-scaffold -->|\"pages with TODO\"| eli12-check[\"check<br/>finding codes\"]",
+           "  eli12-scaffold --> eli12-index[\"index<br/>INDEX.md + index.json\"]"],
+  children=["eli12-format", "eli12-scaffold", "eli12-check", "eli12-index"])
+N("eli12-format", "Page format", "Line one is the .py path; then one sentence; then per public class or function (methods as Class.method) the labelled lines What it does, Expects, Gives back, Used by, Depends on and an optional Watch out, in that order, with a sig comment. Jargon words need a GLOSSARY entry.", kind="rule",
+  files=[F("skills/eli12-docs/SKILL.md", None, "## The format", "Example page"), F(E12, None, "LABELS = [", "Label order"), F(E12, None, "def parse_doc", "Parser of a page")],
+  cov=C("built", "Implemented and enforced by check."))
+N("eli12-scaffold", "scaffold", "Creates or refreshes a page: on an existing page it only refreshes sig, Used by and Depends on and adds missing sections, so written sentences are never overwritten. Calls it cannot pin to one project symbol are listed with (maybe).", kind="command",
+  files=[F(E12, None, "def scaffold_module", "Whole page"), F(E12, None, "def scaffold_entry", "One entry; keeps old sentences"), F(E12, None, "class Project", "Computes callers and callees")],
+  cov=C("built", "Implemented.", ["Unresolved calls are only marked (maybe); a person must check them"]))
+N("eli12-check", "check and finding codes", "Exit 0 clean, 1 findings, 2 usage. Each finding is path:line: code: message with a code from missing-entry, orphan-entry, stale-signature, stale-dependencies, todo, format, too-long, bad-param, jargon and unparseable. --changed GITREF limits it to changed modules plus modules whose lists mention them.", kind="command",
+  files=[F(E12, None, "def run_check", "Runs the checks"), F(E12, None, "\"stale-signature\"", "Signature drift"), F(E12, None, "\"stale-dependencies\"", "Used by / Depends on drift"), F(E12, None, "\"bad-param\"", "Parameter line shape"), F(E12, None, "def changed_files", "--changed GITREF")],
+  cov=C("built", "Implemented; the todo, format and jargon codes are listed in SKILL.md and produced inside check_doc and check_entry."))
+N("eli12-index", "index", "Writes docs/eli12/INDEX.md and docs/eli12/index.json (module path to page path) so the explorer and the dashboards can link each file to its page; scaffold refreshes index.json too.", kind="command",
+  files=[F(E12, None, "def build_index", "Builds the mapping"), F(E12, None, "def write_index", "Writes both files")],
+  cov=C("built", "Implemented.", ["docs/eli12/ does not exist in this repository yet, so the lsf Docs tab reports 'not available' here"]))
+
+ND = "skills/mermaid-nesting-dolls/scripts/nesting_dolls.py"
+EL = "skills/mermaid-nesting-dolls/assets/editor-links.js"
+N("dolls-explorer", "Explorer and editor links", "The nesting-dolls builder turns a model.json into this one-file explorer. Each file in a node's panel is a link that opens the editor at the first line of its range, with a Copy path button; editor and checkout root are set at build time (--workspace-root, --editor) or per view (?editor=&root=).", kind="skill",
+  design=[D("One pure link builder, inlined in every surface", "assets/editor-links.js is the single source; its text between the begin/end markers is copied into the viewer template, the ops shell and the lsf dashboard, and a check fails if a copy drifts.", "Each surface writing its own link code")],
+  files=[F("skills/mermaid-nesting-dolls/SKILL.md", None, "## Opening files in your editor", "Usage"), F(EL, None, "function editorUrl", "The pure function"), F("docs/prds/SFN-08-editor-links.md", None, "# SFN-08", "The PRD")],
+  cov=C("built", "Implemented; tests/test_editor_links.py passes here and the committed explorer was rebuilt and checked with --assets in this refresh.", ["The committed HTML has no workspace root, so it shows Copy path only until ?editor=&root= or a rebuild with --workspace-root is used", "Opening the editor from the page was not clicked in this refresh (no desktop editor registered on this host)"]),
+  diagram=["flowchart LR",
+           "  editor-links[\"editor-links.js<br/>editorUrl(editor, root, path, line)\"] -->|\"inlined between markers\"| editor-copies[\"Inlined copies<br/>viewer, ops shell, lsf dashboard\"]",
+           "  dolls-options[\"Build options<br/>--workspace-root, --editor, ?editor=&root=\"] -->|\"workspace in the model\"| editor-copies",
+           "  editor-copies -->|\"check --assets\"| asset-check[\"Drift check<br/>two copies\"]"],
+  children=["editor-links", "editor-copies", "dolls-options", "asset-check"])
+N("editor-links", "editor-links.js", "A dependency-free ES5 function editorUrl(editor, root, relPath, line) for vscode, cursor, windsurf, zed, idea, sublime and textmate. It returns null for an absolute or .. path, a backslash, a NUL, a scheme prefix or a non-absolute root, and percent-encodes each path segment.", kind="module",
+  files=[F(EL, None, "function editorUrl", "Builder"), F(EL, None, "function validRel", "Path safety")],
+  cov=C("built", "Implemented; tests/test_editor_links.py exercises it."))
+N("editor-copies", "Inlined copies", "The function text between the editor-links begin and end marker comments appears in the viewer template, ops/shell/index.html and skills/lsf/assets/dashboard.html, and skills/lsf/assets/editor-links.js is a copy of the source.", kind="module",
+  files=[F("skills/mermaid-nesting-dolls/assets/template.html", None, "editor-links:begin", "Viewer copy"), F("ops/shell/index.html", None, "editor-links:begin", "Ops shell copy"), F(DASH, None, "editor-links:begin", "lsf dashboard copy"), F("skills/lsf/assets/editor-links.js", None, "editor-links:begin", "lsf asset copy")],
+  cov=C("built", "All four copies are covered by tests (tests/lsf/test_dashboard.py, evals/native/sfn06/test_static.py)."))
+N("dolls-options", "Build options and view overrides", "build and check accept --workspace-root DIR and --editor NAME, stored as model.workspace and validated (absolute root, known editor or none). In the browser ?editor= and ?root= override the model and an invalid root is ignored.", kind="module",
+  files=[F(ND, None, "--workspace-root", "Build and check options"), F(ND, None, "def validate_workspace", "Validation"), F("skills/mermaid-nesting-dolls/assets/template.html", None, "ed=w.editor||\"none\"", "View-time override")],
+  cov=C("built", "Implemented."))
+N("asset-check", "Drift check (--assets)", "check --assets fails if the inlined copy in the viewer template or in ops/shell/index.html differs from assets/editor-links.js. The two lsf copies are not covered by this command; tests cover them.", kind="module",
+  files=[F(ND, None, "def check_assets", "The comparison")],
+  cov=C("partial", "Implemented for two of the four copies.", ["skills/lsf copies are guarded by tests, not by check --assets"]))
+
+# ---- ops: events, emission, cli, tab sources, banners (items 4, 5)
+OPS = "factory/ops"
+setsum("ops-dashboard", "factory.ops bundles historical development artifacts per commit from the git object database, collects runtime telemetry separately with measured / not-measured labels, records stage events as the commands run, and a static shell offers a commit selector, tabs and banners for staleness and open human stops.")
+nodes["ops-dashboard"]["files"] = [F("docs/ops-events.md", None, "# Ops events and the live dashboard", "Events and what emits them"), F("docs/ops-tabs.md", None, "# Ops dashboard tabs", "Where each tab reads from")]
+setcov("ops-dashboard", "partial", "Built and tested (tests/test_ops*.py); a real headless session ran sf ops init and sf slice check and the stage event appeared without anyone calling a script (" + NV20 + ", S6). Not deployed.",
+       ["Not deployed", "Runtime telemetry covers only what its config declares; most figures are 'not measured' without configuration", "Langfuse and CI figures are reported only when configured", "Per-product use not done"])
+nodes["ops-dashboard"]["diagram"] = [
+    "flowchart LR",
+    "  ops-emission[\"Event emission<br/>run_tool, hooks\"] -->|\"one JSON line per stage\"| ops-events[\"events.jsonl<br/>ops/events.py\"]",
+    "  ops-events -->|\"stage hitl events\"| ops-tab-sources[\"Tab sources<br/>collectors\"]",
+    "  qa-notes[\"QA notes<br/>qa promote-notes\"] -->|\"qa-notes.md\"| ops-tab-sources",
+    "  ops-cli[\"sf ops<br/>init, backfill, status, autobundle\"] -->|\"snapshots\"| ops-bundle[\"Bundle<br/>content-addressed blobs\"]",
+    "  ops-tab-sources -->|\"tabs per commit\"| ops-bundle",
+    "  ops-runtime-collector[\"Runtime telemetry<br/>repo_head, behind, stops, Langfuse\"] -->|\"runtime.json\"| ops-shell[\"Shell<br/>tabs, banners\"]",
+    "  ops-bundle --> ops-shell"]
+nodes["ops-dashboard"]["children"] = ["ops-bundle", "ops-events", "ops-emission", "ops-cli", "ops-runtime-collector", "ops-tab-sources", "qa-notes", "ops-shell"]
+N("ops-bundle", "Bundle", "Writes per-commit snapshots under ops/snapshots/<sha>/ as content-addressed blobs read from the git object database (or the working tree), builds the viewer and installs the shell.", kind="module",
+  files=[F(OPS + "/bundle.py", None, "def put_blob", "Content-addressed blob"), F(OPS + "/bundle.py", None, "def build_viewer", "Viewer from the dolls template")],
+  cov=C("built", "Implemented; tests/test_ops.py passes here."))
+N("ops-events", "Stage events", "emit(root, stage, slice, verdict, note, source, role) appends one JSON line to ops/events.jsonl under an exclusive lock: notes are cut to 2,000 characters, control characters and secret shapes are removed, a symlink that leaves the root is refused, and a failure returns False and never raises. SF_EVENTS=off writes nothing.", kind="module",
+  files=[F(OPS + "/events.py", None, "def emit", "The writer"), F(OPS + "/events.py", None, "def _redact", "Secret shapes"), F("docs/ops-events.md", None, "## Stage events", "Contract")],
+  cov=C("built", "Implemented; tests/test_ops_events.py and test_ops_security.py pass here."))
+N("ops-emission", "Where events come from", "factory/cli.py run_tool emits one event after a delegated tool group finishes (pass on exit 0, else fail, note exit=N; nothing for exit 2); the subagent_stop and ledger_audit hooks each emit a subagent-stop event. The exit code and the hook decision are never changed.", kind="module",
+  files=[F("factory/cli.py", None, "def _record_event", "Telemetry only; never raises"), F("factory/cli.py", None, "def run_tool", "Calls _record_event after the tool"), F("factory/hooks/subagent_stop.py", None, "def record", "Hook emission"), F("factory/hooks/ledger_audit.py", None, "emit(cfg.project_root", "Hook emission"), F("docs/ops-events.md", None, "## Which commands leave an event", "Command to stage table")],
+  cov=C("built", "Implemented; seen in a real headless session (S6).", ["Each sub-agent stop is recorded twice (both hooks emit); the agent-stop tile would double count (" + NV20 + ")"]))
+N("ops-cli", "sf ops commands", "init creates ops/config.json and events.jsonl, installs the viewer and bundles HEAD (optionally recording a Langfuse host); backfill bundles commits without a snapshot; status says how far the newest snapshot is behind HEAD (exit 4 when behind or none); autobundle installs, removes or reports a post-commit hook block that runs sf ops bundle --sha HEAD.", kind="module",
+  files=[F(OPS + "/cli.py", None, "def _init", "init"), F(OPS + "/cli.py", None, "def _backfill", "backfill"), F(OPS + "/cli.py", None, "def _status", "status; BEHIND exit 4"), F(OPS + "/cli.py", None, "def _autobundle", "autobundle")],
+  cov=C("built", "Implemented; tests/test_ops_cli_native.py passes here; init and status were run in a real session (S6)."))
+N("ops-runtime-collector", "Runtime telemetry", "collect_runtime measures what the config declares and labels each figure measured or not measured. repo_state reports repo_head and how many commits the newest snapshot is behind (behind, None when unknown); stops reads open human stops through the hitl store with the hash chain verified and reports a failed ledger as an open entry; langfuse says 'not measured' with the reason instead of a number it does not have.", kind="module",
+  design=[D("Not measured is shown, never a zero", "A dashboard that prints 0 traces when it never asked is lying; every runtime figure carries a source and a label.", "Defaulting missing figures to zero")],
+  files=[F(OPS + "/runtime.py", None, "def repo_state", "repo_head and behind"), F(OPS + "/runtime.py", None, "def stops", "Open human stops, chain verified"), F(OPS + "/runtime.py", None, "def langfuse", "Host shown when configured; traces not measured"), F(OPS + "/runtime.py", None, "def collect_runtime", "Assembles runtime.json")],
+  cov=C("built", "Implemented; tests/test_ops.py and test_ops_content.py pass here.", ["Trace ingestion is not checked by the collector: Langfuse traces stay 'not measured'"]))
+N("ops-tab-sources", "Tab sources", "Collectors for the historical tabs, each returning items or 'not available' with the paths searched, never an empty success: the one-page PRD journeys, experiments including resolved.json, the bug log and QA notes, and the human stops history.", kind="module",
+  files=[F(OPS + "/collect.py", None, "COLLECTORS = {", "All tab collectors"), F("docs/ops-tabs.md", None, "# Ops dashboard tabs", "Source per tab")],
+  cov=C("built", "Implemented; tests/test_ops_content.py passes here."),
+  diagram=["flowchart LR",
+           "  tab-prd[\"PRD journeys<br/>docs/prd/onepager.md\"] --> tab-experiments[\"Experiments<br/>results.json, resolved.json\"]",
+           "  tab-experiments --> tab-bugs[\"Evals and bugs<br/>docs/bugs, qa-notes.md\"]",
+           "  tab-bugs --> tab-hitl[\"Human stops<br/>ADRs + hitl events\"]"],
+  children=["tab-prd", "tab-experiments", "tab-bugs", "tab-hitl"])
+N("tab-prd", "One-page PRD journeys", "Reads docs/prd/onepager.md (## Journey: name, a Slices line, one to five steps), flags an id with no docs/slices/<id>/, and warns when the page is over 80 lines without cutting anything; the slice proposals and docs/prds follow.", kind="module",
+  files=[F(OPS + "/collect.py", None, "def _onepager", "Parser"), F(OPS + "/collect.py", None, "def prd_journeys", "Tab source")], cov=C("built", "Implemented."))
+N("tab-experiments", "Resolved experiments", "experiments/<id>/results.json is kind experiment; experiments/<id>/resolved.json {question, resolved_by, sources, as_of} is kind resolved, so a choice settled by research is shown without a fake experiment. sf intake experiments check validates both.", kind="module",
+  files=[F(OPS + "/collect.py", None, "def experiments", "Tab source"), F("factory/intake/cli.py", None, "experiments", "The check accepts resolved.json")], cov=C("built", "Implemented."))
+N("tab-bugs", "Bug log", "Reads docs/bugs/*.md (Status: open, fixed or wontfix, else invalid), docs/bug-log.jsonl and the signature blocks of docs/slices/*/qa-notes.md.", kind="module",
+  files=[F(OPS + "/collect.py", None, "def bug_log", "Tab source"), F(OPS + "/collect.py", None, "def _qa_notes", "QA note blocks")], cov=C("built", "Implemented."))
+N("tab-hitl", "Human stops history", "Historical view of open decisions: ADRs whose status is Proposed or Pending, and ops/events.jsonl events with stage hitl up to the snapshot's commit date. Open stops never enter a snapshot; the live ones come from the runtime collector.", kind="module",
+  files=[F(OPS + "/collect.py", None, "def hitl", "Tab source")], cov=C("built", "Implemented."))
+N("qa-notes", "QA notes (promote-notes)", "sf qa promote-notes --slice DIR writes DIR/qa-notes.md from the local .sf attempt log: one signature block with attempt count, criteria, the observed and expected text and the regression proposal. The leak check runs first (exit 1, nothing written); an unchanged re-run does not rewrite the file.", kind="module",
+  files=[F("factory/qa/notes.py", None, "def promote", "Commits the notes"), F("factory/qa/notes.py", None, "def build", "Builds the Markdown"), F("docs/ops-tabs.md", None, "## Committing QA notes", "Contract")],
+  cov=C("built", "Implemented; tests/test_qa_notes.py passes here.", ["The notes exist only after a real QA loop has recorded failures; none have been produced by a real session"]))
+N("ops-shell", "Shell: tabs and banners", "ops/shell/index.html is the static viewer: twelve tabs (overview, human stops, ops, architecture, research, experiments, ADRs, PRD journeys, Langfuse, evals and bugs, dev journey, git history), a stops banner ('N open human stop(s)' or 'human stops unknown') and a staleness banner ('Snapshot is N commits behind the repository') driven by runtime.json.", kind="module",
+  files=[F("ops/shell/index.html", None, "var TABS=[", "The twelve tabs"), F("ops/shell/index.html", None, "function renderStops", "Stops banner"), F("ops/shell/index.html", None, "commits behind the repository", "Staleness banner"), F("ops/shell/index.html", None, "function hitlHtml", "Human stops tab")],
+  cov=C("built", "Implemented; verified in a real browser against this repository's history in the earlier build.", ["Not deployed"]))
+
+# ---- flow: sf stages versus lsf phases and loop-backs (item 8)
+N("flow-compare", "Flow: sf stages vs lsf phases",
+  "The owner's flow as two runners over one set of stages. Each sf stage 0 to 12 is shown with the lsf phase that aliases onto it (lsf runs decide, phase 6, after evals, phase 5; stages 9, 11 and 12 exist only in sf). The four loop-backs are drawn as clickable boxes: qa to implement, qa to evals, review to implement and inbound to slice.",
+  kind="process",
+  design=[D("Loop-backs are explicit, evidence-bearing edges", "A flow that only runs forward hides the rework the owner cares about; each loop-back names the command or file that makes it happen.", "A linear stage list")],
+  files=[F("docs/sf-flow.md", None, "flowchart TD", "The sf flow with its legend"), F(LSF, None, "SF_ALIAS = {", "lsf phase to /sf stage"), F("factory/agents/default_graph.yaml", None, "loops:", "Declared loops of the role graph")],
+  cov=C("partial", "The sf stages, the alias map and the role-graph loops are code or documents; the loop-backs qa to evals, review to implement and inbound to slice have not been exercised by real agents.",
+        ["Loop-backs have not run in a real session"]),
+  diagram=[
+      "flowchart LR",
+      "  s0[\"0 Intake gate<br/>lsf 0-intake, 1-sweep\"] --> s1[\"1 Research<br/>lsf 2-research\"] --> s2[\"2 Experiments<br/>lsf 3-experiments\"] --> s3[\"3 Decide, ADR<br/>lsf 6-decide\"] --> s4[\"4 Slice, UX stories first<br/>lsf 4-prd\"] --> s5[\"5 Evals first, frozen<br/>lsf 5-evals\"] --> s6[\"6 Blind implement<br/>lsf 7-implement\"] --> s7[\"7 QA<br/>lsf 8-qa\"] --> s8[\"8 Gate, 8b Review<br/>lsf 9-review\"] --> s9[\"9 Drift<br/>sf only\"] --> s10[\"10 Docs<br/>lsf 10-docs\"] --> s11[\"11 Commit + snapshot<br/>sf only\"] --> s12[\"12 Inbound<br/>sf only\"]",
+      "  s7 -->|\"fail: feedback\"| flow-lb-qa-impl{{\"Loop 1<br/>QA to implement\"}}",
+      "  flow-lb-qa-impl --> s6",
+      "  s7 -->|\"same signature again\"| flow-lb-qa-evals{{\"Loop 2<br/>QA to evals\"}}",
+      "  flow-lb-qa-evals --> s5",
+      "  s8 -->|\"finding\"| flow-lb-review-impl{{\"Loop 3<br/>review to implement\"}}",
+      "  flow-lb-review-impl --> s6",
+      "  s12 -->|\"new text, ranked\"| flow-lb-inbound-slice{{\"Loop 4<br/>inbound to slice\"}}",
+      "  flow-lb-inbound-slice --> s4",
+      "  flow-phase-map[\"Alias map<br/>lsf phase to sf stage\"] -.-> s0"],
+  children=["flow-lb-qa-impl", "flow-lb-qa-evals", "flow-lb-review-impl", "flow-lb-inbound-slice", "flow-phase-map"])
+N("flow-lb-qa-impl", "Loop 1: QA to implement", "A failed gate gives behavioural feedback (criterion terms, no test source, leak-checked) and the same tier retries; at the policy point the model tier escalates; at the cap the case is handed to the reviewer. The role graph declares the loop [qa, implement].", kind="loop",
+  files=[F("factory/agents/default_graph.yaml", None, "- [qa, implement]", "Declared loop"), F("factory/qa/decide.py", None, "def decide(", "Retry, escalate, hand off"), F("docs/qa-loop.md", None, "`rerun_for_flake`", "Actions")],
+  cov=C("partial", "Implemented and simulated with a scripted implementer; not run with real agents.", ["Real implementer and QA agent loop not yet run"]))
+N("flow-lb-qa-evals", "Loop 2: QA to evals", "When the same failure signature recurs, QA proposes a regression case (sf qa regression-propose, written append-only to regression-proposals/<signature>.md) which goes back to the evals stage; the evals stay frozen except through an additive amendment.", kind="loop",
+  files=[F("docs/qa-loop.md", None, "regression-proposals", "Where proposals go"), F("factory/qa/decide.py", None, "propose_regression", "The decision")],
+  cov=C("partial", "Implemented and simulated; not run with real agents. The role graph declares no qa to evals back-edge: this loop is the proposal artifact plus a human or orchestrator step.", ["Real run not done"]))
+N("flow-lb-review-impl", "Loop 3: review to implement", "A reviewer finding becomes a triaged task or criterion through sf slice amend --role reviewer (additive only; weakening needs an explicit approval marker) and re-opens implement and QA. The role graph declares the loop [review, implement]; in lsf, 9-review failures amend the PRD and go back to 7 and 8.", kind="loop",
+  files=[F("factory/agents/default_graph.yaml", None, "- [review, implement]", "Declared loop"), F("factory/slices/cli.py", None, "def cmd_amend", "Reviewer amendment"), F("skills/lsf/SKILL.md", None, "failures amend the PRD and go back to 7 and 8", "lsf wording")],
+  cov=C("partial", "The command and the graph loop are implemented and tested; a real reviewer has not amended a slice.", ["Reviewer amendments not yet run in a real session"]))
+N("flow-lb-inbound-slice", "Loop 4: inbound to slice", "Stage 12 looks at what arrived while working, ranks it into the ledger or backlog (sf intake gate --since GITREF re-checks changed requirement text), states 'nothing new' explicitly and the next slice is chosen from the ledger, not a queue.", kind="loop",
+  files=[F("docs/sf-flow.md", None, "inbound --> slice", "In the flow diagram"), F("factory/intake/cli.py", None, "--since", "Gate on changed source"), X(SF, "223-252", "Check the inbound sources", "Stage 12 text in the installed skill")],
+  cov=C("partial", "The gate option exists; the ranking is model procedure and not yet run in a real session.", ["Not run in a real session", "The ranking and the 'nothing new' statement are written procedure with no mechanical check"]))
+N("flow-phase-map", "Alias map: lsf phase to sf stage", "0-intake and 1-sweep map to stage 0, 2-research to 1, 3-experiments to 2, 4-prd to 4, 5-evals to 5, 6-decide to 3, 7-implement to 6, 8-qa to 7, 9-review to 8b and 10-docs to 10, so events from both tools read the same.", kind="config",
+  files=[F(LSF, None, "SF_ALIAS = {", "The map"), F("skills/lsf/SKILL.md", None, "| lsf phase | group |", "The table with the /sf stage column")],
+  cov=C("built", "Implemented as data.", ["lsf has no phase for stages 8 (impact and solver gate), 11 or 12; they exist only in sf"]))
+addchildren("build-loop", "flow-compare", diagram=['  build-hygiene -.->|"drawn against lsf"| flow-compare["Flow: sf vs lsf<br/>loop-backs"]'])
+
+# ---- fill missing line ranges from the quoted text (python def/class extent, markdown section, bracket balance)
+def _span(path, contains, repo="."):
+    p = os.path.join(repo, path)
+    if not os.path.isfile(p):
+        return None
+    L = open(p, encoding="utf-8", errors="replace").read().splitlines()
+    k = next((i for i, t in enumerate(L) if contains in t), None)
+    if k is None:
+        return None
+    s = L[k].strip()
+    ind = len(L[k]) - len(L[k].lstrip())
+    last = k
+    if path.endswith(".py") and _re.match(r"(async\s+def|def|class)\s", s):
+        for j in range(k + 1, len(L)):
+            if not L[j].strip():
+                continue
+            if len(L[j]) - len(L[j].lstrip()) <= ind and not L[j].lstrip().startswith((")", "]", "}")):
+                break
+            last = j
+    elif path.endswith(".md") and s.startswith("#"):
+        lvl = len(s) - len(s.lstrip("#"))
+        for j in range(k + 1, len(L)):
+            m = _re.match(r"(#+)\s", L[j])
+            if m and len(m[1]) <= lvl:
+                break
+            if L[j].strip():
+                last = j
+    else:
+        bal = 0
+        for j in range(k, min(k + 80, len(L))):
+            bal += sum(L[j].count(c) for c in "{[(") - sum(L[j].count(c) for c in "}])")
+            last = j
+            if bal <= 0:
+                break
+        if bal > 0:
+            last = k
+    return f"{k + 1}-{last + 1}" if last > k else str(k + 1)
+
+def _fill_lines():
+    for n in nodes.values():
+        for f in n.get("files", []):
+            if f.get("lines") or not f.get("contains") or f.get("external") or f["path"].startswith("~"):
+                continue
+            sp = _span(f["path"], f["contains"])
+            if sp:
+                f["lines"] = sp
+    # start every range at the first line that holds the quoted text, so the editor link lands on it
+    for n in nodes.values():
+        for f in n.get("files", []):
+            if f.get("external") or f["path"].startswith("~") or not f.get("contains") or not f.get("lines") or not os.path.isfile(f["path"]):
+                continue
+            m = _re.fullmatch(r"(\d+)(?:-(\d+))?", f["lines"])
+            L = open(f["path"], encoding="utf-8", errors="replace").read().splitlines()
+            if not m:
+                continue
+            lo, hi = int(m[1]), int(m[2] or m[1])
+            k = next((i for i in range(lo, min(hi, len(L)) + 1) if f["contains"] in L[i - 1]), None)
+            if k and k > lo:
+                f["lines"] = f"{k}-{hi}" if hi > k else str(k)
 
 # ---- re-anchor cited line ranges to where the quoted text now is (keeps the model honest as files change)
 import os, re as _re
@@ -744,11 +1138,12 @@ def _reanchor(repo="."):
                     span = max(hi - lo, 0)
                     f["lines"] = f"{k}-{min(k + span, len(lines))}" if span else str(k)
                     break
+_fill_lines()
 _reanchor()
 MODEL = {
     "meta": {"title": "Claude Software Factory: workflow, design choices, coverage",
              "subtitle": "Nesting-dolls explorer of the software-factory repository",
-             "repo": "software-factory", "commit": sys.argv[1] if len(sys.argv) > 1 else "", "generated": "2026-10-19"},
+             "repo": "software-factory", "commit": sys.argv[1] if len(sys.argv) > 1 else "", "generated": "2026-10-20"},
     "root": "factory",
     "nodes": nodes,
 }

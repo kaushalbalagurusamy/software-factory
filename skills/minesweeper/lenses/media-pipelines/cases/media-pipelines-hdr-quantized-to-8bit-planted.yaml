@@ -1,0 +1,16 @@
+schema_version: 1
+id: media-pipelines-hdr-quantized-to-8bit-planted
+kind: planted
+twin: media-pipelines-hdr-quantized-to-8bit-clean
+brief: |
+  A real-estate photography service - HDR merge
+
+  - Photographers upload bracketed exposures of each room and receive one merged image.
+  - Inputs: up to 5 bracketed RAW exposures of at most 48 megapixels, 14-bit sensor data; output a 16-bit linear TIFF and an HDR AVIF (PQ, BT.2020).
+  - To keep the code simple, images are opened with the standard image loader into ordinary 8-bit RGB arrays and then merged and tone-mapped.
+  - Each worker has a 16 GB memory limit and processes one burst at a time.
+  - Merged images are delivered within 2 minutes of upload.
+expect:
+  traps:
+  - media-pipelines.hdr-quantized-to-8bit
+  min_severity: high

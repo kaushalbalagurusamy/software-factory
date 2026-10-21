@@ -1,0 +1,15 @@
+schema_version: 1
+id: cryptography-stateful-hbs-state-reuse-planted
+kind: planted
+twin: cryptography-stateful-hbs-state-reuse-clean
+brief: |
+  A device maker signs firmware updates for its routers.
+  - Signatures use XMSS so the update chain stays secure against quantum attacks.
+  - Routers verify the signature before installing.
+  - The signing service runs on three VMs cloned from one image so any of them can sign, and the VMs are
+    snapshotted nightly and restored from snapshot if one fails.
+  - Release cadence is about one update per month.
+expect:
+  traps:
+  - cryptography.stateful-hbs-state-reuse
+  min_severity: high

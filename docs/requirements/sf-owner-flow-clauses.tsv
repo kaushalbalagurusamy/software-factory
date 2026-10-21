@@ -1,0 +1,25 @@
+clause_id	verbatim_fragment	plan_phase	status	producer_or_waits_on
+R1	biz requriments	P0	partial	sf intake gate; paragraph hash
+R2	minesweeping to extract core biz value and best practices in advanced subcategories	P4	partial	skills/intake-gate; skills/minesweeper (external)
+R3	multi agent research seeds on SOTA techniques	P4	partial	sf intake seeds check; research role
+R4	experiments as necessary between SOTA options if those were not theoretically resolved	P4	partial	sf intake experiments check; resolved-record rule
+R5	openspec inspired tracer bullet PRDs that start with UX stories (triaged in priority and dependency order)	P3	satisfied	sf slice check|triage; design role
+R6	MECE eval surface with golden gates/invariants/boundaries/regressions defined	P3	satisfied	eval-designer; sf slice lock
+R7	blind implementer agents and qa agents that supervise and reintiiate when tests fail with feedback state passed to the implementers	P3	partial	qa role; sf qa
+R7b	implementers are also marking things off on the PRD which discourages drift	P1	satisfied	sf slice tick
+R7c	QA agents can also make notes when failures repeat to suggest adding test cases to cover common bugs that could regress	P2	partial	sf qa regression-propose; qa-notes.md
+R8	mecahnistic code review agents that use the oh my mermaid dolls and ponytail	P3	unserved	review role skills
+R8b	when they find failures they ammend to the tracerbullet PRD associated with that (basically kicking off the implementer - QA duo step again) tasks at this stage are triaged as well in terms of priority and dependency order	P4	partial	sf slice amend --role reviewer
+R9	if successful the agent updates docs with implementation details as ADRs making sure there's no staleness, it also prevents drift from the tracer bullet PRDs prior to approving a completion fully	P3	partial	review role + doc-sync + sf slice done
+R9b	this agent is equipped with the minesweeper skillset of advanced principles in networking, cryptography, performance, ethics, etc and the nesting dolls allows granular review as necessary	P3	unserved	review role skills
+D1	a live ops dashboard <which gets updated throughout this sf loop>	P1	unserved	factory/ops/events.py; sf emission
+D1b	(and a live ops dashboard	P1	unserved	sf ops init at the eval stage
+D2	created to montiro the app and dev process	P1	partial	Ops tab; per-product config
+D3	has the oh my mermaid nesting dolls as a tab	P2	satisfied	Architecture tab
+D4	the research findings and experiment results on this too so that we have easy access to this	P2	partial	Research and Experiments tabs; experiments convention
+D5	ADR log	P2	satisfied	ADRs tab
+D6	not only shows the ops but also dev journey / functioning like an open dev brain that stays live with the repo	P1	unserved	events + post-commit bundle
+D7	the core PRD that was created after minesweeping summarized as 1 page for UX journeys	P2	unserved	docs/prd/onepager.md; PRD tab
+D8	langfuse observability if llm features included	P2	partial	Langfuse tab; per-product config
+D9	eval suite status / bug log	P2	partial	Evals and Bug log tabs; docs/bugs; qa-notes.md
+D10	git history to toggle what the snapshot for the otehr catgoires looked like at that time	P1	satisfied	commit selector; backfill

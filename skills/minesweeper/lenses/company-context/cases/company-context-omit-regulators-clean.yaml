@@ -1,0 +1,17 @@
+schema_version: 1
+id: company-context-omit-regulators-clean
+kind: clean
+twin: company-context-omit-regulators-omission
+brief: |
+  A regional airline wants a rebooking assistant on its website. Travellers whose flights are
+  cancelled use it; the airline pays for it as part of its customer-service budget.
+  The airline is governed by its national aviation consumer-protection regulator, whose refund and
+  passenger-rights rules the assistant must follow.
+  Requirements:
+  - Offer the next three alternative flights and rebook in one tap, with the refund option shown
+    alongside as the regulator's rules require.
+  - Explain any fare difference before the traveller confirms.
+  - Handle 2,000 rebookings an hour during disruption days.
+  Success: average time to rebook falls below five minutes.
+expect:
+  none_from_lens: true

@@ -1,0 +1,55 @@
+1
+00:00:01,468 --> 00:00:09,350
+Now: the session clock and phase strip. Phases 0-9 are recorded as done (7-9 were logged after the fact); 10-docs is next. Source: the .lsf phase log.
+
+2
+00:00:09,350 --> 00:00:16,360
+Human stops: 0 waiting. Answered stops come from the hash-chained ledger (.lsf/stops.jsonl); the newest is 6-decide-final.
+
+3
+00:00:16,360 --> 00:00:24,744
+Drilling to the ledger: 6-decide-review reads "superseded by 6-decide-final" (lsf hitl supersede), recorded by the owner's delegate.
+
+4
+00:00:24,744 --> 00:00:32,748
+Telemetry: 33 events, 10 phases ended, 3 checkpoints released. Phases 7-9 show 0 min: recorded, not timed. Cost is "not available".
+
+5
+00:00:32,748 --> 00:00:38,089
+Telemetry timeline: the "hitl superseded" event sits next to the phase start and pass events, from .lsf/events.jsonl.
+
+6
+00:00:38,089 --> 00:00:43,440
+Experiments: s1-token-verify and s2-atomic-core, with verdicts read from experiments/<id>/results.json.
+
+7
+00:00:43,440 --> 00:00:48,790
+ADRs: ADR-001, atomic in-memory core, status Proposed (revised for owner decision 7), from docs/adr/.
+
+8
+00:00:48,790 --> 00:00:55,138
+PRD: the booking-core slice, priority P0, and its six user steps, from docs/slices/booking-core/proposal.md.
+
+9
+00:00:55,138 --> 00:01:02,198
+Architecture: 17 nodes, 4 diagrams, from docs/architecture/booking.model.json. Opening the nested diagrams.
+
+10
+00:01:02,198 --> 00:01:09,202
+Level 1: Page, Server, Core and the external Clerk emulator. Edge labels say resolved or syntactic.
+
+11
+00:01:09,202 --> 00:01:16,207
+Level 2: Server opens its own diagram (routes, auth check, idempotency store, core call).
+
+12
+00:01:16,207 --> 00:01:24,552
+Level 3: Auth / JWKS check is a leaf: its panel lists design choices, gaps found and source files in src/server.mjs.
+
+13
+00:01:24,552 --> 00:01:30,903
+Evals and bugs: bug log and QA notes are "not available" (no entries). Below, the pass verdicts logged by agents.
+
+14
+00:01:30,903 --> 00:01:37,400
+Git: commit history from the repository, newest first, with "View tabs at this commit" and Rollback buttons (not used).

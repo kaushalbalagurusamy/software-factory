@@ -9,7 +9,32 @@ DATE_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 REQUIRED = ("question", "candidates", "metrics", "decision_rule_preregistered", "result", "as_of")
 
 
+def check_resolved(d: Path) -> list[str]:
+    """experiments/<id>/resolved.json: a choice settled by research, with its sources and date."""
+    tag = d.name
+    try:
+        data = json.loads((d / "resolved.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        return [f"{tag}: resolved.json is not valid JSON: {e}"]
+    if not isinstance(data, dict):
+        return [f"{tag}: resolved.json must be an object"]
+    errs = [f"{tag}: resolved.json missing {k}" for k in ("question", "resolved_by")
+            if not isinstance(data.get(k), str) or not data[k].strip()]
+    src = data.get("sources")
+    if not isinstance(src, list) or not any(isinstance(x, str) and x.strip() for x in src):
+        errs.append(f"{tag}: resolved.json missing sources (at least one)")
+    if not isinstance(data.get("as_of"), str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", data["as_of"]):
+        errs.append(f"{tag}: resolved.json missing as_of (YYYY-MM-DD)")
+    return errs
+
+
 def check_dir(d: Path) -> list[str]:
+    if (d / "resolved.json").is_file():
+        return check_resolved(d) + (check_dir_results(d) if (d / "results.json").is_file() else [])
+    return check_dir_results(d)
+
+
+def check_dir_results(d: Path) -> list[str]:
     tag = d.name
     rp = d / "results.json"
     if not rp.is_file():

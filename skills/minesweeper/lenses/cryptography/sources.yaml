@@ -1,0 +1,252 @@
+schema_version: 1
+sources:
+  - id: rfc5116
+    title: RFC 5116 - An Interface and Algorithms for Authenticated Encryption
+    url: https://www.rfc-editor.org/rfc/rfc5116.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "Each nonce provided to distinct invocations of the Authenticated Encryption operation MUST be distinct, for any particular value of the key, unless each and every nonce is zero- length."
+        locator: Section 2.1 (Authenticated Encryption inputs)
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-deterministic-nonce, cryptography.gcm-random-nonce-volume]
+      - text: "The inadvertent reuse of the same nonce by two invocations of the GCM encryption operation, with the same key, but with distinct plaintext values, undermines the confidentiality of the plaintexts protected in those two invocations, and undermines all of the authenticity and integrity protection provided by that key. For this reason, GCM should only be used whenever nonce uniqueness can be provided with assurance."
+        locator: Section 5.1.1 Nonce Reuse
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-deterministic-nonce, cryptography.gcm-random-nonce-volume]
+      - text: "It benefits the application designer by allowing them to focus on important issues such as security services, canonicalization, and data marshaling, and relieving them of the need to design crypto mechanisms that meet their security goals."
+        locator: Section 1.3 Benefits
+        fetched: "2026-10-14"
+        supports: [cryptography.custom-crypto-construction]
+  - id: rfc8452
+    title: RFC 8452 - AES-GCM-SIV - Nonce Misuse-Resistant Authenticated Encryption
+    url: https://www.rfc-editor.org/rfc/rfc8452.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: >-
+      RFC 8452 reports its own encryption and decryption speed measurements relative to AES-GCM. The
+      report's "48 percent slower" figure does not appear here and is not used; any throughput claim
+      for a given platform must be measured by an experiment.
+    quotes:
+      - text: "However, some AEADs (including AES-GCM) suffer catastrophic failures of confidentiality and/or integrity when two distinct messages are encrypted with the same key and nonce."
+        locator: Section 1 Introduction
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-deterministic-nonce]
+      - text: "We suggest that these AEADs be considered in any situation where nonce uniqueness cannot be guaranteed. This includes situations where there is no stateful counter or where such state cannot be guaranteed, as when multiple encryptors use the same key."
+        locator: Section 1 Introduction
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-deterministic-nonce, cryptography.gcm-random-nonce-volume]
+      - text: "couples confidentiality and integrity in a single operation, avoiding the risks of the previously common practice of using ad hoc constructions of block-cipher and hash primitives."
+        locator: Section 1 Introduction
+        fetched: "2026-10-14"
+        supports: [cryptography.custom-crypto-construction]
+      - text: "Without this step, AES-GCM-SIV encryption would be limited by the birthday bound like other standard modes (e.g., AES-GCM, AES-CCM [RFC3610], and AES-SIV [RFC5297])."
+        locator: Section 9 Security Considerations
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-random-nonce-volume]
+  - id: bock-2016-nonce-disrespecting
+    title: "Nonce-Disrespecting Adversaries: Practical Forgery Attacks on GCM in TLS (Böck, Zauner, Devlin, Somorovsky, Jovanovic; USENIX WOOT 2016)"
+    url: https://www.usenix.org/conference/woot16/workshop-program/presentation/bock
+    adapter: paper
+    tier: primary
+    kind: paper
+    notes: The IACR ePrint page (2016/475) returned HTTP 403 to the fetcher; the USENIX programme page carries the same abstract.
+    quotes:
+      - text: "With an Internet-wide scan we identified 184 HTTPS servers repeating nonces, which fully breaks the authenticity of the connections."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-deterministic-nonce]
+      - text: "Furthermore, we discovered over 70,000 HTTPS servers using random nonces, which puts them at risk of nonce reuse, in the unlikely case that large amounts of data are sent via the same session."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-random-nonce-volume]
+  - id: osv-cve-2026-50577
+    title: OSV CVE-2026-50577 - AES-GCM nonce reuse via a frozen request counter
+    url: https://osv.dev/vulnerability/CVE-2026-50577
+    adapter: osv
+    tier: primary
+    kind: advisory
+    notes: >-
+      Confirms the report's claim that this advisory describes a frozen counter causing AES-GCM nonce
+      reuse and GHASH key recovery. The report's "approximately 77,000 same-counter responses" figure
+      does not appear in the OSV or NVD record; unconfirmed.
+    quotes:
+      - text: "The frozen client request counter causes the server side to reuse AES-GCM nonce and key combinations across responses."
+        locator: details
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-deterministic-nonce]
+      - text: "Repeated nonces can also enable recovery of the GHASH authentication key through the Joux forbidden attack, allowing forged AES-GCM messages and injection of malicious responses."
+        locator: details
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-deterministic-nonce]
+  - id: osv-cve-2026-26014
+    title: OSV CVE-2026-26014 - random nonce generation with AES-GCM in a DTLS implementation
+    url: https://osv.dev/vulnerability/CVE-2026-26014
+    adapter: osv
+    tier: primary
+    kind: advisory
+    notes: >-
+      The report cites this CVE alongside the frozen-counter case as a deterministic-nonce or counter
+      failure. The record actually describes random nonce generation leading to reuse within a session,
+      so it supports the random-nonce-volume trap, not the deterministic-nonce trap.
+    quotes:
+      - text: "use random nonce generation with AES GCM ciphers, which makes it easier for remote attackers to obtain the authentication key and spoof data by leveraging the reuse of a nonce in a session and a \"forbidden attack\"."
+        locator: details
+        fetched: "2026-10-14"
+        supports: [cryptography.gcm-random-nonce-volume]
+  - id: nist-sp800-38d
+    title: NIST SP 800-38D - Recommendation for Block Cipher Modes of Operation - GCM and GMAC
+    url: https://csrc.nist.gov/pubs/sp/800/38/d/final
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: >-
+      Only the landing page abstract is fetchable as text; the IV uniqueness requirement and the limit
+      on invocations with random IVs (Section 8) are in the PDF, which the adapters cannot parse. Not
+      cited by a verified trap for that reason; read the PDF directly when a finding depends on the
+      exact invocation limit.
+  - id: rfc4086
+    title: RFC 4086 - Randomness Requirements for Security
+    url: https://www.rfc-editor.org/rfc/rfc4086.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "Note that none of the techniques discussed in this section is suitable for cryptographic use."
+        locator: Section 6.1.3 Traditional Pseudo-random Sequences
+        fetched: "2026-10-14"
+        supports: [cryptography.non-csprng]
+  - id: python-random-docs
+    title: Python standard library - random module
+    url: https://docs.python.org/3/library/random.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: "The pseudo-random generators of this module should not be used for security purposes. For security or cryptographic uses, see the secrets module."
+        locator: Warning (module introduction)
+        fetched: "2026-10-14"
+        supports: [cryptography.non-csprng]
+  - id: java-util-random-docs
+    title: Java SE 21 API - java.util.Random
+    url: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: "Instances of java.util.Random are not cryptographically secure. Consider instead using SecureRandom to get a cryptographically secure pseudo-random number generator for use by security-sensitive applications."
+        locator: Class Random description
+        fetched: "2026-10-14"
+        supports: [cryptography.non-csprng]
+  - id: rfc9370
+    title: RFC 9370 - Multiple Key Exchanges in the Internet Key Exchange Protocol Version 2 (IKEv2)
+    url: https://www.rfc-editor.org/rfc/rfc9370.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "A passive attacker can store all monitored encrypted IPsec communication today and decrypt it once a quantum computer is available in the future."
+        locator: Appendix B Design Criteria, item 3 (Focus on post-quantum confidentiality)
+        fetched: "2026-10-14"
+        supports: [cryptography.quantum-vulnerable-long-term-secrecy]
+  - id: nist-fips203
+    title: NIST FIPS 203 - Module-Lattice-Based Key-Encapsulation Mechanism Standard
+    url: https://csrc.nist.gov/pubs/fips/203/final
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "At present, ML-KEM is believed to be secure, even against adversaries who possess a quantum computer."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [cryptography.quantum-vulnerable-long-term-secrecy]
+  - id: nist-fips204
+    title: NIST FIPS 204 - Module-Lattice-Based Digital Signature Standard
+    url: https://csrc.nist.gov/pubs/fips/204/final
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "ML-DSA is believed to be secure, even against adversaries in possession of a large-scale quantum computer."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [cryptography.quantum-vulnerable-long-term-secrecy]
+  - id: nist-fips205
+    title: NIST FIPS 205 - Stateless Hash-Based Digital Signature Standard
+    url: https://csrc.nist.gov/pubs/fips/205/final
+    adapter: web_page
+    tier: primary
+    kind: standard
+  - id: nist-ir8547
+    title: NIST IR 8547 (initial public draft) - Transition to Post-Quantum Cryptography Standards
+    url: https://csrc.nist.gov/pubs/ir/8547/ipd
+    adapter: web_page
+    tier: primary
+    kind: guidance
+    quotes:
+      - text: "This report describes NIST’s expected approach to transitioning from quantum-vulnerable cryptographic algorithms to post-quantum digital signature algorithms and key-establishment schemes."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [cryptography.quantum-vulnerable-long-term-secrecy]
+  - id: rfc9881
+    title: RFC 9881 - Algorithm Identifiers for ML-DSA in Internet X.509 Public Key Infrastructure
+    url: https://www.rfc-editor.org/rfc/rfc9881.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: Sizes are raw values from Table 2 (ML-DSA-44, -65, -87 at NIST levels 2, 3, 5), excluding ASN.1 encoding overhead.
+    quotes:
+      - text: "listed in Table 2, along with the resulting signature size, public key, and private key sizes in bytes."
+        locator: Section on ML-DSA parameter sets, Table 2
+        fetched: "2026-10-14"
+        supports: [cryptography.pq-signature-size-mtu]
+      - text: "| 2 | (4,4) | 2 | 2420 | 1312 | 32 | 2560 |"
+        locator: Table 2 (NIST level 2 row - signature 2420 bytes, public key 1312 bytes)
+        fetched: "2026-10-14"
+        supports: [cryptography.pq-signature-size-mtu]
+  - id: nist-sp800-208
+    title: NIST SP 800-208 - Recommendation for Stateful Hash-Based Signature Schemes
+    url: https://csrc.nist.gov/pubs/sp/800/208/final
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "This recommendation specifies two algorithms that can be used to generate a digital signature, both of which are stateful hash-based signature schemes: the Leighton-Micali Signature (LMS) system and the eXtended Merkle Signature Scheme (XMSS)"
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [cryptography.stateful-hbs-state-reuse]
+  - id: rfc8554
+    title: RFC 8554 - Leighton-Micali Hash-Based Signatures
+    url: https://www.rfc-editor.org/rfc/rfc8554.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "The LMS signature system, like all N-time signature systems, requires that the signer maintain state across different invocations of the signing algorithm to ensure that none of the component one-time signature systems are used more than once."
+        locator: Section 9.2 Stateful Signature Algorithm
+        fetched: "2026-10-14"
+        supports: [cryptography.stateful-hbs-state-reuse]
+  - id: rfc8391
+    title: RFC 8391 - XMSS - eXtended Merkle Signature Scheme
+    url: https://www.rfc-editor.org/rfc/rfc8391.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "If a secret key state is used twice, no cryptographic security guarantees remain."
+        locator: Section 1 Introduction
+        fetched: "2026-10-14"
+        supports: [cryptography.stateful-hbs-state-reuse]
+  - id: rfc9802
+    title: RFC 9802 - Use of the HSS and XMSS Hash-Based Signature Algorithms in Internet X.509 PKI
+    url: https://www.rfc-editor.org/rfc/rfc9802.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "If an attacker were able to obtain signatures for two different messages created using the same OTS key, then it would become computationally feasible for that attacker to create forgeries"
+        locator: Section 10 Security Considerations
+        fetched: "2026-10-14"
+        supports: [cryptography.stateful-hbs-state-reuse]

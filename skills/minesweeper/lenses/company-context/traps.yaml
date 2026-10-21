@@ -1,0 +1,115 @@
+schema_version: 1
+traps:
+  - id: company-context.contradicts-published-policy
+    aliases: []
+    title: Feature contradicts the organisation's own published policy or mission
+    kind: requirement
+    cues:
+      - "track users across sessions without showing a banner"
+      - "quietly collect device and location signals for later analysis"
+      - "do not surface this in the privacy notice yet"
+      - "privacy-first brand, plus hidden data collection for analytics"
+      - "share engagement data with partners to improve targeting"
+      - "a feature the published acceptable-use policy forbids"
+    principle: >-
+      A published privacy notice, terms of service or AI principle is a representation to customers.
+      A feature that does the opposite risks an unfair or deceptive act or practice, which 15 U.S.C.
+      45(a)(1) declares unlawful; outside the US the rule depends on jurisdiction (ask-owner).
+    sources: [ftc-act-s5]
+    severity:
+      default: critical
+      blast_radius: Customers are misled; the organisation faces enforcement and loses the trust its mission is built on.
+    remediation:
+      safe_route: >-
+        Quote the published policy next to the requirement; either redesign the feature to honour the
+        policy (opt-in, disclosed, minimised) or escalate a policy change to the owner before any build.
+      invariant: No feature collects, uses or shares data in a way the organisation's current published policies do not disclose.
+      spec_section: legal-terms
+    status: verified
+    verified_on: '2026-10-14'
+    notes: Verified against the statute text only; whether a given policy is a binding representation is ask-owner.
+  - id: company-context.ignores-sector-regulator
+    aliases: []
+    title: Brief ignores the regulator that governs the organisation's sector
+    kind: omission
+    cues:
+      - "no regulatory work is needed for the prototype"
+      - "compliance is out of scope for this phase"
+      - "we are just a software vendor, so sector rules do not apply"
+      - "launch to customers in the bank's app next month"
+      - "handle claims, payments or bookings end to end"
+    principle: >-
+      Which regulator governs depends on the sector: general US consumer-protection jurisdiction under
+      15 U.S.C. 45(a)(2) expressly excludes banks, savings and loan institutions, federal credit unions,
+      common carriers and air carriers, which answer to their own regulators. A brief must name the
+      regulator for its sector and jurisdiction.
+    sources: [ftc-act-s5]
+    severity:
+      default: high
+      blast_radius: The product is built to the wrong rules and fails review, or ships in breach of sector obligations.
+    remediation:
+      safe_route: >-
+        Run the research procedure's regulator step; list the governing agencies and the duties that
+        touch the feature; route statute questions to the law-terms-ethics lenses and ask-owner for
+        jurisdiction.
+      invariant: The spec names every regulator that governs the organisation's sector in each launch jurisdiction, with the duties that touch the feature.
+      spec_section: legal-terms
+    status: verified
+    verified_on: '2026-10-14'
+  - id: company-context.metric-serves-evaluator
+    aliases: []
+    title: Success metric serves the evaluator rather than the organisation's customer
+    kind: metric
+    cues:
+      - "success is measured by the reviewer's score"
+      - "optimise for demo impressions"
+      - "maximise time spent in the app"
+      - "number of features shipped"
+      - "the judging panel wants to see"
+    principle: >-
+      A metric pushed past the point where it tracks the goal becomes ineffective or harmful
+      (Goodhart). A success metric must measure the paying customer's outcome; an evaluator's or
+      internal proxy is acceptable only when its link to that outcome is stated.
+    sources: [manheim-garrabrant-goodhart]
+    severity:
+      default: medium
+      blast_radius: The team optimises a number that does not move, or harms, the customer outcome the organisation is paid for.
+    remediation:
+      safe_route: >-
+        Restate the goal as the payer's outcome; keep the evaluator's metric as a secondary gate and
+        record the assumed link between the two, with a check that would falsify it.
+      invariant: Every success metric names whose outcome it measures; at least one measures the paying customer's outcome directly.
+      spec_section: product-scope
+    status: unverified
+    notes: >-
+      The source is an original paper describing the failure mode, not a rule that decides a given
+      metric; whether a metric serves the customer is a judgement, so this stays unverified.
+  - id: company-context.assumed-data-rights
+    aliases: []
+    title: Brief assumes data rights the organisation does not hold
+    kind: requirement
+    cues:
+      - "use the customer data we already have to train the model"
+      - "reuse support transcripts for the new feature"
+      - "partner data is available to us"
+      - "scrape our clients' portals for the dataset"
+      - "update the terms so we can use existing data"
+    principle: >-
+      An organisation may use data only under the consent, contract or licence it was collected
+      under; repurposing it by a quiet, retroactive change of terms may be unfair or deceptive
+      (15 U.S.C. 45(a)(1); FTC staff guidance). Contracts with clients and partners decide the rest
+      (ask-owner).
+    sources: [ftc-act-s5, ftc-terms-change-guidance]
+    severity:
+      default: high
+      blast_radius: Customer or partner data is misused; enforcement, contract breach and forced deletion of models trained on it.
+    remediation:
+      safe_route: >-
+        List every dataset the feature needs with the consent, contract or licence that covers the
+        intended use; where none is documented, ask-owner or obtain fresh consent before use.
+      invariant: Every dataset the product uses has a documented right covering that specific use, recorded before the data is touched.
+      spec_section: legal-terms
+    status: unverified
+    notes: >-
+      Cites FTC staff guidance (secondary) for the retroactive-terms point, so it cannot be verified;
+      the decisive documents are the organisation's own contracts and notices, researched per brief.

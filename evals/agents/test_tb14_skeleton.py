@@ -22,7 +22,7 @@ from evals.agents import lib
 
 HOOK_IDS = {"path_guard", "blindness_guard", "secrets_guard", "bash_guard", "stop_gate", "subagent_stop",
             "ledger_audit", "session_start"}
-ROLES = ["orchestrator", "research", "design", "audit", "implement", "test", "review"]
+ROLES = ["orchestrator", "research", "design", "audit", "implement", "qa", "test", "review"]
 LOG_FIELDS = ["decision", "state_digest", "policy_version", "source", "band", "choice", "action", "top_prob",
               "margin", "probabilities", "fault", "latency_ms"]
 CMD_RE = re.compile(r"factory\.hooks\s+([a-z_]+)")
@@ -182,7 +182,7 @@ def script(root):
 
 @case("TB14-G-001", "golden", ["R-20", "R-01"])
 def test_g001_agents_and_settings_from_profile(tmp_path):
-    """PRD b2: 'the generated agents and settings are produced from the profile alone' - seven
+    """PRD b2: 'the generated agents and settings are produced from the profile alone' - eight
     `.claude/agents/<role>.md` files, and settings whose hooks are `python -m factory.hooks <id>` for contract ids,
     with the implement blindness guard on Read and the sub-agent validator on SubagentStop."""
     root, agents, settings = stack(tmp_path)

@@ -1,0 +1,13 @@
+schema_version: 1
+id: rubric-inversion-llm-judge-self-grading-clean
+kind: clean
+twin: rubric-inversion-llm-judge-self-grading-planted
+brief: |
+  Assessment brief: customer-support answer bot for a software product.
+  The bot answers from the product documentation.
+  Requirement 1: answers cite the documentation page they used.
+  Requirement 2: answer quality is scored by a judge model from a different provider with answer order randomised, checked against 200 human-graded answers (agreement reported); release when the human-checked pass rate is at least 85%.
+  Requirement 3: answers stay under 200 words.
+  Deliverable: the bot, the evaluation script and its results.
+expect:
+  none_from_lens: true

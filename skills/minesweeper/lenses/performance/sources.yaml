@@ -1,0 +1,71 @@
+schema_version: 1
+sources:
+  - id: tail-at-scale
+    title: Dean and Barroso, The Tail at Scale, Communications of the ACM 56(2), 2013 (Google Research publication page with the authors' abstract)
+    url: https://research.google/pubs/the-tail-at-scale/
+    adapter: web_page
+    tier: primary
+    kind: paper
+    notes: The CACM full text (cacm.acm.org, dl.acm.org) returned HTTP 403 to the fetcher; the authors' abstract is quoted. The fan-out arithmetic itself is calc.fanout_tail, not a quoted figure.
+    quotes:
+      - text: Temporary high latency episodes which are unimportant in moderate size systems may come to dominate overall service performance at large scale.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [performance.fanout-tail-amplification]
+      - text: It is challenging to keep the tail of the latency distribution low for interactive services as the size and complexity of the system scales up or as overall utilization increases.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [performance.percentile-slo-without-load-model]
+  - id: little-1961
+    title: Little, A Proof for the Queuing Formula L = lambda W, Operations Research 9(3):383-387, 1961, DOI 10.1287/opre.9.3.383 (publisher-deposited abstract via Crossref)
+    url: https://api.crossref.org/v1/works/10.1287/opre.9.3.383/transform/application/json
+    adapter: web_page
+    tier: primary
+    kind: paper
+    notes: The publisher page (pubsonline.informs.org, doi.org) returned HTTP 403; Crossref serves the abstract the publisher deposited for this DOI.
+    quotes:
+      - text: L be the mean number of units in the system, and W be the mean time spent by a unit in the system. It is shown that, if the three means are finite and the corresponding stochastic processes strictly stationary, and, if the arrival process is metrically transitive with nonzero mean, then L =
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [performance.unbounded-queue, performance.percentile-slo-without-load-model]
+  - id: prometheus-naming
+    title: Prometheus documentation - Metric and label naming
+    url: https://prometheus.io/docs/practices/naming/
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: Remember that every unique combination of key-value label pairs represents a new time series, which can dramatically increase the amount of data stored. Do not use labels to store dimensions with high cardinality (many different label values), such as user IDs, email addresses, or other unbounded sets of values.
+        locator: Labels (CAUTION)
+        fetched: "2026-10-14"
+        supports: [performance.high-cardinality-metric-labels]
+  - id: aws-vpc-pricing
+    title: Amazon VPC pricing (NAT gateway section)
+    url: https://aws.amazon.com/vpc/pricing/
+    adapter: web_page
+    tier: primary
+    kind: terms
+    freshness_days: 30
+    notes: Prices are volatile and are never copied into traps; read the current rate at sweep time and pass it to calc.egress_cost.
+    quotes:
+      - text: Data processing charges apply for each gigabyte processed through the NAT gateway regardless of the traffic's source or destination.
+        locator: NAT Gateway Pricing
+        fetched: "2026-10-14"
+        supports: [performance.egress-unit-economics]
+      - text: You also incur standard AWS data transfer charges for all data transferred via the NAT gateway.
+        locator: NAT Gateway Pricing
+        fetched: "2026-10-14"
+        supports: [performance.egress-unit-economics]
+  - id: gcp-network-pricing
+    title: Google Cloud - Network pricing
+    url: https://cloud.google.com/vpc/network-pricing
+    adapter: web_page
+    tier: primary
+    kind: terms
+    freshness_days: 30
+    notes: Prices are volatile and are never copied into traps; read the current rate at sweep time and pass it to calc.egress_cost.
+    quotes:
+      - text: VM-to-VM data transfer when the source and destination VMs are in different Google Cloud regions. All prices are per GiB in USD.
+        locator: Data transfer between Google Cloud regions
+        fetched: "2026-10-14"
+        supports: [performance.egress-unit-economics]

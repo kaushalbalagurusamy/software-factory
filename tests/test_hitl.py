@@ -313,3 +313,21 @@ def test_qa_next_sees_legacy_stop(proj, capsys):
     capsys.readouterr()
     qa(proj, "next")
     assert json.loads(capsys.readouterr().out)["action"] == "human_stop"
+
+
+def test_supersede_retires_stale_stop_after_later_release(tmp_path):
+    run(tmp_path, "request", "--name", "old", "--reason", "r")
+    run(tmp_path, "request", "--name", "new", "--reason", "r")
+    run(tmp_path, "release", "--name", "new", "--by", "human:k")
+    assert run(tmp_path, "supersede", "--name", "old", "--by-stop", "new", "--by", "human:k") == OK
+    assert run(tmp_path, "status") == OK
+    assert not (tmp_path / ".factory/stops/old.json").exists()
+
+
+def test_supersede_refused_for_agent_or_unreleased_stop(tmp_path):
+    run(tmp_path, "request", "--name", "old", "--reason", "r")
+    run(tmp_path, "request", "--name", "new", "--reason", "r")
+    assert run(tmp_path, "supersede", "--name", "old", "--by-stop", "new", "--by", "human:k") == USAGE
+    run(tmp_path, "release", "--name", "new", "--by", "human:k")
+    assert run(tmp_path, "supersede", "--name", "old", "--by-stop", "new", "--by", "agent:x") == REFUSED
+    assert run(tmp_path, "status") == OPEN

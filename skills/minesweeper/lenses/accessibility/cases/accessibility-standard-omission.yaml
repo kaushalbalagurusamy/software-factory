@@ -1,0 +1,15 @@
+schema_version: 1
+id: accessibility-standard-omission
+kind: omission
+twin: accessibility-standard-omission-clean
+brief: |
+  Harbor Desk: a customer-support web app for a mid-size retailer
+  Users: support agents.
+  1. Agents see a queue of tickets and open one to read the conversation.
+  2. They reply inline, tag the ticket, and set a priority.
+  3. A side panel shows the customer's order history.
+  4. Keyboard shortcuts move between tickets, and no state is shown by colour alone.
+  5. The app must load the queue in under 500 ms and autosave drafts.
+  6. All data in transit is encrypted.
+expect:
+  omissions: [accessibility.a11y-standard]

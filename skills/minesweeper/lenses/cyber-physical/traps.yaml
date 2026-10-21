@@ -1,0 +1,210 @@
+schema_version: 1
+traps:
+  - id: cyber-physical.standing-vendor-remote-access
+    aliases: [CPS-01]
+    title: Always-on vendor VPN into OT or substation networks
+    kind: requirement
+    cues:
+      - "give the vendor an always-on VPN"
+      - "vendors can push updates directly to the PLCs"
+      - "permanent remote access for the integrator"
+      - "the maintenance contract includes a standing tunnel"
+      - "remote support without needing to call the control room"
+    principle: >-
+      NERC CIP-005 (Parts 2.4 and 2.5, approved in FERC Order No. 850) requires methods to determine
+      active vendor remote access sessions and to disable them; users, owners and operators of the
+      bulk-power system must comply. Outside CIP scope, US agencies recommend remote access only when
+      essential, over private connectivity with phishing-resistant MFA and least privilege per asset
+      and scope of work.
+    sources: [fr-ferc-order-850, usc-16-824o, cfr-18-40-2, cisa-ot-primary-mitigations]
+    severity:
+      default: critical
+      blast_radius: Anyone holding or hijacking the vendor's session reaches the controllers of a physical process; for BES assets it is also a reliability standard violation.
+    remediation:
+      safe_route: Terminate vendor access at a jump host in a DMZ outside the OT zone; require MFA, per-session operator approval with a time limit, session recording, and an operator kill switch.
+      invariant: No vendor session to OT exists without an operator-approved, time-boxed, MFA-authenticated, logged session that the operator can see and terminate.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: The report's claim that CIP-003-9 became enforceable in April 2026 and extends vendor remote access controls to low-impact assets is unconfirmed here (NERC PDFs are not machine-fetchable). CIP-005 applies to high and medium impact BES Cyber Systems; whether an asset is in scope is ask-owner.
+  - id: cyber-physical.unauthenticated-ot-write-path
+    aliases: [CPS-02]
+    title: Cloud or IT application writes to controllers over unauthenticated OT protocols
+    kind: requirement
+    cues:
+      - "the cloud sends setpoints over Modbus"
+      - "open port 502 to the analytics service"
+      - "an IP allowlist firewall protects the controllers"
+      - "the optimizer writes directly to the PLC registers"
+      - "remote start/stop from the web dashboard"
+      - "the AI adjusts the plant in real time"
+    principle: >-
+      OT devices lack authentication and authorisation methods resistant to modern threats, so any
+      host that can reach the port can send commands; an address-and-port firewall cannot tell a
+      read from a write. US agencies recommend segmenting IT and OT with a DMZ for passing control
+      data.
+    sources: [cisa-ot-primary-mitigations]
+    severity:
+      default: critical
+      blast_radius: Any compromised host or credential on the allowed path can trip breakers, change setpoints or damage equipment.
+    remediation:
+      safe_route: Send telemetry out through a one-way path; keep writes local, or route them through an authenticated OT-aware gateway that allowlists function codes and register ranges and bounds values, with operator approval for setpoint changes.
+      invariant: No path from IT or cloud reaches an actuator write without authentication, value bounds and an approval the plant operator controls; loss of that path leaves the local control unchanged.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: The report also cites CIP-005 and CIP-012 for this; not quote-checked here. Modbus/DNP3 protocol specifics come from the protocol specifications, not quoted.
+  - id: cyber-physical.unattended-patch-reboot
+    aliases: [CPS-03]
+    title: Unattended automatic patching and reboots of live controllers
+    kind: requirement
+    cues:
+      - "enable automatic OS updates on every RTU"
+      - "nightly reboots of the control servers"
+      - "patch all OT hosts within the window automatically"
+      - "treat controllers like any other endpoint in the patch tool"
+    principle: >-
+      OT has unique performance, reliability and safety requirements; a live controller cannot be
+      rebooted on an IT schedule without disturbing the process. NERC CIP-007 asks for security patch
+      evaluation at least every 35 calendar days and then apply-or-mitigate (a dated mitigation plan),
+      not unattended installation.
+    sources: [nist-sp800-82r3, nerc-cip-007-6]
+    severity:
+      default: critical
+      blast_radius: Unscheduled controller restarts trip generating units or process lines, with physical and grid-stability consequences.
+    remediation:
+      safe_route: Evaluate patches on a test bench within the cycle; apply to live controllers only in scheduled outages under change control; give unpatchable assets a dated mitigation plan with compensating controls.
+      invariant: No controller in service is patched or rebooted outside an approved maintenance window; every evaluated patch is either applied or covered by a dated mitigation plan.
+      spec_section: product-scope
+    checks: []
+    status: unverified
+    notes: CIP-007-6 text (35-day evaluation; apply or dated mitigation plan) was read by hand from the NERC PDF on 2026-10-14 and matches the report, but the web_page adapter cannot extract PDF text, so no quote can be machine-checked. The NIST 800-82r3 abstract alone does not decide it. Stays unverified.
+  - id: cyber-physical.no-internal-network-monitoring
+    aliases: [CPS-04]
+    title: Perimeter-only monitoring; traffic inside the OT trust zone is trusted and unwatched
+    kind: requirement
+    cues:
+      - "monitor at the perimeter firewall only"
+      - "traffic inside the substation LAN is trusted"
+      - "no monitoring between HMIs and PLCs"
+      - "east-west traffic is out of scope"
+    principle: >-
+      FERC approved CIP-015-1 (internal network security monitoring) because the CIP standards
+      focused on the electronic security perimeter and did not require monitoring inside the trusted
+      CIP-networked environment; users, owners and operators of the bulk-power system must comply with
+      approved standards.
+    sources: [fr-ferc-order-907, cfr-18-40-2]
+    severity:
+      default: high
+      blast_radius: An intruder who crosses the perimeter (vendor laptop, USB, stolen credential) moves laterally and issues commands with no detection.
+    remediation:
+      safe_route: Passive taps or SPAN ports on internal switches feeding an out-of-band OT network monitor that baselines east-west traffic, with alert handling owned by named staff.
+      invariant: East-west traffic inside each OT trust zone is collected, baselined and reviewed; no active scanning of live controllers.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Order 907's rule is effective 2025-09-02. The report's mandatory-enforcement date of 2028-10-01 comes from NERC's implementation plan, not quoted here (report claim, unconfirmed). CIP-015-1 covers high impact BES Cyber Systems and medium impact ones with external routable connectivity; outside that scope the trap is medium.
+  - id: cyber-physical.safety-interlock-bypass
+    title: Software may bypass, override or relax safety interlocks or safety instrumented functions
+    kind: requirement
+    cues:
+      - "the optimizer may put the interlock in bypass"
+      - "override the trip so the batch finishes"
+      - "auto-reset the emergency shutdown"
+      - "the AI can relax safety limits when confident"
+      - "disable alarms that slow down operators"
+    principle: >-
+      For covered US processes, interlocks and emergency shutdown systems are within mechanical
+      integrity, and changes to equipment, technology and procedures need written management-of-change
+      procedures before the change; a software bypass is such a change. IEC 61508/61511 govern
+      functional safety elsewhere (paywalled, not quoted).
+    sources: [cfr-29-1910-119]
+    severity:
+      default: critical
+      blast_radius: Loss of the last layer protecting people and equipment from a hazardous process; release, fire or explosion.
+    remediation:
+      safe_route: Safety functions stay independent of the product; any bypass is authorised by the process-safety owner through management of change, time-limited, and done on the safety system itself, never by the software.
+      invariant: The software has no write path to safety interlocks, safety instrumented functions or emergency shutdown, and treats their trips as final.
+      spec_section: product-scope
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: 1910.119 applies only to covered processes at US workplaces; for other sites the duty is jurisdictional (ask-owner), but no regime permits an unmanaged software bypass.
+  - id: cyber-physical.cloud-hard-realtime-loop
+    title: Hard real-time or safety-relevant control loop closed through the cloud
+    kind: requirement
+    cues:
+      - "the cloud runs the control loop"
+      - "read the sensor every 50 ms and write the valve from the cloud"
+      - "move the PID controllers to our SaaS platform"
+      - "the plant needs the internet connection to operate"
+      - "edge devices just relay commands from the cloud"
+    principle: >-
+      OT has unique performance, reliability and safety requirements, and US agencies name the
+      ability to revert to manual control and fail-safe operation as a primary mitigation. A loop
+      closed over a wide-area network has no guaranteed latency or availability bound, so loss or
+      delay of the link becomes loss of control.
+    sources: [cisa-ot-primary-mitigations, nist-sp800-82r3]
+    severity:
+      default: critical
+      blast_radius: A network partition, cloud outage or latency spike leaves an actuator at its last value or oscillating; physical damage or a trip.
+    remediation:
+      safe_route: Keep the control loop and its fail-safe in the local controller; the cloud may suggest parameters that an engineer reviews and loads; define the local behaviour on loss of link.
+      invariant: Every loop whose timing or safety matters closes locally and stays safe with the cloud link down indefinitely.
+      spec_section: capacity-physics
+    checks: []
+    status: unverified
+    notes: The quotes support manual and fail-safe operation but do not themselves state a latency bound; whether a given loop tolerates WAN latency is an experiment (measure loop deadline vs observed round-trip tail and outage rate). Left unverified on purpose.
+  - id: cyber-physical.flat-it-ot-network
+    title: Enterprise IT, cloud and OT devices on one flat network
+    kind: requirement
+    cues:
+      - "put everything on one network so engineers can reach any device"
+      - "the PLCs are on the office LAN"
+      - "no need for a DMZ"
+      - "the controllers are reachable from the corporate VPN"
+      - "simplify by removing the OT firewall"
+    principle: >-
+      US agencies recommend segmenting IT and OT and passing control data through a DMZ, because OT
+      devices lack authentication resistant to modern threats; IEC 62443 frames this as zones and
+      conduits.
+    sources: [cisa-ot-primary-mitigations]
+    severity:
+      default: high
+      blast_radius: Ordinary IT compromise (phishing, ransomware) reaches controllers directly.
+    remediation:
+      safe_route: Separate zones for enterprise, DMZ and OT (and safety), with documented conduits, each filtered and monitored; remote access ends in the DMZ.
+      invariant: No device in the OT zone is reachable from enterprise IT or the internet except through a documented conduit.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+  - id: cyber-physical.bes-cip-deferred
+    title: NERC CIP treated as out of scope or post-launch for bulk electric system assets
+    kind: requirement
+    cues:
+      - "NERC CIP compliance is out of scope for the first release"
+      - "we will handle CIP after launch"
+      - "regulatory compliance is the customer's problem"
+      - "the grid assets connect at transmission voltage"
+      - "rubric does not score regulatory compliance"
+    principle: >-
+      All users, owners and operators of the bulk-power system shall comply with reliability standards
+      in effect, which include cybersecurity protection. Violations carry a statutory civil penalty of
+      up to $1,000,000 per day, inflation-adjusted to $1,584,648 per violation per day in
+      18 CFR 385.1602(d) (January 2025 adjustment).
+    sources: [usc-16-824o, cfr-18-40-2, usc-16-825o-1, cfr-18-385-1602]
+    severity:
+      default: critical
+      blast_radius: The deployed system puts the registered entity out of compliance from day one; penalties accrue per violation per day; redesign after launch.
+    remediation:
+      safe_route: Establish with the asset owner whether the assets are BES and their CIP impact ratings before design; build CIP obligations (perimeter, access, patching, monitoring, evidence) into the requirements.
+      invariant: For every BES Cyber System the product touches, the applicable CIP requirements are listed as requirements with owners and evidence, before launch.
+      spec_section: legal-terms
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: The report's $1,584,648/day figure is confirmed in 18 CFR 385.1602(d) as of Order 906 (Jan 2025); a 2026 adjustment, if published, would supersede it. Applicability (registration, BES definition, impact rating) is ask-owner.

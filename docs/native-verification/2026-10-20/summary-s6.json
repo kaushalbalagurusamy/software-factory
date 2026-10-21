@@ -1,0 +1,71 @@
+{
+  "label": "ACTUAL HARNESS (real headless Claude Code sessions)",
+  "checks": [
+    {
+      "check": "install succeeds",
+      "pass": true,
+      "detail": ".factory/profile.yaml: created"
+    },
+    {
+      "check": "second install is idempotent ('unchanged')",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "doctor passes (hook commands executed as subprocesses)",
+      "pass": true,
+      "detail": "exit 0"
+    },
+    {
+      "check": "S6 session finished",
+      "pass": true,
+      "detail": "success, turns 4, $0.09524349999999998"
+    },
+    {
+      "check": "S6 Sonnet only (models seen: ['claude-sonnet-5-5'])",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "S6 sf commands run in a real session wrote their own stage events (ops/events.jsonl)",
+      "pass": true,
+      "detail": "1 events: ['4-slice']"
+    },
+    {
+      "check": "S6 `sf ops init` created the viewer and excluded the local event log from git",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "S6 `sf ops status --json` reports head, snapshot, behind and events",
+      "pass": true,
+      "detail": "exit 0"
+    },
+    {
+      "check": "S6 the working tree stays clean of the event log",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "all 15 installed skills resolve in the real runtime",
+      "pass": true,
+      "detail": "missing []"
+    },
+    {
+      "check": "generated agents resolve",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "sessions": {
+    "S6": {
+      "claude_exit": 0,
+      "turns": 4,
+      "cost_usd": 0.09524349999999998,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "result_subtype": "success"
+    }
+  }
+}

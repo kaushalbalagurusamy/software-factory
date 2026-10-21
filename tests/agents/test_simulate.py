@@ -113,7 +113,7 @@ def test_profile_change_changes_outcomes(base, variant):
 def test_generated_from_profile_alone(base, variant):
     a, b = generate_project(base), generate_project(variant)
     assert set(a) == set(b) == {f".claude/agents/{r}.md" for r in
-                                ("orchestrator", "research", "design", "audit", "implement",
+                                ("orchestrator", "research", "design", "audit", "implement", "qa",
                                  "test", "review")} | {".claude/settings.json"}
     assert a == generate_project(base)  # deterministic
     settings = json.loads(a[".claude/settings.json"])

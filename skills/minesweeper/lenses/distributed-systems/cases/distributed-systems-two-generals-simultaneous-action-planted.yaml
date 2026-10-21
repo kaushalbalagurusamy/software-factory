@@ -1,0 +1,19 @@
+schema_version: 1
+id: distributed-systems-two-generals-simultaneous-action-planted
+kind: planted
+twin: distributed-systems-two-generals-simultaneous-action-clean
+brief: |
+  Project: frequency-hopping coordination for an inspection drone and its ground station.
+  - The drone streams video to the ground station over a licensed radio band.
+  - When interference is detected, both ends must move to a new channel.
+  - The switch must happen on both ends in the same millisecond, and neither end may switch until it is completely sure the other end has received its confirmation.
+  - Channel plans are preloaded on both ends before each flight.
+  - Fault model: either end may lose the link for seconds at a time or reboot; both ends are operated by the same crew and are trusted.
+  - Control messages are authenticated with a per-flight key, carry a message id, are retransmitted until acknowledged, and duplicates are ignored.
+  - Channel changes are numbered; an end ignores a change number lower than its current one.
+  - Flight logs are uploaded after landing for maintenance review.
+  - The operator app shows link quality and the active channel.
+expect:
+  traps:
+  - distributed-systems.two-generals-simultaneous-action
+  min_severity: medium

@@ -1,0 +1,16 @@
+schema_version: 1
+id: accessibility-eaa-service-planted
+kind: planted
+twin: accessibility-eaa-service-clean
+brief: |
+  Greenleaf Books: consumer e-book store and reader, launching October 2025
+  Users: EU consumers buying and reading e-books.
+  1. Shoppers browse, buy and read e-books on the web and in a mobile app, sold to EU consumers.
+  2. Accessibility (screen-reader support in the reader, accessible checkout) is logged as a
+     stretch goal for a later release so the launch date holds.
+  3. Payments handled by a third-party processor.
+  4. The reader supports offline download.
+  5. Catalogue of 50,000 titles at launch.
+expect:
+  traps: [accessibility.covered-service-not-accessible]
+  min_severity: high

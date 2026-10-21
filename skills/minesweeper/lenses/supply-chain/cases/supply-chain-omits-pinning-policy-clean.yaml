@@ -1,0 +1,15 @@
+schema_version: 1
+id: supply-chain-omits-pinning-policy-clean
+kind: clean
+twin: supply-chain-omits-pinning-policy
+brief: |
+  A university lab is building a web service that converts lab instrument files to open formats.
+  - Python backend, React frontend, deployed to the lab's container platform.
+  - New dependencies are added only from the approved list maintained by the lab's research engineer,
+    after a registry check.
+  - All dependencies are pinned with hashes in lock files; updates arrive as reviewed pull requests.
+  - Coding assistants may suggest packages; a person approves and installs them.
+  - Conversions must finish within one minute for files up to 200 MB.
+  - Source is published under an open licence at the end of the project.
+expect:
+  none_from_lens: true

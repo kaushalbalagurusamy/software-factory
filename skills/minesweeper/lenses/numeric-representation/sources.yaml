@@ -1,0 +1,80 @@
+schema_version: 1
+sources:
+  - id: python-floatingpoint
+    title: "Python tutorial: Floating-Point Arithmetic: Issues and Limitations"
+    url: https://docs.python.org/3/tutorial/floatingpoint.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: Unfortunately, most decimal fractions cannot be represented exactly as binary fractions. A consequence is that, in general, the decimal floating-point numbers you enter are only approximated by the binary floating-point numbers actually stored in the machine.
+        locator: Section 15 (Floating-Point Arithmetic), opening
+        fetched: "2026-10-14"
+        supports: [numeric-representation.money-in-binary-float]
+      - text: since 0.1 is not exactly 1/10, summing three values of 0.1 may not yield exactly 0.3, either
+        locator: Section 15, representation error example
+        fetched: "2026-10-14"
+        supports: [numeric-representation.float-equality]
+  - id: python-decimal
+    title: Python decimal module documentation
+    url: https://docs.python.org/3/library/decimal.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: While near to zero, the differences prevent reliable equality testing and differences can accumulate. For this reason, decimal is preferred in accounting applications which have strict equality invariants.
+        locator: decimal module introduction
+        fetched: "2026-10-14"
+        supports: [numeric-representation.money-in-binary-float]
+  - id: goldberg-1991
+    title: Goldberg, What Every Computer Scientist Should Know About Floating-Point Arithmetic (ACM Computing Surveys 23(1), 1991, DOI 10.1145/103162.103163), Oracle-hosted copy
+    url: https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: Squeezing infinitely many real numbers into a finite number of bits requires an approximate representation.
+        locator: Rounding Error, opening
+        fetched: "2026-10-14"
+        supports: [numeric-representation.money-in-binary-float]
+      - text: some people think that the solution to such anomalies is never to compare floating-point numbers for equality, but instead to consider them equal if they are within some error bound E. This is hardly a cure-all because it raises as many questions as it answers.
+        locator: Rounding Error, comparison discussion
+        fetched: "2026-10-14"
+        supports: [numeric-representation.float-equality]
+      - text: Due to roundoff errors, the associative laws of algebra do not necessarily hold for floating-point numbers.
+        locator: Languages and Compilers, Ambiguity
+        fetched: "2026-10-14"
+        supports: [numeric-representation.order-dependent-float-aggregation]
+  - id: python-datetime
+    title: Python datetime module documentation (aware and naive objects)
+    url: https://docs.python.org/3/library/datetime.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: A naive object does not contain enough information to unambiguously locate itself relative to other date/time objects.
+        locator: Aware and Naive Objects
+        fetched: "2026-10-14"
+        supports: [numeric-representation.naive-local-timestamps]
+  - id: rfc3339
+    title: RFC 3339, Date and Time on the Internet - Timestamps
+    url: https://www.rfc-editor.org/rfc/rfc3339.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: The UTC time corresponding to 17:00 on 23rd March 2005 in New York may depend on administrative decisions about daylight savings time.
+        locator: Section 1, Introduction (assumptions)
+        fetched: "2026-10-14"
+        supports: [numeric-representation.naive-local-timestamps]
+  - id: jls-integer-ops
+    title: Java Language Specification SE 21, 4.2.2 Integer Operations
+    url: https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html
+    adapter: web_page
+    tier: primary
+    kind: spec
+    quotes:
+      - text: The integer operators do not indicate overflow or underflow in any way.
+        locator: 4.2.2 Integer Operations
+        fetched: "2026-10-14"
+        supports: [numeric-representation.fixed-width-counter-overflow]

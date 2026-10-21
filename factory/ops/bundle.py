@@ -9,10 +9,13 @@ import json
 import os
 import subprocess
 import sys
+import threading
+import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .collect import COLLECTOR_VERSION, GitSource, WorkTreeSource, _git, collect_all
+from .collect import COLLECTOR_VERSION, GitSource, WorkTreeSource, _git, collect_all, unavailable
 
 SCHEMA = 1
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -41,7 +44,7 @@ def _atomic(path: Path, data: bytes, root: Path) -> None:
     _check_inside(path, root)
     path.parent.mkdir(parents=True, exist_ok=True)
     _check_inside(path, root)
-    tmp = path.with_name(path.name + f".tmp{os.getpid()}")
+    tmp = path.with_name(path.name + f".tmp{os.getpid()}.{threading.get_ident()}")
     tmp.write_bytes(data)
     os.replace(tmp, path)
 
@@ -81,6 +84,61 @@ def _commit_meta(repo: Path, sha: str) -> dict:
     return {"sha": h, "date": d, "subject": s}
 
 
+def _when(text):
+    try:
+        d = datetime.fromisoformat(str(text).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+
+
+LOCAL_LOG_BYTES = 8_000_000
+
+
+def _local_events(repo: Path, cut) -> list[dict]:
+    """Events of the untracked working-tree log (C-50) stamped no later than the commit's committer date."""
+    path = Path(repo) / "ops" / "events.jsonl"
+    try:
+        if path.is_symlink() or path.parent.is_symlink() or not path.is_file():
+            return []
+        with open(path, "rb") as f:
+            text = f.read(LOCAL_LOG_BYTES).decode("utf-8", "replace")
+    except OSError:
+        return []
+    out = []
+    for ln in text.splitlines():
+        try:
+            e = json.loads(ln)
+        except ValueError:
+            continue
+        when = _when(e.get("at")) if isinstance(e, dict) else None
+        if when is not None and (cut is None or when <= cut):
+            out.append(e)
+    return out
+
+
+def _stage_events(tab: dict, commit_date: str, worktree: bool, repo: Path | None = None, tracked: bool = True) -> dict:
+    """Stage events are history: use the committed log, or the local log when the commit does not track it, drop
+    those stamped after the commit, and report none as unavailable, not an empty table."""
+    cut = None if worktree else _when(commit_date)
+    source = "commit"
+    if not worktree and not tracked and repo is not None:
+        local = _local_events(repo, cut)
+        if local:
+            if not tab["available"]:
+                tab = {"available": True, "summary": {"count": 0, "slices": 0}, "items": [], "events": []}
+            tab["events"], source = local, "local log"
+    if not tab["available"]:
+        return unavailable(f"no stage events recorded ({tab['reason']})")
+    keep = [e for e in tab["events"] if "error" in e or cut is None or (_when(e.get("at")) or cut) <= cut]
+    if not any("error" not in e for e in keep):
+        return unavailable("no stage events recorded")
+    tab["events"] = keep
+    tab["events_source"] = source
+    tab["summary"]["events"] = len(keep)
+    return tab
+
+
 def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
     """Build (or find) the snapshot for one commit; returns its index entry. Idempotent per sha."""
     meta = _commit_meta(repo, "HEAD" if worktree else sha)
@@ -91,6 +149,7 @@ def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
     else:
         src = WorkTreeSource(repo) if worktree else GitSource(repo, meta["sha"])
         tabs_out, tabs = {}, collect_all(src)
+        tabs["dev_journey"] = _stage_events(tabs["dev_journey"], meta["date"], worktree, repo, src.text("ops/events.jsonl") is not None)
         for name, tab in tabs.items():
             entry: dict = {"available": tab["available"]}
             if not tab["available"]:
@@ -123,16 +182,66 @@ def snapshot(repo: Path, sha: str, out: Path, worktree: bool = False) -> dict:
             "tabs": {k: manifest["tabs"][k]["available"] for k in sorted(manifest["tabs"])}, "latest_stage_event": latest}
 
 
-def update_index(out: Path, entries: list[dict]) -> dict:
-    ip = out / "index.json"
-    idx = json.loads(ip.read_text(encoding="utf-8")) if ip.exists() else {"schema": SCHEMA, "commits": []}
-    by = {c["sha"]: c for c in idx["commits"]}
-    for e in entries:
-        if e["sha"] != "worktree":
-            by[e["sha"]] = e
-    idx["commits"] = sorted(by.values(), key=lambda c: (c["date"], c.get("n", 0)), reverse=True)
-    _atomic(ip, json.dumps(idx, indent=1).encode("utf-8"), out)
-    return idx
+@contextmanager
+def _index_lock(out: Path):
+    """Exclusive lock for the index read-modify-write: flock where available, else an atomic mkdir lock."""
+    out.mkdir(parents=True, exist_ok=True)
+    lock = out / ".lock"
+    _check_inside(lock, out)
+    try:
+        import fcntl
+    except ImportError:
+        fcntl = None
+    if fcntl is not None:
+        fd = os.open(lock, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o644)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            os.close(fd)
+        return
+    d = out / ".lock.d"  # shortcut: a lock dir older than 60 s is taken as stale (its owner died)
+    for _ in range(600):
+        try:
+            d.mkdir()
+            break
+        except FileExistsError:
+            try:
+                if time.time() - d.stat().st_mtime > 60:
+                    d.rmdir()
+            except OSError:
+                pass
+            time.sleep(0.1)
+    else:
+        raise TimeoutError(f"could not lock {d}")
+    try:
+        yield
+    finally:
+        d.rmdir()
+
+
+def _is_ancestor(repo: Path, old: str, new: str) -> bool:
+    try:
+        return subprocess.run(["git", "-C", str(repo), "merge-base", "--is-ancestor", old, new],
+                              capture_output=True, timeout=30).returncode != 1
+    except (OSError, subprocess.SubprocessError):
+        return True
+
+
+def update_index(out: Path, entries: list[dict], head: str | None = None, repo: Path | None = None) -> dict:
+    with _index_lock(out):
+        ip = out / "index.json"
+        idx = json.loads(ip.read_text(encoding="utf-8")) if ip.exists() else {"schema": SCHEMA, "commits": []}
+        by = {c["sha"]: c for c in idx["commits"]}
+        for e in entries:
+            if e["sha"] != "worktree":
+                by[e["sha"]] = e
+        cur = idx.get("head")
+        if head and (not cur or cur == head or repo is None or _is_ancestor(repo, cur, head)):
+            idx["head"] = head  # the newest default (--sha HEAD) bundle; never moves to a non-descendant
+        idx["commits"] = sorted(by.values(), key=lambda c: (c["date"], c.get("n", 0)), reverse=True)
+        _atomic(ip, json.dumps(idx, indent=1).encode("utf-8"), out)
+        return idx
 
 
 def bundle(repo: Path, sha: str = "HEAD", out: Path = Path("ops"), backfill: int = 0, worktree: bool = False,
@@ -145,7 +254,7 @@ def bundle(repo: Path, sha: str = "HEAD", out: Path = Path("ops"), backfill: int
     if backfill > 0 and not worktree:
         shas = _git(repo, "rev-list", f"-n{backfill}", sha).decode().split()[::-1]
     entries = [snapshot(repo, s, out, worktree) for s in shas]
-    update_index(out, entries)
+    update_index(out, entries, entries[-1]["sha"] if sha == "HEAD" and not worktree else None, repo)
     if viewer:
         build_viewer(out)
     install_shell(out)

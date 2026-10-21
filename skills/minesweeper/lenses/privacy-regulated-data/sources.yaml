@@ -1,0 +1,89 @@
+schema_version: 1
+sources:
+  - id: hipaa-164-502
+    title: 45 CFR 164.502 Uses and disclosures of protected health information - general rules
+    url: https://www.law.cornell.edu/cfr/text/45/164.502
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: >-
+      Cornell LII reproduction of the current eCFR text. eCFR.gov serves a CAPTCHA page to automated
+      fetches (its API endpoints 404 or need compression), so LII is used; check eCFR by hand if the
+      wording matters.
+    quotes:
+      - text: A covered entity may disclose protected health information to a business associate and may allow a business associate to create, receive, maintain, or transmit protected health information on its behalf, if the covered entity obtains satisfactory assurance that the business associate will appropriately safeguard the information.
+        locator: 164.502(e)(1)(i)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.phi-to-general-model-endpoint]
+  - id: hipaa-164-504
+    title: 45 CFR 164.504 Uses and disclosures - organizational requirements
+    url: https://www.law.cornell.edu/cfr/text/45/164.504
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: Cornell LII reproduction of the current eCFR text (eCFR blocks automated fetches).
+    quotes:
+      - text: "A contract between the covered entity and a business associate must:"
+        locator: 164.504(e)(2)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.phi-to-general-model-endpoint]
+      - text: Not use or further disclose the information other than as permitted or required by the contract or as required by law;
+        locator: 164.504(e)(2)(ii)(A)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.phi-to-general-model-endpoint]
+  - id: hipaa-164-308
+    title: 45 CFR 164.308 Administrative safeguards
+    url: https://www.law.cornell.edu/cfr/text/45/164.308
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: Cornell LII reproduction of the current eCFR text (eCFR blocks automated fetches).
+    quotes:
+      - text: A covered entity may permit a business associate to create, receive, maintain, or transmit electronic protected health information on the covered entity's behalf only if the covered entity obtains satisfactory assurances, in accordance with § 164.314(a), that the business associate will appropriately safeguard the information.
+        locator: 164.308(b)(1)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.phi-to-general-model-endpoint]
+  - id: gdpr
+    title: Regulation (EU) 2016/679 (General Data Protection Regulation), Official Journal text
+    url: https://publications.europa.eu/resource/cellar/3e485e15-11bd-11e6-ba9a-01aa75ed71a1.0006.03/DOC_1
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: EU Publications Office (Cellar) English XHTML of CELEX 32016R0679; EUR-Lex HTML returns a bot challenge to automated fetches.
+    quotes:
+      - text: Processing of personal data revealing racial or ethnic origin, political opinions, religious or philosophical beliefs, or trade union membership, and the processing of genetic data, biometric data for the purpose of uniquely identifying a natural person, data concerning health or data concerning a natural person's sex life or sexual orientation shall be prohibited.
+        locator: Article 9(1)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.phi-to-general-model-endpoint, privacy-regulated-data.special-category-global-edge-cache]
+      - text: Where processing is to be carried out on behalf of a controller, the controller shall use only processors providing sufficient guarantees to implement appropriate technical and organisational measures in such a manner that processing will meet the requirements of this Regulation and ensure the protection of the rights of the data subject.
+        locator: Article 28(1)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.phi-to-general-model-endpoint]
+      - text: Processing by a processor shall be governed by a contract or other legal act under Union or Member State law, that is binding on the processor with regard to the controller
+        locator: Article 28(3)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.phi-to-general-model-endpoint]
+      - text: Any transfer of personal data which are undergoing processing or are intended for processing after transfer to a third country or to an international organisation shall take place only if, subject to the other provisions of this Regulation, the conditions laid down in this Chapter are complied with by the controller and processor
+        locator: Article 44 (Chapter V)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.special-category-global-edge-cache]
+      - text: adequate, relevant and limited to what is necessary in relation to the purposes for which they are processed (‘data minimisation’);
+        locator: Article 5(1)(c)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.collect-all-keep-forever]
+      - text: kept in a form which permits identification of data subjects for no longer than is necessary for the purposes for which the personal data are processed;
+        locator: Article 5(1)(e)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.collect-all-keep-forever]
+  - id: coppa-312-5
+    title: 16 CFR 312.5 Parental consent (Children's Online Privacy Protection Rule)
+    url: https://www.law.cornell.edu/cfr/text/16/312.5
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: Cornell LII reproduction of the current eCFR text (eCFR blocks automated fetches).
+    quotes:
+      - text: An operator is required to obtain verifiable parental consent before any collection, use, or disclosure of personal information from children
+        locator: 312.5(a)(1)
+        fetched: "2026-10-14"
+        supports: [privacy-regulated-data.children-data-without-parental-consent]

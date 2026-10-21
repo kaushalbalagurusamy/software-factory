@@ -1,0 +1,14 @@
+schema_version: 1
+id: theory-complexity-omits-instance-size
+kind: omission
+twin: theory-complexity-states-instance-size
+brief: |
+  Product brief: exam timetabling for a university.
+  Requirement 1: import courses, enrolments, rooms and invigilators from the student records system.
+  Requirement 2: produce a timetable with no student sitting two exams at once; an approximate timetable is acceptable if it is within 3% of the solver's best bound on total clashes avoided, reported with the result.
+  Requirement 3: registry staff can lock individual exams and re-solve the rest.
+  Requirement 4: publish personal timetables to students.
+  Success: fewer clash-resolution emails each term.
+expect:
+  omissions:
+  - theory-complexity.instance-size

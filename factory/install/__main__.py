@@ -1,11 +1,11 @@
-"""python -m factory.install {install,uninstall,doctor}. Exit codes: 0 ok, 1 failure (install error,
+"""python -m factory.install {install,uninstall,doctor,pin-external}. Exit codes: 0 ok, 1 failure (install error,
 refused uninstall, failed doctor check), 2 usage error."""
 from __future__ import annotations
 
 import argparse
 import sys
 
-from .core import InstallError, install, uninstall
+from .core import InstallError, install, pin_external, uninstall
 
 
 def build() -> argparse.ArgumentParser:
@@ -22,6 +22,9 @@ def build() -> argparse.ArgumentParser:
     d.add_argument("--project"); d.add_argument("--skills-dir"); d.add_argument("--json", action="store_true")
     d.add_argument("--factory-root"); d.add_argument("--python")
     d.add_argument("--allow-model", action="append", default=[], metavar="NAME")
+    pe = sub.add_parser("pin-external")
+    pe.add_argument("--skills-dir"); pe.add_argument("--factory-root"); pe.add_argument("--yes", action="store_true")
+    pe.add_argument("--accept-changed", action="append", default=[], metavar="NAME")
     return ap
 
 
@@ -38,6 +41,8 @@ def main(argv=None) -> int:
             return 0
         if a.cmd == "uninstall":
             return 0 if uninstall(a.project) else 1
+        if a.cmd == "pin-external":
+            return pin_external(a.skills_dir, a.factory_root, a.yes, accept_changed=a.accept_changed)
         from .doctor import run_doctor
         return run_doctor(a)
     except InstallError as e:

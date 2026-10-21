@@ -1,0 +1,13 @@
+schema_version: 1
+id: copyright-data-rights-provenance-omission
+kind: omission
+twin: copyright-data-rights-provenance-omission-clean
+brief: |
+  Fabrikam Voice: narration model for audiobooks
+
+  1. Train a text-to-speech model that reads books aloud in a warm narrator voice.
+  2. Use a large collection of audiobook recordings and their texts as training data.
+  3. Sell narration as a service to small publishers.
+  4. Target a naturalness score of 4.2 in listening tests.
+expect:
+  omissions: ["copyright-data-rights.content-provenance"]

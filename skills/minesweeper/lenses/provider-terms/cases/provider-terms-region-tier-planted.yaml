@@ -1,0 +1,15 @@
+schema_version: 1
+id: provider-terms-region-tier-planted
+kind: planted
+twin: provider-terms-region-tier-clean
+brief: |
+  Contoso Travel Notes: itinerary summariser
+
+  1. Summarise booking confirmations into a one-page itinerary using a hosted model's API.
+  2. Launch simultaneously in Germany, France, the UK and Switzerland.
+  3. To keep the pilot free, use the provider's no-cost API quota for all users.
+  4. Only itinerary text is sent; outputs are shown to the user and not used elsewhere.
+  5. Mobile and web clients.
+expect:
+  traps: [provider-terms.unsupported-region-or-tier]
+  min_severity: high

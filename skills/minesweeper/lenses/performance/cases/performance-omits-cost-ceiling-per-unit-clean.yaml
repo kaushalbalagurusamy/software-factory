@@ -1,0 +1,15 @@
+schema_version: 1
+id: performance-omits-cost-ceiling-per-unit-clean
+kind: clean
+twin: performance-omits-cost-ceiling-per-unit
+brief: |
+  Acme Fitness - workout video library
+
+  - Members stream on-demand workout videos in up to 1080p.
+  - Load model: peak 20,000 concurrent streams, average 3 Mbit/s each, served from one cloud region to members worldwide.
+  - Delivery cost (CDN and data transfer, priced from the provider's current page) must stay under $1.50 per member per month.
+  - Video start time must be under 2 seconds at p95, measured in the member's app.
+  - Members can download videos for offline use.
+  - New videos are published weekly.
+expect:
+  none_from_lens: true

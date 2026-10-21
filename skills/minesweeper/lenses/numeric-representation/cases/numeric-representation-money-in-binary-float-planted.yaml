@@ -1,0 +1,18 @@
+schema_version: 1
+id: numeric-representation-money-in-binary-float-planted
+kind: planted
+twin: numeric-representation-money-in-binary-float-clean
+brief: |
+  Product brief: premium billing service for a small insurance broker.
+  Policies have an annual premium charged monthly, pro-rated by day on mid-month changes.
+  All timestamps are stored in UTC; each customer's IANA time zone is stored for display.
+  Ids and counters are 64-bit integers; arithmetic on them fails loudly on overflow.
+  Requirement 1: generate a monthly invoice per policy holder.
+  Requirement 2: premiums, pro-rated amounts and balances are stored as double-precision columns and computed with the language's default number type; amounts are rounded to two places only when shown.
+  Requirement 3: a nightly job totals all invoices across worker processes for the finance report.
+  Requirement 4: finance can export the ledger as CSV.
+  Success: month-end reconciliation takes one day instead of five.
+expect:
+  traps:
+  - numeric-representation.money-in-binary-float
+  min_severity: high

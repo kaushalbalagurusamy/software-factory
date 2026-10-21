@@ -1,0 +1,128 @@
+schema_version: 1
+sources:
+  - id: usc-18-1030
+    title: 18 U.S.C. 1030 Fraud and related activity in connection with computers
+    url: https://www.law.cornell.edu/uscode/text/18/1030
+    adapter: web_page
+    tier: primary
+    kind: statute
+    notes: >-
+      Cornell LII reproduction of the US Code. uscode.house.gov returned "Page Not Found" to automated
+      fetches on 2026-10-14, and its granule view returned only a 1.2 kB shell on 2026-10-15.
+    quotes:
+      - text: intentionally accesses a computer without authorization or exceeds authorized access, and thereby obtains—
+        locator: 1030(a)(2)
+        fetched: "2026-10-14"
+        supports: [security-ethics.exploit-and-dump-to-prove, security-ethics.unauthorised-third-party-scanning]
+      - text: knowingly causes the transmission of a program, information, code, or command, and as a result of such conduct, intentionally causes damage without authorization, to a protected computer;
+        locator: 1030(a)(5)(A)
+        fetched: "2026-10-14"
+        supports: [security-ethics.unauthorised-third-party-scanning, security-ethics.weaponised-exploit-beyond-proof]
+      - text: the term "exceeds authorized access" means to access a computer with authorization and to use such access to obtain or alter information in the computer that the accesser is not entitled so to obtain or alter;
+        locator: 1030(e)(6)
+        fetched: "2026-10-14"
+        supports: [security-ethics.exploit-and-dump-to-prove]
+  - id: cisa-vdp-template
+    title: CISA Vulnerability Disclosure Policy Template
+    url: https://www.cisa.gov/vulnerability-disclosure-policy-template
+    adapter: web_page
+    tier: primary
+    kind: guidance
+    notes: The US federal template that agencies publish as their vulnerability disclosure policy (BOD 20-01); it states the conduct rules a good-faith tester follows.
+    quotes:
+      - text: Only use exploits to the extent necessary to confirm a vulnerability’s presence. Do not use an exploit to compromise or exfiltrate data, establish persistent command line access, or use the exploit to pivot to other systems.
+        locator: Guidelines
+        fetched: "2026-10-14"
+        supports: [security-ethics.exploit-and-dump-to-prove, security-ethics.weaponised-exploit-beyond-proof]
+      - text: Once you’ve established that a vulnerability exists or encounter any sensitive data (including personally identifiable information, financial information, or proprietary information or trade secrets of any party), you must stop your test, notify us immediately, and not disclose this data to anyone else.
+        locator: Guidelines
+        fetched: "2026-10-14"
+        supports: [security-ethics.exploit-and-dump-to-prove]
+      - text: Provide us a reasonable amount of time to resolve the issue before you disclose it publicly.
+        locator: Guidelines
+        fetched: "2026-10-14"
+        supports: [security-ethics.public-disclosure-before-fix]
+      - text: Any service not expressly listed above, such as any connected services, are excluded from scope and are not authorized for testing.
+        locator: Scope
+        fetched: "2026-10-14"
+        supports: [security-ethics.unauthorised-third-party-scanning]
+      - text: Before adding a system or service to the scope, ensure you are permitted to authorize security testing on the system or service.
+        locator: Scope (drafting note)
+        fetched: "2026-10-14"
+        supports: [security-ethics.unauthorised-third-party-scanning]
+  - id: cisa-cvd
+    title: CISA Coordinated Vulnerability Disclosure Process
+    url: https://www.cisa.gov/coordinated-vulnerability-disclosure-process
+    adapter: web_page
+    tier: primary
+    kind: guidance
+    quotes:
+      - text: Through our Coordinated Vulnerability Disclosure (CVD) program, CISA facilitates the timely and synchronized dissemination of vulnerability information and any associated mitigations if available.
+        locator: About CVD, Overview
+        fetched: "2026-10-14"
+        supports: [security-ethics.public-disclosure-before-fix]
+      - text: In cases where a vendor is unresponsive or will not establish a reasonable timeframe for remediation, CISA may disclose vulnerabilities as early as 45 days after the initial attempt to contact the vendor is made, regardless of the availability of a patch or update.
+        locator: Public Disclosure, Disclosure Timeline, Vendor Responsiveness
+        fetched: "2026-10-14"
+        supports: [security-ethics.public-disclosure-before-fix]
+  - id: cert-cvd-discovery
+    title: The CERT Guide to Coordinated Vulnerability Disclosure, Discovery phase (CERT/CC, web edition of CMU/SEI-2017-SR-022)
+    url: https://certcc.github.io/CERT-Guide-to-CVD/topics/phases/discovery/
+    adapter: web_page
+    tier: primary
+    kind: guidance
+    quotes:
+      - text: Vulnerability research should of course be performed on equipment that the finder is authorized to use for the purpose.
+        locator: Avoid Unnecessary Risk in Finding Vulnerabilities, Advice for Finders
+        fetched: "2026-10-15"
+        supports: [security-ethics.unauthorised-third-party-scanning]
+  - id: cert-cvd-ethics
+    title: The CERT Guide to Coordinated Vulnerability Disclosure, Principles, Ethical Considerations (CERT/CC)
+    url: https://certcc.github.io/CERT-Guide-to-CVD/topics/principles/ethics/
+    adapter: web_page
+    tier: primary
+    kind: guidance
+    notes: The quoted duty is the FIRST Ethics SIG text as reproduced by CERT/CC in its guide.
+    quotes:
+      - text: Team members who learn of a vulnerability should follow coordinated vulnerability disclosure by cooperating with stakeholders to remediate or mitigate the security vulnerability and minimize harm associated with disclosure.
+        locator: FIRST Ethics SIG, Duty of coordinated vulnerability disclosure
+        fetched: "2026-10-15"
+        supports: [security-ethics.public-disclosure-before-fix]
+      - text: Team members should coordinate with appropriate stakeholders to agree upon clear timelines and expectations for the release of information, providing enough details to allow users to evaluate their risk and take actionable defensive measures.
+        locator: FIRST Ethics SIG, Duty of coordinated vulnerability disclosure
+        fetched: "2026-10-15"
+        supports: [security-ethics.public-disclosure-before-fix]
+  - id: iso-iec-29147
+    title: ISO/IEC 29147:2018 Information technology, Security techniques, Vulnerability disclosure (abstract page)
+    url: https://www.iso.org/standard/72311.html
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: >-
+      iso.org returned HTTP 403 to automated fetches on 2026-10-15 (also with a query string); the standard
+      itself is paywalled. Not quoted, so no trap relies on it for verification; CISA and CERT/CC texts carry
+      the coordinated-disclosure rule instead.
+  - id: gdpr
+    title: Regulation (EU) 2016/679 (General Data Protection Regulation), Official Journal text
+    url: https://publications.europa.eu/resource/cellar/3e485e15-11bd-11e6-ba9a-01aa75ed71a1.0006.03/DOC_1
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: EU Publications Office (Cellar) English XHTML of CELEX 32016R0679.
+    quotes:
+      - text: ‘personal data breach’ means a breach of security leading to the accidental or unlawful destruction, loss, alteration, unauthorised disclosure of, or access to, personal data transmitted, stored or otherwise processed;
+        locator: Article 4(12)
+        fetched: "2026-10-14"
+        supports: [security-ethics.exploit-and-dump-to-prove]
+      - text: the controller and the processor shall implement appropriate technical and organisational measures to ensure a level of security appropriate to the risk
+        locator: Article 32(1)
+        fetched: "2026-10-15"
+        supports: [security-ethics.exploit-and-dump-to-prove]
+      - text: In assessing the appropriate level of security account shall be taken in particular of the risks that are presented by processing, in particular from accidental or unlawful destruction, loss, alteration, unauthorised disclosure of, or access to personal data transmitted, stored or otherwise processed.
+        locator: Article 32(2)
+        fetched: "2026-10-15"
+        supports: [security-ethics.exploit-and-dump-to-prove]
+      - text: In the case of a personal data breach, the controller shall without undue delay and, where feasible, not later than 72 hours after having become aware of it, notify the personal data breach to the supervisory authority competent in accordance with Article 55, unless the personal data breach is unlikely to result in a risk to the rights and freedoms of natural persons.
+        locator: Article 33(1)
+        fetched: "2026-10-15"
+        supports: [security-ethics.exploit-and-dump-to-prove]

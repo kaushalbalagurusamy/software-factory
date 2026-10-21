@@ -1,0 +1,14 @@
+schema_version: 1
+id: agent-security-omits-untrusted-inputs
+kind: omission
+twin: agent-security-omits-untrusted-inputs-clean
+brief: |
+  A legal-services firm wants a research assistant for its associates.
+  - The assistant searches public case-law websites and the firm's document store, then drafts memos.
+  - It calls internal MCP servers as the signed-in associate, with read scopes on matters they staff.
+  - Only two reviewed internal servers are connected; tool definitions are pinned.
+  - Saving a memo to a client matter or emailing it requires the associate's confirmation.
+  - Memos cite every source with a link.
+expect:
+  omissions:
+  - agent-security.untrusted-inputs

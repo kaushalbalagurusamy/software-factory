@@ -1,0 +1,14 @@
+schema_version: 1
+id: agent-security-omits-human-approval
+kind: omission
+twin: agent-security-omits-human-approval-clean
+brief: |
+  A logistics company wants an operations assistant for its dispatch team.
+  - The assistant uses internal MCP servers for routing, driver messaging and order changes.
+  - Each server runs as the signed-in dispatcher with that dispatcher's permissions.
+  - Only the three internal servers are connected; their tool definitions are pinned and reviewed.
+  - Customer emails are treated as untrusted; while one is in context the assistant can only read.
+  - Target: cut average dispatch handling time by a quarter.
+expect:
+  omissions:
+  - agent-security.human-approval

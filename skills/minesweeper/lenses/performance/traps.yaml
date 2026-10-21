@@ -1,0 +1,132 @@
+schema_version: 1
+traps:
+  - id: performance.fanout-tail-amplification
+    aliases: [PERF-04]
+    title: Fan-out request assumes it inherits the per-backend percentile latency
+    kind: requirement
+    cues:
+      - "each backend answers within 10 ms at p99, so the page loads in 10 ms"
+      - "query every shard in parallel on each request"
+      - "call all downstream services synchronously and merge the results"
+      - "aggregate data from every tenant service on dashboard load"
+    principle: >-
+      A request that waits on n independent calls is slow if any one is slow: with per-call probability p of
+      being within the percentile, the whole request misses it with probability 1 - p^n. Temporary slow
+      episodes that are negligible for one server dominate at scale.
+    sources: [tail-at-scale]
+    severity:
+      default: high
+      blast_radius: The end-to-end SLO is missed on a large fraction of requests; callers pile up waiting and exhaust their own pools.
+    remediation:
+      safe_route: Compute 1 - p^n with calc.fanout_tail for the stated fan-out; reduce fan-out (precomputed or materialized views), use hedged or tied requests with cancellation, propagate deadlines, and return partial results where acceptable.
+      invariant: The end-to-end percentile target is stated for the composed request and justified from per-call distributions and fan-out, not copied from a single backend's SLO.
+      spec_section: capacity-physics
+    checks: [calc.fanout_tail]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      The report's 39.5% (n=50) and 63.4% (n=100) at p99 are arithmetic, reproduced by calc.fanout_tail
+      (1 - 0.99^50 and 1 - 0.99^100); they assume independent calls. The Tail at Scale full text was not
+      fetchable (HTTP 403); the abstract is quoted.
+  - id: performance.egress-unit-economics
+    aliases: [PERF-06]
+    title: Raw data shipped across regions, NAT or the internet with per-GB charges ignored
+    kind: requirement
+    cues:
+      - "stream all raw sensor readings to a central region"
+      - "replicate every event to all regions in real time"
+      - "send the full-resolution media to every viewer from the origin"
+      - "route outbound traffic through the NAT gateway"
+      - "ship raw logs off-cloud for analysis"
+    principle: >-
+      Cloud providers bill data processed by NAT gateways per GB regardless of source or destination, in
+      addition to standard data transfer charges, and bill inter-region transfer per GiB. Cost scales with
+      bytes moved, so raw high-rate streams make cost per user a function of volume, not of revenue.
+    sources: [aws-vpc-pricing, gcp-network-pricing]
+    severity:
+      default: high
+      blast_radius: Transfer cost per customer can exceed revenue per customer; the bill grows with usage with no ceiling.
+    remediation:
+      safe_route: Aggregate, downsample or compress at the edge; keep traffic within a region or zone where possible; use private endpoints that avoid NAT processing where the provider offers them; compute cost with calc.egress_cost from a price read at sweep time.
+      invariant: Bytes moved per user per month and the resulting transfer cost (from the provider's current price page, cited with fetch date) are stated and stay below the stated cost ceiling per unit.
+      spec_section: capacity-physics
+    checks: [calc.egress_cost]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Prices are never copied into this trap (pricing pages are refreshed every 30 days). The report's
+      per-GB figures and "bills exceed 100% of gross revenue" are illustrations, not facts; the ratio
+      depends on the brief's volumes and revenue.
+  - id: performance.high-cardinality-metric-labels
+    aliases: []
+    title: Unbounded identifiers used as metric labels
+    kind: requirement
+    cues:
+      - "tag every metric with the request id"
+      - "add the user id as a label so we can filter per user"
+      - "record a metric series per session"
+      - "index every raw payload in the metrics store"
+    principle: >-
+      In a labelled time-series system every unique combination of label values is a new time series; the
+      Prometheus documentation says not to use labels for high-cardinality dimensions such as user IDs, email
+      addresses or other unbounded sets.
+    sources: [prometheus-naming]
+    severity:
+      default: medium
+      blast_radius: Series count grows with traffic, the metrics store runs out of memory or the ingestion bill grows without bound, and dashboards fail when they are needed.
+    remediation:
+      safe_route: Keep metric labels to bounded sets; put request, user and session identifiers in logs or traces, linked by exemplars or trace ids.
+      invariant: Every metric label has a bounded, documented value set; unbounded identifiers appear only in logs and traces.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Second half of report seed PERF-06 (alias held by performance.egress-unit-economics).
+  - id: performance.unbounded-queue
+    title: Unbounded queue or buffer absorbs overload instead of shedding it
+    kind: requirement
+    cues:
+      - "queue every request so none are ever dropped"
+      - "buffer jobs in memory until workers catch up"
+      - "accept all uploads and process them in the background"
+      - "retry failed calls until they succeed"
+    principle: >-
+      Little's law: the mean number in a stationary system equals arrival rate times mean time in system
+      (L = lambda W). When arrivals exceed service capacity the system is not stationary: the queue and the
+      waiting time grow without bound, so "never drop" becomes "unbounded latency and memory".
+    sources: [little-1961]
+    severity:
+      default: high
+      blast_radius: Under sustained overload, latency and memory grow until timeouts or OOM, and retries amplify the overload.
+    remediation:
+      safe_route: Bound every queue, apply backpressure or admission control, shed or defer excess explicitly, and use retry budgets with jittered backoff.
+      invariant: Each queue has a stated maximum length derived from L = lambda W at the target latency; overflow behaviour (reject, shed, degrade) is specified.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: The publisher page returned HTTP 403; the abstract the publisher deposited with Crossref for the DOI is quoted.
+  - id: performance.percentile-slo-without-load-model
+    title: Latency promise without a load model or percentile
+    kind: omission
+    cues:
+      - "the API must be fast"
+      - "responses under 100 ms"
+      - "p99 under 50 ms, with no request rate or payload stated"
+      - "must scale to millions of users"
+      - "real-time performance"
+    principle: >-
+      Latency depends on load: by Little's law concurrency equals arrival rate times time in system, and tail
+      latency grows with utilization and scale. A latency target without a stated percentile, request rate,
+      payload size and concurrency cannot be tested or provisioned.
+    sources: [little-1961, tail-at-scale]
+    severity:
+      default: medium
+      blast_radius: Acceptance is untestable; the system is either over-provisioned or misses the target at the first real peak.
+    remediation:
+      safe_route: Ask for, or state as an assumption, the load model (peak rate, payload distribution, concurrency) and the percentile; derive capacity from it and load-test against it.
+      invariant: Every latency target names a percentile, a measurement point and the load model it holds under.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"

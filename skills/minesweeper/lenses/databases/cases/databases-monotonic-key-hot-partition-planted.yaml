@@ -1,0 +1,17 @@
+schema_version: 1
+id: databases-monotonic-key-hot-partition-planted
+kind: planted
+twin: databases-monotonic-key-hot-partition-clean
+brief: |
+  Project: telemetry store for a fleet of 20,000 delivery vans.
+  - Each van sends position and engine readings every second.
+  - Readings are keyed by the server receive timestamp, so new rows land in time order; we will add nodes as traffic grows to scale writes.
+  - Data is stored in a range-partitioned distributed SQL database.
+  - Dashboards show each van's last hour and may lag ingest by up to 10 seconds; analysts query monthly aggregates.
+  - During a network partition vans buffer readings locally and upload later; ingest accepts late data.
+  - Each reading is a single-row insert with no multi-row invariants; the database is the only store, and aggregates are computed from it.
+  - Raw data is kept for 90 days.
+expect:
+  traps:
+  - databases.monotonic-key-hot-partition
+  min_severity: medium

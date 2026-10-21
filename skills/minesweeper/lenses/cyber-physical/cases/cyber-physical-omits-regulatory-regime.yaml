@@ -1,0 +1,19 @@
+schema_version: 1
+id: cyber-physical-omits-regulatory-regime
+kind: omission
+twin: cyber-physical-complete-clean
+brief: |
+  Northwind Energy runs a 200 MW battery storage site and the substation that connects it to the grid.
+  Build a monitoring and optimisation platform for its operations team.
+  Dashboards show state of charge, inverter temperatures and breaker status per bay.
+  The site's protection relays, interlocks and emergency shutdown are owned by the protection engineer and are outside this platform; the platform never writes to them.
+  The platform is read-only toward controllers: telemetry leaves through a one-way gateway, and setpoint changes are entered by the control-room operator at the local HMI.
+  Enterprise IT, a DMZ and the OT network are separate zones; the only conduits are the one-way telemetry gateway and a vendor jump host in the DMZ with MFA, operator-approved time-boxed sessions, recording and a kill switch.
+  Controller patches are evaluated on a test bench at least every 35 days and applied only in scheduled outages; unpatchable assets get a dated mitigation plan.
+  Passive taps on the internal switches feed an out-of-band sensor that baselines HMI-to-controller traffic inside the perimeter.
+  Alarms page the on-call engineer within one minute; reports export to CSV.
+  Operators use it on desktop and tablet in the control room.
+expect:
+  omissions:
+  - cyber-physical.regulatory-regime
+notes: Same as cyber-physical-complete-clean with the regulatory-regime statement removed.

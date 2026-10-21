@@ -1,0 +1,85 @@
+schema_version: 1
+traps:
+  - id: media-pipelines.decoded-frames-exceed-memory
+    aliases: [PERF-01]
+    title: Whole bursts or clips decoded into RAM in a small worker
+    kind: requirement
+    cues:
+      - "decode the full burst of high-resolution photos into float buffers before merging"
+      - "load all frames of the clip into memory, then process"
+      - "accept concurrent uploads of large RAW bursts in a 2 GB container"
+      - "buffer ten seconds of decoded video for smoothing"
+      - "keep every intermediate image so the user can undo"
+    principle: >-
+      Decoded image memory is frames x width x height x channels x bytes per channel, before any intermediate
+      pyramids or copies, and it multiplies by concurrent requests per worker. When a container's usage
+      reaches memory.max and cannot be reclaimed, the kernel invokes the OOM killer in that cgroup.
+    sources: [kernel-cgroup-v2]
+    severity:
+      default: high
+      blast_radius: Workers are killed under concurrent load, uploads fail, and retries cause crash loops.
+    remediation:
+      safe_route: Compute the footprint with calc.memory from the brief's resolution, bit depth, frame count and concurrency; process in tiles or scanlines, or stream frames, keep intermediates bounded, and admit requests by a memory semaphore.
+      invariant: Peak decoded bytes per request times admitted concurrency per worker is below the worker's memory limit with headroom; inputs above the stated maximum resolution or frame count are rejected before decode.
+      spec_section: capacity-physics
+    checks: [calc.memory]
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      The report's 3.84 GB (5 frames x 48 MP x 16 bytes per pixel) is arithmetic, reproduced by calc.memory
+      (frames=5 width=8000 height=6000 channels=4 bytes_per_channel=4). Its "easily exceeding" peak RSS figure
+      for pyramids and the PCIe round-trip claims are not sourced; an experiment must measure peak RSS for the
+      chosen algorithm.
+  - id: media-pipelines.hdr-quantized-to-8bit
+    aliases: [PERF-02]
+    title: HDR or high-bit-depth input converted to 8-bit before processing
+    kind: requirement
+    cues:
+      - "load the images with the default loader into standard RGB arrays, then run the HDR merge"
+      - "convert the 10-bit video frames to 8-bit for processing"
+      - "normalise everything to sRGB first"
+      - "use uint8 buffers throughout the pipeline"
+    principle: >-
+      HDR television signals are specified at 10 or 12 bits with PQ or HLG transfer functions (ITU-R BT.2100);
+      quantizing scene data to 8 bits per channel early, or clipping to a standard-dynamic-range transfer
+      function, discards highlight and shadow information that later merge or tone-mapping stages cannot
+      recover, and causes visible banding.
+    sources: [itu-bt2100]
+    severity:
+      default: high
+      blast_radius: The HDR deliverable fails its purpose (clipped highlights, banding, posterization) in every output.
+    remediation:
+      safe_route: Decode to a linear, high-precision working space (16-bit integer or half/single float) and keep the transfer function and colour primaries as metadata; tone-map or quantize only at the final output stage.
+      invariant: Bit depth, transfer function and colour primaries are stated for input, working space and output; no stage reduces precision below the output's before the final encode.
+      spec_section: capacity-physics
+    checks: []
+    status: unverified
+    notes: >-
+      Unverified: the BT.2100 parameter tables are only in the ITU PDF, which the web_page adapter cannot read,
+      and the landing page has no decisive text. The 10/12-bit statement is from the standard's known content
+      and must be confirmed by quote before promotion. The memory cost of the safe route is checked with calc.memory.
+  - id: media-pipelines.uncompressed-bandwidth
+    title: Uncompressed frames moved between stages or hosts at full rate
+    kind: requirement
+    cues:
+      - "send raw frames from the capture service to the processing service"
+      - "pass decoded frames between microservices as arrays"
+      - "store every decoded frame for later analysis"
+      - "4K at 60 fps through the pipeline in real time"
+    principle: >-
+      An uncompressed stream needs width x height x channels x bytes per channel x frame rate bytes per
+      second on every link, bus and memory copy it crosses; each extra copy multiplies the memory bandwidth used.
+    sources: [itu-bt2100]
+    severity:
+      default: high
+      blast_radius: Network links, storage and memory bandwidth saturate; the pipeline drops frames or falls behind real time.
+    remediation:
+      safe_route: Compute the rate with calc.bandwidth; keep frames in one process or device memory across stages, pass compressed or reduced representations between hosts, and measure link and bus capacity by experiment.
+      invariant: The data rate between every pair of stages is computed and is below the measured capacity of that link with headroom.
+      spec_section: capacity-physics
+    checks: [calc.bandwidth]
+    status: unverified
+    notes: >-
+      The rule is arithmetic (calc.bandwidth); the report's 3.98 GB/s for 4K60 at 8 bytes per pixel is
+      reproduced by calc.bandwidth (width=3840 height=2160 channels=4 bytes_per_channel=2 fps=60). It stays
+      unverified because its only cited source (BT.2100 PDF) could not be quoted; link capacities must be measured.

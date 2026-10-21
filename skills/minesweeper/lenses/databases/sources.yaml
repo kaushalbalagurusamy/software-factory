@@ -1,0 +1,131 @@
+schema_version: 1
+sources:
+  - id: gilbert-lynch-2012
+    title: Gilbert and Lynch (2012). Perspectives on the CAP Theorem. IEEE Computer 45(2) 30-36 (MIT DSpace record, hdl 1721.1/79112)
+    url: https://dspace.mit.edu/handle/1721.1/79112
+    adapter: web_page
+    tier: primary
+    kind: paper
+    notes: >-
+      Written by the authors of the CAP proof. The proof itself, Gilbert and Lynch (2002), Brewer's
+      Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services, ACM SIGACT
+      News 33(2), DOI 10.1145/564585.564601, could not be fetched as text on 2026-10-14 (ACM DL 403, the
+      author copy is a PDF, the Crossref API refuses the adapter's Accept header with 406).
+    quotes:
+      - text: >-
+          Eric Brewer introduced the idea that there is a fundamental trade-off between consistency,
+          availability, and partition tolerance.
+        locator: Abstract
+        fetched: '2026-10-14'
+        supports: [databases.cap-strong-and-available]
+  - id: abadi-pacelc-blog
+    title: Abadi (2010). Problems with CAP, and Yahoo's little known NoSQL system (author's blog post, first statement of PACELC)
+    url: https://dbmsmusings.blogspot.com/2010/04/problems-with-cap-and-yahoos-little.html
+    adapter: web_page
+    tier: primary
+    kind: paper
+    notes: >-
+      Treated as primary because it is the originator's own first statement of PACELC; the peer-reviewed
+      version is Abadi (2012), Consistency Tradeoffs in Modern Distributed Database System Design, IEEE
+      Computer 45(2), DOI 10.1109/MC.2012.33, whose IEEE pages are JavaScript-only and whose Crossref
+      record has no abstract.
+    quotes:
+      - text: >-
+          if there is a partition (P) how does the system tradeoff between availability and consistency
+          (A and C); else (E) when the system is running as normal in the absence of partitions, how does
+          the system tradeoff between latency (L) and consistency (C)?
+        locator: 'Section "Conclusion: Replace CAP with PACELC"'
+        fetched: '2026-10-14'
+        supports: [databases.cap-strong-and-available]
+  - id: pg-transactions
+    title: PostgreSQL documentation, Tutorial, 3.4 Transactions
+    url: https://www.postgresql.org/docs/current/tutorial-transactions.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: >-
+          The essential point of a transaction is that it bundles multiple steps into a single,
+          all-or-nothing operation. The intermediate states between the steps are not visible to other
+          concurrent transactions, and if some failure occurs that prevents the transaction from
+          completing, then none of the steps affect the database at all.
+        locator: Section 3.4 Transactions
+        fetched: '2026-10-14'
+        supports: [databases.dual-write-without-outbox]
+  - id: pg-isolation
+    title: PostgreSQL documentation, 13.2 Transaction Isolation
+    url: https://www.postgresql.org/docs/current/transaction-iso.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: >-
+          The result of successfully committing a group of transactions is inconsistent with all
+          possible orderings of running those transactions one at a time.
+        locator: Section 13.2, definition of serialization anomaly
+        fetched: '2026-10-14'
+        supports: [databases.isolation-anomaly]
+      - text: Read Committed is the default isolation level in PostgreSQL.
+        locator: Section 13.2.1 Read Committed Isolation Level
+        fetched: '2026-10-14'
+        supports: [databases.isolation-anomaly]
+      - text: >-
+          prevents all of the phenomena described in Table 13.1 except for serialization anomalies.
+        locator: Section 13.2.2 Repeatable Read Isolation Level
+        fetched: '2026-10-14'
+        supports: [databases.isolation-anomaly]
+  - id: berenson-1995
+    title: Berenson, Bernstein, Gray, Melton, O'Neil, O'Neil (1995). A Critique of ANSI SQL Isolation Levels. arXiv cs/0701157
+    url: https://arxiv.org/abs/cs/0701157
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: >-
+          This paper shows that these phenomena and the ANSI SQL definitions fail to characterize several
+          popular isolation levels, including the standard locking implementations of the levels.
+        locator: Abstract
+        fetched: '2026-10-14'
+        supports: [databases.isolation-anomaly]
+  - id: spanner-schema
+    title: Google Cloud Spanner documentation, Schema design best practices
+    url: https://cloud.google.com/spanner/docs/schema-design
+    adapter: web_page
+    tier: primary
+    kind: docs
+    notes: Vendor documentation of its own system's partitioning behaviour; the same rule applies to any range-partitioned store, and each system's own docs decide it for that system.
+    quotes:
+      - text: >-
+          Monotonic keys cause all new entries to write to the same range of your key space. Because
+          Spanner uses key ranges to distribute data across servers, a monotonic key directs all insert
+          traffic to a single server, creating a bottleneck.
+        locator: Section "Choose a primary key to prevent hotspots"
+        fetched: '2026-10-14'
+        supports: [databases.monotonic-key-hot-partition]
+  - id: dynamodb-gsi
+    title: Amazon DynamoDB Developer Guide, Using Global Secondary Indexes
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    notes: Vendor documentation of its own system; other stores differ, so the sweeper asks which store and checks that store's docs.
+    quotes:
+      - text: >-
+          When an application writes or deletes items in a table, any global secondary indexes on that
+          table are updated asynchronously, using an eventually consistent model.
+        locator: Section "Data synchronization between tables and Global Secondary Indexes"
+        fetched: '2026-10-14'
+        supports: [databases.secondary-index-read-after-write]
+  - id: kafka-semantics
+    title: Apache Kafka 4.3 documentation, Design, Message Delivery Semantics
+    url: https://kafka.apache.org/43/design/design/
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: >-
+          Exactly-once delivery for other destination systems generally requires cooperation with such
+          systems
+        locator: Design, Message Delivery Semantics
+        fetched: '2026-10-14'
+        supports: [databases.dual-write-without-outbox]

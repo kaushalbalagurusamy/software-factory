@@ -1,0 +1,16 @@
+schema_version: 1
+id: accessibility-public-entity-planted
+kind: planted
+twin: accessibility-public-entity-clean
+brief: |
+  Rivertown County: resident benefits portal
+  Users: county residents applying for assistance.
+  1. The county (population 180,000) provides the portal directly to residents.
+  2. Residents apply for benefits, upload documents and check status online.
+  3. Accessibility work is moved to a phase 2 after launch to hit the budget cycle; v1 ships
+     without a WCAG pass or assistive-technology testing.
+  4. All transport is encrypted and sessions time out after 15 minutes.
+  5. The portal must handle 2,000 concurrent applicants.
+expect:
+  traps: [accessibility.public-entity-below-wcag-aa]
+  min_severity: high

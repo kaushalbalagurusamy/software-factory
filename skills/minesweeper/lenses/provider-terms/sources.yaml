@@ -1,0 +1,74 @@
+schema_version: 1
+sources:
+  - id: anthropic-commercial
+    title: Anthropic Commercial Terms of Service
+    url: https://www.anthropic.com/legal/commercial-terms
+    adapter: web_page
+    tier: primary
+    kind: terms
+    quotes:
+      - text: Customer may not and must not attempt to (a) access the Services to build a competing product or service, including to train competing AI models or resell the Services except as expressly approved by Anthropic
+        locator: Section D.4 (Use Restrictions)
+        fetched: "2026-10-14"
+        supports: [provider-terms.output-distillation, provider-terms.unauthorised-resale-proxy]
+  - id: anthropic-consumer
+    title: Anthropic Consumer Terms of Service
+    url: https://www.anthropic.com/legal/consumer-terms
+    adapter: web_page
+    tier: primary
+    kind: terms
+    quotes:
+      - text: To develop any products or services that compete with our Services, including to develop or train any artificial intelligence or machine learning algorithms or models or resell the Services.
+        locator: Section 3 (Use of our Services), prohibited uses
+        fetched: "2026-10-14"
+        supports: [provider-terms.output-distillation]
+  - id: anthropic-aup
+    title: Anthropic Usage Policy
+    url: https://www.anthropic.com/legal/aup
+    adapter: web_page
+    tier: primary
+    kind: terms
+    quotes:
+      - text: Use outputs to train an AI model (e.g., “model scraping” or “model distillation”) without prior authorization from Anthropic
+        locator: Universal usage standards, platform abuse
+        fetched: "2026-10-14"
+        supports: [provider-terms.output-distillation]
+      - text: Resell, proxy, or otherwise provide access to Claude through unauthorized means, including services that route requests through consumer subscriptions or misrepresent the product or client being used
+        locator: Universal usage standards, platform abuse
+        fetched: "2026-10-14"
+        supports: [provider-terms.unauthorised-resale-proxy]
+      - text: Coordinate malicious activity across multiple accounts, or create multiple accounts, to avoid detection, circumvent product guardrails, or generate identical or similar inputs that otherwise violate our Usage Policy
+        locator: Universal usage standards, platform abuse
+        fetched: "2026-10-14"
+        supports: [provider-terms.limit-evasion-multi-account]
+      - text: Intentionally bypass or interfere with capabilities, restrictions, or guardrails established within our products, including by circumvention of the account sign-up or log-in process
+        locator: Universal usage standards, platform abuse
+        fetched: "2026-10-14"
+        supports: [provider-terms.limit-evasion-multi-account]
+      - text: Access, facilitate, or provide others (including end users) with access to our products or services in violation of our Supported Regions Policy
+        locator: Universal usage standards, platform abuse
+        fetched: "2026-10-14"
+        supports: [provider-terms.unsupported-region-or-tier]
+  - id: gemini-terms
+    title: Gemini API Additional Terms of Service
+    url: https://ai.google.dev/gemini-api/terms
+    adapter: web_page
+    tier: primary
+    kind: terms
+    quotes:
+      - text: You may not use the Services to develop models that compete with the Services (e.g., Gemini API or Google AI Studio).
+        locator: Use restrictions
+        fetched: "2026-10-14"
+        supports: [provider-terms.output-distillation]
+      - text: You may only access the Services (or make API Clients available to users) within an available region. You may use only Paid Services when making API Clients available to users in the European Economic Area, Switzerland, or the United Kingdom.
+        locator: Use restrictions
+        fetched: "2026-10-14"
+        supports: [provider-terms.unsupported-region-or-tier]
+      - text: To help with quality and improve our products, human reviewers may read, annotate, and process your API input and output.
+        locator: How Google uses your data, Unpaid Services
+        fetched: "2026-10-14"
+        supports: [provider-terms.sensitive-data-on-unpaid-tier]
+      - text: Do not submit sensitive, confidential, or personal information to the Unpaid Services.
+        locator: How Google uses your data, Unpaid Services
+        fetched: "2026-10-14"
+        supports: [provider-terms.sensitive-data-on-unpaid-tier]

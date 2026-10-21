@@ -1,0 +1,14 @@
+schema_version: 1
+id: rubric-inversion-proxy-metric-as-target-clean
+kind: clean
+twin: rubric-inversion-proxy-metric-as-target-planted
+brief: |
+  Assessment brief: build a contract summarisation assistant for a legal operations team.
+  Submissions are scored by an automated rubric.
+  Rubric item 1: summaries must cite the clause each point comes from.
+  Rubric item 2: summaries are scored on recall of obligations, deadlines and exclusions (the goal), checked against a lawyer-written key per contract, with a penalty for any dropped negation or exception; length is capped at one page but earns no points.
+  Rubric item 3: latency under 10 seconds per contract.
+  Rubric item 4: a short design note explaining the approach.
+  Deliverable: a working service and the design note.
+expect:
+  none_from_lens: true

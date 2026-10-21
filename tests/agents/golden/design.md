@@ -1,10 +1,10 @@
 ---
 name: design
 description: Turns approved research into PRDs, specs and decision records, writing only to the design folders.
-model: opus
+model: sonnet
 tools: Read, Glob, Grep, Write, Bash
 skills:
-  - prd-designer
+  - prd-writer
   - axiomatic-spec
   - one-way-door
   - superpowers:brainstorming
@@ -46,7 +46,7 @@ Only under `docs/prd`, `docs/spec`, `docs/adr`.
 
 ## Skills
 
-- `prd-designer`
+- `prd-writer`
 - `axiomatic-spec`
 - `one-way-door`
 - `superpowers:brainstorming`

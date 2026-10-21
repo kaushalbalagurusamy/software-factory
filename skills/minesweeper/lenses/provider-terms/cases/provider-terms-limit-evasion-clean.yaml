@@ -1,0 +1,15 @@
+schema_version: 1
+id: provider-terms-limit-evasion-clean
+kind: clean
+twin: provider-terms-limit-evasion-planted
+brief: |
+  Northwind Catalogue Enrichment: batch product description writer
+
+  1. Generate descriptions for 4 million products with a hosted model on the paid API tier.
+  2. Plan the batch against our account's granted rate limit (spread over several nights if needed)
+     and request a limit increase through the provider's official process.
+  3. Only product attributes are sent; no personal data.
+  4. Generated text is stored in the catalogue and shown to shoppers.
+  5. Retry failed calls up to three times with exponential backoff.
+expect:
+  none_from_lens: true

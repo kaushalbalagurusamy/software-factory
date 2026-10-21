@@ -1,0 +1,15 @@
+schema_version: 1
+id: privacy-regulated-data-collect-all-planted
+kind: planted
+twin: privacy-regulated-data-collect-all-clean
+brief: |
+  Northwind Shop: loyalty programme relaunch (EU customers)
+
+  1. Members earn points on purchases and redeem them in the app.
+  2. Collect everything we can from the phone (contacts, precise location history, installed apps)
+     and keep it forever, since it might be useful for future features.
+  3. Our analytics vendor has a signed data processing agreement.
+  4. Data is stored in the EU.
+expect:
+  traps: [privacy-regulated-data.collect-all-keep-forever]
+  min_severity: high

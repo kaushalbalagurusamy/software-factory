@@ -1,0 +1,4 @@
+{
+  "factory/resource_limits.py": "docs/eli12/factory.resource_limits.md",
+  "scripts/lsf-vps.py": "docs/eli12/scripts.lsf-vps.md"
+}

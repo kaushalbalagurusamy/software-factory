@@ -1,0 +1,15 @@
+schema_version: 1
+id: realtime-transport-no-jitter-buffer-clean
+kind: clean
+twin: realtime-transport-no-jitter-buffer-planted
+brief: |
+  Acme Radio - remote co-host studio
+
+  - Two presenters in different cities co-host a live talk show over the internet.
+  - Audio is carried as RTP over UDP with Opus at 20 ms packets.
+  - The receiver uses an adaptive jitter buffer sized from measured interarrival jitter, with loss concealment, inside the latency budget.
+  - Each presenter's audio is recorded locally as a backup.
+  - Network assumptions: mobile and home Wi-Fi with up to 3% packet loss, 150 ms round trip, 40 ms jitter; path MTU discovered, 1,200-byte datagrams.
+  - End-to-end latency budget: 400 ms mouth-to-ear, split as capture 20, encode 20, network 150, jitter buffer 80, processing 100, playout 30.
+expect:
+  none_from_lens: true

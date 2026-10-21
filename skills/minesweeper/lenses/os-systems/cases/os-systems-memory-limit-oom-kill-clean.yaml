@@ -1,0 +1,14 @@
+schema_version: 1
+id: os-systems-memory-limit-oom-kill-clean
+kind: clean
+twin: os-systems-memory-limit-oom-kill-planted
+brief: |
+  Northwind Analytics - report export service
+
+  - Users export account histories as CSV or PDF.
+  - Exports run on worker containers, each with a 1 GB memory limit and 4 concurrent jobs per worker.
+  - Workers stream rows from the database in pages of 5,000 and write the file incrementally; histories above 2 million rows are queued for a batch export instead.
+  - Exports must finish within 5 minutes for the 95th percentile account.
+  - Workers use a fixed pool of 4 job threads and one pooled database connection each; peak open files per worker is under 100.
+expect:
+  none_from_lens: true

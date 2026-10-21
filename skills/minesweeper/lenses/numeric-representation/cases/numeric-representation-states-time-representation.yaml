@@ -1,0 +1,15 @@
+schema_version: 1
+id: numeric-representation-states-time-representation
+kind: clean
+twin: numeric-representation-omits-time-representation
+brief: |
+  Product brief: shift scheduling for a retail chain with stores in several regions.
+  Managers publish weekly rotas; staff clock in and out on a tablet.
+  Pay is computed in integer cents per minute worked; no other money handling.
+  Ids are 64-bit integers.
+  Requirement 1: managers publish shifts with start and end times in the store's local time, stored with the store's IANA time zone.
+  Requirement 2: clock-in and clock-out instants are recorded in UTC, so minutes worked are correct across daylight-saving changes.
+  Requirement 3: payroll exports total minutes worked per person per week.
+  Success: payroll disputes fall by half.
+expect:
+  none_from_lens: true

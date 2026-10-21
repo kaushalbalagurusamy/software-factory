@@ -1,0 +1,14 @@
+schema_version: 1
+id: media-pipelines-decoded-frames-exceed-memory-clean
+kind: clean
+twin: media-pipelines-decoded-frames-exceed-memory-planted
+brief: |
+  A real-estate photography service - HDR merge
+
+  - Photographers upload bracketed exposures of each room and receive one merged image.
+  - Inputs: up to 5 bracketed RAW exposures of at most 48 megapixels, 14-bit sensor data; output a 16-bit linear TIFF and an HDR AVIF (PQ, BT.2020).
+  - Workers run in 16 GB containers and admit 1 burst at a time (about 3.8 GB of decoded float buffers plus intermediates, from calc.memory); merging is done in tiles of 1024 x 1024.
+  - Merged images are delivered within 2 minutes of upload.
+  - Originals are kept for 30 days.
+expect:
+  none_from_lens: true

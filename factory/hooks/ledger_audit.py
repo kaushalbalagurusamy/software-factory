@@ -48,6 +48,9 @@ def decide(payload: Payload, cfg) -> Decision:
 
 
 def record(payload: Payload, cfg) -> None:
+    from factory.ops.events import emit
+
+    emit(cfg.project_root, "subagent-stop", "-", "stopped", source="hook", role=payload.agent_type)  # never raises
     try:
         ticket = current_ticket(cfg.project_root)
     except LedgerError as exc:

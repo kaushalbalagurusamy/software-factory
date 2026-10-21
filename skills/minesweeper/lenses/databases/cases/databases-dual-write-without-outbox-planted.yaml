@@ -1,0 +1,17 @@
+schema_version: 1
+id: databases-dual-write-without-outbox-planted
+kind: planted
+twin: databases-dual-write-without-outbox-clean
+brief: |
+  Project: order service for an online stationery shop.
+  - Customers place orders through the web checkout.
+  - The checkout handler inserts the order into the database, then publishes an OrderPlaced message to the broker and updates the order-history search index.
+  - The warehouse service consumes order events to create pick tasks.
+  - The search service shows customers their order history.
+  - Orders are stored in a single-region relational database with daily backups; customers read their own orders from the primary, and search results may lag by up to a minute.
+  - If the database is unreachable, checkout returns an error and nothing is written elsewhere.
+  - Stock decrement and order insert run in one SERIALIZABLE transaction, retried on conflict.
+expect:
+  traps:
+  - databases.dual-write-without-outbox
+  min_severity: high

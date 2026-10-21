@@ -1,0 +1,138 @@
+schema_version: 1
+traps:
+  - id: market-reality.negative-unit-economics
+    aliases: []
+    title: Unit economics cannot work at the stated price and volume
+    kind: requirement
+    cues:
+      - "unlimited AI messages for a low monthly fee"
+      - "every page view triggers a model call"
+      - "analyse each upload with the largest model"
+      - "flat price, usage expected to grow tenfold"
+      - "cost is not a concern for the first version"
+    principle: >-
+      Cost per user = requests per user per period x units per request (tokens, seconds, GB) x the
+      provider's current unit price, from the provider's own price page. When that exceeds revenue per
+      user after payment and platform fees at the brief's stated volume, every new user loses money.
+    sources: [anthropic-pricing]
+    severity:
+      default: high
+      blast_radius: Losses scale with adoption; success bankrupts the product or forces a price change on existing customers.
+    remediation:
+      safe_route: >-
+        Compute cost per user from the brief's volume and the provider's price page; cap usage per plan,
+        route to cheaper models or cache, or reprice. Record the arithmetic and the price-page fetch date.
+      invariant: At the stated volume, cost to serve one user per period stays below revenue per user after fees, with a stated margin.
+      spec_section: product-scope
+    checks: []
+    status: unverified
+    notes: >-
+      Decided by arithmetic on the brief's own figures and a current price page, not by a quote; no
+      unit-economics function exists in tools/checks yet, so compute it by hand and show the working.
+  - id: market-reality.top-down-tam
+    aliases: []
+    title: Market sized only top-down
+    kind: metric
+    cues:
+      - "the global market is worth billions; we only need 1%"
+      - "a multi-billion-dollar industry by 2030"
+      - "if every clinic in the country used it"
+      - "analyst reports put the market at"
+      - "huge addressable market"
+    principle: >-
+      A market size is credible when built bottom-up: reachable buyers counted from primary statistics
+      (census, labour or business registers; public-company filings) times a sourced price. A share of
+      a headline industry figure says nothing about who will buy.
+    sources: [census-susb, bls-oews, eurostat-sbs, sec-edgar-search]
+    severity:
+      default: medium
+      blast_radius: Targets, budgets and scale requirements are set against a market that may not exist at that size.
+    remediation:
+      safe_route: >-
+        Rebuild the sizing bottom-up: count of reachable buyers from a primary dataset x adoption
+        assumption (marked proposed) x sourced price; keep top-down figures only as a cross-check.
+      invariant: Every market-size figure in the spec shows its bottom-up derivation and the primary count it starts from.
+      spec_section: product-scope
+    status: unverified
+    notes: The sources are examples of primary sizing data, not rules; whether a given sizing is adequate is a judgement.
+  - id: market-reality.unsourced-willingness-to-pay
+    aliases: []
+    title: Users-will-pay assumed without a willingness-to-pay source
+    kind: requirement
+    cues:
+      - "users will happily pay for this"
+      - "customers have told us they want it"
+      - "we will charge a premium tier"
+      - "people pay for similar apps, so they will pay for ours"
+      - "monetise later once we have users"
+    principle: >-
+      A price is a hypothesis until evidence supports it: customer interviews with a stated price, a
+      pricing test, or comparable prices and revenues from primary disclosures such as filings. An
+      unsourced figure must be marked proposed and must not drive the build.
+    sources: [sec-edgar-search]
+    severity:
+      default: medium
+      blast_radius: The product is built for a revenue that never arrives; downstream budgets inherit the error.
+    remediation:
+      safe_route: >-
+        Mark the price proposed; name the evidence that would confirm it (interviews, landing-page test,
+        comparable filings) and schedule it before committing spend that depends on it.
+      invariant: Every price or conversion figure is sourced or labelled proposed, with the test that would confirm it.
+      spec_section: product-scope
+    status: unverified
+    notes: No primary rule decides willingness to pay; it is settled by research or an experiment.
+  - id: market-reality.latency-over-correctness-floor
+    aliases: []
+    title: Latency or scale target set while the correctness floor is unstated
+    kind: metric
+    cues:
+      - "sub-50 ms responses for a daily report"
+      - "must handle a million concurrent users at launch"
+      - "real-time everything"
+      - "fastest on the market"
+      - "accuracy will be tuned later"
+    principle: >-
+      Market sizing says which axes the customer notices. Response-time limits users perceive are on
+      the order of 0.1 s, 1 s and 10 s (practitioner guidance), and launch scale follows from the
+      sized volume. A target beyond what the market needs, while the one capability that must work
+      is unstated or untested, spends the budget on the wrong axis.
+    sources: [nng-response-times]
+    severity:
+      default: medium
+      blast_radius: Engineering effort goes to speed or scale the customer does not need while the core capability fails.
+    remediation:
+      safe_route: >-
+        State the correctness floor and its acceptance test first; derive latency and scale targets from
+        the sized volume and the user's tolerance, and record which targets the sizing relaxes.
+      invariant: The spec states the correctness floor with an acceptance test, and every latency or scale target cites the sizing that justifies it.
+      spec_section: verification-calibration
+    status: unverified
+    notes: Only source is secondary guidance; the trap is decided by the brief's own sizing.
+  - id: market-reality.unbounded-free-tier
+    aliases: []
+    title: Free tier whose marginal cost is unbounded
+    kind: requirement
+    cues:
+      - "free forever, no limits"
+      - "unlimited free generations to drive growth"
+      - "free users get the same model as paid users"
+      - "no sign-up needed to use the full product"
+      - "free storage and downloads for everyone"
+    principle: >-
+      Each free user costs real compute, storage and bandwidth at the provider's price. Without a
+      per-user quota, worst-case cost is unbounded and abuse (scripted accounts) multiplies it.
+    sources: [anthropic-pricing]
+    severity:
+      default: high
+      blast_radius: A traffic spike or abuse campaign produces a bill with no matching revenue.
+    remediation:
+      safe_route: >-
+        Cap free usage per user and per period, require sign-up or rate limits, use a cheaper model
+        tier for free users, and set a spend alarm; compute worst-case monthly free cost from the cap.
+      invariant: The free tier has a per-user cap, and the worst-case monthly free cost at the cap is computed and within budget.
+      spec_section: product-scope
+    checks: [calc.egress_cost]
+    status: unverified
+    notes: >-
+      Arithmetic, not a quote, decides it; calc.egress_cost covers the bandwidth part, model or compute
+      cost is computed by hand from the price page.

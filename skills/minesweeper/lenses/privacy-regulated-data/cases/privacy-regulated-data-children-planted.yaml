@@ -1,0 +1,15 @@
+schema_version: 1
+id: privacy-regulated-data-children-planted
+kind: planted
+twin: privacy-regulated-data-children-clean
+brief: |
+  Brightline Reading Pals: phonics game for early readers (US launch)
+
+  1. Designed for children aged five to eight.
+  2. Kids create an account with a username and a selfie avatar, and the app records their voice
+     while reading aloud to score pronunciation.
+  3. Recordings are stored for 12 months in US regions with our hosting provider under a data processing agreement.
+  4. Progress reports emailed weekly.
+expect:
+  traps: [privacy-regulated-data.children-data-without-parental-consent]
+  min_severity: critical

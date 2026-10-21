@@ -1,0 +1,16 @@
+schema_version: 1
+id: privacy-regulated-data-edge-cache-planted
+kind: planted
+twin: privacy-regulated-data-edge-cache-clean
+brief: |
+  Acme Health Coach: symptom diary app for EU users
+
+  1. Users log symptoms, medication and mood daily.
+  2. Processing of health data is based on the user's explicit consent; our cloud host has a signed
+     Article 28 processor contract.
+  3. For speed, cache every API response, including the user's diary entries, on the CDN's
+     global edge nodes in all regions.
+  4. Diary data is kept until the user deletes their account.
+expect:
+  traps: [privacy-regulated-data.special-category-global-edge-cache]
+  min_severity: critical

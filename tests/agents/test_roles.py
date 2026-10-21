@@ -10,7 +10,7 @@ import yaml
 
 from factory.agents.roles import RoleError, RoleSpec, load_roles
 
-ROLE_IDS = ["orchestrator", "research", "design", "audit", "implement", "test", "review"]
+ROLE_IDS = ["orchestrator", "research", "design", "audit", "implement", "qa", "test", "review"]
 HOOK_IDS = {
     "path_guard", "blindness_guard", "secrets_guard", "bash_guard",
     "stop_gate", "subagent_stop", "ledger_audit", "session_start",
@@ -37,7 +37,7 @@ def _mutate(role_dir, role, fn):
     path.write_text(yaml.safe_dump(data))
 
 
-def test_seven_roles_in_order(roles):
+def test_eight_roles_in_order(roles):
     assert list(roles) == ROLE_IDS
     assert all(isinstance(r, RoleSpec) for r in roles.values())
     assert all(r.id == k for k, r in roles.items())
@@ -65,14 +65,14 @@ def test_max_tools_bound(roles):
 def test_writes_and_blind(roles):
     assert {k: r.writes for k, r in roles.items()} == {
         "orchestrator": "none", "research": "research_dir", "design": "design_dirs",
-        "audit": "audit_dir", "implement": "app", "test": "eval_paths", "review": "none",
+        "audit": "audit_dir", "implement": "app", "qa": "qa_paths", "test": "eval_paths", "review": "none",
     }
     assert [k for k, r in roles.items() if r.blind] == ["implement"]
 
 
 def test_spawns(roles):
     assert set(roles["orchestrator"].spawns) == set(ROLE_IDS) - {"orchestrator"}
-    assert len(roles["orchestrator"].spawns) == 6
+    assert len(roles["orchestrator"].spawns) == 7
     assert roles["implement"].spawns == ()
     assert not any(t.startswith("Agent") for t in roles["implement"].core_tools)
     assert set(roles["review"].spawns) == {
@@ -80,7 +80,7 @@ def test_spawns(roles):
         "pr-review-toolkit:pr-test-analyzer",
         "feature-dev:code-reviewer",
     }
-    for k in ("research", "design", "audit", "test"):
+    for k in ("research", "design", "audit", "qa", "test"):
         assert roles[k].spawns == ()
 
 
@@ -98,7 +98,7 @@ def test_agent_tools_match_spawns(roles):
 def test_bash_modes(roles):
     assert {k: r.bash for k, r in roles.items()} == {
         "orchestrator": "full", "research": "readonly", "design": "readonly",
-        "audit": "readonly", "implement": "full", "test": "full", "review": "readonly",
+        "audit": "readonly", "implement": "full", "qa": "full", "test": "full", "review": "readonly",
     }
 
 
@@ -127,14 +127,16 @@ def test_skills_exact(roles):
                          "deploy-verify", "one-way-door",
                          "superpowers:dispatching-parallel-agents"],
         "research": ["grounded-research", "deep-research", "brownfield-explorer"],
-        "design": ["prd-designer", "axiomatic-spec", "one-way-door",
+        "design": ["prd-writer", "axiomatic-spec", "one-way-door",
                    "superpowers:brainstorming", "superpowers:writing-plans"],
         "audit": ["legacy-audit", "brownfield-explorer", "claude-security:scan"],
         "implement": ["superpowers:test-driven-development", "superpowers:systematic-debugging",
                       "claude-api", "frontend-design:frontend-design"],
+        "qa": ["qa-supervisor", "superpowers:verification-before-completion"],
         "test": ["eval-designer", "deploy-verify",
                  "superpowers:verification-before-completion", "langfuse"],
-        "review": ["implementation-review", "code-review:code-review"],
+        "review": ["implementation-review", "code-review:code-review", "mermaid-nesting-dolls",
+                   "minesweeper", "doc-sync"],
     }
     assert {k: list(r.skills) for k, r in roles.items()} == expect
 
@@ -286,8 +288,23 @@ def test_invalid_yaml_rejected(role_dir):
 
 
 def test_string_dir_accepted():
-    assert len(load_roles(str(SHIPPED))) == 7
+    assert len(load_roles(str(SHIPPED))) == 8
 
 
 def test_deterministic():
     assert load_roles() == load_roles()
+
+
+def test_every_shipped_role_declares_sonnet(roles):
+    assert {k: r.model for k, r in roles.items()} == {k: "sonnet" for k in ROLE_IDS}
+
+
+@pytest.mark.parametrize("model", ["opus", "haiku", "fable"])
+def test_non_sonnet_model_rejected_unless_allowed(role_dir, model):
+    _mutate(role_dir, "design", lambda d: d.update(model=model))
+    with pytest.raises(RoleError) as e:
+        load_roles(role_dir)
+    assert (e.value.role, e.value.field) == ("design", "model")
+    assert load_roles(role_dir, allow_models=[model])["design"].model == model
+    with pytest.raises(RoleError):
+        load_roles(role_dir, allow_models=["other"])

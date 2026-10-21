@@ -1,4 +1,4 @@
-"""TB-02 seven role specs and loader: golden and diagnostic cases.
+"""TB-02 eight role specs and loader: golden and diagnostic cases.
 
 Expectations come only from docs/contracts/roles-and-generation.md, docs/contracts/hook-io.md (hook ids),
 docs/prds/TB-02-role-specs.md, section 3 of docs/plans/2026-09-24-agent-capability-map.md and the binding
@@ -15,12 +15,12 @@ import yaml
 
 from evals.agents import lib
 
-ROLES = ["orchestrator", "research", "design", "audit", "implement", "test", "review"]
+ROLES = ["orchestrator", "research", "design", "audit", "implement", "qa", "test", "review"]
 FIELDS = ["id", "description", "model", "core_tools", "disallowed_tools", "skills", "mcp", "spawns",
           "writes", "bash", "blind", "hooks", "max_tools"]
 HOOK_IDS = {"path_guard", "blindness_guard", "secrets_guard", "bash_guard", "stop_gate", "subagent_stop",
             "ledger_audit", "session_start"}
-WRITES = {"none", "app", "research_dir", "design_dirs", "audit_dir", "eval_paths"}
+WRITES = {"none", "app", "research_dir", "design_dirs", "audit_dir", "eval_paths", "qa_paths"}
 REVIEWERS = {"pr-review-toolkit:silent-failure-hunter", "pr-review-toolkit:pr-test-analyzer",
              "feature-dev:code-reviewer"}
 ROLE_DIR = lib.REPO / "factory" / "agents" / "roles"
@@ -80,9 +80,9 @@ def agent_names(tools):
 # ---------------------------------------------------------------- golden
 
 @case("TB02-G-001", "golden")
-def test_g001_exactly_seven_roles():
-    """Behaviour 1: load_roles() returns exactly seven RoleSpecs keyed by the seven role ids."""
-    assert set(roles()) == set(ROLES) and len(roles()) == 7
+def test_g001_exactly_eight_roles():
+    """Behaviour 1: load_roles() returns exactly eight RoleSpecs keyed by the eight role ids (C-40, qa added)."""
+    assert set(roles()) == set(ROLES) and len(roles()) == 8
 
 
 @case("TB02-G-002", "golden", reqs=("R-04", "R-05", "R-08"))
@@ -98,9 +98,9 @@ def test_g002_all_fields_and_max_tools():
 @case("TB02-G-003", "golden", reqs=("R-06",))
 def test_g003_writes_per_role():
     """Behaviour 3: implement writes app; orchestrator and review none; research research_dir; design
-    design_dirs; audit audit_dir; test eval_paths."""
+    design_dirs; audit audit_dir; test eval_paths; qa qa_paths (C-40.2)."""
     expected = {"implement": "app", "orchestrator": "none", "review": "none", "research": "research_dir",
-                "design": "design_dirs", "audit": "audit_dir", "test": "eval_paths"}
+                "design": "design_dirs", "audit": "audit_dir", "test": "eval_paths", "qa": "qa_paths"}
     assert {r: get(s, "writes") for r, s in roles().items()} == expected
 
 
@@ -112,7 +112,7 @@ def test_g004_only_implement_blind():
 
 @case("TB02-G-005", "golden", reqs=("R-07",))
 def test_g005_orchestrator_and_implement_spawns():
-    """Behaviour 4: orchestrator spawns exactly the other six role ids; implement spawns none."""
+    """Behaviour 4: orchestrator spawns exactly the other seven role ids (qa included); implement spawns none."""
     rs = roles()
     assert sorted(get(rs["orchestrator"], "spawns")) == sorted(r for r in ROLES if r != "orchestrator")
     assert list(get(rs["implement"], "spawns")) == []
@@ -144,7 +144,7 @@ def test_g008_rejects_max_tools_over_20(tmp_path):
 
 @case("TB02-D-001", "diagnostic")
 def test_d001_id_matches_key():
-    """Contract: id is one of the seven role ids; the dict is keyed by it."""
+    """Contract: id is one of the eight role ids; the dict is keyed by it."""
     for rid, spec in roles().items():
         assert get(spec, "id") == rid
 
@@ -165,9 +165,9 @@ def test_d003_implement_has_no_agent_tool():
 
 @case("TB02-D-004", "diagnostic", reqs=("R-04",))
 def test_d004_bash_modes():
-    """Behaviour 5: research, audit, design, review readonly; orchestrator, implement, test full."""
+    """Behaviour 5: research, audit, design, review readonly; orchestrator, implement, qa, test full (C-41.3: qa full)."""
     expected = {"research": "readonly", "audit": "readonly", "design": "readonly", "review": "readonly",
-                "orchestrator": "full", "implement": "full", "test": "full"}
+                "orchestrator": "full", "implement": "full", "qa": "full", "test": "full"}
     assert {r: get(s, "bash") for r, s in roles().items()} == expected
 
 
@@ -179,7 +179,7 @@ def test_d005_implement_hooks():
 
 @case("TB02-D-006", "diagnostic", reqs=("R-04", "R-06"))
 def test_d006_path_guard_on_all_roles():
-    """[A-13]: all seven roles list path_guard (the hook decides by role)."""
+    """[A-13]: all eight roles list path_guard (the hook decides by role)."""
     rs = roles()
     for r in ROLES:
         assert "path_guard" in set(get(rs[r], "hooks")), r
@@ -203,11 +203,11 @@ SKILLS = {
     "orchestrator": {"orchestration", "plan-adherence", "session-handoff", "away-mode", "deploy-verify", "one-way-door",
                      "superpowers:dispatching-parallel-agents"},
     "research": {"grounded-research", "deep-research", "brownfield-explorer"},
-    "design": {"prd-designer", "axiomatic-spec", "one-way-door", "superpowers:brainstorming",
+    "design": {"prd-writer", "axiomatic-spec", "one-way-door", "superpowers:brainstorming",
                "superpowers:writing-plans"},
     "audit": {"legacy-audit", "brownfield-explorer", "claude-security:scan"},
     "test": {"eval-designer", "deploy-verify", "superpowers:verification-before-completion", "langfuse"},
-    "review": {"implementation-review", "code-review:code-review"},
+    "review": {"implementation-review", "code-review:code-review", "mermaid-nesting-dolls", "minesweeper", "doc-sync"},
 }
 IMPLEMENT_SKILLS = {"superpowers:test-driven-development", "superpowers:systematic-debugging", "claude-api",
                     "frontend-design:frontend-design"}
@@ -299,7 +299,7 @@ def test_d022_agent_tool_matches_spawn_allowlist():
 
 @case("TB02-D-023", "diagnostic")
 def test_d023_enum_values_valid():
-    """Contract: writes in {none, app, research_dir, design_dirs, audit_dir, eval_paths}; bash in
+    """Contract: writes in {none, app, research_dir, design_dirs, audit_dir, eval_paths, qa_paths}; bash in
     {none, readonly, full}; blind boolean; description and model non-empty strings."""
     for rid, spec in roles().items():
         assert get(spec, "writes") in WRITES, rid
@@ -358,7 +358,7 @@ def test_d031_explicit_dir_equals_default(tmp_path):
 
 @case("TB02-D-032", "diagnostic")
 def test_d032_one_file_per_role():
-    """Contract: role data lives in factory/agents/roles/<role>.yaml, one file per role (seven files)."""
+    """Contract: role data lives in factory/agents/roles/<role>.yaml, one file per role (eight files)."""
     mod()
     assert sorted(f.stem for f in ROLE_DIR.glob("*.yaml")) == sorted(ROLES)
 
@@ -381,6 +381,7 @@ ALLOWED_MCP = {
     "design": set(),
     "audit": set(),
     "implement": set(),
+    "qa": set(),
     "test": {"$deploy", "playwright"},
     "review": {"$git_host", "$deploy"},
 }
@@ -425,3 +426,34 @@ def test_d037_role_file_is_field_mapping():
     for r in ROLES:
         data = yaml.safe_load((ROLE_DIR / f"{r}.yaml").read_text())
         assert isinstance(data, dict) and set(data) == set(FIELDS), r
+
+
+# ---------------------------------------------------------------- added for the eight-role amendment (C-40, C-41, ADR-0005)
+
+@case("TB02-D-038", "diagnostic")
+def test_d038_qa_skills():
+    """C-40 / PRD A-02: qa's skills are exactly qa-supervisor and superpowers:verification-before-completion."""
+    skills = [str(x) for x in get(roles()["qa"], "skills")]
+    assert set(skills) == {"qa-supervisor", "superpowers:verification-before-completion"} and len(skills) == 2
+
+
+@case("TB02-D-039", "diagnostic")
+def test_d039_every_role_file_declares_sonnet():
+    """C-40.1 (replaces the earlier Opus declarations): each shipped role file declares model sonnet and loads
+    without any allowed model."""
+    for rid, spec in roles().items():
+        assert get(spec, "model") == "sonnet", rid
+        assert yaml.safe_load((ROLE_DIR / f"{rid}.yaml").read_text())["model"] == "sonnet", rid
+
+
+@pytest.mark.parametrize("model", [
+    pytest.param(x, marks=case(f"TB02-D-{40 + i:03d}", "diagnostic"), id=x) for i, x in enumerate(["opus", "haiku", "fable"])])
+def test_d040_rejects_non_sonnet_model(tmp_path, model):
+    """C-40.1: a role declaring any model other than sonnet is rejected with an error naming role and field model,
+    and the same file loads when that model is allowed (via allow_models)."""
+    m = mod()
+    e = rejects(tmp_path, "design", lambda d: d.__setitem__("model", model))
+    assert (e.role, e.field) == ("design", "model")
+    (tmp_path / "ok").mkdir()
+    d = role_copy(tmp_path / "ok", "design", lambda x: x.__setitem__("model", model))
+    assert get(m.load_roles(d, allow_models=[model])["design"], "model") == model

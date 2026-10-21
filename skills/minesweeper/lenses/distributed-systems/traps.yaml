@@ -1,0 +1,247 @@
+schema_version: 1
+traps:
+  - id: distributed-systems.cft-in-byzantine-setting
+    aliases: [DIST-01]
+    title: Crash-fault-tolerant consensus (Raft, Paxos, ZAB) used among nodes that may lie
+    kind: requirement
+    cues:
+      - "run a 3-node raft cluster across customer-owned gateways"
+      - "reach consensus even if one device is compromised and reports false readings"
+      - "use paxos/zookeeper/etcd so field devices agree on state"
+      - "majority vote among untrusted edge nodes decides the value"
+      - "tolerate a hacked node with three replicas"
+    principle: >-
+      Raft and Paxos tolerate only non-Byzantine (crash) faults: n >= 2f+1 replicas with majority
+      quorums. A node that sends inconsistent information to different peers defeats any three-processor
+      algorithm; tolerating f arbitrary (Byzantine) faults in an asynchronous system needs at least
+      3f+1 replicas with quorums of 2f+1, authenticated messages, and failures that are independent
+      (diverse implementations, separate administration).
+    sources: [lamport-pubs, pbft-osdi99, pbft-osdi99-model, raft-site]
+    severity:
+      default: critical
+      blast_radius: >-
+        One compromised or faulty node can win leadership or feed forged entries into the replicated log,
+        and every honest replica applies them; in cyber-physical deployments the forged state drives
+        actuators.
+    remediation:
+      safe_route: >-
+        State the fault model first. If any participant can be compromised, use a BFT protocol sized
+        with calc.bft_quorum(f) (n >= 3f+1, quorum 2f+1) over signed or MAC-authenticated messages, with
+        diverse implementations, and keep physical safety interlocks local to actuators. If all
+        participants are inside one trust domain, CFT with n >= 2f+1 is correct and the brief must say so.
+      invariant: >-
+        The number of replicas n and the declared Byzantine fault budget f satisfy n >= 3f+1, and no
+        replicated state transition is accepted without 2f+1 authenticated votes; a CFT protocol is used
+        only where every replica is in the operator's trust domain.
+      spec_section: trust-consensus
+    checks: [calc.bft_quorum, calc.bft_tolerates, calc.cft_quorum]
+    status: verified
+    verified_on: '2026-10-14'
+    notes: >-
+      Report nuance corrected: 3f+1 is the bound for asynchronous systems and for oral (unsigned)
+      messages; Pease, Shostak and Lamport show 2f+1 suffices with unforgeable signatures under
+      synchrony. PBFT-class protocols over the Internet need 3f+1 regardless. The report's physical
+      attack examples (voltage glitching, firmware) are illustrative, not sourced.
+  - id: distributed-systems.unauthenticated-relay
+    aliases: []
+    title: Votes or readings forwarded through untrusted relays without end-to-end authentication
+    kind: requirement
+    cues:
+      - "devices relay each other's readings to the coordinator"
+      - "messages are forwarded by partner gateways as-is"
+      - "trust the sender id in the payload"
+      - "any node can join the cluster by announcing itself"
+      - "relays aggregate votes before forwarding"
+    principle: >-
+      Byzantine agreement bounds assume each message's origin can be established. Without signatures or
+      MACs, a relay can forge, alter or replay other nodes' messages, and with open membership one
+      attacker can present many identities, so the f-of-n bound is meaningless. With unforgeable
+      signatures fewer replicas suffice; without them the oral-message bound applies.
+    sources: [lamport-pubs, pbft-osdi99-model]
+    severity:
+      default: high
+      blast_radius: >-
+        A single relay can impersonate honest nodes, forge quorums and replay stale commands, defeating
+        whatever consensus protocol sits above it.
+    remediation:
+      safe_route: >-
+        Authenticate end to end: each originator signs (or MACs with pairwise keys) its message including
+        a sequence number or nonce; relays only forward. Admit members through an explicit, authenticated
+        membership list rather than self-announcement.
+      invariant: >-
+        Every vote or reading accepted by the protocol carries a verifiable signature or MAC from its
+        originator over (sender, sequence, payload), and membership changes are themselves authenticated.
+      spec_section: trust-consensus
+    checks: [calc.bft_tolerates]
+    status: verified
+    verified_on: '2026-10-14'
+  - id: distributed-systems.two-generals-simultaneous-action
+    aliases: [DIST-06]
+    title: Two parties must act simultaneously only once both are certain the other agreed, over a lossy link
+    kind: requirement
+    cues:
+      - "both sites switch at exactly the same moment once each has confirmed the other got the ack"
+      - "neither side proceeds until it is 100% certain the other side will proceed"
+      - "guaranteed coordinated cutover over cellular or radio"
+      - "ack the ack so both are sure"
+      - "simultaneous actuation at two remote locations"
+    principle: >-
+      When messengers may never arrive, no finite exchange of acknowledgements makes the agreement
+      common knowledge; in practical systems common knowledge cannot be attained. A requirement for
+      certain, simultaneous joint action over a lossy channel cannot be met by adding more acks.
+    sources: [lamport-pubs, halpern-moses]
+    severity:
+      default: medium
+      blast_radius: >-
+        The protocol either waits forever for the last ack (livelock) or one side acts while the other
+        does not; with physical actuation, the two ends are left in conflicting states.
+    remediation:
+      safe_route: >-
+        Replace certainty with a pre-agreed plan: scheduled switch time with a dual-listen or overlap
+        window, time-bounded leases, a defined fallback state each side enters on timeout, and idempotent
+        retries.
+      invariant: >-
+        Each side's behaviour after any message loss is defined and safe on its own; correctness never
+        depends on receiving the final acknowledgement.
+      spec_section: trust-consensus
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'
+  - id: distributed-systems.lock-without-fencing-token
+    aliases: [DIST-03]
+    title: Lease or lock with timeout used for mutual exclusion without a fencing token checked at the resource
+    kind: requirement
+    cues:
+      - "take a lock with a 5-second expiry before debiting the account"
+      - "acquire a redis lock (setnx) so only one worker writes"
+      - "the lock guarantees no two workers process the same item"
+      - "leader holds a lease and writes directly to storage"
+      - "lock ttl prevents double processing"
+    principle: >-
+      A process holding a lock may issue a request and then stall or fail; another process acquires the
+      lock, and the delayed request can later arrive and be acted on without the lock's protection. The
+      lock service alone cannot prevent this; the protected resource must check a sequencer (lock
+      generation number, fencing token) and reject requests carrying a stale one.
+    sources: [chubby-osdi06]
+    severity:
+      default: high
+      blast_radius: >-
+        After a pause (GC, scheduling, network delay) two holders write concurrently; double debits,
+        lost updates or conflicting actuator commands follow, silently.
+    remediation:
+      safe_route: >-
+        Have the lock service issue a monotonically increasing token with each grant; pass it with every
+        protected write; the storage or actuator rejects any token lower than the highest it has seen
+        (a conditional write or compare-and-set).
+      invariant: >-
+        The protected resource accepts a write only if its fencing token is >= the highest token it has
+        previously accepted, checked atomically with the write.
+      spec_section: trust-consensus
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'
+    notes: >-
+      The report attributes the fencing-token idea to a blog critique of one lock library; the decisive
+      primary statement is the Chubby sequencer (Burrows 2006).
+  - id: distributed-systems.wall-clock-ordering
+    aliases: [DIST-04]
+    title: Concurrent updates ordered or resolved by physical wall-clock timestamps (last-write-wins)
+    kind: requirement
+    cues:
+      - "resolve conflicting edits by keeping the one with the latest timestamp"
+      - "use the device's utc time to decide which update wins"
+      - "order events across servers by their system clock"
+      - "last write wins based on client time"
+      - "process the messages in timestamp order regardless of arrival order"
+    principle: >-
+      Events in a distributed system are only partially ordered: one event precedes another iff it can
+      causally affect it. Physical timestamps from different clocks do not capture that order, so
+      wall-clock last-write-wins discards causally later or concurrent updates whenever clocks disagree,
+      and a client can set its clock to win.
+    sources: [lamport-pubs]
+    severity:
+      default: high
+      blast_radius: >-
+        Valid updates from nodes with lagging clocks are silently overwritten; the loss is invisible to
+        users and to monitoring.
+    remediation:
+      safe_route: >-
+        Use logical ordering: server-assigned sequence numbers on a single log, version vectors that
+        surface true concurrency for a domain merge, CRDTs, or hybrid logical clocks with deterministic
+        tie-breaks, and never trust client clocks for ordering.
+      invariant: >-
+        No update is discarded because of a timestamp comparison alone; concurrent updates are either
+        merged by a defined rule or surfaced as a conflict.
+      spec_section: trust-consensus
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'
+    notes: >-
+      Report claims of clock drift of 10 to 100 ppm and skew of tens of milliseconds are unconfirmed
+      here; magnitudes must be measured for the deployment, not quoted.
+  - id: distributed-systems.consensus-guaranteed-termination
+    aliases: []
+    title: Deterministic consensus guaranteed to always decide despite a faulty node on an asynchronous network
+    kind: requirement
+    cues:
+      - "nodes always reach agreement within the deadline even if one node crashes"
+      - "consensus must never stall"
+      - "guaranteed progress with no timing assumptions"
+      - "the cluster must always commit, whatever the network does"
+    principle: >-
+      In a fully asynchronous system no deterministic consensus protocol can guarantee termination if
+      even one process may crash (Fischer, Lynch, Paterson 1985). Practical protocols keep safety always
+      and obtain liveness only under a synchrony assumption (bounded delays, eventually) or with
+      randomisation.
+    sources: [flp-1985, pbft-osdi99]
+    severity:
+      default: medium
+      blast_radius: >-
+        A spec that promises unconditional progress cannot be tested to pass; implementations either
+        weaken safety to meet it or stall under partitions while the spec says they never do.
+    remediation:
+      safe_route: >-
+        Promise safety unconditionally and liveness under a stated timing assumption; define behaviour
+        (read-only mode, queueing, alerting) while no quorum can be formed.
+      invariant: >-
+        Agreement and validity hold under all message delays; termination is required only while the
+        stated synchrony and quorum conditions hold.
+      spec_section: trust-consensus
+    checks: [calc.cft_quorum]
+    status: unverified
+    notes: >-
+      The original FLP paper could not be fetched as text (ACM 403/404, author copy PDF only, no
+      Crossref abstract). The PBFT quote states the result while citing FLP, but it is not the original,
+      so the trap stays unverified until an HTML or text copy of FLP is quoted.
+  - id: distributed-systems.exactly-once-delivery
+    aliases: []
+    title: Exactly-once delivery promised end to end without idempotency or destination cooperation
+    kind: requirement
+    cues:
+      - "the queue guarantees each message is delivered exactly once"
+      - "we will never process a payment event twice because the broker is exactly-once"
+      - "retry on failure until delivered, with no duplicates"
+      - "exactly-once webhook delivery to partner systems"
+      - "enable exactly-once in the broker so consumers need no dedup"
+    principle: >-
+      Over a channel that can lose acknowledgements, a sender that retries delivers at least once and a
+      sender that does not delivers at most once. Broker-level exactly-once covers only reads and writes
+      within that broker; exactly-once effects on any other destination require the destination's
+      cooperation, such as idempotent writes keyed by a stable id or a transactional offset store.
+    sources: [kafka-semantics]
+    severity:
+      default: high
+      blast_radius: >-
+        Duplicated side effects (double charges, duplicate notifications, repeated actuations) on every
+        retry after a timeout or consumer restart.
+    remediation:
+      safe_route: >-
+        Specify at-least-once delivery with an idempotency key per logical operation, a dedup store or
+        conditional write at the consumer, and a stated retry and expiry policy.
+      invariant: >-
+        Applying the same message (same idempotency key) any number of times has the same effect as
+        applying it once.
+      spec_section: trust-consensus
+    checks: []
+    status: verified
+    verified_on: '2026-10-14'

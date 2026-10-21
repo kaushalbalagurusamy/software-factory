@@ -1,0 +1,13 @@
+schema_version: 1
+id: ml-evaluation-states-calibration-target
+kind: clean
+twin: ml-evaluation-omits-calibration-target
+brief: |
+  Product brief: loan default scoring for a small business lender.
+  About 4% of loans default within a year; the model must beat the existing scorecard.
+  Evaluation: train on loans issued before a cutoff date, test on loans issued after, grouped by borrower.
+  Requirement 1: the score is calibrated with isotonic regression on a held-out calibration period and must show expected calibration error below 0.01 on the test period; only then is it shown to underwriters as the probability of default and used to set the interest margin.
+  Requirement 2: underwriters can override the score with a written reason.
+  Success: lower losses at the same approval rate.
+expect:
+  none_from_lens: true

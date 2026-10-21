@@ -1,0 +1,15 @@
+schema_version: 1
+id: accessibility-colour-only-clean
+kind: clean
+twin: accessibility-colour-only-planted
+brief: |
+  Acme Billing: invoice dashboard for a small-business accounting tool
+  Users: bookkeepers.
+  1. A table lists invoices; each row shows its payment state as a text label plus an icon,
+     with colour used only to reinforce it.
+  2. Targets WCAG 2.2 Level AA and tests with a screen reader each release.
+  3. All controls are keyboard operable and no action requires a drag.
+  4. Export the table to CSV.
+  5. Load the first page in under 400 ms.
+expect:
+  none_from_lens: true

@@ -1,0 +1,13 @@
+schema_version: 1
+id: cryptography-omits-protection-lifetime
+kind: omission
+twin: cryptography-omits-protection-lifetime-clean
+brief: |
+  A genomics startup encrypts customer DNA files before storing them in the cloud.
+  - Files are encrypted with AES-256-GCM via the cloud provider's encryption SDK.
+  - Each file gets its own data key from the key service; nonces come from the SDK, one per key.
+  - Data keys are wrapped with a master key using the provider's default key-wrapping (RSA-OAEP).
+  - Customers can download and delete their files at any time.
+expect:
+  omissions:
+  - cryptography.protection-lifetime

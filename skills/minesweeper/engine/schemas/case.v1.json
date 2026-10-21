@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "minesweeper/case.v1.json",
+  "title": "Evaluation case (lenses/<id>/cases/*.yaml and integration/*.yaml)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "kind", "brief", "expect"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "kind": {"enum": ["planted", "clean", "omission", "integration"]},
+    "twin": {"type": "string", "description": "Planted and omission cases name their clean twin; a clean case names the case it twins."},
+    "brief": {"type": "string", "minLength": 40},
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "traps": {"type": "array", "items": {"type": "string"}},
+        "omissions": {"type": "array", "items": {"type": "string"}, "description": "<lens-id>.<required-statement-id>"},
+        "min_severity": {"enum": ["critical", "high", "medium", "low"]},
+        "none_from_lens": {"type": "boolean", "description": "Clean twin: the lens under test must raise nothing that survives grounding."}
+      }
+    },
+    "notes": {"type": "string"}
+  }
+}

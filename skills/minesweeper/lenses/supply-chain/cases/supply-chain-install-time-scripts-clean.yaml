@@ -1,0 +1,14 @@
+schema_version: 1
+id: supply-chain-install-time-scripts-clean
+kind: clean
+twin: supply-chain-install-time-scripts-planted
+brief: |
+  Build pipeline for a small payments-reporting service run by a finance team.
+  - Node.js 20 service; tests run on every pull request.
+  - Dependencies are installed with lifecycle scripts disabled in a job that holds no secrets; a separate
+    publish job with the deploy keys only receives the built image.
+  - Docker images are built once per release and promoted between environments by digest.
+  - Lockfiles are committed and installs use npm ci.
+  - Build logs are kept for 90 days.
+expect:
+  none_from_lens: true

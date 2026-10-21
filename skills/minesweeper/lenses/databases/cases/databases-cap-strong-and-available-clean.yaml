@@ -1,0 +1,14 @@
+schema_version: 1
+id: databases-cap-strong-and-available-clean
+kind: clean
+twin: databases-cap-strong-and-available-planted
+brief: |
+  Project: account wallet for a travel-booking platform with customers in North America, Europe and Asia.
+  - Customers hold a stored-value balance used at checkout.
+  - Each customer's balance has a home region with a synchronous three-replica quorum there; writes from other regions are forwarded and take one cross-region round trip, and if the home region is unreachable, balance writes are rejected while other regions serve reads marked with their staleness.
+  - Balance changes are written by the checkout and refund services as SERIALIZABLE transactions retried on conflict.
+  - Each balance change writes an outbox row in the same transaction; the statement service consumes it by event id.
+  - Monthly statements are generated per customer.
+  - Support agents can view balance history.
+expect:
+  none_from_lens: true

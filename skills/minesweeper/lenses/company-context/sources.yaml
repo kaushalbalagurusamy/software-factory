@@ -1,0 +1,55 @@
+schema_version: 1
+sources:
+  - id: ftc-act-s5
+    title: 15 U.S.C. 45 - Unfair methods of competition unlawful; prevention by Commission (FTC Act Section 5)
+    url: https://www.govinfo.gov/content/pkg/USCODE-2023-title15/html/USCODE-2023-title15-chap2-subchapI-sec45.htm
+    adapter: web_page
+    tier: primary
+    kind: statute
+    notes: >-
+      uscode.house.gov returned "Page Not Found" for the granule URL on 2026-10-14 (site in a temporary
+      format); govinfo.gov carries the same official Code text. US federal law only; other jurisdictions
+      are ask-owner.
+    quotes:
+      - text: >-
+          Unfair methods of competition in or affecting commerce, and unfair or deceptive acts or
+          practices in or affecting commerce, are hereby declared unlawful.
+        locator: 15 U.S.C. 45(a)(1)
+        fetched: '2026-10-14'
+        supports: [company-context.contradicts-published-policy, company-context.assumed-data-rights]
+      - text: >-
+          The Commission is hereby empowered and directed to prevent persons, partnerships, or
+          corporations, except banks, savings and loan institutions described in section 57a(f)(3) of
+          this title, Federal credit unions described in section 57a(f)(4) of this title, common
+          carriers subject to the Acts to regulate commerce, air carriers and foreign air carriers
+          subject to part A of subtitle VII of title 49
+        locator: 15 U.S.C. 45(a)(2)
+        fetched: '2026-10-14'
+        supports: [company-context.ignores-sector-regulator]
+  - id: ftc-terms-change-guidance
+    title: FTC Technology Blog - AI (and other) companies quietly changing your terms of service could be unfair or deceptive
+    url: https://www.ftc.gov/policy/advocacy-research/tech-at-ftc/2024/02/ai-other-companies-quietly-changing-your-terms-service-could-be-unfair-or-deceptive
+    adapter: web_page
+    tier: secondary
+    kind: guidance
+    notes: Agency staff guidance, not the rule itself; the rule is 15 U.S.C. 45.
+    quotes:
+      - text: >-
+          A business that collects user data based on one set of privacy commitments cannot then
+          unilaterally renege on those commitments after collecting users' data.
+        locator: paragraph beginning "Even though the technological landscape has changed"
+        fetched: '2026-10-14'
+        supports: [company-context.assumed-data-rights]
+  - id: manheim-garrabrant-goodhart
+    title: Manheim and Garrabrant (2018), Categorizing Variants of Goodhart's Law, arXiv:1803.04585
+    url: https://arxiv.org/abs/1803.04585
+    adapter: web_page
+    tier: primary
+    kind: paper
+    quotes:
+      - text: >-
+          This occurs when a metric which can be used to improve a system is used to an extent that
+          further optimization is ineffective or harmful, and is sometimes termed Goodhart's Law.
+        locator: Abstract
+        fetched: '2026-10-14'
+        supports: [company-context.metric-serves-evaluator]

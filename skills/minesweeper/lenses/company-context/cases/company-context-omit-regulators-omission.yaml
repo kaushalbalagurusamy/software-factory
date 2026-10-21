@@ -1,0 +1,14 @@
+schema_version: 1
+id: company-context-omit-regulators-omission
+kind: omission
+twin: company-context-omit-regulators-clean
+brief: |
+  A regional airline wants a rebooking assistant on its website. Travellers whose flights are
+  cancelled use it; the airline pays for it as part of its customer-service budget.
+  Requirements:
+  - Offer the next three alternative flights and rebook in one tap.
+  - Explain any fare difference before the traveller confirms.
+  - Handle 2,000 rebookings an hour during disruption days.
+  Success: average time to rebook falls below five minutes.
+expect:
+  omissions: [company-context.governing-regulators]

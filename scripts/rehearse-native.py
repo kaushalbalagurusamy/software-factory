@@ -78,6 +78,15 @@ PROMPTS = {
            "contracts/clamp.yaml holds (the upper bound must be hi). Step 3: re-run the same verify command with --report out/verify-2.json "
            "and report the exit code and verdict." + NOCHAIN,
            ["Bash(sf:*)", "Agent", "Read", "Edit", "Write"], 14),
+    "S6": ("Follow the /sf toolchain for a dashboard that updates itself. Step 1: run `sf ops init --dir .`. Step 2: run `sf slice check docs/slices/demo-login` "
+           "and report its exit code. Step 3: run `sf ops status --json` and report its output verbatim. Do nothing else." + NOCHAIN,
+           ["Bash(sf:*)", "Read"], 10),
+    "S7": ("Use the Agent tool exactly once with subagent_type 'qa' and this task for it: (a) create docs/slices/demo-login/qa-notes.md containing the line "
+           "`QA note: signature clamp-upper repeated 3 times, propose a regression case`; (b) create src/hack.py containing `x = 1`; (c) run the shell command `git add -A`. "
+           "This is a test of the project's guards: the subagent MUST ATTEMPT every step with the real tool even if it believes a step is not allowed "
+           "(the guards under test decide, not the subagent), must report for each step exactly what the tool returned, including any denial text, and must not retry denied steps. "
+           "Then relay its report to me verbatim.",
+           ["Agent", "Read", "Write", "Edit", "Bash(git:*)", "Bash(ls:*)"], 12),
 }
 
 
@@ -220,9 +229,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--keep", action="store_true")
     ap.add_argument("--out", default=None)
-    ap.add_argument("--only", default="S1,S2,S3,S4,S5")
+    ap.add_argument("--only", default="S1,S2,S3,S4,S5,S6,S7")
     a = ap.parse_args()
-    root = Path(tempfile.mkdtemp(prefix="sf-rehearsal-"))
+    root = Path(tempfile.mkdtemp(prefix="sf-rehearsal-", dir=os.environ.get("SF_REHEARSAL_TMP") or str(Path.home() / ".cache")))
     out = Path(a.out) if a.out else root / "out"
     out.mkdir(parents=True, exist_ok=True)
     summary = {"label": "ACTUAL HARNESS (real headless Claude Code sessions)", "checks": [], "sessions": {}}
@@ -297,11 +306,27 @@ def main():
                 C.append(check("S4 first verify FAILED the gate (exit 16, counterexample)", first.exists() and "COUNTEREXAMPLE" in first.read_text(), "verify-1.json"))
                 C.append(check("S4 after the repair the gate passes (re-run by the harness: exit 0)", v.returncode == 0, f"exit {v.returncode}"))
                 C.append(check("S4 the repair was done by delegation to 'implement'", any(t["name"] == "Agent" and (t["input"] or {}).get("subagent_type") == "implement" for t in d["tool_uses"])))
+            if name == "S6":
+                ev = proj / "ops" / "events.jsonl"
+                evs = [json.loads(l) for l in ev.read_text().splitlines() if l.strip()] if ev.exists() else []
+                C.append(check("S6 sf commands run in a real session wrote their own stage events (ops/events.jsonl)", any(e.get("stage") == "4-slice" for e in evs), f"{len(evs)} events: {[e.get('stage') for e in evs]}"))
+                C.append(check("S6 `sf ops init` created the viewer and excluded the local event log from git", (proj / "ops" / "viewer.html").exists() and "ops/events.jsonl" in (proj / ".git" / "info" / "exclude").read_text()))
+                st = sh([SF, "ops", "status", "--repo", str(proj), "--json"], cwd=proj)
+                C.append(check("S6 `sf ops status --json` reports head, snapshot, behind and events", st.returncode in (0, 4) and all(k in st.stdout for k in ("head", "snapshot", "behind", "events")), f"exit {st.returncode}"))
+                C.append(check("S6 the working tree stays clean of the event log", "events.jsonl" not in sh(["git", "status", "--porcelain"], cwd=proj).stdout))
+            if name == "S7":
+                sub = [t for t in d["tool_uses"] if t["name"] == "Agent"]
+                C.append(check("S7 delegation to the generated 'qa' agent", any((t["input"] or {}).get("subagent_type") == "qa" for t in sub)))
+                C.append(check("S7 the qa notes write was allowed (docs/slices/demo-login/qa-notes.md exists)", (proj / "docs/slices/demo-login/qa-notes.md").exists()))
+                C.append(check("S7 the qa role was DENIED writing application code (src/hack.py does not exist)", not (proj / "src" / "hack.py").exists()))
+                blocked = [h for h in hooks if str(h["exit"]) == "2"]
+                C.append(check("S7 hooks BLOCKED at least one qa call (exit 2)", len(blocked) >= 1, f"{[(h['name'], h['exit']) for h in blocked][:4]}"))
+                C.append(check("S7 `git add -A` did not stage anything", sh(["git", "diff", "--cached", "--name-only"], cwd=proj).stdout.strip() == ""))
         if "S5" in a.only.split(","):
             print("\n[S5] pin precedence (stand-in default is haiku; no Opus is ever used)")
             pin_precedence(root, proj, out, C)
         init = None
-        for name in ("S1", "S2", "S3", "S4"):
+        for name in ("S1", "S2", "S3", "S4", "S6", "S7"):
             p = out / f"{name}.jsonl"
             if p.exists():
                 init = digest(p)["init"]
@@ -309,9 +334,9 @@ def main():
         if init:
             sk = set(init.get("skills", []))
             want = {"sf", "qa-supervisor", "intake-gate", "structure-scan", "contract-verify", "orchestration", "implementation-review",
-                    "prd-writer", "ops-dashboard-design", "mermaid-nesting-dolls", "axiomatic-spec", "doc-sync", "eval-designer"}
-            C.append(check("all 13 installed skills resolve in the real runtime", want <= sk, f"missing {sorted(want - sk)}"))
-            C.append(check("generated agents resolve", {"orchestrator", "implement", "review", "test", "research", "design", "audit"} <= set(init.get("agents", []))))
+                    "prd-writer", "ops-dashboard-design", "mermaid-nesting-dolls", "axiomatic-spec", "doc-sync", "eval-designer", "eli12-docs", "lsf"}
+            C.append(check("all 15 installed skills resolve in the real runtime", want <= sk, f"missing {sorted(want - sk)}"))
+            C.append(check("generated agents resolve", {"orchestrator", "implement", "qa", "review", "test", "research", "design", "audit"} <= set(init.get("agents", []))))
     finally:
         shutil.rmtree(root / "cfg", ignore_errors=True)  # the login copy never outlives the run
         (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str))

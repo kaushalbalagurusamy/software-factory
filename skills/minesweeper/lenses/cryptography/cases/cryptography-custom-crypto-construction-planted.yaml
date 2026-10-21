@@ -1,0 +1,15 @@
+schema_version: 1
+id: cryptography-custom-crypto-construction-planted
+kind: planted
+twin: cryptography-custom-crypto-construction-clean
+brief: |
+  A field-survey app stores responses on tablets until they sync.
+  - Responses include names and home addresses.
+  - To avoid a heavy library, encrypt each response by XORing it with a SHA-256 stream derived from the
+    device key, and append a hash of the plaintext so tampering can be spotted.
+  - Sync happens over HTTPS when a connection is available.
+  - Tablets are enrolled in device management and can be wiped remotely.
+expect:
+  traps:
+  - cryptography.custom-crypto-construction
+  min_severity: high

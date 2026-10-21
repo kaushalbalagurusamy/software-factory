@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "minesweeper/traps.v1.json",
+  "title": "Trap catalogue (lenses/<id>/traps.yaml)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "traps"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "traps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "kind", "cues", "principle", "sources", "severity", "remediation", "status"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z0-9][a-z0-9-]*$"},
+          "aliases": {"type": "array", "items": {"type": "string"}},
+          "title": {"type": "string", "minLength": 5},
+          "kind": {"enum": ["requirement", "dependency", "metric", "rubric", "omission"]},
+          "cues": {"type": "array", "items": {"type": "string", "minLength": 2}, "minItems": 1},
+          "principle": {"type": "string", "minLength": 10},
+          "sources": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "severity": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["default", "blast_radius"],
+            "properties": {
+              "default": {"enum": ["critical", "high", "medium", "low"]},
+              "blast_radius": {"type": "string", "minLength": 5}
+            }
+          },
+          "remediation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["safe_route", "invariant", "spec_section"],
+            "properties": {
+              "safe_route": {"type": "string", "minLength": 10},
+              "invariant": {"type": "string", "minLength": 10},
+              "spec_section": {"enum": ["trust-consensus", "crypto-agent-security", "capacity-physics", "verification-calibration", "legal-terms", "product-scope"]}
+            }
+          },
+          "checks": {"type": "array", "items": {"type": "string", "pattern": "^[a-z]+\\.[a-z_]+$"}},
+          "status": {"enum": ["unverified", "verified"]},
+          "verified_on": {"type": "string", "format": "date"},
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

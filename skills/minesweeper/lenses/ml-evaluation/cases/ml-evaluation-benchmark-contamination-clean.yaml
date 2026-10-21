@@ -1,0 +1,14 @@
+schema_version: 1
+id: ml-evaluation-benchmark-contamination-clean
+kind: clean
+twin: ml-evaluation-benchmark-contamination-planted
+brief: |
+  Product brief: choosing a language model to answer staff questions about internal tax-filing procedures.
+  About a third of staff questions concern rare procedures; the model must beat keyword search on those.
+  Answers are graded right or wrong by two reviewers; no scores are shown as probabilities.
+  Requirement 1: pick the candidate model by its accuracy on 300 new questions written by the procedures team this month from internal documents, never published, held out from any fine-tuning, with the split by question date.
+  Requirement 2: the chosen model answers in the staff chat tool with links to the source procedure.
+  Requirement 3: staff can flag wrong answers.
+  Success: fewer escalations to the procedures team.
+expect:
+  none_from_lens: true

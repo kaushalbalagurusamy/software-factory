@@ -1,0 +1,16 @@
+schema_version: 1
+id: security-ethics-scanning-clean
+kind: clean
+twin: security-ethics-scanning-planted
+brief: |
+  Northwind Watch: an exposure monitor for a company's own assets
+  Users: a small IT team.
+  1. The team registers the domains and IP ranges they operate; the tool checks them daily.
+  2. Active checks run only against domains whose owner has proven control with a verification token and agreed a written scope; the scope never expands on its own. Hosts that are not in the verified, owner-authorised scope are never probed, and
+     discovered systems are not added automatically.
+  3. Findings about systems the operator does not own are reported privately to that owner and are not published until a fix or an agreed date.
+  4. If a check encounters personal or confidential data it stops, keeps nothing, and notifies the owner.
+  5. A dashboard lists open issues for the registered assets with a severity each.
+  6. Daily email summary to the team.
+expect:
+  none_from_lens: true
