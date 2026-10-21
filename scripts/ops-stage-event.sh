@@ -9,8 +9,10 @@ if [ "$#" -lt 3 ]; then
 fi
 root="$(git rev-parse --show-toplevel)"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# the factory venv has the dependencies (yaml); the system python3 may not
+py="$here/.venv/bin/python"; [ -x "$py" ] || py=python3
 # -I: no current directory, PYTHONPATH or user site on sys.path, so an untrusted cwd cannot shadow `factory`.
-python3 -I -c '
+"$py" -I -c '
 import sys
 sys.path.insert(0, sys.argv[1])
 from factory.ops.events import emit
