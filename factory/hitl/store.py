@@ -90,6 +90,7 @@ def _read_log(d: Path) -> list[dict]:
 
 def _open_from(entries: list[dict]) -> dict[str, dict]:
     open_: dict[str, dict] = {}
+    released: set[str] = set()
     for e in entries:
         if e.get("event") == "request" and e.get("name") not in open_:
             open_[e["name"]] = e
@@ -98,6 +99,13 @@ def _open_from(entries: list[dict]) -> dict[str, dict]:
                 _check_actor(e.get("by", ""))
             except ReleaseRefused as exc:
                 raise StopLedgerError(f"log line {e['seq']}: release by non-human: {exc}") from None
+            del open_[e["name"]]
+            released.add(e["name"])
+        elif e.get("event") == "supersede" and e.get("name") in open_ and e.get("by_stop") in released:
+            try:
+                _check_actor(e.get("by", ""))
+            except ReleaseRefused as exc:
+                raise StopLedgerError(f"log line {e['seq']}: supersede by non-human: {exc}") from None
             del open_[e["name"]]
         else:
             raise StopLedgerError(f"log line {e.get('seq')}: unexpected {e.get('event')!r} for {e.get('name')!r}")
@@ -190,6 +198,23 @@ def release(root, name: str, by: str, tty_probe=None) -> None:
         if name not in _verified_open(root):
             raise StopUsageError(f"no open stop named {name!r}")
         _append(d, {"event": "release", "name": name, "by": by, "at": _now()})
+        (d / f"{name}.json").unlink()
+
+
+def supersede(root, name: str, by_stop: str, by: str, note: str = "", tty_probe=None) -> None:
+    """Retire open stop ``name`` because a later stop ``by_stop`` over the same ground was already
+    released. Same gate as :func:`release` (human, interactive terminal); appends a chained record."""
+    if not (tty_probe or interactive_terminal)():
+        raise ReleaseRefused("a human stop is superseded by a person at a terminal "
+                             "(stdin and stdout must be interactive TTYs; there is no bypass flag)")
+    _check_actor(by)
+    d = stops_dir(root)
+    with _Lock(d):
+        if name not in _verified_open(root):
+            raise StopUsageError(f"no open stop named {name!r}")
+        if not any(e.get("event") == "release" and e.get("name") == by_stop for e in _read_log(d)):
+            raise StopUsageError(f"{by_stop!r} has not been released; supersede needs a released stop")
+        _append(d, {"event": "supersede", "name": name, "by_stop": by_stop, "by": by, "note": note, "at": _now()})
         (d / f"{name}.json").unlink()
 
 

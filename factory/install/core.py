@@ -53,7 +53,7 @@ paths:
 # (a declaration `--by human:<ref>` alone would let an agent type it).
 one_way_door_patterns:
   - 'factory\\.cli\\s+hitl'
-  - '\\bsf\\s+hitl\\b.*\\brelease'
+  - '\\bsf\\s+hitl\\b.*\\b(release|supersede)'
   - 'factory\\.hitl'
   - '\\.factory/stops'
 """
