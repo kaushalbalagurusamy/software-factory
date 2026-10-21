@@ -538,3 +538,11 @@ def test_doctor_warns_on_changed_external_pin_and_fails_on_missing(proj, env, ca
     capsys.readouterr()
     assert doc(proj, env) == 1
     assert "FAIL external good-night" in "\n".join(lines(capsys))
+
+
+def test_bash_guard_denies_sf_hitl_supersede_even_with_an_old_profile_pattern():
+    from factory.hooks import bash_guard
+    import re
+    assert re.search(bash_guard.BUILTIN_HITL_GUARD, "sf hitl supersede --name a --by-stop b --by human:x")
+    assert re.search(bash_guard.BUILTIN_HITL_GUARD, "sf hitl release --name a --by human:x")
+    assert not re.search(bash_guard.BUILTIN_HITL_GUARD, "sf hitl status --root .")

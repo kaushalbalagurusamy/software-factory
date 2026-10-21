@@ -911,11 +911,15 @@ def _message_free(words: list[str]) -> list[str]:
     return keep
 
 
+BUILTIN_HITL_GUARD = r"\bsf\s+hitl\b.*\b(release|supersede)"
+
+
 def _analyse(cmds: list[Cmd], cfg: HookConfig, depth: int = 0) -> list[Finding]:
     if depth > MAX_DEPTH:
         raise ParseError("command nesting is too deep")
     findings: list[Finding] = []
-    patterns = [re.compile(p) for p in cfg.one_way_door_patterns]
+    # built in, so a project installed before `supersede` existed is still guarded
+    patterns = [re.compile(p) for p in (*cfg.one_way_door_patterns, BUILTIN_HITL_GUARD)]
     deploy = cfg.profile.deploy
     route = deploy.route if deploy is not None and deploy.route else None
     for idx, cmd in enumerate(cmds):
