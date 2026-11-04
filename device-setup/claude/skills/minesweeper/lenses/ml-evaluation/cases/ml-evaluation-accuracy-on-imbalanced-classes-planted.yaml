@@ -1,0 +1,17 @@
+schema_version: 1
+id: ml-evaluation-accuracy-on-imbalanced-classes-planted
+kind: planted
+twin: ml-evaluation-accuracy-on-imbalanced-classes-clean
+brief: |
+  Product brief: fraud flagging for card payments at a small online retailer.
+  Evaluation: train on the first ten months, test on the last two, grouped by card.
+  Scores are used only as a ranking for manual review.
+  Fraud is about 1 in 500 orders.
+  Requirement 1: the model ships when its accuracy on the test months exceeds 99%.
+  Requirement 2: flagged orders go to a manual review queue.
+  Requirement 3: reviewers can mark a flag as wrong to feed retraining.
+  Success: lower chargeback losses.
+expect:
+  traps:
+  - ml-evaluation.accuracy-on-imbalanced-classes
+  min_severity: medium

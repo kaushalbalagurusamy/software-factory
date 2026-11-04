@@ -1,0 +1,16 @@
+schema_version: 1
+id: numeric-representation-omits-time-representation
+kind: omission
+twin: numeric-representation-states-time-representation
+brief: |
+  Product brief: shift scheduling for a retail chain with stores in several regions.
+  Managers publish weekly rotas; staff clock in and out on a tablet.
+  Pay is computed in integer cents per minute worked; no other money handling.
+  Ids are 64-bit integers.
+  Requirement 1: managers publish shifts with start and end times.
+  Requirement 2: clock-in and clock-out times are recorded for each shift.
+  Requirement 3: payroll exports total minutes worked per person per week.
+  Success: payroll disputes fall by half.
+expect:
+  omissions:
+  - numeric-representation.time-representation

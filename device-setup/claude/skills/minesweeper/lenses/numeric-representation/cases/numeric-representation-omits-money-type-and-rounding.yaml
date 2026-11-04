@@ -1,0 +1,16 @@
+schema_version: 1
+id: numeric-representation-omits-money-type-and-rounding
+kind: omission
+twin: numeric-representation-states-money-type-and-rounding
+brief: |
+  Product brief: expense splitting for shared households.
+  Housemates record shared bills and the app shows who owes whom.
+  All timestamps are stored in UTC.
+  Ids are 64-bit integers.
+  Requirement 1: record a bill with an amount and the people sharing it.
+  Requirement 2: split each bill equally or by custom shares.
+  Requirement 3: show each person's net balance and a settle-up suggestion.
+  Success: households settle up monthly without arguments.
+expect:
+  omissions:
+  - numeric-representation.money-type-and-rounding

@@ -1,0 +1,15 @@
+schema_version: 1
+id: realtime-transport-omits-latency-budget-clean
+kind: clean
+twin: realtime-transport-omits-latency-budget
+brief: |
+  A language school - live online conversation classes
+
+  - A tutor and up to 6 students talk in a live audio and video room.
+  - Media is carried over WebRTC with Opus, adaptive jitter buffering and loss concealment.
+  - End-to-end latency budget: 400 ms mouth-to-ear, split as capture 20, encode 20, network 150, jitter buffer 80, mixing 50, playout 80.
+  - Network assumptions: home Wi-Fi and mobile with up to 3% packet loss, 150 ms round trip, 40 ms jitter; path MTU discovered.
+  - Tutors can share slides and a whiteboard.
+  - Sessions are recorded only with every participant's consent.
+expect:
+  none_from_lens: true

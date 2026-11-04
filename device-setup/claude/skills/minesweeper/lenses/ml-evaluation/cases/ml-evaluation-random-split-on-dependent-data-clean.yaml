@@ -1,0 +1,15 @@
+schema_version: 1
+id: ml-evaluation-random-split-on-dependent-data-clean
+kind: clean
+twin: ml-evaluation-random-split-on-dependent-data-planted
+brief: |
+  Product brief: readmission risk ranking for a hospital group.
+  Each patient has on average four admissions across five years of records.
+  About 12% of admissions lead to readmission within 30 days; the model must beat ranking by length of stay.
+  All scaling and encoding are fitted on training data only.
+  Scores rank patients for follow-up calls and are not shown as probabilities.
+  Requirement 1: evaluate by holding out all admissions after a cutoff date and keeping each patient's admissions entirely on one side of the split.
+  Requirement 2: the care team sees the top 50 patients each morning.
+  Success: more readmissions avoided per follow-up call.
+expect:
+  none_from_lens: true

@@ -1,0 +1,15 @@
+schema_version: 1
+id: realtime-transport-omits-network-path
+kind: omission
+twin: realtime-transport-omits-network-path-clean
+brief: |
+  A neighbourhood watch app - push-to-talk voice
+
+  - Members send short voice messages to their street group, played live to anyone listening.
+  - Audio is Opus over RTP on UDP with an adaptive jitter buffer and loss concealment.
+  - End-to-end latency budget: 500 ms mouth-to-ear, split as capture 20, encode 20, network 200, jitter buffer 100, playout 160.
+  - Messages are also stored for 24 hours for members who were offline.
+  - Groups have at most 50 members.
+expect:
+  omissions:
+  - realtime-transport.network-path

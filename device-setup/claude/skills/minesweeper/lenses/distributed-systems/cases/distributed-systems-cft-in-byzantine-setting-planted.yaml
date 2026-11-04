@@ -1,0 +1,21 @@
+schema_version: 1
+id: distributed-systems-cft-in-byzantine-setting-planted
+kind: planted
+twin: distributed-systems-cft-in-byzantine-setting-clean
+brief: |
+  Project: shared control plane for a regional microgrid cooperative.
+  Members: twelve independently owned solar-and-battery sites, each with its own gateway box and owner.
+  Goal: the gateways jointly decide the hourly export schedule and publish it to the grid operator.
+  Threat model: any single member site may be compromised or misconfigured and report false meter values.
+  - Each gateway reads its local meter every 10 seconds and stores 30 days of history locally.
+  - The schedule is recomputed every hour from all members' forecasts.
+  - Agreement on the schedule: run a three-member Raft group over the gateways so the cluster still decides if one member is lying.
+  - Messages between gateways are signed with per-device keys provisioned at install time; membership is the fixed list of twelve sites.
+  - Forecast submissions are retried until acknowledged and deduplicated by (site, hour).
+  - Schedules carry the hour number; a gateway applies only the highest hour number it has seen.
+  - Each gateway enforces local export limits in hardware regardless of the schedule.
+  - Operators see a web dashboard of the current schedule and each site's contribution.
+expect:
+  traps:
+  - distributed-systems.cft-in-byzantine-setting
+  min_severity: high

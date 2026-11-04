@@ -1,0 +1,14 @@
+schema_version: 1
+id: cryptography-omits-key-nonce-management
+kind: omission
+twin: cryptography-omits-key-nonce-management-clean
+brief: |
+  A document-sharing startup encrypts every uploaded file before storing it.
+  - Files are encrypted with AES-256-GCM using the platform's standard crypto library.
+  - Customer contracts require confidentiality for seven years; the adversary is an attacker with a copy
+    of the storage bucket.
+  - Uploads up to 2 GB; about 300,000 uploads per day.
+  - Downloads decrypt on the server and stream over HTTPS.
+expect:
+  omissions:
+  - cryptography.key-nonce-management

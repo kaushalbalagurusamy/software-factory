@@ -1,0 +1,16 @@
+schema_version: 1
+id: theory-complexity-np-hard-optimal-at-scale-clean
+kind: clean
+twin: theory-complexity-np-hard-optimal-at-scale-planted
+brief: |
+  Product brief: dispatch planner for a regional field-service company.
+  Dispatchers manage about 400 technicians and 1,500 customer sites per day.
+  Each job has a time window, a required skill and an estimated duration.
+  Requirement 1: import the day's jobs from the existing CSV export each morning.
+  Requirement 2: when a job is added or cancelled, the planner returns a feasible updated plan within 200 ms using a fast heuristic; a background solver improves the plan for up to 60 seconds and reports its gap to the best known lower bound, accepting plans within 5% of that bound. Sizes up to 500 technicians and 2,000 sites must be supported.
+  Requirement 3: dispatchers can drag a job to another technician and see the new route.
+  Requirement 4: show each technician's route on a map in the mobile app.
+  Requirement 5: keep an audit log of every manual reassignment.
+  Success: fewer late arrivals and less overtime than the current manual process.
+expect:
+  none_from_lens: true

@@ -1,0 +1,17 @@
+schema_version: 1
+id: professional-duty-oversight-omission-clean
+kind: clean
+twin: professional-duty-oversight-omission
+brief: |
+  Rosewood Health: symptom-check assistant for a regional clinic network
+  Users: triage nurses.
+  1. A nurse enters a patient's reported symptoms.
+  2. The assistant returns a suggested urgency level and a next step, and shows the findings and
+     reasoning behind it so the nurse can independently review the basis; the nurse remains the
+     decision-maker and can override every suggestion.
+  3. The assistant drafts a message back to the patient for the nurse to review and send.
+  4. Integrates with the scheduling system to offer appointment slots.
+  5. Responses must arrive within two seconds, logged with the patient id.
+  6. All transport is encrypted and access is role-based.
+expect:
+  none_from_lens: true

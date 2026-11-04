@@ -1,0 +1,14 @@
+axiomatic-spec
+contract-verify
+doc-sync
+eli12-docs
+eval-designer
+implementation-review
+intake-gate
+mermaid-nesting-dolls
+ops-dashboard-design
+orchestration
+prd-writer
+qa-supervisor
+sf
+structure-scan

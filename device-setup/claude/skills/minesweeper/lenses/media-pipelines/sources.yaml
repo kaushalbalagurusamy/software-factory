@@ -1,0 +1,20 @@
+schema_version: 1
+sources:
+  - id: kernel-cgroup-v2
+    title: Control Group v2 - Linux kernel documentation
+    url: https://docs.kernel.org/admin-guide/cgroup-v2.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: If a cgroup's memory usage reaches this limit and can't be reduced, the OOM killer is invoked in the cgroup.
+        locator: Memory Interface Files, memory.max
+        fetched: "2026-10-14"
+        supports: [media-pipelines.decoded-frames-exceed-memory]
+  - id: itu-bt2100
+    title: Recommendation ITU-R BT.2100 - Image parameter values for high dynamic range television for use in production and international programme exchange
+    url: https://www.itu.int/rec/R-REC-BT.2100
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: The landing page only lists versions (BT.2100-3, 02/2025 in force); the parameter tables (bit depth, PQ/HLG transfer functions) are in the PDF, which the web_page adapter cannot read. No quote recorded; traps citing it stay unverified.

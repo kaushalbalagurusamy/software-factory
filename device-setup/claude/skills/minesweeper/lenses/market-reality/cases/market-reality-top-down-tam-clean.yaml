@@ -1,0 +1,16 @@
+schema_version: 1
+id: market-reality-top-down-tam-clean
+kind: clean
+twin: market-reality-top-down-tam-planted
+brief: |
+  Acme Ledger builds invoicing software for independent plumbers and electricians, priced at $25
+  per month, with about 2 invoices a day per customer.
+  Market: count of plumbing and electrical firms in our launch states from the national business
+  register, times a proposed 2% first-year adoption, times the price; infrastructure is planned for
+  that figure with headroom of three times.
+  Requirements:
+  - Create, send and track invoices from a phone.
+  - The one thing that must work: invoice totals and tax lines are always correct.
+  - Sync with the two most common accounting packages.
+expect:
+  none_from_lens: true

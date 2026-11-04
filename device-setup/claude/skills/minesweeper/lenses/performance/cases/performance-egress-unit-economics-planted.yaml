@@ -1,0 +1,17 @@
+schema_version: 1
+id: performance-egress-unit-economics-planted
+kind: planted
+twin: performance-egress-unit-economics-clean
+brief: |
+  Acme Agritech - soil sensor platform
+
+  - Each farm has 200 soil sensors reporting moisture and temperature.
+  - Farmers see daily trends and get alerts when moisture drops below a threshold.
+  - Every sensor sends its full raw readings 1,000 times per second, and we forward all of them from the edge region through the NAT gateway to the analytics cluster in another region.
+  - Subscription is per farm per month.
+  - Load model: 5,000 farms, summaries of under 2 KB each, alerts within 60 seconds at p95 measured at the farmer's app.
+  - Infrastructure and data-transfer cost must stay under $3 per farm per month.
+expect:
+  traps:
+  - performance.egress-unit-economics
+  min_severity: high

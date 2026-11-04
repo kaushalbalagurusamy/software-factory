@@ -1,0 +1,17 @@
+schema_version: 1
+id: licensing-gpl-distributed-planted
+kind: planted
+twin: licensing-gpl-distributed-clean
+brief: |
+  Acme Logistics: offline route planner (commercial desktop product)
+
+  1. Customers download a signed Windows and macOS installer; the product is sold per seat.
+  2. Our source code stays proprietary and is never shared with customers.
+  3. For the solver, bundle the fastest open-source routing library we found, which is GPLv3,
+     statically linked into the main binary to keep install size small.
+  4. Produce a dependency list with the SPDX licence of every component before release.
+  5. Route recalculation must finish in under two seconds for 500 stops.
+  6. Crash reports are sent only with the user's consent.
+expect:
+  traps: [licensing.gpl-in-distributed-proprietary]
+  min_severity: critical

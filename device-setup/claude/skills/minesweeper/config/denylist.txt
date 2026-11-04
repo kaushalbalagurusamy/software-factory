@@ -1,0 +1,14 @@
+# No-project rule: lens content, cases and docs must not name specific briefs, programmes or projects.
+# One case-insensitive whole-word pattern per line. Generic words (e.g. thesis, cover) are left out on purpose.
+facilitygrid
+qrypt
+boostlingo
+autohdr
+openemr
+meridian
+equinox
+cerbo
+peak6
+gauntlet
+shadowboxing
+brainlift

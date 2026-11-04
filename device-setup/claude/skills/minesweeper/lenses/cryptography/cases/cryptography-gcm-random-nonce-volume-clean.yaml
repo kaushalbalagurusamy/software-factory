@@ -1,0 +1,13 @@
+schema_version: 1
+id: cryptography-gcm-random-nonce-volume-clean
+kind: clean
+twin: cryptography-gcm-random-nonce-volume-planted
+brief: |
+  A messaging platform encrypts device-to-server traffic for a large fleet of sensors.
+  - AES-128-GCM with a 96-bit random nonce per message.
+  - Each sensor has its own key, derived per device and rotated after 2^24 messages or 30 days,
+    whichever comes first.
+  - Messages are small (under 1 KB).
+  - Server verifies the tag before processing any field.
+expect:
+  none_from_lens: true

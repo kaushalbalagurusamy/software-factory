@@ -1,0 +1,15 @@
+schema_version: 1
+id: licensing-non-commercial-asset-clean
+kind: clean
+twin: licensing-non-commercial-asset-planted
+brief: |
+  Fabrikam Retail: paid product-photo tagging API
+
+  1. Fine-tune an image classifier and sell access per 1,000 calls; served from our cloud only.
+  2. Training data: our own labelled catalogue photos plus datasets whose licence permits commercial use
+     (for example CC BY 4.0 or CC0); non-commercial datasets are excluded.
+  3. Record the SPDX licence of each model checkpoint and dataset in the model card.
+  4. Target 92 percent top-1 accuracy on the held-out set.
+  5. p95 latency under 150 ms.
+expect:
+  none_from_lens: true

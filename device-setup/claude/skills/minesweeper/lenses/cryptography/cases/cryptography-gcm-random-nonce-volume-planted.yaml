@@ -1,0 +1,15 @@
+schema_version: 1
+id: cryptography-gcm-random-nonce-volume-planted
+kind: planted
+twin: cryptography-gcm-random-nonce-volume-clean
+brief: |
+  A messaging platform encrypts device-to-server traffic for a large fleet of sensors.
+  - AES-128-GCM with a 96-bit random nonce per message.
+  - All 5 million sensors share one network key that is never rotated; each sends a reading every second
+    for the ten-year life of the deployment.
+  - Messages are small (under 1 KB).
+  - Server verifies the tag before processing any field.
+expect:
+  traps:
+  - cryptography.gcm-random-nonce-volume
+  min_severity: high

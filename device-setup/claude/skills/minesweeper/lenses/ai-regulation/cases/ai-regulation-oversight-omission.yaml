@@ -1,0 +1,14 @@
+schema_version: 1
+id: ai-regulation-oversight-omission
+kind: omission
+twin: ai-regulation-oversight-omission-clean
+brief: |
+  Fabrikam Lending: consumer loan pre-approval for EU applicants
+
+  1. Applicants upload payslips and bank statements; a model estimates repayment capacity.
+  2. The system is classified as high-risk under EU AI Act Annex III (creditworthiness).
+  3. The model outputs approve, refer or decline with a reason code.
+  4. Applicants are told an automated system assessed their application.
+  5. Decisions returned within one minute.
+expect:
+  omissions: ["ai-regulation.human-oversight"]

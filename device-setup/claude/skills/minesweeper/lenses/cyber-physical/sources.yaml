@@ -1,0 +1,174 @@
+schema_version: 1
+sources:
+  - id: nist-sp800-82r3
+    title: NIST SP 800-82 Rev. 3, Guide to Operational Technology (OT) Security (CSRC landing page)
+    url: https://csrc.nist.gov/pubs/sp/800/82/r3/final
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: Only the abstract is machine-fetchable; the full guide is a PDF the web_page adapter cannot extract. The landing page notes a Revision 4 initial public draft (comments due 2026-11-30).
+    quotes:
+      - text: "This document provides guidance on how to secure operational technology (OT) while addressing their unique performance, reliability, and safety requirements."
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [cyber-physical.unattended-patch-reboot, cyber-physical.cloud-hard-realtime-loop]
+  - id: usc-16-824o
+    title: 16 U.S.C. 824o, Electric reliability (Federal Power Act section 215), 2023 edition
+    url: https://www.govinfo.gov/content/pkg/USCODE-2023-title16/html/USCODE-2023-title16-chap12-subchapII-sec824o.htm
+    adapter: web_page
+    tier: primary
+    kind: statute
+    quotes:
+      - text: "All users, owners and operators of the bulk-power system shall comply with reliability standards that take effect under this section."
+        locator: 16 U.S.C. 824o(b)(1)
+        fetched: "2026-10-14"
+        supports: [cyber-physical.bes-cip-deferred, cyber-physical.standing-vendor-remote-access]
+      - text: "The term includes requirements for the operation of existing bulk-power system facilities, including cybersecurity protection, and the design of planned additions or modifications to such facilities to the extent necessary to provide for reliable operation of the bulk-power system"
+        locator: 16 U.S.C. 824o(a)(3)
+        fetched: "2026-10-14"
+        supports: [cyber-physical.bes-cip-deferred]
+  - id: usc-16-825o-1
+    title: 16 U.S.C. 825o-1, Enforcement of certain provisions (civil penalties), 2023 edition
+    url: https://www.govinfo.gov/content/pkg/USCODE-2023-title16/html/USCODE-2023-title16-chap12-subchapIII-sec825o-1.htm
+    adapter: web_page
+    tier: primary
+    kind: statute
+    notes: Statutory maximum is $1,000,000 per day per violation; the inflation-adjusted figure is in 18 CFR 385.1602(d).
+    quotes:
+      - text: "Any person who violates any provision of subchapter II or any provision of any rule or order thereunder shall be subject to a civil penalty of not more than $1,000,000 for each day that such violation continues."
+        locator: 16 U.S.C. 825o-1(b)
+        fetched: "2026-10-14"
+        supports: [cyber-physical.bes-cip-deferred]
+  - id: cfr-18-385-1602
+    title: 18 CFR 385.1602, Civil penalties, as adjusted (LII reproduction of the e-CFR)
+    url: https://www.law.cornell.edu/cfr/text/18/385.1602
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: The eCFR site blocks automated fetches; LII reproduces the e-CFR text. The figure carries the citation Order 906, 90 FR 2932, Jan. 14, 2025; a later January adjustment would supersede it, so re-check on refresh.
+    quotes:
+      - text: "(d) 16 U.S.C. 825o-1(b), Federal Power Act: $1,584,648 per violation, per day."
+        locator: 18 CFR 385.1602(d)
+        fetched: "2026-10-14"
+        supports: [cyber-physical.bes-cip-deferred]
+  - id: fr-2025-00516-penalty-adjustment
+    title: FERC Order No. 906, Civil Monetary Penalty Inflation Adjustments, final rule (Federal Register, 2025-01-14)
+    url: https://www.govinfo.gov/content/pkg/FR-2025-01-14/html/2025-00516.htm
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: Rule that set the $1,584,648 figure (up from $1,544,521). Kept for provenance; the CFR text is the quoted authority.
+  - id: cfr-18-40-2
+    title: 18 CFR 40.2, Mandatory Reliability Standards (LII reproduction of the e-CFR)
+    url: https://www.law.cornell.edu/cfr/text/18/40.2
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    quotes:
+      - text: "(a) Each applicable user, owner or operator of the Bulk-Power System must comply with Commission-approved Reliability Standards developed by the Electric Reliability Organization."
+        locator: 18 CFR 40.2(a)
+        fetched: "2026-10-14"
+        supports: [cyber-physical.bes-cip-deferred, cyber-physical.standing-vendor-remote-access, cyber-physical.no-internal-network-monitoring]
+  - id: cfr-29-1910-119
+    title: 29 CFR 1910.119, Process safety management of highly hazardous chemicals (LII reproduction of the e-CFR)
+    url: https://www.law.cornell.edu/cfr/text/29/1910.119
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: Applies to covered processes (highly hazardous chemicals above threshold quantities) at US workplaces; other jurisdictions and sectors have their own functional-safety rules (IEC 61508 / IEC 61511 are paywalled and not quoted here).
+    quotes:
+      - text: "(1) The employer shall establish and implement written procedures to manage changes (except for “replacements in kind”) to process chemicals, technology, equipment, and procedures; and, changes to facilities that affect a covered process."
+        locator: 29 CFR 1910.119(l)(1) Management of change
+        fetched: "2026-10-14"
+        supports: [cyber-physical.safety-interlock-bypass]
+      - text: "(v) Controls (including monitoring devices and sensors, alarms, and interlocks) and,"
+        locator: 29 CFR 1910.119(j)(1)(v) Mechanical integrity, application
+        fetched: "2026-10-14"
+        supports: [cyber-physical.safety-interlock-bypass]
+      - text: "(iv) Emergency shutdown systems;"
+        locator: 29 CFR 1910.119(j)(1)(iv) Mechanical integrity, application
+        fetched: "2026-10-14"
+        supports: [cyber-physical.safety-interlock-bypass]
+  - id: fr-ferc-order-850
+    title: FERC Order No. 850, Supply Chain Risk Management Reliability Standards, final rule (Federal Register, 2018-10-26)
+    url: https://www.govinfo.gov/content/pkg/FR-2018-10-26/html/2018-23201.htm
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: Approves CIP-005-6 Parts 2.4 and 2.5. The current NERC version is CIP-005-7 (PDF, not machine-fetchable here); that it carries the same vendor-session parts is not quote-checked.
+    quotes:
+      - text: "Requirement R2.4 requires one or more methods for determining active vendor remote access sessions, including Interactive Remote Access and system[hyphen]to[hyphen]system remote access."
+        locator: Paragraph 84
+        fetched: "2026-10-14"
+        supports: [cyber-physical.standing-vendor-remote-access]
+      - text: "Requirement R2.5 requires one or more methods to disable active vendor remote access, including Interactive Remote Access and system[hyphen]to[hyphen]system remote access."
+        locator: Paragraph 84
+        fetched: "2026-10-14"
+        supports: [cyber-physical.standing-vendor-remote-access]
+  - id: fr-ferc-order-907
+    title: FERC Order No. 907, Reliability Standard CIP-015-1 (Internal Network Security Monitoring), final rule (Federal Register, 2025-07-02)
+    url: https://www.govinfo.gov/content/pkg/FR-2025-07-02/html/2025-12309.htm
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: The rule's effective date is 2025-09-02. The compliance (enforcement) dates sit in NERC's implementation plan, which this page does not contain; a 2028 date seen in secondary material is unconfirmed here.
+    quotes:
+      - text: "the Commission approves proposed Critical Infrastructure Protection (CIP) Reliability Standard CIP-015-1 (Cyber Security--Internal Network Security Monitoring)."
+        locator: Supplementary Information, paragraph 1
+        fetched: "2026-10-14"
+        supports: [cyber-physical.no-internal-network-monitoring]
+      - text: "The Commission explained that the currently effective CIP Reliability Standards focus on preventing unauthorized access at the electronic security perimeter and do not require INSM inside the trusted CIP-networked environment."
+        locator: Paragraph 10
+        fetched: "2026-10-14"
+        supports: [cyber-physical.no-internal-network-monitoring]
+      - text: "DATES: This action is effective September 2, 2025."
+        locator: DATES
+        fetched: "2026-10-14"
+        supports: [cyber-physical.no-internal-network-monitoring]
+  - id: nerc-cip-007-6
+    title: NERC Reliability Standard CIP-007-6, Cyber Security - System Security Management (PDF)
+    url: https://www.nerc.com/globalassets/standards/reliability-standards/cip/cip-007-6.pdf
+    adapter: web_page
+    tier: primary
+    kind: standard
+    notes: PDF; the web_page adapter cannot extract its text, so no quote can be checked by refresh. Read by hand on 2026-10-14 (pdftotext) - Part 2.2 evaluate security patches at least once every 35 calendar days; Part 2.3 within 35 calendar days apply the patch or create a dated mitigation plan. Applies to high and medium impact BES Cyber Systems and associated EACMS, PACS and PCA. Whether CIP-007-6 or a later version is the one currently enforceable is not confirmed here.
+  - id: cisa-ot-primary-mitigations
+    title: CISA, FBI, EPA and DOE, Primary Mitigations to Reduce Cyber Threats to Operational Technology (fact sheet, 2025-05-06)
+    url: https://www.cisa.gov/resources-tools/resources/primary-mitigations-reduce-cyber-threats-operational-technology
+    adapter: web_page
+    tier: primary
+    kind: guidance
+    notes: US government guidance, not a regulation. Primary for what the authoring agencies recommend.
+    quotes:
+      - text: "OT devices lack authentication and authorization methods that are resistant to modern threats and are quickly found by searching for open ports on public IP ranges with search engine tools to target victims with OT components"
+        locator: Mitigations, Remove OT connections to the public internet
+        fetched: "2026-10-14"
+        supports: [cyber-physical.unauthenticated-ot-write-path]
+      - text: "Segmenting critical systems and introducing a demilitarized zone for passing control data to enterprise logistics reduces the potential impact of cyber threats and reduces the risk of disruptions to essential OT operations"
+        locator: Mitigations, Segment IT and OT networks
+        fetched: "2026-10-14"
+        supports: [cyber-physical.flat-it-ot-network, cyber-physical.unauthenticated-ot-write-path]
+      - text: "If remote access is essential, upgrade to a private IP network connection to remove these OT assets from the public internet and use virtual private network (VPN) functionality with a strong password and phishing-resistant multifactor authentication (MFA) for user remote access."
+        locator: Mitigations, Secure remote access to OT networks
+        fetched: "2026-10-14"
+        supports: [cyber-physical.standing-vendor-remote-access]
+      - text: "Document and configure remote access solutions to apply principles of least privilege for the specific asset and user role or scope of work"
+        locator: Mitigations, Secure remote access to OT networks
+        fetched: "2026-10-14"
+        supports: [cyber-physical.standing-vendor-remote-access]
+      - text: "The capability for organizations to revert to manual controls to quickly restore operations is vital in the immediate aftermath of an incident."
+        locator: Mitigations, Practice and maintain the ability to operate OT systems manually
+        fetched: "2026-10-14"
+        supports: [cyber-physical.cloud-hard-realtime-loop]
+  - id: isa-62443-summary
+    title: ISA, ISA/IEC 62443 Series of Standards (summary page)
+    url: https://www.isa.org/standards-and-publications/isa-standards/isa-iec-62443-series-of-standards
+    adapter: web_page
+    tier: secondary
+    kind: standard
+    notes: The standards themselves are paywalled. This page lists the parts (e.g. 3-2 security risk assessment for system design, 3-3 system security requirements) but does not state the zones-and-conduits model; it is a pointer, never a verifying source.
+    quotes:
+      - text: "The ISA/IEC 62443 series of standards define requirements and processes for implementing and maintaining electronically secure industrial automation and control systems (IACS)."
+        locator: Summary
+        fetched: "2026-10-14"
+        supports: []

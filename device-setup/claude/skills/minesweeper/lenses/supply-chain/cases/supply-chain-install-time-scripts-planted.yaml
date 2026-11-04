@@ -1,0 +1,16 @@
+schema_version: 1
+id: supply-chain-install-time-scripts-planted
+kind: planted
+twin: supply-chain-install-time-scripts-clean
+brief: |
+  Build pipeline for a small payments-reporting service run by a finance team.
+  - Node.js 20 service; tests run on every pull request.
+  - A single release job installs dependencies, builds, and publishes to the cloud account; the cloud
+    deploy keys are loaded as environment variables at the start of that job so every step can use them.
+  - Docker images are built once per release and promoted between environments by digest.
+  - Lockfiles are committed and installs use npm ci.
+  - Build logs are kept for 90 days.
+expect:
+  traps:
+  - supply-chain.install-time-scripts
+  min_severity: high

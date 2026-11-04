@@ -1,0 +1,16 @@
+schema_version: 1
+id: numeric-representation-naive-local-timestamps-clean
+kind: clean
+twin: numeric-representation-naive-local-timestamps-planted
+brief: |
+  Product brief: appointment booking for a chain of physiotherapy clinics in three countries.
+  Clinics are in different time zones; patients book online.
+  Prices are stored as integer cents with the currency code; no division is performed.
+  Ids and counters are 64-bit integers; arithmetic on them fails loudly on overflow.
+  Requirement 1: patients pick a clinic, a therapist and a free slot.
+  Requirement 2: appointment times are stored as UTC instants together with the clinic's IANA time zone; wall-clock times are computed from the zone for display, and slots that fall in a daylight-saving gap are not offered.
+  Requirement 3: reminders are sent 24 hours before each appointment.
+  Requirement 4: head office sees all bookings across clinics in one list ordered by time.
+  Success: no-shows fall by a quarter.
+expect:
+  none_from_lens: true

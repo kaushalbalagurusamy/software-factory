@@ -1,0 +1,77 @@
+{
+  "deepwiki": {
+    "type": "http",
+    "url": "https://mcp.deepwiki.com/mcp"
+  },
+  "docker": {
+    "args": [
+      "mcp",
+      "gateway",
+      "run"
+    ],
+    "command": "/Applications/Docker.app/Contents/Resources/bin/docker",
+    "env": {},
+    "type": "stdio"
+  },
+  "github": {
+    "args": [
+      "stdio",
+      "--toolsets=default,actions"
+    ],
+    "command": "/opt/homebrew/bin/github-mcp-server",
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+    },
+    "type": "stdio"
+  },
+  "gitlab": {
+    "type": "http",
+    "url": "https://gitlab.com/api/v4/mcp"
+  },
+  "railway": {
+    "args": [
+      "mcp"
+    ],
+    "command": "railway"
+  },
+  "safari": {
+    "args": [
+      "-y",
+      "safari-mcp"
+    ],
+    "command": "npx",
+    "env": {},
+    "type": "stdio"
+  },
+  "supabase": {
+    "args": [],
+    "command": "__HOME__/.gemini/mcp/supabase-mcp/bin/supabase-mcp-server",
+    "env": {},
+    "type": "stdio"
+  },
+  "vercel": {
+    "headers": {
+      "Authorization": ""
+    },
+    "type": "http",
+    "url": "https://mcp.vercel.com"
+  },
+  "langfuse": {
+    "type": "stdio",
+    "command": "__HOME__/Projects/ai-red-team/.venv/bin/python",
+    "args": [
+      "__HOME__/Projects/ai-red-team/tools/langfuse_mcp.py"
+    ],
+    "env": {}
+  },
+  "devstudio": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": [
+      "devstudio-mcp"
+    ],
+    "env": {
+      "RECORDING_OUTPUT_DIR": ""
+    }
+  }
+}

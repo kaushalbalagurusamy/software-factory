@@ -1,0 +1,230 @@
+<title>Project Briefing</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: sticky tab strip over three panels (status, story, questions). Replace the sample content; keep tokens, structure and script. */
+:root{
+  --bg:#f6f7f5; --surface:#ffffff; --fg:#1b2420; --muted:#5d6b64; --line:#dde3df;
+  --accent:#0f6b52; --accent-soft:#e0f0ea;
+  --good:#1a7f4b; --good-soft:#dff3e7; --warn:#a15c00; --warn-soft:#fbeed6; --crit:#b3261e; --crit-soft:#fbe3e0; --run:#2457c5; --run-soft:#e1e9fa;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101612; --surface:#18201b; --fg:#e6ece8; --muted:#9aa89f; --line:#2a352e; --accent:#58c4a0; --accent-soft:#1c3a30;
+  --good:#5fd08e; --good-soft:#173324; --warn:#e3a34a; --warn-soft:#3a2a10; --crit:#f08a82; --crit-soft:#3d1c19; --run:#7ea6f5; --run-soft:#1b2a4a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101612; --surface:#18201b; --fg:#e6ece8; --muted:#9aa89f; --line:#2a352e; --accent:#58c4a0; --accent-soft:#1c3a30;
+  --good:#5fd08e; --good-soft:#173324; --warn:#e3a34a; --warn-soft:#3a2a10; --crit:#f08a82; --crit-soft:#3d1c19; --run:#7ea6f5; --run-soft:#1b2a4a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans);padding-inline:16px;padding-block:20px 56px}
+main{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-size:26px;line-height:1.2;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 10px;font-weight:600}
+h3{margin:0 0 6px;font-size:16px;text-wrap:balance}
+p{margin:0} code,.mono{font-family:var(--mono);font-size:.88em}
+.asof{color:var(--muted);margin-top:6px;font-size:14px}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);display:flex;gap:6px;padding-block:8px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{font:inherit;font-weight:600;color:var(--muted);background:transparent;border:1px solid transparent;border-radius:6px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent)}
+.tab:focus-visible,.opt:focus-within,button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tab .badge{margin-left:6px;font-size:12px;background:var(--crit-soft);color:var(--crit);border-radius:99px;padding:1px 7px}
+.panel{display:flex;flex-direction:column;gap:26px}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;min-width:0}
+.tile b{display:block;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.2}
+.tile span{color:var(--muted);font-size:13px}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.done{background:var(--good-soft);color:var(--good)} .run{background:var(--run-soft);color:var(--run)}
+.todo{background:var(--line);color:var(--muted)} .warn{background:var(--warn-soft);color:var(--warn)} .crit{background:var(--crit-soft);color:var(--crit)}
+.list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.row{display:grid;grid-template-columns:190px 1fr;gap:4px 16px;padding:12px 14px;border-top:1px solid var(--line);align-items:start}
+.row:first-child{border-top:0} .row>div{min-width:0}
+.row .k{font-weight:600} .row .d{color:var(--muted);font-size:14px}
+.ana{margin-top:6px;padding:8px 10px;border-radius:6px;background:var(--accent-soft);color:var(--fg);font-size:14px}
+.ana b{color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.07em;margin-right:6px}
+.term{color:var(--muted);font-size:12px;font-family:var(--mono)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+.story{display:flex;flex-direction:column;gap:12px}
+.story .meta{color:var(--muted);font-size:13px;margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap}
+.story dl{margin:0;display:grid;grid-template-columns:120px 1fr;gap:6px 14px}
+.story dt{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+.story dd{margin:0;min-width:0}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q .why{color:var(--muted);font-size:14px}
+.opt{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;cursor:pointer;background:var(--bg)}
+.opt input{margin-top:4px}
+.opt.rec{border-color:var(--accent)}
+.opt .c{color:var(--muted);font-size:14px}
+.opt[data-on="true"]{background:var(--accent-soft);border-color:var(--accent)}
+textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-height:60px}
+button.go{font:inherit;font-weight:600;background:var(--accent);color:var(--bg);border:0;border-radius:6px;padding:8px 16px;cursor:pointer;align-self:flex-start}
+button.go[disabled]{opacity:.5;cursor:default}
+.saved{color:var(--good);font-size:14px}
+.foot{color:var(--muted);font-size:13px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+@media (max-width:560px){.row,.story dl{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.tab{transition:background .12s}}
+</style>
+
+<main>
+  <header>
+    <h1><!-- Project name --> Briefing</h1>
+    <p class="asof">As of <!-- date, time zone -->, <code><!-- branch --> @ <!-- HEAD hash --></code>. <!-- one sentence: the headline --></p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-status" aria-selected="true" aria-controls="p-status" data-tab="status">Status</button>
+    <button class="tab" role="tab" id="t-story" aria-selected="false" aria-controls="p-story" data-tab="story">Research and experiments</button>
+    <button class="tab" role="tab" id="t-ask" aria-selected="false" aria-controls="p-ask" data-tab="ask">Open questions <span class="badge" id="ask-badge" hidden></span></button>
+  </div>
+
+  <!-- TAB 1: STATUS ---------------------------------------------------------------- -->
+  <section class="panel" id="p-status" role="tabpanel" aria-labelledby="t-status">
+    <div class="strip">
+      <div class="tile"><b>0 / 0</b><span>requirements satisfied</span></div>
+      <div class="tile"><b>0</b><span>in flight</span></div>
+      <div class="tile"><b>0</b><span>waiting on you</span></div>
+      <div class="tile"><b>0</b><span>commits since last briefing</span></div>
+    </div>
+
+    <div>
+      <h2>In flight</h2>
+      <div class="list">
+        <div class="row"><div class="k">Task name <span class="pill run">running</span></div>
+          <div class="d">What it is doing and what it will hand back.
+            <div class="ana"><b>Like</b>household analogy for this task. <span class="term">technical term</span></div></div></div>
+      </div>
+    </div>
+
+    <div>
+      <h2>Requirements: done and left</h2>
+      <div class="list">
+        <div class="row"><div class="k">Group name <span class="pill done">done</span> <div class="term">R-021, R-027</div></div>
+          <div class="d">Plain description of what is now true and the artifact that proves it.
+            <div class="ana"><b>Like</b>analogy, and where it stops working.</div></div></div>
+        <div class="row"><div class="k">Group name <span class="pill crit">needs you</span></div>
+          <div class="d">What is left and what it waits on.</div></div>
+      </div>
+    </div>
+
+    <div>
+      <h2>Repo state</h2>
+      <div class="cols">
+        <div class="card"><h3>Committed since last briefing</h3><ul class="mono" style="font-size:12.5px"><li>abc1234 subject</li></ul></div>
+        <div class="card"><h3>Uncommitted</h3><ul><li>group and purpose</li></ul></div>
+        <div class="card"><h3>Tests and evals</h3><ul><li>result, who ran it, what is pending</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: RESEARCH AND EXPERIMENTS ------------------------------------------------ -->
+  <section class="panel" id="p-story" role="tabpanel" aria-labelledby="t-story" hidden>
+    <div class="story">
+      <div class="card">
+        <h3>Short entry title</h3>
+        <div class="meta"><span>date</span><span class="pill done">outcome in a word</span><span class="mono">source/path or hash</span></div>
+        <dl>
+          <dt>Question</dt><dd>What the work set out to answer.</dd>
+          <dt>What was done</dt><dd>Method, data size, cost.</dd>
+          <dt>Real outcome</dt><dd>Exact numbers with denominators, intervals, surprises.</dd>
+          <dt>Limits</dt><dd>What the number does not show.</dd>
+          <dt>What it changed</dt><dd>The decision, ADR or spec it fed.</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="card"><h3>Could not verify</h3><ul><li>Item and why.</li></ul></div>
+  </section>
+
+  <!-- TAB 3: OPEN QUESTIONS ---------------------------------------------------------- -->
+  <section class="panel" id="p-ask" role="tabpanel" aria-labelledby="t-ask" hidden>
+    <p class="foot" id="ask-note">Answers are saved to this page and read by Claude at the start of its next turn. Each answer is recorded as your decision.</p>
+    <div id="questions"></div>
+    <div id="decided"></div>
+  </section>
+
+  <p class="foot">Private page. Keep the same link; Claude updates it in place.</p>
+</main>
+
+<script>
+/* QUESTIONS: regenerate each briefing. id is stable across briefings; keep answered ones listed so they appear under Decided.
+   opts[].rec marks the recommendation. dflt names what Claude does if there is no answer. */
+var QUESTIONS = [
+  { id:"sample-q", blocked:true, title:"One-sentence question?",
+    why:"What this blocks and by when.",
+    opts:[
+      { key:"a", label:"Option A (recommended)", consequence:"Plain-language consequence. Optional analogy.", rec:true },
+      { key:"b", label:"Option B", consequence:"Plain-language consequence." }
+    ],
+    dflt:"What Claude will do if unanswered (recorded as AI autonomous)." }
+];
+
+(function(){
+  var tabs = document.querySelectorAll(".tab");
+  function show(name){
+    tabs.forEach(function(t){ t.setAttribute("aria-selected", String(t.dataset.tab===name)); });
+    document.querySelectorAll(".panel").forEach(function(p){ p.hidden = (p.id !== "p-"+name); });
+    try{ localStorage.setItem("briefing-tab", name); }catch(e){}
+    if(location.hash !== "#"+name){ try{ history.replaceState(null,"","#"+name); }catch(e){} }
+  }
+  tabs.forEach(function(t){ t.addEventListener("click", function(){ show(t.dataset.tab); }); });
+  var start = (location.hash||"").slice(1);
+  if(["status","story","ask"].indexOf(start)<0){ try{ start = localStorage.getItem("briefing-tab"); }catch(e){} }
+  show(["status","story","ask"].indexOf(start)>=0 ? start : "status");
+
+  var answers = {}, dbRef = null;
+  var qEl = document.getElementById("questions"), dEl = document.getElementById("decided"), badge = document.getElementById("ask-badge");
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+  function render(){
+    var open = QUESTIONS.filter(function(q){ return !answers[q.id]; });
+    var done = QUESTIONS.filter(function(q){ return answers[q.id]; });
+    badge.hidden = open.length===0; badge.textContent = String(open.length);
+    qEl.innerHTML = open.length ? "" : '<div class="card"><p>Nothing needs your input right now.</p></div>';
+    open.sort(function(a,b){ return (b.blocked?1:0)-(a.blocked?1:0); }).forEach(function(q){
+      var box = document.createElement("div"); box.className = "card q"; box.dataset.q = q.id;
+      var html = '<h3>'+esc(q.title)+(q.blocked?' <span class="pill crit">blocking</span>':'')+'</h3><p class="why">'+esc(q.why)+'</p>';
+      q.opts.forEach(function(o){
+        html += '<label class="opt'+(o.rec?' rec':'')+'" data-on="false"><input type="radio" name="r-'+esc(q.id)+'" value="'+esc(o.key)+'"><span><b>'+esc(o.label)+'</b>'+(o.rec?' <span class="pill done">recommended</span>':'')+'</span><span></span><span class="c">'+esc(o.consequence)+'</span></label>';
+      });
+      html += '<label class="opt" data-on="false"><input type="radio" name="r-'+esc(q.id)+'" value="other"><span><b>Something else</b></span></label>';
+      html += '<textarea id="n-'+esc(q.id)+'" placeholder="Optional note, or your own answer if you chose something else"></textarea>';
+      html += '<p class="foot">If unanswered: '+esc(q.dflt)+'</p>';
+      html += '<button class="go" disabled>Save answer</button><span class="saved" hidden></span>';
+      box.innerHTML = html; qEl.appendChild(box);
+      var btn = box.querySelector("button.go"), msg = box.querySelector(".saved"), chosen = null;
+      box.querySelectorAll("input[type=radio]").forEach(function(r){
+        r.addEventListener("change", function(){
+          chosen = r.value; btn.disabled = !dbRef;
+          box.querySelectorAll(".opt").forEach(function(l){ l.dataset.on = String(l.contains(r) && r.checked); });
+        });
+      });
+      btn.addEventListener("click", function(){
+        if(!chosen || !dbRef) return; btn.disabled = true;
+        var note = document.getElementById("n-"+q.id).value;
+        dbRef.collection("answers").doc(q.id).set({ choice: chosen, note: note, at: new Date().toISOString() })
+          .then(function(){ msg.hidden=false; msg.textContent="Saved."; })
+          .catch(function(){ msg.hidden=false; msg.className="foot"; msg.textContent="Could not save. Reload and try again."; btn.disabled=false; });
+      });
+    });
+    dEl.innerHTML = done.length ? "<h2>Decided</h2>" : "";
+    done.forEach(function(q){
+      var a = answers[q.id], o = q.opts.filter(function(x){return x.key===a.choice;})[0];
+      var c = document.createElement("div"); c.className = "card";
+      c.innerHTML = '<h3>'+esc(q.title)+'</h3><p><span class="pill done">answered</span> '+esc(o?o.label:"Something else")+(a.note?' <span class="foot">'+esc(a.note)+'</span>':'')+'</p>';
+      dEl.appendChild(c);
+    });
+  }
+  render();
+
+  if(window.claude && claude.use){
+    claude.use("db").then(function(db){
+      if(!db){ document.getElementById("ask-note").textContent = "Saving is unavailable in this view. Reply to Claude in the session instead."; return; }
+      dbRef = db;
+      db.collection("answers").onSnapshot(function(snap){
+        var next = {}; snap.forEach(function(d){ next[d.id] = d.data(); }); answers = next; render();
+      }, function(){});
+    }).catch(function(){});
+  }
+})();
+</script>

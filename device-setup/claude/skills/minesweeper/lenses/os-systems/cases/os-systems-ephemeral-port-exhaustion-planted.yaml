@@ -1,0 +1,18 @@
+schema_version: 1
+id: os-systems-ephemeral-port-exhaustion-planted
+kind: planted
+twin: os-systems-ephemeral-port-exhaustion-clean
+brief: |
+  Acme Logistics - delivery event relay
+
+  - Carriers post delivery events to our webhook, peaking at 15,000 per second.
+  - Each event is enriched with the customer's address and forwarded to the partner tracking API.
+  - For simplicity the handler opens a brand-new HTTPS connection to the partner API for every event and closes it afterwards, so the service stays stateless.
+  - Failed forwards are retried once and then written to a dead-letter table.
+  - Events must reach the partner within 2 seconds at p95, measured at our egress.
+  - Each worker container has a 4 GB memory limit; requests are capped at 5 MB and each worker handles at most 64 at once.
+  - Workers run a fixed pool of 32 threads; peak per host is about 2,000 open sockets and files, under the configured descriptor limit.
+expect:
+  traps:
+  - os-systems.ephemeral-port-exhaustion
+  min_severity: high

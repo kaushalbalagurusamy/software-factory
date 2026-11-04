@@ -1,0 +1,9 @@
+# Model per role. Claude Max subscription only: no OpenRouter or other paid API (owner decision
+# 2026-10-14). Values are Agent-tool model aliases. A group's model in groups.yaml overrides `sweeper`.
+schema_version: 1
+roles:
+  extractor: sonnet
+  sweeper: sonnet
+  grounder: sonnet
+  skeptic: opus      # a fresh context that sees claims and citations only, never the sweepers' reasoning
+  reframer: sonnet

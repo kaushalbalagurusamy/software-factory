@@ -1,0 +1,16 @@
+schema_version: 1
+id: databases-cap-strong-and-available-planted
+kind: planted
+twin: databases-cap-strong-and-available-clean
+brief: |
+  Project: account wallet for a travel-booking platform with customers in North America, Europe and Asia.
+  - Customers hold a stored-value balance used at checkout.
+  - Every region must always accept balance writes, including when the links between regions are down, with writes completing in under 5 ms locally and every read anywhere returning the latest balance.
+  - Balance changes are written by the checkout and refund services as SERIALIZABLE transactions retried on conflict.
+  - Each balance change writes an outbox row in the same transaction; the statement service consumes it by event id.
+  - Monthly statements are generated per customer.
+  - Support agents can view balance history.
+expect:
+  traps:
+  - databases.cap-strong-and-available
+  min_severity: high

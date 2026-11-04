@@ -1,0 +1,15 @@
+schema_version: 1
+id: performance-high-cardinality-metric-labels-clean
+kind: clean
+twin: performance-high-cardinality-metric-labels-planted
+brief: |
+  Northwind Payments - checkout API observability
+
+  - The checkout API exposes request counts, error counts and latency histograms.
+  - On-call engineers need to debug individual failed checkouts.
+  - Metric labels are limited to route, status class and region; customer, cart and request ids are recorded in structured logs and traces, linked from latency histograms by trace id.
+  - Alerts fire when the 5xx rate exceeds 1% for 5 minutes.
+  - Load model: peak 2,000 requests per second, payloads under 20 KB, up to 5,000 concurrent sessions.
+  - Latency is measured at the API edge; infrastructure and data-transfer cost must stay under $0.02 per active user per month.
+expect:
+  none_from_lens: true

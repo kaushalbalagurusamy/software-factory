@@ -1,0 +1,15 @@
+schema_version: 1
+id: realtime-transport-datagram-exceeds-path-mtu-clean
+kind: clean
+twin: realtime-transport-datagram-exceeds-path-mtu-planted
+brief: |
+  A multiplayer game studio - match state sync
+
+  - Up to 64 players share a match; the server sends world state 30 times per second over UDP.
+  - Clients interpolate between updates.
+  - Each world-state update is delta-encoded and split by the application into datagrams of at most 1,200 bytes including headers, each independently decodable.
+  - Lost updates are not retransmitted; the next update supersedes them.
+  - Network assumptions: mobile and home Wi-Fi with up to 3% packet loss, 150 ms round trip, 40 ms jitter; path MTU discovered, 1,200-byte datagrams.
+  - End-to-end latency budget: 400 ms mouth-to-ear, split as capture 20, encode 20, network 150, jitter buffer 80, processing 100, playout 30.
+expect:
+  none_from_lens: true

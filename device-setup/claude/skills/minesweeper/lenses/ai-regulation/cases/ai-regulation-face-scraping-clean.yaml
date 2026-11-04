@@ -1,0 +1,14 @@
+schema_version: 1
+id: ai-regulation-face-scraping-clean
+kind: clean
+twin: ai-regulation-face-scraping-planted
+brief: |
+  Contoso Venue Access: face check-in for events in France and Spain
+
+  1. Guests walk through a gate camera instead of showing tickets.
+  2. Only guests who enrol a selfie with explicit consent at ticket purchase are in the recognition
+     index; others use a QR ticket. Enrolment data is deleted after the event.
+  3. The gate shows green or red within one second.
+  4. A human steward handles every red result.
+expect:
+  none_from_lens: true

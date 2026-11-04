@@ -1,0 +1,19 @@
+theme "cursor-dark"
+simplified_ui true
+pane_frames false
+
+themes {
+    cursor-dark {
+        fg "#cccccc"
+        bg "#1e1e1e"
+        black "#1e1e1e"
+        red "#f14c4c"
+        green "#6a9955"
+        yellow "#dcdcaa"
+        blue "#569cd6"
+        magenta "#c586c0"
+        cyan "#4ec9b0"
+        white "#ffffff"
+        orange "#ce9178"
+    }
+}

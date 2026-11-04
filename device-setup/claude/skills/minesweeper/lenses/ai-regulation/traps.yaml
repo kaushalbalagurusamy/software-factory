@@ -1,0 +1,124 @@
+schema_version: 1
+traps:
+  - id: ai-regulation.emotion-inference-work-education
+    aliases: [LEG-02]
+    title: Inferring emotions of workers or students (EU AI Act prohibited practice)
+    kind: requirement
+    cues:
+      - "detect frustration, stress or engagement from employees' webcams"
+      - "score student emotional engagement during online exams"
+      - "flag agents whose voice sounds angry or tired on calls"
+      - "mood analytics for the classroom dashboard"
+      - "sentiment of staff from video meetings"
+    principle: >-
+      Regulation (EU) 2024/1689 Article 5(1)(f) prohibits placing on the market, putting into service for this
+      purpose, or using AI systems to infer the emotions of a natural person in the areas of workplace and
+      education institutions, except where intended for medical or safety reasons. Article 5 sits in Chapter II,
+      applicable from 2 February 2025; Article 99(3) sets fines up to EUR 35 000 000 or 7 % of worldwide annual
+      turnover, whichever is higher.
+    sources: [eu-ai-act]
+    severity:
+      default: critical
+      blast_radius: >-
+        The feature is unlawful to sell or use in the EU workplace or education context; fines at the
+        Article 99(3) tier; trust harm to the monitored people.
+    remediation:
+      safe_route: >-
+        Remove emotion inference. Use explicit self-reporting, task-level signals that do not infer emotional
+        state, or a narrowly scoped medical or safety purpose confirmed by counsel.
+      invariant: No component infers the emotional state of workers or students in an EU workplace or education setting, except a documented medical or safety purpose.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Applies by place of market or use (see Article 2 for territorial scope); whether a non-EU deployment is
+      in scope is ask-owner. The medical-or-safety exception is narrow and must be argued, not assumed.
+  - id: ai-regulation.annex-iii-without-oversight-or-logs
+    aliases: [LEG-03]
+    title: Annex III high-risk use (hiring, credit, exam grading) run autonomously with no logs or human oversight
+    kind: requirement
+    cues:
+      - "agents screen and reject job applicants automatically"
+      - "fully automated credit scoring, no human in the loop"
+      - "grade student exams end to end without teacher review"
+      - "no need to keep decision logs"
+      - "autonomous multi-agent pipeline decides who gets an interview"
+    principle: >-
+      Under Regulation (EU) 2024/1689 Article 6(2), AI systems listed in Annex III are high-risk; Annex III
+      includes recruitment and selection (4(a)), creditworthiness and credit scoring (5(b)) and evaluation of
+      learning outcomes (3(b)). High-risk systems must technically allow automatic logging over their lifetime
+      (Article 12(1)), must be designed to be effectively overseen by natural persons (Article 14(1)); deployers
+      must assign competent human oversight (Article 26(2)) and keep logs under their control for at least six
+      months (Article 26(6)). Regulation (EU) 2026/1744 moved the application date of these obligations for
+      Annex III systems to 2 December 2027 (and 2 August 2028 for Annex I systems).
+    sources: [eu-ai-act, eu-ai-omnibus]
+    severity:
+      default: critical
+      blast_radius: >-
+        The system cannot lawfully be placed on the EU market or used once the obligations apply; people
+        affected by hiring, credit or grading decisions have no oversight or audit trail.
+    remediation:
+      safe_route: >-
+        Design for the high-risk requirements from the start: automatic tamper-evident event logs retained at
+        least six months, a human-oversight interface with authority to override or stop, and the provider
+        obligations of Chapter III Section 2. Check Article 6(3) only with counsel.
+      invariant: >-
+        Every decision path in an Annex III use case is logged automatically and can be reviewed, overridden or
+        halted by an assigned, competent human before it takes effect on a person.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Report claims corrected or unconfirmed: (1) the report says Recitals 99 and 100 extend high-risk duties
+      across every agent in a multi-agent chain; the adopted text of those recitals concerns general-purpose AI
+      models and systems, not multi-agent chains, so that claim is wrong. Whether each agent in a chain is
+      itself a high-risk system is a classification question for counsel (ask-owner). (2) Regulation (EU)
+      2026/1744 and its 2 December 2027 / 2 August 2028 dates are confirmed from the Official Journal text.
+      (3) The report's "24 months for biometric or law-enforcement logs" is unconfirmed and left out.
+      (4) Article 99(4) fines up to EUR 15 000 000 or 3 % apply to listed operator obligations; not quoted here.
+  - id: ai-regulation.undisclosed-ai-interaction
+    title: Chatbot or voice agent that does not tell people they are talking to an AI
+    kind: requirement
+    cues:
+      - "the assistant should pass as a human agent"
+      - "do not mention that replies are automated"
+      - "give the bot a human name and persona so customers trust it"
+      - "outbound voice agent that sounds like a real caller"
+    principle: >-
+      Regulation (EU) 2024/1689 Article 50(1): providers must ensure AI systems intended to interact directly
+      with natural persons are designed so those persons are informed they are interacting with an AI system,
+      unless obvious to a reasonably well-informed person in context. The Regulation applies generally from
+      2 August 2026 (Article 113).
+    sources: [eu-ai-act]
+    severity:
+      default: high
+      blast_radius: Transparency breach for every EU user conversation; deception harm to users.
+    remediation:
+      safe_route: Disclose AI interaction at the start of every conversation or call; a persona name is fine if the disclosure is clear.
+      invariant: Every direct AI interaction with a person discloses that it is an AI system unless that is obvious in context.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Article 50 has further duties (synthetic content marking, deep-fake disclosure) not covered by this trap.
+  - id: ai-regulation.untargeted-face-scraping
+    title: Building a face recognition database by untargeted scraping of images or CCTV
+    kind: requirement
+    cues:
+      - "crawl public social media photos to build our face index"
+      - "harvest faces from street camera footage for matching"
+      - "collect as many face images from the web as possible for recognition"
+    principle: >-
+      Regulation (EU) 2024/1689 Article 5(1)(e) prohibits AI systems that create or expand facial recognition
+      databases through the untargeted scraping of facial images from the internet or CCTV footage; Chapter II
+      applies from 2 February 2025 and Article 99(3) sets the highest fine tier.
+    sources: [eu-ai-act]
+    severity:
+      default: critical
+      blast_radius: Prohibited practice; the database and any product built on it are unlawful in the EU.
+    remediation:
+      safe_route: Use enrolment with explicit, informed consent of each person, or drop face recognition.
+      invariant: No facial image enters a recognition database except through targeted, consented enrolment.
+      spec_section: legal-terms
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Biometric data is also special-category data under GDPR Article 9 (see privacy-regulated-data).

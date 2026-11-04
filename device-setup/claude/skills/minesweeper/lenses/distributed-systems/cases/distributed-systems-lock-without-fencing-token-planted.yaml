@@ -1,0 +1,18 @@
+schema_version: 1
+id: distributed-systems-lock-without-fencing-token-planted
+kind: planted
+twin: distributed-systems-lock-without-fencing-token-clean
+brief: |
+  Project: payout service for a marketplace of independent tutors.
+  - A nightly job computes each tutor's earnings from completed lessons.
+  - Payout workers run on four autoscaled containers and pick tutors from a shared queue that delivers at least once.
+  - Fault model: workers may crash or pause at any point; all components run in our own cloud account and are trusted.
+  - Earnings periods are processed in order of period number.
+  - Before paying a tutor, a worker takes a cache-server lock on that tutor with a 10-second expiry; holding the lock is what guarantees a tutor is never paid twice.
+  - Payouts are sent through the bank's transfer API and recorded in the payouts table.
+  - Tutors receive an email receipt after each payout.
+  - Finance can export a monthly CSV of all payouts.
+expect:
+  traps:
+  - distributed-systems.lock-without-fencing-token
+  min_severity: high

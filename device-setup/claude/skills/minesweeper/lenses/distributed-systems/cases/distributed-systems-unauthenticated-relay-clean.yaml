@@ -1,0 +1,15 @@
+schema_version: 1
+id: distributed-systems-unauthenticated-relay-clean
+kind: clean
+twin: distributed-systems-unauthenticated-relay-planted
+brief: |
+  Project: environmental sensor network for a chain of cold-storage warehouses.
+  Fault model: up to one of the four regional aggregators may be faulty or compromised; we run a BFT quorum of four aggregators.
+  - Each warehouse has 40 temperature sensors on a low-power mesh.
+  - Sensors without a direct uplink hand their readings to neighbouring sensors, which forward them unchanged; each reading carries a MAC from the originating sensor's provisioned key over (sensor id, sequence number, value), and aggregators reject unverified or replayed readings. Sensors are added only through the signed site roster.
+  - Aggregators agree on an hourly compliance record and archive it for audit.
+  - Alarm thresholds are configured per room by the facilities team.
+  - Sensors report every minute and retransmit until an aggregator acknowledges; aggregators deduplicate by (sensor id, sequence number) and order readings per sensor by sequence number.
+  - Dashboard and weekly PDF report for quality managers.
+expect:
+  none_from_lens: true

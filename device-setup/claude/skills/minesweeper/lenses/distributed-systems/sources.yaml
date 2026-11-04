@@ -1,0 +1,163 @@
+schema_version: 1
+sources:
+  - id: lamport-pubs
+    title: Leslie Lamport, My Writings (author's annotated list of his papers, with commentary on each result)
+    url: https://lamport.azurewebsites.net/pubs/pubs.html
+    adapter: web_page
+    tier: primary
+    kind: paper
+    notes: >-
+      Author's own statement of the results of Pease, Shostak, Lamport (JACM 1980), Lamport, Shostak,
+      Pease (TOPLAS 1982) and Lamport (CACM 1978). The Microsoft Research publication pages for these
+      papers were fetched and carry only the anecdote, not the theorem statement, so this author page is
+      used instead. The paper PDFs are not parsed by the HTML adapter.
+    quotes:
+      - text: >-
+          This paper shows that "Byzantine" faults, in which a faulty processor sends inconsistent
+          information to the other processors, can defeat any traditional three-processor algorithm.
+        locator: Entry "Reaching Agreement in the Presence of Faults" (Pease, Shostak, Lamport, JACM 1980), commentary
+        fetched: '2026-10-14'
+        supports: [distributed-systems.cft-in-byzantine-setting]
+      - text: >-
+          In general, 3n+1 processors are needed to tolerate n faults. However, if digital signatures
+          are used, 2n+1 processors are enough.
+        locator: Entry "Reaching Agreement in the Presence of Faults" (Pease, Shostak, Lamport, JACM 1980), commentary
+        fetched: '2026-10-14'
+        supports: [distributed-systems.cft-in-byzantine-setting, distributed-systems.unauthenticated-relay]
+      - text: >-
+          The builders claimed that it would maintain consistency despite any number of non-Byzantine
+          faults, and would make progress if any majority of the processors were working.
+        locator: Entry "The Part-Time Parliament" (Paxos, TOCS 1998), commentary
+        fetched: '2026-10-14'
+        supports: [distributed-systems.cft-in-byzantine-setting]
+      - text: >-
+          There is a problem in distributed computing that is sometimes called the Chinese Generals
+          Problem, in which two generals have to come to a common agreement on whether to attack or
+          retreat, but can communicate only by sending messengers who might never arrive.
+        locator: Entry "The Byzantine Generals Problem" (Lamport, Shostak, Pease, TOPLAS 1982), commentary
+        fetched: '2026-10-14'
+        supports: [distributed-systems.two-generals-simultaneous-action]
+      - text: >-
+          Special relativity teaches us that there is no invariant total ordering of events in
+          space-time; different observers can disagree about which of two events happened first. There
+          is only a partial order in which an event e1 precedes an event e2 iff e1 can causally affect e2.
+        locator: Entry "Time, Clocks and the Ordering of Events in a Distributed System" (CACM 1978), commentary
+        fetched: '2026-10-14'
+        supports: [distributed-systems.wall-clock-ordering]
+  - id: pbft-osdi99
+    title: Castro and Liskov (1999). Practical Byzantine Fault Tolerance. OSDI 99. Section 3, Service Properties (USENIX HTML full paper)
+    url: https://www.usenix.org/legacy/events/osdi99/full_papers/castro/castro_html/node3.html
+    adapter: paper
+    tier: primary
+    kind: paper
+    notes: The pmg.csail.mit.edu PDF refused the connection; the USENIX HTML edition of the same paper is used.
+    quotes:
+      - text: >-
+          The resiliency of our algorithm is optimal: 3f+1 is the minimum number of replicas that allow
+          an asynchronous system to provide the safety and liveness properties when up to freplicas are
+          faulty (see [2]
+        locator: Section 3, Service Properties
+        fetched: '2026-10-14'
+        supports: [distributed-systems.cft-in-byzantine-setting]
+      - text: >-
+          it must rely on synchrony to provide liveness; otherwise it could be used to implement
+          consensus in an asynchronous system, which is not possible
+        locator: Section 3, Service Properties (citing Fischer, Lynch, Paterson as reference [9])
+        fetched: '2026-10-14'
+        supports: [distributed-systems.consensus-guaranteed-termination]
+  - id: pbft-osdi99-model
+    title: Castro and Liskov (1999). Practical Byzantine Fault Tolerance. OSDI 99. Section 2, System Model (USENIX HTML full paper)
+    url: https://www.usenix.org/legacy/events/osdi99/full_papers/castro/castro_html/node2.html
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: >-
+          We use a Byzantine failure model, i.e., faulty nodes may behave arbitrarily, subject only to
+          the restriction mentioned below. We assume independent node failures.
+        locator: Section 2, System Model
+        fetched: '2026-10-14'
+        supports: [distributed-systems.cft-in-byzantine-setting, distributed-systems.unauthenticated-relay]
+      - text: >-
+          We use cryptographic techniques to prevent spoofing and replays and to detect corrupted
+          messages.
+        locator: Section 2, System Model
+        fetched: '2026-10-14'
+        supports: [distributed-systems.unauthenticated-relay]
+  - id: flp-1985
+    title: Fischer, Lynch, Paterson (1985). Impossibility of Distributed Consensus with One Faulty Process. JACM 32(2). DOI 10.1145/3149.214
+    url: https://doi.org/10.1145/3149.214
+    adapter: paper
+    tier: primary
+    kind: paper
+    notes: >-
+      Not quotable by the fetcher on 2026-10-14: doi.org/ACM DL returned 404/403, the author copy at
+      groups.csail.mit.edu is a PDF the HTML adapter cannot parse, and Crossref holds no abstract for this
+      DOI. The trap that cites it stays unverified until an HTML or text copy is available.
+  - id: halpern-moses
+    title: Halpern and Moses. Knowledge and Common Knowledge in a Distributed Environment (arXiv cs/0006009; JACM 37(3), 1990)
+    url: https://arxiv.org/abs/cs/0006009
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: >-
+          Furthermore, it is shown that, formally speaking, in practical systems common knowledge cannot
+          be attained.
+        locator: Abstract
+        fetched: '2026-10-14'
+        supports: [distributed-systems.two-generals-simultaneous-action]
+  - id: chubby-osdi06
+    title: Burrows (2006). The Chubby lock service for loosely-coupled distributed systems. OSDI 06 (USENIX HTML).
+    url: https://www.usenix.org/legacy/event/osdi06/tech/full_papers/burrows/burrows_html/
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: >-
+          Thus, a process holding a lock L may issue a request R, but then fail. Another process may
+          acquire L and perform some action before R arrives at its destination. If R later arrives, it
+          may be acted on without the protection of L, and potentially on inconsistent data.
+        locator: Section 2.4, Locks and sequencers
+        fetched: '2026-10-14'
+        supports: [distributed-systems.lock-without-fencing-token]
+      - text: >-
+          The client passes the sequencer to servers (such as file servers) if it expects the operation
+          to be protected by the lock. The recipient server is expected to test whether the sequencer is
+          still valid and has the appropriate mode; if not, it should reject the request.
+        locator: Section 2.4, Locks and sequencers
+        fetched: '2026-10-14'
+        supports: [distributed-systems.lock-without-fencing-token]
+  - id: raft-site
+    title: The Raft Consensus Algorithm (authors' site, Ongaro and Ousterhout)
+    url: https://raft.github.io/
+    adapter: web_page
+    tier: primary
+    kind: spec
+    notes: >-
+      The ATC 14 paper itself (raft.github.io/raft.pdf) is a PDF; the USENIX landing page carries only
+      the abstract, which does not state the fault model. This authors' page states the majority rule.
+    quotes:
+      - text: >-
+          progress when any majority of their servers is available; for example, a cluster of 5 servers
+          can continue to operate even if 2 servers fail. If more servers fail, they stop making progress
+        locator: Section "What is Raft?"
+        fetched: '2026-10-14'
+        supports: [distributed-systems.cft-in-byzantine-setting]
+  - id: kafka-semantics
+    title: Apache Kafka 4.3 documentation, Design, Message Delivery Semantics
+    url: https://kafka.apache.org/43/design/design/
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: >-
+          Exactly-once delivery for other destination systems generally requires cooperation with such
+          systems, but Kafka provides the primitives which makes implementing this feasible
+        locator: Design, Message Delivery Semantics
+        fetched: '2026-10-14'
+        supports: [distributed-systems.exactly-once-delivery]
+      - text: Otherwise, Kafka guarantees at-least-once delivery by default
+        locator: Design, Message Delivery Semantics
+        fetched: '2026-10-14'
+        supports: [distributed-systems.exactly-once-delivery]

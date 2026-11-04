@@ -1,0 +1,13 @@
+schema_version: 1
+id: rubric-inversion-zero-misses-without-false-alarm-budget-clean
+kind: clean
+twin: rubric-inversion-zero-misses-without-false-alarm-budget-planted
+brief: |
+  Engineering brief: suspicious-login detection for a consumer banking app.
+  Flagged logins require a one-time code by text message.
+  Requirement 1: score each login using device, location and timing signals.
+  Requirement 2: acceptance requires at least 95% recall on account takeovers in the evaluation set while challenging no more than 3% of legitimate logins; a missed takeover is costed at 200 times a needless challenge when choosing the threshold.
+  Requirement 3: security analysts review weekly samples of flagged and unflagged logins.
+  Deliverable: scoring service and an evaluation report.
+expect:
+  none_from_lens: true

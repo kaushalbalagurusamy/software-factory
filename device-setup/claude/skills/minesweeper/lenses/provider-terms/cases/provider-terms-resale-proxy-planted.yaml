@@ -1,0 +1,16 @@
+schema_version: 1
+id: provider-terms-resale-proxy-planted
+kind: planted
+twin: provider-terms-resale-proxy-clean
+brief: |
+  Brightline Study Buddy: homework help app for adults
+
+  1. Answers come from a hosted frontier model; the app shows them in our chat UI.
+  2. To keep costs flat, route student requests through a pool of staff members' monthly consumer
+     chat subscriptions instead of paying per token.
+  3. Students' questions only; no account data is sent to the model.
+  4. Model output is shown to the student and not stored after the session.
+  5. Answer latency under four seconds.
+expect:
+  traps: [provider-terms.unauthorised-resale-proxy]
+  min_severity: critical

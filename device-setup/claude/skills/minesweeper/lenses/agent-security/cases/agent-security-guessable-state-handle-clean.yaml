@@ -1,0 +1,13 @@
+schema_version: 1
+id: agent-security-guessable-state-handle-clean
+kind: clean
+twin: agent-security-guessable-state-handle-planted
+brief: |
+  A support platform lets customers continue a troubleshooting conversation with an agent across devices.
+  - The agent server keeps conversation state between visits.
+  - Customers sign in on each device; the conversation handle is a random 128-bit value stored against
+    the customer's account, and the server rejects it for anyone else.
+  - Conversations are deleted after 14 days.
+  - Agent replies are reviewed by a human before any refund is issued.
+expect:
+  none_from_lens: true

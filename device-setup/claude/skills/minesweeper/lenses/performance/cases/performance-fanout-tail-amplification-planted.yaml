@@ -1,0 +1,17 @@
+schema_version: 1
+id: performance-fanout-tail-amplification-planted
+kind: planted
+twin: performance-fanout-tail-amplification-clean
+brief: |
+  A property management SaaS - portfolio dashboard
+
+  - Landlords see occupancy, rent due and open repairs across all their buildings.
+  - Each building's data lives in its own tenant service (up to 80 per landlord).
+  - On every dashboard load we call all of a landlord's building services in parallel and wait for every answer; since each service meets 20 ms at p99, the dashboard will also load in 20 ms at p99.
+  - Repairs can be filed from the dashboard.
+  - Load model: peak 2,000 requests per second, payloads under 20 KB, up to 5,000 concurrent sessions.
+  - Latency is measured at the API edge; infrastructure and data-transfer cost must stay under $0.02 per active user per month.
+expect:
+  traps:
+  - performance.fanout-tail-amplification
+  min_severity: high

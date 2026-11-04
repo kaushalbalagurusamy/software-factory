@@ -1,0 +1,15 @@
+schema_version: 1
+id: databases-omits-partition-behaviour
+kind: omission
+twin: databases-omits-partition-behaviour-clean
+brief: |
+  Project: loyalty points for a chain of 300 coffee shops across three countries.
+  - Points are stored in a replicated database with replicas in each country.
+  - Customers earn points at the till and spend them in the app.
+  - Each customer's points live in their home country with synchronous replication; reads elsewhere may lag by up to 5 seconds.
+  - Earning and spending run as SERIALIZABLE transactions retried on conflict.
+  - Point changes are written with an outbox row in the same transaction; the analytics feed consumes from it by event id.
+  - Monthly reports summarise points issued and redeemed.
+expect:
+  omissions:
+  - databases.partition-behaviour

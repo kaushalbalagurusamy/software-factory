@@ -1,0 +1,14 @@
+schema_version: 1
+id: copyright-data-rights-circumvention-clean
+kind: clean
+twin: copyright-data-rights-circumvention-planted
+brief: |
+  Northwind Learn: textbook question generator
+
+  1. Generate practice questions from popular university textbooks.
+  2. Obtain textbook text through licensing agreements with the publishers, delivered as licensed
+     text files; no DRM or access control is bypassed.
+  3. Questions are reviewed by tutors before release.
+  4. Record which book and which licence each question came from.
+expect:
+  none_from_lens: true

@@ -1,0 +1,161 @@
+schema_version: 1
+traps:
+  - id: agent-orchestration.unbounded-agent-loop
+    aliases: [AGT-01]
+    title: Agent loop with no iteration, token or time budget and a goal-only stop rule
+    kind: requirement
+    cues:
+      - "iterate until the reviewer is satisfied"
+      - "keep refining until the score reaches 100%"
+      - "agents debate until they agree"
+      - "retry until the tests pass"
+      - "can spawn as many sub-agents as needed"
+      - "runs autonomously until the task is complete"
+      - "rubric rewards fully autonomous completion with no human hand-off"
+    principle: >-
+      An LLM application that allows excessive and uncontrolled inference exposes the operator to
+      denial of service and economic loss; the controls are timeouts, throttling and caps on queued
+      and total actions, and clients should time out tool calls. A stop rule that fires only when the
+      goal is reached is not a halting condition: a model that never satisfies the critic loops
+      until an external limit (rate limit, credit, quota) stops it.
+    sources: [owasp-llm10-unbounded-consumption, mcp-spec-tools]
+    severity:
+      default: high
+      blast_radius: Runaway spend, exhausted shared API quotas and stalled queues for every tenant on the same account; repeated side-effecting tool calls if the loop also acts.
+    remediation:
+      safe_route: Give every loop an iteration cap, a token or cost ceiling and a wall-clock limit enforced by the orchestrator (not the model), halt on repeated identical tool calls or no progress, and hand unresolved work to a human queue.
+      invariant: For every agent run, iterations <= N, tokens <= T and elapsed <= W are enforced outside the model; reaching any cap ends the run in an explicit escalated state, never a silent retry.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Report figures such as "N <= 3 revisions" are a design choice, not a source rule; the cap value is the owner's call.
+  - id: agent-orchestration.irreversible-action-without-gate
+    aliases: [AGT-02]
+    title: Agent executes irreversible external actions straight from model output
+    kind: requirement
+    cues:
+      - "the assistant can issue refunds directly"
+      - "agent deletes accounts on request"
+      - "agent runs SQL against production"
+      - "sends emails to customers automatically"
+      - "deploys to production without waiting for review"
+      - "no human in the loop so customers never wait"
+      - "acts on the user's behalf end to end"
+    principle: >-
+      Excessive Agency is damaging action taken in response to unexpected, ambiguous or manipulated
+      model output, whatever its cause (hallucination or prompt injection); the mitigation is
+      human-in-the-loop approval of high-impact actions. The MCP specification says a human SHOULD be
+      able to deny tool invocations, clients SHOULD confirm sensitive operations, and hosts must obtain
+      consent before invoking tools. A database rollback cannot undo an email, a payment or a deploy.
+    sources: [owasp-llm06-excessive-agency, mcp-spec-tools, mcp-spec-overview]
+    severity:
+      default: critical
+      blast_radius: Money moved, data destroyed or messages sent to third parties on the strength of one manipulated chat turn; no way to undo them.
+    remediation:
+      safe_route: The agent proposes a structured action; a deterministic policy check validates it; irreversible or high-value actions wait for human approval; multi-step writes run under an orchestrator with compensating actions and idempotency keys.
+      invariant: No irreversible or externally visible action executes unless a policy engine outside the model allowed it and, above the stated threshold, a named human approved it; every multi-step write has a defined compensation.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: The report also ties this to EU AI Act Articles 12, 14 and 15; those apply to high-risk AI systems only and belong to the ai-regulation lens. Not asserted here.
+  - id: agent-orchestration.non-idempotent-retry
+    title: Agent retries side-effecting tool calls with no idempotency or applied-check
+    kind: requirement
+    cues:
+      - "if the call times out, just call it again"
+      - "retry the payment until it succeeds"
+      - "the agent re-sends the message if it gets no reply"
+      - "automatic retries on every tool error"
+      - "self-healing agent re-runs failed steps"
+    principle: >-
+      A request is idempotent when repeating it has the same intended effect as sending it once; a
+      client should not automatically retry a non-idempotent request unless it knows the semantics are
+      idempotent or can detect that the original was never applied. A timeout does not mean the
+      action failed.
+    sources: [rfc9110-idempotent]
+    severity:
+      default: high
+      blast_radius: Duplicate charges, refunds, orders or messages whenever a downstream call is slow; the agent reports success once and the customer sees it twice.
+    remediation:
+      safe_route: Attach a client-generated idempotency key to every side-effecting call and reuse it on retry, or query the outcome before retrying; cap retries.
+      invariant: Every side-effecting tool call is either idempotent by contract or carries an idempotency key reused across retries; retries are bounded.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+  - id: agent-orchestration.standing-broad-credentials
+    title: Agent holds a standing admin or all-tenant credential
+    kind: requirement
+    cues:
+      - "the agent uses the admin service account"
+      - "give the agent full API access to keep things simple"
+      - "one long-lived key for all integrations"
+      - "read-write access to every table"
+      - "the bot has org-wide permissions"
+    principle: >-
+      An extension that acts for an individual user must not reach downstream systems with a generic
+      high-privileged identity; permissions are limited to the minimum necessary and enforced by the
+      downstream system. Broad up-front scopes increase the impact of token compromise and obscure
+      audit trails; scopes should start minimal and elevate per operation.
+    sources: [owasp-llm06-excessive-agency, mcp-spec-security-best-practices]
+    severity:
+      default: high
+      blast_radius: One injected instruction or one leaked token reaches every tenant's data and every write the service account can do.
+    remediation:
+      safe_route: Issue short-lived tokens scoped to the acting user and the task's tools; separate read and write identities; elevate scope per sensitive operation with approval.
+      invariant: Each agent action is authorised with a credential no broader than the acting user's rights and the task's declared tools, and expires with the task.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+  - id: agent-orchestration.delegation-without-least-privilege
+    title: Coordinator agent hands its full authority to sub-agents, which self-authorise
+    kind: requirement
+    cues:
+      - "sub-agents inherit the coordinator's token"
+      - "pass the user's credentials down to each helper agent"
+      - "agents decide among themselves whether an action is allowed"
+      - "the planner agent grants tools to workers as needed"
+      - "agents trust messages from other agents"
+    principle: >-
+      A compromised peer agent is a named trigger of Excessive Agency; actions taken for a user must
+      run in that user's context with minimum privilege, and authorisation belongs in downstream
+      systems (complete mediation) rather than in a model's judgement. MCP servers must not accept
+      tokens that were not issued for them, which rules out passing one token down a chain.
+    sources: [owasp-llm06-excessive-agency, mcp-spec-security-best-practices]
+    severity:
+      default: high
+      blast_radius: Compromise of any one agent in the chain (by injected content) yields the coordinator's full authority; no downstream check stops it.
+    remediation:
+      safe_route: Mint a narrowed, audience-bound credential per sub-agent and task; enforce authorisation in each downstream service on every call; treat inter-agent messages as untrusted input.
+      invariant: A sub-agent's effective permissions are a subset of its parent's and of the task's declared needs, and every downstream call is authorised by the downstream system, not by an agent.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+  - id: agent-orchestration.no-action-audit-trail
+    title: No record of which agent did what under which identity
+    kind: omission
+    cues:
+      - "we don't need logs of the agent's actions"
+      - "the chat transcript is the record"
+      - "tool calls are not stored to save cost"
+      - "logs are kept only for errors"
+    principle: >-
+      Logging and monitoring the activity of LLM extensions and downstream systems is the named way
+      to find where undesirable actions are taking place; passing tokens through makes downstream
+      logs show the wrong identity. Without per-action records an operator cannot detect, attribute
+      or reverse agent mistakes.
+    sources: [owasp-llm06-excessive-agency, mcp-spec-security-best-practices]
+    severity:
+      default: medium
+      blast_radius: Incidents caused by the agent cannot be reconstructed, attributed or reversed; other controls cannot be shown to work.
+    remediation:
+      safe_route: Record every tool call with arguments, acting agent and user identity, approval reference and outcome in an append-only store with a stated retention.
+      invariant: For every side-effecting action there is a log record naming the agent, the user it acted for, the approval (if any) and the result.
+      spec_section: crypto-agent-security
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"

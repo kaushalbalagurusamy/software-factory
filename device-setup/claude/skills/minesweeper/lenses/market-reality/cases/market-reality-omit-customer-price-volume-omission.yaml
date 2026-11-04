@@ -1,0 +1,14 @@
+schema_version: 1
+id: market-reality-omit-customer-price-volume-omission
+kind: omission
+twin: market-reality-omit-customer-price-volume-clean
+brief: |
+  Acme Garden is a plant-identification app with a paid plan.
+  Users photograph a plant and get its name, care instructions and watering reminders.
+  The one thing that must work: toxic plants are never identified as safe for pets.
+  Requirements:
+  - Identify a plant from one photo.
+  - Remind the user when to water, based on species and season.
+  - Work offline for previously identified plants.
+expect:
+  omissions: [market-reality.customer-price-volume]

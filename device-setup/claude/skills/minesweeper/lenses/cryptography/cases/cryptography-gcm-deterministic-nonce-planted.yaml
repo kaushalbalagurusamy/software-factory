@@ -1,0 +1,15 @@
+schema_version: 1
+id: cryptography-gcm-deterministic-nonce-planted
+kind: planted
+twin: cryptography-gcm-deterministic-nonce-clean
+brief: |
+  A telehealth vendor encrypts visit notes at rest across a fleet of stateless API workers.
+  - Notes are encrypted with AES-256-GCM under a per-tenant key held in the cloud key service.
+  - So the workers need no shared state, each worker builds the 96-bit IV from the note's id and the
+    tenant id; a note is re-encrypted under the same IV when it is edited.
+  - Keys rotate yearly; old keys stay available for decryption only.
+  - Each note is under 64 KB; about 2 million notes per day.
+expect:
+  traps:
+  - cryptography.gcm-deterministic-nonce
+  min_severity: high

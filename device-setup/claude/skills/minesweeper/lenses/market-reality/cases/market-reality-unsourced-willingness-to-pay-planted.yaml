@@ -1,0 +1,15 @@
+schema_version: 1
+id: market-reality-unsourced-willingness-to-pay-planted
+kind: planted
+twin: market-reality-unsourced-willingness-to-pay-clean
+brief: |
+  A regional clinic network wants a symptom-diary app for patients with chronic conditions.
+  Patients will obviously pay $15 a month for it out of pocket, so the business plan and the
+  hiring plan assume 20,000 paying patients in year one, each logging twice a day.
+  Requirements:
+  - Log symptoms, medications and mood in under a minute.
+  - The one thing that must work: entries are never lost and are shown to the clinician in order.
+  - Export a summary before each appointment.
+expect:
+  traps: [market-reality.unsourced-willingness-to-pay]
+  min_severity: medium

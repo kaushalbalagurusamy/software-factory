@@ -1,0 +1,8 @@
+
+eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+
+
+# Local user tools
+export PATH="__HOME__/.local/bin:$PATH"
+
+export PATH="__HOME__/.local/share/solana/install/active_release/bin:$PATH"

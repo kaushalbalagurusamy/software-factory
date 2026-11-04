@@ -1,0 +1,46 @@
+schema_version: 1
+sources:
+  - id: dsm-2019-790
+    title: Directive (EU) 2019/790 on copyright and related rights in the Digital Single Market, Official Journal text
+    url: https://publications.europa.eu/resource/cellar/214471fe-786e-11e9-9f05-01aa75ed71a1.0006.03/DOC_1
+    adapter: web_page
+    tier: primary
+    kind: statute
+    notes: EU Publications Office (Cellar) English XHTML of CELEX 32019L0790; EUR-Lex HTML returns a bot challenge to automated fetches. A directive applies through each Member State's transposition.
+    quotes:
+      - text: Member States shall provide for an exception or limitation to the rights provided for in Article 5(a) and Article 7(1) of Directive 96/9/EC, Article 2 of Directive 2001/29/EC, Article 4(1)(a) and (b) of Directive 2009/24/EC and Article 15(1) of this Directive for reproductions and extractions of lawfully accessible works and other subject matter for the purposes of text and data mining.
+        locator: Article 4(1)
+        fetched: "2026-10-14"
+        supports: [copyright-data-rights.tdm-ignoring-opt-out, copyright-data-rights.circumvent-access-controls]
+      - text: The exception or limitation provided for in paragraph 1 shall apply on condition that the use of works and other subject matter referred to in that paragraph has not been expressly reserved by their rightholders in an appropriate manner, such as machine-readable means in the case of content made publicly available online.
+        locator: Article 4(3)
+        fetched: "2026-10-14"
+        supports: [copyright-data-rights.tdm-ignoring-opt-out]
+  - id: usc-17-1201
+    title: 17 U.S.C. 1201 Circumvention of copyright protection systems
+    url: https://www.law.cornell.edu/uscode/text/17/1201
+    adapter: web_page
+    tier: primary
+    kind: statute
+    notes: Cornell LII reproduction of the US Code; uscode.house.gov returned "Page Not Found" to automated fetches on 2026-10-14.
+    quotes:
+      - text: No person shall circumvent a technological measure that effectively controls access to a work protected under this title.
+        locator: 1201(a)(1)(A)
+        fetched: "2026-10-14"
+        supports: [copyright-data-rights.circumvent-access-controls]
+  - id: eu-ai-act
+    title: Regulation (EU) 2024/1689 (Artificial Intelligence Act), Official Journal text
+    url: https://publications.europa.eu/resource/cellar/dc8116a1-3fe6-11ef-865a-01aa75ed71a1.0006.03/DOC_1
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: EU Publications Office (Cellar) English XHTML of CELEX 32024R1689. Regulation (EU) 2026/1744 did not amend Article 53 (checked 2026-10-14).
+    quotes:
+      - text: put in place a policy to comply with Union law on copyright and related rights, and in particular to identify and comply with, including through state-of-the-art technologies, a reservation of rights expressed pursuant to Article 4(3) of Directive (EU) 2019/790;
+        locator: Article 53(1)(c)
+        fetched: "2026-10-14"
+        supports: [copyright-data-rights.tdm-ignoring-opt-out, copyright-data-rights.gpai-without-copyright-policy-or-summary]
+      - text: draw up and make publicly available a sufficiently detailed summary about the content used for training of the general-purpose AI model, according to a template provided by the AI Office.
+        locator: Article 53(1)(d)
+        fetched: "2026-10-14"
+        supports: [copyright-data-rights.gpai-without-copyright-policy-or-summary]

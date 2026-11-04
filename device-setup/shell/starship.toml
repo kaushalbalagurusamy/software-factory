@@ -1,0 +1,17 @@
+# Clean Minimalist Starship Prompt
+
+format = "$directory$git_branch$character"
+add_newline = false
+
+[directory]
+style = "bold white"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+style = "#808080"
+format = " [$branch]($style)"
+
+[character]
+success_symbol = " ❯ "
+error_symbol = " ❯ "

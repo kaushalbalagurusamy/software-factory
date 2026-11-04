@@ -1,0 +1,109 @@
+{
+  "model": "sonnet",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"__HOME__/Projects/software-factory/.venv/bin/python\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/sf-reminder.py\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"__HOME__/Projects/software-factory/.venv/bin/python\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/state-snapshot.py\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"__HOME__/Projects/software-factory/.venv/bin/python\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/sf-reminder.py\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"__HOME__/Projects/software-factory/.venv/bin/python\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/state-snapshot.py\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"__HOME__/Projects/software-factory/.venv/bin/python\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/subagent-ledger.py\""
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "python3 ~/.claude/statusline.py",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "slack@claude-plugins-official": false,
+    "claude-code-setup@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "figma@claude-plugins-official": false,
+    "gitlab@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "stripe@claude-plugins-official": false,
+    "supabase@claude-plugins-official": false,
+    "firecrawl@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": false,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "atomic-agents@claude-plugins-official": false,
+    "claude-security@claude-plugins-official": true,
+    "sourcegraph@claude-plugins-official": false,
+    "railway@claude-plugins-official": true,
+    "redis-development@claude-plugins-official": false,
+    "ponytail@ponytail": true,
+    "oh-my-mermaid@oh-my-mermaid": true
+  },
+  "extraKnownMarketplaces": {
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "oh-my-mermaid": {
+      "source": {
+        "source": "github",
+        "repo": "oh-my-mermaid/oh-my-mermaid"
+      }
+    }
+  },
+  "modelSettings": {
+    "claude-sonnet-5": {
+      "effortLevel": "medium"
+    }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
+  "switchModelsOnFlag": false,
+  "agentPushNotifEnabled": true
+}

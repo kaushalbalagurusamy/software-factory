@@ -1,0 +1,109 @@
+schema_version: 1
+sources:
+  - id: sklearn-pitfalls
+    title: "scikit-learn User Guide: Common pitfalls and recommended practices (data leakage)"
+    url: https://scikit-learn.org/stable/common_pitfalls.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: Data leakage occurs when information that would not be available at prediction time is used when building the model. This results in overly optimistic performance estimates, for example from cross-validation, and thus poorer performance when the model is used on actually novel data, for example during production.
+        locator: 12.2 Data leakage
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.preprocessing-leakage]
+      - text: The general rule is to never call fit on the test data. While this may sound obvious, this is easy to miss in some cases, for example when applying certain pre-processing steps.
+        locator: 12.2 Data leakage
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.preprocessing-leakage]
+  - id: sklearn-cv
+    title: "scikit-learn User Guide: Cross-validation (grouped and time-series splits)"
+    url: https://scikit-learn.org/stable/modules/cross_validation.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: If one knows that the samples have been generated using a time-dependent process, it is safer to use a time-series aware cross-validation scheme. Similarly, if we know that the generative process has a group structure (samples collected from different subjects, experiments, measurement devices), it is safer to use group-wise cross-validation.
+        locator: 3.1.2.1 Cross-validation iterators for i.i.d. data, Note
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.random-split-on-dependent-data]
+      - text: classical cross-validation techniques such as KFold and ShuffleSplit assume the samples are independent and identically distributed, and would result in unreasonable correlation between training and testing instances (yielding poor estimates of generalization error) on time series data.
+        locator: 3.1.2.6 Cross validation of time series data
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.random-split-on-dependent-data]
+  - id: kaufman-2012
+    title: Kaufman, Rosset, Perlich, Stitelman, Leakage in Data Mining - Formulation, Detection, and Avoidance (ACM TKDD 6(4), 2012; KDD 2011)
+    url: https://doi.org/10.1145/2382577.2382579
+    adapter: paper
+    tier: primary
+    kind: paper
+    notes: ACM Digital Library returns HTTP 403 to the adapter (2026-10-14). Background reading only; no trap cites it, so no trap depends on an unquoted source.
+  - id: guo-2017
+    title: Guo, Pleiss, Sun, Weinberger, On Calibration of Modern Neural Networks (ICML 2017)
+    url: https://arxiv.org/abs/1706.04599
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: We discover that modern neural networks, unlike those from a decade ago, are poorly calibrated.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.uncalibrated-scores-as-probabilities]
+  - id: sklearn-calibration
+    title: "scikit-learn User Guide: Probability calibration"
+    url: https://scikit-learn.org/stable/modules/calibration.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: Some models can give you poor estimates of the class probabilities and some even do not support probability prediction
+        locator: 1.16 Probability calibration
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.uncalibrated-scores-as-probabilities]
+      - text: a well calibrated (binary) classifier should classify the samples such that among the samples to which it gave a predict_proba value close to, say, 0.8, approximately 80% actually belong to the positive class.
+        locator: 1.16 Probability calibration
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.uncalibrated-scores-as-probabilities]
+  - id: sklearn-metrics
+    title: "scikit-learn User Guide: Metrics and scoring"
+    url: https://scikit-learn.org/stable/modules/model_evaluation.html
+    adapter: web_page
+    tier: primary
+    kind: docs
+    quotes:
+      - text: if the conventional accuracy is above chance only because the classifier takes advantage of an imbalanced test set, then the balanced accuracy, as appropriate, will drop to
+        locator: 3.4.4.4 Balanced accuracy score
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.accuracy-on-imbalanced-classes]
+  - id: saito-2015
+    title: Saito, Rehmsmeier, The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets (PLOS ONE 10(3), 2015)
+    url: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118432
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: We show here that the visual interpretability of ROC plots in the context of imbalanced datasets can be deceptive with respect to conclusions about the reliability of classification performance, owing to an intuitive but wrong interpretation of specificity.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.accuracy-on-imbalanced-classes]
+  - id: sainz-2023
+    title: Sainz et al., NLP Evaluation in trouble - On the Need to Measure LLM Data Contamination for each Benchmark (Findings of EMNLP 2023)
+    url: https://arxiv.org/abs/2310.18018
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: Contamination causes an overestimation of the performance of a contaminated model in a target benchmark and associated task with respect to their non-contaminated counterparts.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.benchmark-contamination]
+  - id: koh-2021
+    title: Koh et al., WILDS - A Benchmark of in-the-Wild Distribution Shifts (ICML 2021)
+    url: https://arxiv.org/abs/2012.07421
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: On each dataset, we show that standard training yields substantially lower out-of-distribution than in-distribution performance.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [ml-evaluation.in-distribution-only-evaluation]

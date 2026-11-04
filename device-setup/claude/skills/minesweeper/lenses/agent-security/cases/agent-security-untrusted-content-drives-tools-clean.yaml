@@ -1,0 +1,13 @@
+schema_version: 1
+id: agent-security-untrusted-content-drives-tools-clean
+kind: clean
+twin: agent-security-untrusted-content-drives-tools-planted
+brief: |
+  A recruiting firm wants an inbox assistant for its recruiters.
+  - Connects to the recruiter's mailbox, calendar and the candidate database.
+  - Must support English and Spanish.
+  - It reads incoming email and drafts suggested actions; while an external email is open it can only read,
+    and every forward, record change or booking is shown in full for the recruiter to confirm.
+  - Keep an audit trail of every change the assistant makes.
+expect:
+  none_from_lens: true

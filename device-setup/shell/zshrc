@@ -1,0 +1,149 @@
+eval "$(fnm env --use-on-cd)"
+gemini() {
+    # Find the current version in the npx cache
+    local package_json=$(find "$HOME/.npm/_npx" -maxdepth 5 -name "package.json" -path "*/@google/gemini-cli/package.json" -exec ls -t {} + 2>/dev/null | head -n 1)
+    local old_version=""
+    local installed_date=""
+    if [[ -n "$package_json" && -f "$package_json" ]]; then
+        old_version=$(grep '"version":' "$package_json" | head -n 1 | cut -d'"' -f4)
+        installed_date=$(stat -f "%Sm" "$package_json" 2>/dev/null)
+    fi
+
+    local target_tag="latest"
+    local boot_version="$old_version"
+
+    # Handle tag selection
+    local gemini_args=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --preview|--nightly|--stable)
+                target_tag="${1#--}"
+                [[ "$target_tag" == "stable" ]] && target_tag="latest"
+                shift
+                ;;
+            *)
+                gemini_args+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    # Check for updates if interactive
+    if [[ -t 1 ]]; then
+        printf "gemini booting... (checking versions)\r"
+        local info=$(npm show @google/gemini-cli --json 2>/dev/null)
+        if [[ $? -eq 0 && -n "$info" ]]; then
+            local latest_ver=$(echo "$info" | jq -r '."dist-tags".latest' 2>/dev/null)
+            local preview_ver=$(echo "$info" | jq -r '."dist-tags".preview' 2>/dev/null)
+            local nightly_ver=$(echo "$info" | jq -r '."dist-tags".nightly' 2>/dev/null)
+            
+            case "$target_tag" in
+                preview) boot_version="$preview_ver" ;;
+                nightly) boot_version="$nightly_ver" ;;
+                *)       boot_version="$latest_ver"  ;;
+            esac
+
+            printf "\r\033[Kgemini versions:\n"
+            for tag_pair in "stable:$latest_ver" "preview:$preview_ver" "nightly:$nightly_ver"; do
+                local tag="${tag_pair%%:*}"
+                local ver="${tag_pair#*:}"
+                local rel_date=$(echo "$info" | jq -r ".time[\"$ver\"]" 2>/dev/null)
+                
+                # Format release date (macOS date command)
+                local d="${rel_date%%.*}"
+                [[ "$d" == "$rel_date" ]] && d="${rel_date%Z}"
+                local fmt_rel_date=$(date -jf "%Y-%m-%dT%H:%M:%S" "$d" "+%B %d, %Y" 2>/dev/null || echo "$rel_date")
+                
+                local marker="  "
+                local extra=""
+                if [[ "$ver" == "$old_version" ]]; then
+                    marker="* "
+                    extra=" [installed: $installed_date]"
+                fi
+                printf "%s%-8s %-15s (Released: %s)%s\n" "$marker" "$tag" "$ver" "$fmt_rel_date" "$extra"
+            done
+            printf "\n"
+        fi
+    fi
+
+    # Boot Gemini
+    if [[ -n "$boot_version" ]]; then
+        npx -y @google/gemini-cli@$boot_version "${gemini_args[@]}"
+    else
+        npx -y @google/gemini-cli "${gemini_args[@]}"
+    fi
+}
+
+
+# Local user tools
+export PATH="__HOME__/.local/bin:$PATH"
+
+# Homebrew Completions
+if type brew &>/dev/null; then
+  fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
+fi
+
+# Yazi 'cd-on-exit' wrapper
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+
+# Zellij shortcut
+alias ide="zellij --layout ide"
+
+# Core Integrations
+eval "$(zoxide init zsh)"
+export FZF_DEFAULT_OPTS="--color=bg+:#2d2d2d,bg:#1e1e1e,spinner:#569cd6,hl:#569cd6,fg:#cccccc,header:#569cd6,info:#c586c0,pointer:#569cd6,marker:#569cd6,prompt:#569cd6,hl+:#569cd6"
+eval "$(fzf --zsh)"
+eval "$(starship init zsh)"
+
+# Zsh Plugins
+if [ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+    source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+fi
+
+if [ -f "$(brew --prefix)/share/fzf-tab/fzf-tab.zsh" ]; then
+    source "$(brew --prefix)/share/fzf-tab/fzf-tab.zsh"
+fi
+
+# Syntax Highlighting Clean Configuration
+if [ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+    typeset -A ZSH_HIGHLIGHT_STYLES
+    ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=default'
+    ZSH_HIGHLIGHT_STYLES[command]='fg=white,bold'
+    ZSH_HIGHLIGHT_STYLES[builtin]='fg=white,bold'
+    ZSH_HIGHLIGHT_STYLES[alias]='fg=white,bold'
+    ZSH_HIGHLIGHT_STYLES[function]='fg=white,bold'
+    ZSH_HIGHLIGHT_STYLES[path]='fg=default'
+    source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+
+# Added by Antigravity IDE
+export PATH="__HOME__/.antigravity-ide/antigravity-ide/bin:$PATH"
+
+export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+
+# claude -sf: away mode + Remote Control + skip permissions + /sf build loop.
+# Any other invocation passes through to the real claude binary unchanged.
+claude() {
+  if [ "${1:-}" = "-lsf" ]; then
+    shift
+    "$HOME/.local/bin/claude-lsf" "$@"
+  elif [ "${1:-}" = "-sf" ]; then
+    shift
+    # Keep the Mac awake for the life of this shell's claude run (same flags as away-mode).
+    caffeinate -ims -w $$ >/dev/null 2>&1 &!
+    command -v battery >/dev/null 2>&1 && battery maintain 70-80 >/dev/null 2>&1
+    command claude --dangerously-skip-permissions \
+      --remote-control "sf-${PWD:t}" \
+      --name "sf-${PWD:t}" \
+      "$@" "/sf"
+  else
+    command claude "$@"
+  fi
+}

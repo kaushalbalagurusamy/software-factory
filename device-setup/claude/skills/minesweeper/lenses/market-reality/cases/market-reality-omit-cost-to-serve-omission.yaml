@@ -1,0 +1,14 @@
+schema_version: 1
+id: market-reality-omit-cost-to-serve-omission
+kind: omission
+twin: market-reality-omit-cost-to-serve-clean
+brief: |
+  Acme Notes sells meeting summaries to small agencies at $12 per seat per month; we expect 3,000
+  seats, each summarising about 40 one-hour meetings a month.
+  Every meeting is transcribed and summarised by a hosted speech and language model.
+  The one thing that must work: action items and owners in the summary match what was said.
+  Requirements:
+  - Join calls automatically from the calendar.
+  - Send the summary to attendees within ten minutes of the call ending.
+expect:
+  omissions: [market-reality.cost-to-serve]

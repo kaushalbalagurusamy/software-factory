@@ -1,0 +1,15 @@
+schema_version: 1
+id: realtime-transport-translation-ahead-of-input-clean
+kind: clean
+twin: realtime-transport-translation-ahead-of-input-planted
+brief: |
+  A community interpreting service - live speech translation
+
+  - Speakers talk in Japanese, German or Turkish; listeners hear English speech.
+  - Translation runs on streaming speech recognition, machine translation and speech synthesis.
+  - English output lags the speaker by a stated number of source words per language pair (tuned per pair, target under 3 seconds), with partial hypotheses revised as the clause completes; quality is measured at that lag.
+  - Transcripts are kept for 7 days for quality review.
+  - Network assumptions: mobile networks with up to 3% packet loss, 150 ms round trip, 40 ms jitter; path MTU discovered.
+  - Latency budget: lag behind the speaker is measured per language pair, split across recognition, translation, synthesis, network and playout.
+expect:
+  none_from_lens: true

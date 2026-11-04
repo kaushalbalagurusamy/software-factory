@@ -1,0 +1,2 @@
+#!/bin/sh
+exec python3 "__HOME__/.claude/skills/lsf/scripts/lsf.py" "$@"

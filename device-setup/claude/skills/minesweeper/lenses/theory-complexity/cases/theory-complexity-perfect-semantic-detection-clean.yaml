@@ -1,0 +1,15 @@
+schema_version: 1
+id: theory-complexity-perfect-semantic-detection-clean
+kind: clean
+twin: theory-complexity-perfect-semantic-detection-planted
+brief: |
+  Product brief: plugin marketplace for a self-hosted team wiki.
+  Third-party developers upload plugins; site administrators install them.
+  Requirement 1: developers sign plugins with a key registered to their account.
+  Requirement 2: each listing shows permissions the plugin requests.
+  Requirement 3: an automated scanner examines every upload and is measured quarterly on a held-out corpus of known-bad and known-good plugins, targeting at least 90% detection with at most 2% false alarms; independently, plugins run in a sandbox limited to their declared permissions so a missed sample cannot exceed them.
+  Requirement 4: administrators can uninstall a plugin and revoke its data access.
+  Requirement 5: a public changelog accompanies every plugin version.
+  Success: 200 published plugins in the first year.
+expect:
+  none_from_lens: true

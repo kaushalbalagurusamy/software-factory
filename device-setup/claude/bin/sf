@@ -1,0 +1,6 @@
+#!/bin/sh
+# Use this Mac's Software Factory checkout and its isolated Python environment.
+FACTORY_ROOT="${SF_FACTORY_ROOT:-$HOME/Projects/software-factory}"
+PY="${SF_PYTHON:-$FACTORY_ROOT/.venv/bin/python}"
+[ -x "$PY" ] || { echo "sf: interpreter not found: $PY" >&2; exit 127; }
+PYTHONPATH="$FACTORY_ROOT${PYTHONPATH:+:$PYTHONPATH}" exec "$PY" -c 'import sys; from factory.cli import main; sys.exit(main(sys.argv[1:]))' "$@"

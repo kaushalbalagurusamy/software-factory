@@ -1,0 +1,15 @@
+schema_version: 1
+id: media-pipelines-omits-media-format-clean
+kind: clean
+twin: media-pipelines-omits-media-format
+brief: |
+  A school photography company - portrait retouching
+
+  - Photographers upload class portraits; the service crops, colour-corrects and smooths skin.
+  - Inputs are JPEG or 14-bit RAW files up to 45 megapixels in sRGB or Adobe RGB; outputs are 8-bit sRGB JPEGs at 300 dpi.
+  - Each worker container has an 8 GB memory limit and processes 2 portraits at a time.
+  - Retouched portraits are ready for parent ordering within one hour.
+  - Parents can request a re-take before the order deadline.
+  - Originals are deleted 90 days after the order window closes.
+expect:
+  none_from_lens: true

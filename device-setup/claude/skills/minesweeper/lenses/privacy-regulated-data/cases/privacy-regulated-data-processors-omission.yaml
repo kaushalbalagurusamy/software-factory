@@ -1,0 +1,13 @@
+schema_version: 1
+id: privacy-regulated-data-processors-omission
+kind: omission
+twin: privacy-regulated-data-processors-omission-clean
+brief: |
+  Contoso Care Line: telehealth appointment notes (US and EU patients)
+
+  1. Data processed: patient name, contact details, appointment reason and clinician notes (health data).
+  2. Notes are transcribed by an external speech-to-text service and summarised by an external model API.
+  3. Data is stored in US and EU regions matching the patient's location; notes kept for 7 years.
+  4. Clinicians sign off each note.
+expect:
+  omissions: ["privacy-regulated-data.processors-and-agreements"]

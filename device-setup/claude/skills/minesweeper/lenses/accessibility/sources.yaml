@@ -1,0 +1,68 @@
+schema_version: 1
+sources:
+  - id: wcag-22
+    title: Web Content Accessibility Guidelines (WCAG) 2.2, W3C Recommendation
+    url: https://www.w3.org/TR/WCAG22/
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: "Color is not used as the only visual means of conveying information, indicating an action, prompting a response, or distinguishing a visual element."
+        locator: Success Criterion 1.4.1 Use of Color (Level A)
+        fetched: "2026-10-14"
+        supports: [accessibility.information-by-single-sense]
+      - text: All functionality of the content is operable through a keyboard interface without requiring specific timings for individual keystrokes
+        locator: Success Criterion 2.1.1 Keyboard (Level A)
+        fetched: "2026-10-14"
+        supports: [accessibility.not-keyboard-or-pointer-operable]
+      - text: All functionality that uses a dragging movement for operation can be achieved by a single pointer without dragging, unless dragging is essential or the functionality is determined by the user agent and not modified by the author.
+        locator: Success Criterion 2.5.7 Dragging Movements (Level AA)
+        fetched: "2026-10-14"
+        supports: [accessibility.not-keyboard-or-pointer-operable]
+      - text: For Level AA conformance, the web page satisfies all the Level A and Level AA success criteria, or a Level AA conforming alternate version is provided.
+        locator: Conformance, Conformance Requirements
+        fetched: "2026-10-14"
+        supports: [accessibility.information-by-single-sense, accessibility.not-keyboard-or-pointer-operable]
+  - id: eaa-2019-882
+    title: Directive (EU) 2019/882 (European Accessibility Act), Official Journal text
+    url: https://publications.europa.eu/resource/cellar/6eb3ceb5-8905-11e9-9369-01aa75ed71a1.0006.03/DOC_1
+    adapter: web_page
+    tier: primary
+    kind: statute
+    notes: EU Publications Office (Cellar) English XHTML of CELEX 32019L0882.
+    quotes:
+      - text: "this Directive applies to the following services provided to consumers after 28 June 2025:"
+        locator: Article 2(2)
+        fetched: "2026-10-14"
+        supports: [accessibility.covered-service-not-accessible]
+      - text: economic operators only place on the market products and only provide services that comply with the accessibility requirements set out in Annex I.
+        locator: Article 4(1)
+        fetched: "2026-10-14"
+        supports: [accessibility.covered-service-not-accessible]
+      - text: Service providers shall ensure that they design and provide services in accordance with the accessibility requirements of this Directive.
+        locator: Article 13(1)
+        fetched: "2026-10-14"
+        supports: [accessibility.covered-service-not-accessible]
+      - text: making websites, including the related online applications, and mobile device-based services, including mobile applications, accessible in a consistent and adequate way by making them perceivable, operable, understandable and robust;
+        locator: Annex I, Section III(c)
+        fetched: "2026-10-14"
+        supports: [accessibility.covered-service-not-accessible]
+  - id: ada-28-cfr-35-200
+    title: 28 CFR 35.200 Requirements for web and mobile accessibility (ADA Title II)
+    url: https://www.law.cornell.edu/cfr/text/28/35.200
+    adapter: web_page
+    tier: primary
+    kind: regulation
+    notes: >-
+      Cornell LII reproduction of 28 CFR 35.200 (subpart H, AG Order 5919-2024 as amended 2026). eCFR.gov itself
+      returns a bot-challenge page to automated fetches; its renderer API serves the same text keyed by a date.
+      The rule incorporates WCAG 2.1 Level AA by reference (not 2.2); the report did not claim a version here.
+    quotes:
+      - text: "A public entity shall ensure that the following are readily accessible to and usable by individuals with disabilities:"
+        locator: 35.200(a) General
+        fetched: "2026-10-14"
+        supports: [accessibility.public-entity-below-wcag-aa]
+      - text: comply with Level A and Level AA success criteria and conformance requirements specified in WCAG 2.1, unless the public entity
+        locator: 35.200(b)(1)
+        fetched: "2026-10-14"
+        supports: [accessibility.public-entity-below-wcag-aa]

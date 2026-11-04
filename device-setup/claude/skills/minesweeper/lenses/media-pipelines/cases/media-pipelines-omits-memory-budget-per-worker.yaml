@@ -1,0 +1,15 @@
+schema_version: 1
+id: media-pipelines-omits-memory-budget-per-worker
+kind: omission
+twin: media-pipelines-omits-memory-budget-per-worker-clean
+brief: |
+  A drone survey firm - orthomosaic stitching
+
+  - Pilots upload 500 to 2,000 overlapping aerial photos per site.
+  - Inputs are 20-megapixel 8-bit sRGB JPEGs; output is a georeferenced 8-bit GeoTIFF mosaic.
+  - The mosaic is built tile by tile and published to the client portal.
+  - Mosaics are delivered within 6 hours of upload.
+  - Ground control points are optional.
+expect:
+  omissions:
+  - media-pipelines.memory-budget-per-worker

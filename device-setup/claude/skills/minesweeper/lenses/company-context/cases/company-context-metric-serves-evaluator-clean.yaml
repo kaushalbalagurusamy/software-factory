@@ -1,0 +1,15 @@
+schema_version: 1
+id: company-context-metric-serves-evaluator-clean
+kind: clean
+twin: company-context-metric-serves-evaluator-planted
+brief: |
+  Acme Logistics sells a route-planning tool to small courier firms, who pay per vehicle per month.
+  Couriers use it to finish their daily deliveries in fewer miles. It is a business tool with no
+  sector regulator beyond ordinary commercial law.
+  Build a new planning screen:
+  - Import the day's stops from a spreadsheet.
+  - Propose an ordered route per vehicle and allow drag-and-drop reordering.
+  - Success means a measured reduction in miles driven per delivery for pilot couriers; the
+    quarterly showcase score is tracked as a secondary signal only.
+expect:
+  none_from_lens: true

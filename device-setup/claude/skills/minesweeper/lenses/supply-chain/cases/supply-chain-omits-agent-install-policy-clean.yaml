@@ -1,0 +1,14 @@
+schema_version: 1
+id: supply-chain-omits-agent-install-policy-clean
+kind: clean
+twin: supply-chain-omits-agent-install-policy
+brief: |
+  A software team is adopting an AI coding agent that works on its billing service.
+  - The agent runs in a container with the repository checked out and opens pull requests.
+  - Dependencies come only from the internal package mirror, which mirrors an allowlist.
+  - All dependencies are pinned with hashes; CI installs from the lock files with scripts disabled.
+  - The agent may not install or add packages itself; it proposes them and a developer approves.
+  - Every pull request needs one human review before merge.
+  - Success: fewer than 5% of agent pull requests reverted within a month.
+expect:
+  none_from_lens: true

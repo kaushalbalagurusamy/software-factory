@@ -1,0 +1,20 @@
+schema_version: 1
+traps:
+  - id: example-lens.short-slug
+    aliases: []                 # external ids, e.g. a report's LEG-01
+    title: One line naming the trap
+    kind: requirement           # requirement | dependency | metric | rubric | omission
+    cues:                       # naive phrasings that suggest it; generic, no project names
+      - "phrase one"
+      - "phrase two"
+    principle: The law, theorem, standard or term it violates, in one or two sentences.
+    sources: [source-id]        # ids in sources.yaml
+    severity:
+      default: high             # a hint only; policy.yaml questions decide
+      blast_radius: What breaks and for whom.
+    remediation:
+      safe_route: What to build instead.
+      invariant: The invariant or guardrail the spec must state.
+      spec_section: legal-terms # trust-consensus | crypto-agent-security | capacity-physics | verification-calibration | legal-terms | product-scope
+    checks: []                  # optional, names from tools/checks/__init__.py
+    status: unverified          # verified only when every source is primary and has a supporting quote

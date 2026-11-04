@@ -1,0 +1,15 @@
+schema_version: 1
+id: databases-secondary-index-read-after-write-clean
+kind: clean
+twin: databases-secondary-index-read-after-write-planted
+brief: |
+  Project: sign-up flow for a community sports league app.
+  - Users register with email and password.
+  - Accounts are stored in a managed key-value database with a global index on email.
+  - To stop duplicate accounts, sign-up writes an email-claim item keyed by the email with a condition that it does not exist; the welcome page loads the account by its primary key.
+  - Reads of an account by its primary key are strongly consistent; the database runs in one region, and if it is unavailable sign-up shows an error and writes nothing.
+  - Team membership changes use the database's transactional write API.
+  - Confirmation emails are sent from a stream of committed account records, deduplicated by account id.
+  - Admins can search users by name.
+expect:
+  none_from_lens: true

@@ -1,0 +1,14 @@
+schema_version: 1
+id: os-systems-page-cache-as-free-memory-clean
+kind: clean
+twin: os-systems-page-cache-as-free-memory-planted
+brief: |
+  A municipal library consortium - catalogue search
+
+  - Patrons search a catalogue index of about 30 GB on disk.
+  - Search runs in containers with a 4 GB memory limit, one search process per container.
+  - The index is sharded so each container serves a 2 GB shard; the memory budget covers 1.5 GB heap plus the 2 GB shard in page cache under the 4 GB limit.
+  - Queries must answer within 300 ms at p95.
+  - Each search process runs a fixed pool of 16 threads and holds at most 500 open connections and files.
+expect:
+  none_from_lens: true

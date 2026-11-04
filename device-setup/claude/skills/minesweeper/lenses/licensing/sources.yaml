@@ -1,0 +1,77 @@
+schema_version: 1
+sources:
+  - id: gpl-3-0
+    title: GNU General Public License, version 3
+    url: https://www.gnu.org/licenses/gpl-3.0.txt
+    adapter: web_page
+    tier: primary
+    kind: licence
+    quotes:
+      - text: To "convey" a work means any kind of propagation that enables other parties to make or receive copies. Mere interaction with a user through a computer network, with no transfer of a copy, is not conveying.
+        locator: Section 0 (Definitions)
+        fetched: "2026-10-14"
+        supports: [licensing.gpl-in-distributed-proprietary, licensing.agpl-modified-network-service]
+      - text: You must license the entire work, as a whole, under this License to anyone who comes into possession of a copy.
+        locator: Section 5(c)
+        fetched: "2026-10-14"
+        supports: [licensing.gpl-in-distributed-proprietary]
+      - text: You may convey a covered work in object code form under the terms of sections 4 and 5, provided that you also convey the machine-readable Corresponding Source under the terms of this License
+        locator: Section 6
+        fetched: "2026-10-14"
+        supports: [licensing.gpl-in-distributed-proprietary]
+  - id: agpl-3-0
+    title: GNU Affero General Public License, version 3
+    url: https://www.gnu.org/licenses/agpl-3.0.txt
+    adapter: web_page
+    tier: primary
+    kind: licence
+    quotes:
+      - text: Notwithstanding any other provision of this License, if you modify the Program, your modified version must prominently offer all users interacting with it remotely through a computer network (if your version supports such interaction) an opportunity to receive the Corresponding Source of your version by providing access to the Corresponding Source from a network server at no charge, through some standard or customary means of facilitating copying of software.
+        locator: Section 13 (Remote Network Interaction)
+        fetched: "2026-10-14"
+        supports: [licensing.agpl-modified-network-service]
+  - id: sspl-1-0
+    title: Server Side Public License, version 1 (SPDX SSPL-1.0)
+    url: https://spdx.org/licenses/SSPL-1.0.html
+    adapter: spdx
+    tier: primary
+    kind: licence
+    quotes:
+      - text: If you make the functionality of the Program or a modified version available to third parties as a service, you must make the Service Source Code available via network download to everyone at no charge, under the terms of this License.
+        locator: Section 13 (Offering the Program as a Service)
+        fetched: "2026-10-14"
+        supports: [licensing.source-available-managed-service]
+      - text: “Service Source Code” means the Corresponding Source for the Program or the modified version, and the Corresponding Source for all programs that you use to make the Program or modified version available as a service, including, without limitation, management software, user interfaces, application program interfaces, automation software, monitoring software, backup software, storage software and hosting software
+        locator: Section 13
+        fetched: "2026-10-14"
+        supports: [licensing.source-available-managed-service]
+  - id: busl-1-1
+    title: Business Source License 1.1 (SPDX BUSL-1.1)
+    url: https://spdx.org/licenses/BUSL-1.1.html
+    adapter: spdx
+    tier: primary
+    kind: licence
+    quotes:
+      - text: The Licensor hereby grants you the right to copy, modify, create derivative works, redistribute, and make non-production use of the Licensed Work. The Licensor may make an Additional Use Grant, above, permitting limited production use.
+        locator: Terms, first paragraph
+        fetched: "2026-10-14"
+        supports: [licensing.source-available-managed-service]
+      - text: If your use of the Licensed Work does not comply with the requirements currently in effect as described in this License, you must purchase a commercial license from the Licensor, its affiliated entities, or authorized resellers, or you must refrain from using the Licensed Work.
+        locator: Terms
+        fetched: "2026-10-14"
+        supports: [licensing.source-available-managed-service]
+  - id: cc-by-nc-4-0
+    title: Creative Commons Attribution-NonCommercial 4.0 International (SPDX CC-BY-NC-4.0)
+    url: https://spdx.org/licenses/CC-BY-NC-4.0.html
+    adapter: spdx
+    tier: primary
+    kind: licence
+    quotes:
+      - text: NonCommercial means not primarily intended for or directed towards commercial advantage or monetary compensation.
+        locator: Section 1(i)
+        fetched: "2026-10-14"
+        supports: [licensing.non-commercial-asset-in-paid-product]
+      - text: reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only
+        locator: Section 2(a)(1)(A)
+        fetched: "2026-10-14"
+        supports: [licensing.non-commercial-asset-in-paid-product]

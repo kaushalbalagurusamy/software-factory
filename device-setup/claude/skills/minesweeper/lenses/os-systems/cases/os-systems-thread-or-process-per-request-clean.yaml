@@ -1,0 +1,14 @@
+schema_version: 1
+id: os-systems-thread-or-process-per-request-clean
+kind: clean
+twin: os-systems-thread-or-process-per-request-planted
+brief: |
+  A small payments startup - fraud scoring gateway
+
+  - Card authorisations arrive at up to 5,000 per second at peak.
+  - Each authorisation is scored by three rules services before approval.
+  - The gateway uses a fixed pool of 256 worker threads with a bounded queue of 2,000; authorisations beyond that receive a fallback decision immediately.
+  - Scoring must answer within 150 ms at p99.
+  - Each gateway container has a 2 GB memory limit and serves at most 5,000 in-flight requests; connections to the rules services are pooled.
+expect:
+  none_from_lens: true

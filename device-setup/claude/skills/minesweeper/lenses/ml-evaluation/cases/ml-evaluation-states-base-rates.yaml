@@ -1,0 +1,15 @@
+schema_version: 1
+id: ml-evaluation-states-base-rates
+kind: clean
+twin: ml-evaluation-omits-base-rates
+brief: |
+  Product brief: early warning of equipment failure on delivery trucks.
+  Data: engine sensor logs and maintenance records for 900 trucks over four years.
+  About 1.5% of truck-fortnights end in a failure; the model must beat scheduling inspections by mileage alone.
+  Evaluation: train on the first three years, test on the last year, grouped by truck.
+  Scores are used only to rank trucks for inspection and are not shown as probabilities.
+  Requirement 1: flag trucks likely to fail in the next 14 days.
+  Requirement 2: fleet managers see a weekly inspection list.
+  Success: fewer roadside breakdowns.
+expect:
+  none_from_lens: true

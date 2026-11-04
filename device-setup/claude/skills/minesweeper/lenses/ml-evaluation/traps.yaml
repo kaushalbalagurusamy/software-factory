@@ -1,0 +1,140 @@
+schema_version: 1
+traps:
+  - id: ml-evaluation.preprocessing-leakage
+    aliases: [TCS-04]
+    title: Scalers, encoders or feature selection fitted on the full dataset before the split
+    kind: requirement
+    cues:
+      - "normalise all features across the full dataset, then split"
+      - "fit the encoder on all records before training"
+      - "select the top features using every labelled row"
+      - "compute target averages per category over the whole table"
+      - "use future values to fill gaps before evaluation"
+    principle: >-
+      Data leakage is using information not available at prediction time when building the model; it
+      gives overly optimistic estimates and poorer production performance. Never call fit on the test
+      data, including in preprocessing (scikit-learn, Common pitfalls 12.2).
+    sources: [sklearn-pitfalls]
+    severity:
+      default: medium
+      blast_radius: Offline metrics overstate quality; the shipped model underperforms on live data and the ship decision was made on a false number.
+    remediation:
+      safe_route: Put every fitted transform inside a pipeline that is fit on the training fold only; build features only from data available at prediction time.
+      invariant: No statistic used by the model is computed from evaluation rows or from data timestamped after the prediction point.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+  - id: ml-evaluation.random-split-on-dependent-data
+    title: Random train/test split on time-ordered or grouped records
+    kind: requirement
+    cues:
+      - "random 80/20 split"
+      - "shuffle all records and hold out 20%"
+      - "k-fold cross-validation on the transaction history"
+      - "split visits randomly, several per patient"
+      - "evaluate on a random sample of last year's data"
+    principle: >-
+      Classical KFold and ShuffleSplit assume i.i.d. samples; on time series they correlate train and
+      test and give poor estimates of generalisation error, and data with group structure needs
+      group-wise splitting (scikit-learn, Cross-validation 3.1.2).
+    sources: [sklearn-cv]
+    severity:
+      default: medium
+      blast_radius: The model memorises entities or future trends; offline scores collapse on new customers or future periods.
+    remediation:
+      safe_route: Split chronologically (train strictly before a cutoff, test after) for temporal data, and by entity (group-wise) where several rows belong to one subject; report both where both apply.
+      invariant: No entity appears on both sides of the split and no training row postdates any test row's prediction time.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Split from report seed TCS-04 (the seed bundles preprocessing leakage and split method).
+  - id: ml-evaluation.uncalibrated-scores-as-probabilities
+    aliases: [TCS-05]
+    title: Raw model scores or softmax outputs presented as calibrated probabilities or confidence
+    kind: requirement
+    cues:
+      - "use the model's softmax output as the risk probability"
+      - "show the model confidence as a percentage"
+      - "price using the predicted probability directly"
+      - "token log-probabilities as the likelihood the answer is right"
+      - "auto-approve when confidence is above 0.9"
+    principle: >-
+      Modern neural networks are poorly calibrated (Guo et al. 2017); only a well-calibrated classifier's
+      scores can be read as confidence, meaning about 80% of samples scored 0.8 are positive
+      (scikit-learn, Probability calibration).
+    sources: [guo-2017, sklearn-calibration]
+    severity:
+      default: medium
+      blast_radius: Mispriced risk, thresholds that admit far more errors than stated, and users trusting a number that is not a probability.
+    remediation:
+      safe_route: Calibrate on a held-out calibration split (temperature scaling, Platt or isotonic), report calibration error and reliability diagrams on held-out data, and recalibrate on drift.
+      invariant: Any score shown or used as a probability has a measured calibration error on held-out data below a stated target.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Report seed TCS-05 also contains a rubric half (accuracy as the target); that half is ml-evaluation.accuracy-on-imbalanced-classes and rubric-inversion.proxy-metric-as-target.
+  - id: ml-evaluation.accuracy-on-imbalanced-classes
+    title: Plain accuracy (or ROC alone) as the success measure when the positive class is rare
+    kind: metric
+    cues:
+      - "ship if accuracy is above 95%"
+      - "fraud is about 1 in 1,000 transactions; target 99% accuracy"
+      - "measure the detector by percentage of correct predictions"
+      - "report AUC-ROC only for the rare-event model"
+      - "rubric: highest accuracy wins"
+    principle: >-
+      On an imbalanced test set accuracy can be above chance only by exploiting the imbalance, which
+      balanced accuracy exposes (scikit-learn, Balanced accuracy); ROC plots can be deceptive on
+      imbalanced data where precision-recall is more informative (Saito and Rehmsmeier 2015).
+    sources: [sklearn-metrics, saito-2015]
+    severity:
+      default: medium
+      blast_radius: A model that never flags the rare event passes the gate; missed fraud, faults or diagnoses in production.
+    remediation:
+      safe_route: State the base rate and evaluate with precision, recall, PR-AUC or a cost-weighted confusion matrix at the operating threshold, compared against the trivial majority-class baseline.
+      invariant: The success metric beats the majority-class baseline by a stated margin and is reported per class at the deployed threshold.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+  - id: ml-evaluation.benchmark-contamination
+    title: Public benchmark score used as evidence for a model that may have trained on it
+    kind: metric
+    cues:
+      - "pick the model with the best public leaderboard score"
+      - "evaluate on the standard public benchmark"
+      - "fine-tune on scraped web data, then test on the published test set"
+      - "our model scores 90% on the well-known exam questions"
+    principle: >-
+      Contamination, a model trained on a benchmark's test split, causes overestimation of performance
+      relative to uncontaminated models (Sainz et al. 2023).
+    sources: [sainz-2023]
+    severity:
+      default: medium
+      blast_radius: Model selection rests on memorised answers; production quality is lower than the chosen score implied.
+    remediation:
+      safe_route: Evaluate on a private, freshly written or post-cutoff held-out set from the target domain, and run a contamination check on any public set used.
+      invariant: The decision-making evaluation set is held out from all training and tuning data, and its provenance and creation date are recorded.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+  - id: ml-evaluation.in-distribution-only-evaluation
+    title: Evaluation only on data drawn like the training data while deployment differs
+    kind: metric
+    cues:
+      - "validate on a held-out slice of the same dataset"
+      - "trained on data from two sites, deploy to all sites"
+      - "test set sampled from the same period and region as training"
+      - "no need to test on new customers; the validation score is enough"
+    principle: >-
+      Under distribution shift, standard training yields substantially lower out-of-distribution than
+      in-distribution performance (Koh et al. 2021, WILDS).
+    sources: [koh-2021]
+    severity:
+      default: medium
+      blast_radius: Acceptance numbers do not transfer to new sites, periods or populations; failures concentrate on the groups not seen in training.
+    remediation:
+      safe_route: Hold out whole sites, periods or populations that match the deployment shift and report in- and out-of-distribution scores separately, with monitoring for drift after launch.
+      invariant: The acceptance test includes at least one held-out slice representing the expected deployment shift, reported separately.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"

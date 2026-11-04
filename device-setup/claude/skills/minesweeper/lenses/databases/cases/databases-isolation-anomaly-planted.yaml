@@ -1,0 +1,16 @@
+schema_version: 1
+id: databases-isolation-anomaly-planted
+kind: planted
+twin: databases-isolation-anomaly-clean
+brief: |
+  Project: on-call roster for a hospital department.
+  - Doctors mark themselves off-call through the roster app.
+  - The app must never leave a shift with no doctor on call: inside a transaction, it counts the doctors still on call for that shift and lets the request through if at least one other remains, using the database's default settings.
+  - Roster changes are stored in the department's single-primary relational database; all reads and writes go to the primary.
+  - If the database is unreachable, the app shows the roster read-only and blocks changes.
+  - The switchboard reads the roster table directly; no other store holds roster data.
+  - Changes are logged for audit.
+expect:
+  traps:
+  - databases.isolation-anomaly
+  min_severity: high

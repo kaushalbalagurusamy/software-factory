@@ -1,0 +1,95 @@
+schema_version: 1
+traps:
+  - id: rubric-inversion.proxy-metric-as-target
+    title: A rubric or KPI rewards a proxy metric that can rise while the real goal falls
+    kind: rubric
+    cues:
+      - "scored on number of features shipped"
+      - "maximise lines of code written per day"
+      - "reward summaries with the highest compression ratio"
+      - "agents are graded on tickets closed"
+      - "the more tests, the higher the score"
+      - "rubric: points per item produced"
+    principle: >-
+      Optimising a metric past the point where it tracks the system's goal is ineffective or harmful
+      (Goodhart's law, Manheim and Garrabrant 2018); optimising an imperfect proxy reward leads to poor
+      performance on the true reward (Skalse et al. 2022).
+    sources: [manheim-2018, skalse-2022]
+    severity:
+      default: medium
+      blast_radius: The team or agent optimises the number and degrades the outcome (padding, dropped caveats, gamed counts); the rubric certifies a worse product.
+    remediation:
+      safe_route: Name the goal the metric stands for, pair it with a counter-metric that falls when the proxy is gamed, cap or saturate the proxy, and audit samples by hand.
+      invariant: Every scored metric states what it is a proxy for and has a paired counter-metric; no score increases monotonically with raw volume.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Rubric half of report seed TCS-05. The seed's quoted phrasing of Goodhart's law is Strathern's 1997 paraphrase.
+  - id: rubric-inversion.coverage-or-test-count-target
+    title: Test coverage percentage or test count set as the quality target
+    kind: rubric
+    cues:
+      - "100% code coverage required"
+      - "at least 500 unit tests"
+      - "coverage must never drop below 95%"
+      - "grade the test suite by coverage"
+      - "add a test for every line"
+    principle: >-
+      Coverage measures code executed, not faults detected; a coverage target is a Goodhart proxy that
+      assertion-free or trivial tests satisfy (Manheim and Garrabrant 2018), and coverage was found not
+      strongly correlated with test-suite effectiveness (Inozemtseva and Holmes 2014).
+    sources: [manheim-2018, inozemtseva-2014]
+    severity:
+      default: medium
+      blast_radius: Large suites that execute code without checking it; real regressions ship while the gate is green.
+    remediation:
+      safe_route: Keep coverage as a diagnostic, and gate on fault-detection evidence (mutation score on critical modules, spec-derived and property-based tests, escaped-defect rate).
+      invariant: The quality gate includes a fault-detection measure; coverage alone never passes a change.
+      spec_section: verification-calibration
+    status: unverified
+    notes: Unverified because inozemtseva-2014 returns HTTP 403 from the ACM Digital Library (2026-10-14) and has no reachable HTML abstract; the coverage-specific finding cannot be quoted yet.
+  - id: rubric-inversion.zero-misses-without-false-alarm-budget
+    title: Zero false negatives (or 100% recall) demanded with no false-positive budget
+    kind: rubric
+    cues:
+      - "must never miss a fraudulent transaction"
+      - "zero false negatives"
+      - "flag every possible threat"
+      - "recall of 100% is required"
+      - "better to alert on everything than miss one"
+    principle: >-
+      Precision and recall trade off across thresholds; high recall with low precision returns most
+      relevant items but a high proportion of wrong ones (scikit-learn, Precision-Recall example). A
+      recall-only target is met by flagging everything.
+    sources: [sklearn-pr-example]
+    severity:
+      default: medium
+      blast_radius: Alert floods, reviewer fatigue and blocked legitimate users; real positives get lost in the noise the target created.
+    remediation:
+      safe_route: Set the recall target together with a precision floor or alert-volume budget and the cost of each error type; choose the threshold on held-out data against that cost.
+      invariant: Every detection target names both error rates (or their costs) and the operating threshold; neither is unbounded.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"
+  - id: rubric-inversion.llm-judge-self-grading
+    title: The same or same-family LLM generates outputs and grades them as the acceptance measure
+    kind: rubric
+    cues:
+      - "the model scores its own answers"
+      - "use the same LLM as judge to grade quality"
+      - "self-evaluation score above 9/10 means release"
+      - "have the assistant rate its responses and report the average"
+      - "auto-grade with an LLM; no human labels needed"
+    principle: >-
+      LLM judges show position, verbosity and self-enhancement biases (Zheng et al. 2023), and LLM
+      evaluators score their own outputs higher than others' that humans rate equal (Panickssery et al. 2024).
+    sources: [zheng-2023, panickssery-2024]
+    severity:
+      default: medium
+      blast_radius: Inflated quality scores certify a release; comparisons against other systems are biased toward the grader's own outputs.
+    remediation:
+      safe_route: Use a judge from a different model family, randomise position, control for length, and calibrate the judge against a human-labelled sample with reported agreement.
+      invariant: The acceptance judge is not the generator, and its agreement with human labels on a held-out sample is measured and reported.
+      spec_section: verification-calibration
+    status: verified
+    verified_on: "2026-10-14"

@@ -1,0 +1,14 @@
+schema_version: 1
+id: distributed-systems-omits-fault-model-clean
+kind: clean
+twin: distributed-systems-omits-fault-model
+brief: |
+  Project: shared scheduling service for five partner clinics, each running its own server.
+  - The five servers replicate the appointment book and elect a leader to order bookings.
+  - Fault model: up to one clinic server may crash or be partitioned (crash faults only; all five servers are administered by the shared IT team), so the five-server majority group tolerates f=1.
+  - Booking requests are retried by the client for up to one minute, each with a request id the servers deduplicate.
+  - Bookings are ordered by the leader's log sequence number.
+  - Messages between servers are mutually authenticated with per-clinic certificates; only the five listed servers are members.
+  - Patients book through a web form; staff use a desktop app.
+expect:
+  none_from_lens: true

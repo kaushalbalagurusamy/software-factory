@@ -1,0 +1,15 @@
+schema_version: 1
+id: market-reality-omit-customer-price-volume-clean
+kind: clean
+twin: market-reality-omit-customer-price-volume-omission
+brief: |
+  Acme Garden is a plant-identification app for home gardeners, with a paid plan at $3 per month;
+  we expect 20,000 paying users identifying about ten plants a month each. Identification runs on
+  the device, so the marginal cost per identification is negligible.
+  The one thing that must work: toxic plants are never identified as safe for pets.
+  Requirements:
+  - Identify a plant from one photo.
+  - Remind the user when to water, based on species and season.
+  - Work offline for previously identified plants.
+expect:
+  none_from_lens: true

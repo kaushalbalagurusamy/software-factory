@@ -1,0 +1,107 @@
+schema_version: 1
+traps:
+  - id: theory-complexity.np-hard-optimal-at-scale
+    aliases: [TCS-01]
+    title: Exact global optimum demanded for an NP-hard combinatorial problem at scale and in real time
+    kind: requirement
+    cues:
+      - "always compute the optimal schedule"
+      - "globally optimal routes for all vehicles"
+      - "best possible assignment, returned instantly"
+      - "pack orders into the fewest boxes, guaranteed"
+      - "conflict-free timetable for every room and person within the request"
+      - "rubric: full marks only if the solution is provably optimal"
+    principle: >-
+      Covering, packing, routing, assignment and sequencing problems are equivalent under polynomial
+      reduction: either all have a polynomial-bounded algorithm or none does (Karp 1972). No known
+      algorithm guarantees the exact optimum within a polynomial step bound, so "optimal" plus a hard
+      latency bound plus unbounded instance size cannot all be promised.
+    sources: [karp-1972]
+    severity:
+      default: high
+      blast_radius: Request timeouts, worker starvation and stalled planning as real customers grow past toy instance sizes; or a silently suboptimal answer labelled optimal.
+    remediation:
+      safe_route: Reframe to a bounded-time heuristic or anytime solver (greedy construction, local search, CP-SAT/MILP with time limit) that reports the best solution found and its optimality gap; run deep optimisation asynchronously.
+      invariant: Every solve has a wall-clock limit and returns a feasible solution with a reported bound or gap; the brief states the maximum instance size and the gap it accepts.
+      spec_section: capacity-physics
+    status: verified
+    verified_on: "2026-10-14"
+    notes: >-
+      Report claim, corrected: the seed lists TSP and bin packing as Karp's 21 problems; Karp's list
+      contains Hamiltonian circuit, knapsack, chromatic number and 0-1 integer programming, while
+      bin packing NP-hardness is usually cited from Garey and Johnson (1979). The seed's size
+      threshold (N > 25) is not a sourced fact; an experiment must measure solver time at the
+      brief's own instance sizes.
+  - id: theory-complexity.undecidable-rule-verification
+    aliases: [TCS-02]
+    title: Static guarantee demanded for a semantic property of user programs in a Turing-complete language
+    kind: requirement
+    cues:
+      - "verify at save time that every custom script terminates"
+      - "users write arbitrary rules in a general-purpose language; reject any that could loop forever"
+      - "statically prove a plugin never reads fields it should not"
+      - "recursive triggers allowed, but the platform guarantees no infinite chains"
+      - "analyse any submitted workflow and prove it is safe"
+    principle: >-
+      Whether an arbitrary program halts is undecidable (Turing 1936), and every non-trivial semantic
+      property of the programs of a Turing-complete language is undecidable (Rice 1953). A save-time
+      checker must therefore either reject some valid programs or accept some bad ones.
+    sources: [turing-1936, rice-1953]
+    severity:
+      default: high
+      blast_radius: Runaway rules hang shared workers or leak data that the checker was claimed to prevent; or the checker rejects legitimate rules and the feature is unusable.
+    remediation:
+      safe_route: Restrict user logic to a non-Turing-complete expression language with guaranteed termination, or execute it in a sandbox with instruction/fuel, time, memory and recursion-depth limits enforced at run time; cap trigger chain depth.
+      invariant: Every user rule executes under a hard step/time/memory budget and a bounded trigger depth; the brief never promises a static semantic guarantee for an unrestricted language.
+      spec_section: product-scope
+    status: unverified
+    notes: >-
+      Unverified: the publisher pages for Turing (Wiley, doi.org) and Rice (AMS) return HTTP 403 to the
+      adapter on 2026-10-14 and the free copies are PDF only. The theorems themselves are standard;
+      verification needs a fetchable primary statement (for example an HTML theorem statement from
+      the publisher).
+  - id: theory-complexity.perfect-semantic-detection
+    title: Perfect detection demanded for a behavioural property of arbitrary code or content
+    kind: requirement
+    cues:
+      - "detect all malicious code before it runs"
+      - "block every virus with no false positives"
+      - "identify 100% of harmful uploads automatically"
+      - "guarantee no malicious plugin ever passes review"
+      - "rubric: scanner must catch every sample in any future test set"
+    principle: >-
+      Precise detection of a virus, by appearance or by behaviour, is undecidable; only statistical or
+      restricted methods are available (Cohen 1987). A brief that demands complete and exact detection
+      of a behavioural property over arbitrary programs demands the impossible.
+    sources: [cohen-1987]
+    severity:
+      default: high
+      blast_radius: A security control sold as complete lets undetected samples through, or an over-eager scanner blocks legitimate users; either way the stated guarantee is false.
+    remediation:
+      safe_route: State detection as a measured rate on a defined, held-out sample with an agreed false-positive budget, and layer it with containment (sandboxing, least privilege, allow-lists) that does not depend on detection being perfect.
+      invariant: The brief names detection and false-alarm targets as measured rates on a stated corpus, and a containment control holds when detection misses.
+      spec_section: product-scope
+    status: verified
+    verified_on: "2026-10-14"
+  - id: theory-complexity.backtracking-regex-on-untrusted-input
+    title: User-supplied or complex regular expressions run with a backtracking engine on untrusted input
+    kind: requirement
+    cues:
+      - "let customers enter their own regex filters"
+      - "full Perl-compatible regex support including backreferences"
+      - "validate every request field with the pattern library"
+      - "admins can paste any regular expression into the rule"
+      - "match user patterns against uploaded documents in the request thread"
+    principle: >-
+      Regex features that need backtracking carry potential exponential runtime; an engine built for
+      untrusted patterns (RE2) excludes them and guarantees match time linear in input length (RE2 README).
+    sources: [re2-readme]
+    severity:
+      default: high
+      blast_radius: One crafted pattern or input pins a worker CPU (regular-expression denial of service), stalling every tenant on that worker.
+    remediation:
+      safe_route: Use a linear-time engine (RE2 or equivalent) for any untrusted pattern or input, drop backreferences and look-around from the user-facing syntax, and enforce a match timeout and input length cap.
+      invariant: No user-controlled pattern or input reaches a backtracking engine without a time limit; match cost is linear in input length.
+      spec_section: capacity-physics
+    status: verified
+    verified_on: "2026-10-14"

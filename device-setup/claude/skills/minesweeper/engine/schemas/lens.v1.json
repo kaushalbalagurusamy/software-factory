@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "minesweeper/lens.v1.json",
+  "title": "Lens manifest (front matter of lenses/<id>/lens.md)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "title", "group", "owner", "scope", "applies_when", "required_statements", "adapters"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "title": {"type": "string", "minLength": 3},
+    "group": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "owner": {"type": "string"},
+    "scope": {"type": "string", "minLength": 20},
+    "applies_when": {
+      "description": "A brief is in scope when any signal matches (case-insensitive substring) or always is true.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "always": {"type": "boolean"},
+        "signals": {"type": "array", "items": {"type": "string", "minLength": 2}}
+      },
+      "anyOf": [{"required": ["always"]}, {"required": ["signals"]}]
+    },
+    "required_statements": {
+      "description": "What a brief in this lens's domain must state. Missing ones become omission claims.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "statement"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+          "statement": {"type": "string", "minLength": 10},
+          "never_out_of_scope": {"type": "string", "description": "Topic id from policy.yaml never_out_of_scope, if any."}
+        }
+      }
+    },
+    "adapters": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "model": {"enum": ["sonnet", "opus"]},
+    "depends_on": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,69 @@
+schema_version: 1
+sources:
+  - id: rfc9293
+    title: RFC 9293 Transmission Control Protocol (TCP)
+    url: https://www.rfc-editor.org/rfc/rfc9293.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: TCP provides a reliable, in-order, byte-stream service to applications.
+        locator: Section 2.2 (Key TCP Concepts)
+        fetched: "2026-10-14"
+        supports: [realtime-transport.live-media-over-reliable-stream]
+  - id: rfc9000
+    title: RFC 9000 QUIC - A UDP-Based Multiplexed and Secure Transport
+    url: https://www.rfc-editor.org/rfc/rfc9000.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: When a packet loss occurs, only streams with data in that packet are blocked waiting for a retransmission to be received, while other streams can continue making progress.
+        locator: Section 13 (Packetization and Reliability)
+        fetched: "2026-10-14"
+        supports: [realtime-transport.live-media-over-reliable-stream]
+  - id: rfc3550
+    title: RFC 3550 RTP - A Transport Protocol for Real-Time Applications
+    url: https://www.rfc-editor.org/rfc/rfc3550.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: The Internet, like other packet networks, occasionally loses and reorders packets and delays them by variable amounts of time. To cope with these impairments, the RTP header contains timing information and a sequence number that allow the receivers to reconstruct the timing produced by the source
+        locator: Section 2.1 (Simple Multicast Audio Conference)
+        fetched: "2026-10-14"
+        supports: [realtime-transport.no-jitter-buffer, realtime-transport.live-media-over-reliable-stream]
+      - text: but it is appropriate to include considering that the receiver buffer must accommodate it.
+        locator: Section 6.4.4 (Analyzing Sender and Receiver Reports)
+        fetched: "2026-10-14"
+        supports: [realtime-transport.no-jitter-buffer]
+  - id: rfc8085
+    title: RFC 8085 UDP Usage Guidelines (BCP 145)
+    url: https://www.rfc-editor.org/rfc/rfc8085.txt
+    adapter: web_page
+    tier: primary
+    kind: standard
+    quotes:
+      - text: The loss of a single fragment results in the loss of an entire fragmented packet, because even if all other fragments are received correctly, the original packet cannot be reassembled and delivered.
+        locator: Section 3.2 (Message Size Guidelines)
+        fetched: "2026-10-14"
+        supports: [realtime-transport.datagram-exceeds-path-mtu]
+      - text: Due to these issues, an application SHOULD NOT send UDP datagrams that result in IP packets that exceed the Maximum Transmission Unit (MTU) along the path to the destination.
+        locator: Section 3.2 (Message Size Guidelines)
+        fetched: "2026-10-14"
+        supports: [realtime-transport.datagram-exceeds-path-mtu]
+  - id: stacl-2019
+    title: Ma et al., STACL - Simultaneous Translation with Implicit Anticipation and Controllable Latency using Prefix-to-Prefix Framework (ACL 2019), arXiv 1810.08398
+    url: https://arxiv.org/abs/1810.08398
+    adapter: paper
+    tier: primary
+    kind: paper
+    quotes:
+      - text: Simultaneous translation, which translates sentences before they are finished, is useful in many scenarios but is notoriously difficult due to word-order differences.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [realtime-transport.translation-ahead-of-input]
+      - text: a very simple yet surprisingly effective wait-k policy trained to generate the target sentence concurrently with the source sentence, but always k words behind.
+        locator: Abstract
+        fetched: "2026-10-14"
+        supports: [realtime-transport.translation-ahead-of-input]

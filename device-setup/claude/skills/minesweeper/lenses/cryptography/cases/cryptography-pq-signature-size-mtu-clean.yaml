@@ -1,0 +1,13 @@
+schema_version: 1
+id: cryptography-pq-signature-size-mtu-clean
+kind: clean
+twin: cryptography-pq-signature-size-mtu-planted
+brief: |
+  A utility deploys smart meters that broadcast signed readings over a low-power radio link.
+  - Each reading frame carries at most 255 bytes of payload.
+  - Readings are sent every 15 minutes.
+  - Readings are authenticated per frame with a symmetric MAC under a per-meter key; a post-quantum
+    signature over a daily batch is sent through the multi-frame bulk transfer channel.
+  - The head-end stores readings for billing for seven years.
+expect:
+  none_from_lens: true

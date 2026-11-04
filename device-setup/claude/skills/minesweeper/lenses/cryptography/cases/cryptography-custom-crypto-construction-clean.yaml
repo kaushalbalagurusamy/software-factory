@@ -1,0 +1,13 @@
+schema_version: 1
+id: cryptography-custom-crypto-construction-clean
+kind: clean
+twin: cryptography-custom-crypto-construction-planted
+brief: |
+  A field-survey app stores responses on tablets until they sync.
+  - Responses include names and home addresses.
+  - Each response is encrypted with ChaCha20-Poly1305 through the platform crypto library's AEAD API,
+    with keys held in the device keystore.
+  - Sync happens over HTTPS when a connection is available.
+  - Tablets are enrolled in device management and can be wiped remotely.
+expect:
+  none_from_lens: true

@@ -1,0 +1,99 @@
+schema_version: 1
+traps:
+  - id: realtime-transport.live-media-over-reliable-stream
+    aliases: [PERF-03]
+    title: Live audio or video over a reliable in-order stream to avoid any loss
+    kind: requirement
+    cues:
+      - "stream the live call audio over websockets so no frames are ever dropped"
+      - "use a reliable TCP connection for the real-time voice channel"
+      - "guarantee every audio packet arrives in order"
+      - "send live video chunks over HTTP"
+    principle: >-
+      TCP provides a reliable, in-order byte stream, so after a loss later data that has already arrived is
+      held until the retransmission arrives: loss becomes delay for everything behind it. QUIC confines this
+      blocking to the streams whose data was in the lost packet, and RTP media over UDP lets receivers
+      reconstruct timing despite loss and reordering.
+    sources: [rfc9293, rfc9000, rfc3550]
+    severity:
+      default: high
+      blast_radius: On lossy mobile or Wi-Fi links the live stream freezes for retransmission round trips, then bursts; conversational latency targets fail.
+    remediation:
+      safe_route: Carry live media over RTP/SRTP on UDP (for example WebRTC) or over unreliable or per-frame streams in QUIC, with loss concealment, forward error correction where the codec supports it, and an adaptive jitter buffer; keep reliable streams for control and text.
+      invariant: Live media transport tolerates a stated packet-loss rate without stalling; late media is concealed or dropped, never allowed to block later media.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: The report's "zero dropped audio frames" guarantee cannot be met on a lossy path by any transport at a fixed latency; a reliable stream trades loss for unbounded delay.
+  - id: realtime-transport.no-jitter-buffer
+    title: Live playback demanded with no buffering and a fixed tiny latency
+    kind: requirement
+    cues:
+      - "play each packet the moment it arrives, no buffering"
+      - "zero-latency audio playback"
+      - "no delay between speaker and listener"
+      - "remove the playout buffer to cut latency"
+    principle: >-
+      Packet networks lose, reorder and delay packets by variable amounts; RTP carries timestamps and sequence
+      numbers so receivers can reconstruct the source timing, and the receiver buffer must accommodate the
+      variation (jitter). Playback without a buffer sized to the path's jitter produces gaps and glitches.
+    sources: [rfc3550]
+    severity:
+      default: medium
+      blast_radius: Audio is choppy on real networks even when average latency looks fine.
+    remediation:
+      safe_route: Use an adaptive jitter buffer sized from measured interarrival jitter, with packet-loss concealment, and budget its delay inside the end-to-end latency target.
+      invariant: The end-to-end latency budget lists capture, encode, network, jitter buffer and playout separately and is met at a stated jitter percentile.
+      spec_section: capacity-physics
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+  - id: realtime-transport.datagram-exceeds-path-mtu
+    title: Large application messages sent as single UDP datagrams
+    kind: requirement
+    cues:
+      - "send each video frame as one UDP packet"
+      - "pack the whole state update into a single datagram"
+      - "use 64 KB UDP messages for efficiency"
+      - "the network will fragment large packets for us"
+    principle: >-
+      IP fragmentation lowers efficiency and reliability: losing one fragment loses the whole datagram, and
+      some NATs and firewalls drop fragments. RFC 8085 says applications SHOULD NOT send UDP datagrams that
+      result in IP packets exceeding the path MTU.
+    sources: [rfc8085]
+    severity:
+      default: medium
+      blast_radius: Effective loss rate multiplies with fragment count; on some paths large datagrams never arrive.
+    remediation:
+      safe_route: Packetize at the application layer below the path MTU (use calc.payload_mtu with the stated MTU and header sizes), and discover or probe the path MTU rather than assuming it.
+      invariant: Every datagram, including headers, fits the stated or discovered path MTU; messages larger than that are split by the application.
+      spec_section: capacity-physics
+    checks: [calc.payload_mtu]
+    status: verified
+    verified_on: "2026-10-14"
+  - id: realtime-transport.translation-ahead-of-input
+    title: Simultaneous translation promised at full accuracy with near-zero lag
+    kind: requirement
+    cues:
+      - "translate each sentence fully and accurately within 100 ms of the speaker starting"
+      - "live interpretation with no lag and full-sentence quality"
+      - "output the translation as the speaker talks, word for word"
+      - "instant speech-to-speech translation between any languages"
+    principle: >-
+      Output cannot precede the input it depends on. Between languages with different word order, the word
+      that decides a target phrase (for example a clause-final verb) may arrive at the end of the source
+      sentence, so simultaneous translation must either wait (for example a wait-k policy that stays k words
+      behind) or anticipate and possibly revise.
+    sources: [stacl-2019]
+    severity:
+      default: high
+      blast_radius: The latency and accuracy targets cannot both be met; the system either lags or emits wrong translations that must be corrected.
+    remediation:
+      safe_route: State an explicit latency-versus-quality trade-off (lag in words or seconds behind the speaker) per language pair, use streaming recognition with partial hypotheses and revision, and measure quality at that lag.
+      invariant: The latency target is measured from the end of the source content each output depends on (or as a stated lag), per language pair, alongside a quality metric at that lag.
+      spec_section: verification-calibration
+    checks: []
+    status: verified
+    verified_on: "2026-10-14"
+    notes: Report places this in PERF-03 prose without its own id. Causality is a logical bound; the size of the lag needed per language pair must be measured.

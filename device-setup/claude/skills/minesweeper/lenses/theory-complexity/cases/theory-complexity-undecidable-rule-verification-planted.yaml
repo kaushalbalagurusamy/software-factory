@@ -1,0 +1,17 @@
+schema_version: 1
+id: theory-complexity-undecidable-rule-verification-planted
+kind: planted
+twin: theory-complexity-undecidable-rule-verification-clean
+brief: |
+  Product brief: workflow automation for a mid-size accounting firm.
+  Administrators build automations that react to events such as "invoice received".
+  Requirement 1: an event log shows every automation run with inputs and outputs.
+  Requirement 2: administrators may write automations as arbitrary Python scripts, and automations can trigger other automations; when a script is saved the platform analyses it and guarantees it will always finish and never touch client records outside its scope, rejecting any script that might not.
+  Requirement 3: automations can call the internal approval API and send email.
+  Requirement 4: each automation has an owner and can be disabled with one click.
+  Requirement 5: runs are retried up to three times on transient errors.
+  Success: the firm retires its spreadsheet macros within one quarter.
+expect:
+  traps:
+  - theory-complexity.undecidable-rule-verification
+  min_severity: high

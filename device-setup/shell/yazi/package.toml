@@ -1,0 +1,9 @@
+[[plugin.deps]]
+use = "yazi-rs/flavors:vscode-dark"
+rev = "1a5f787"
+hash = "99aa06d3014798d86001c324468d497f"
+
+[[flavor.deps]]
+use = "yazi-rs/flavors:catppuccin-mocha"
+rev = "1a5f787"
+hash = "7dfe41c9c3d9be76da8a844263d0bbed"
